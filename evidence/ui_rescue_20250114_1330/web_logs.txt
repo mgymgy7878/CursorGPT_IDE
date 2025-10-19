@@ -1,0 +1,78 @@
+﻿10.18.3
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Ôò¡ Warning ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔò«
+Ôöé                                                                              Ôöé
+Ôöé   Ignored build scripts: @tailwindcss/oxide.                                 Ôöé
+Ôöé   Run "pnpm approve-builds" to pick which dependencies should be allowed     Ôöé
+Ôöé   to run scripts.                                                            Ôöé
+Ôöé                                                                              Ôöé
+Ôò░ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔò»
+
+Done in 2.4s using pnpm v10.18.3
+  Ôû▓ Next.js 14.2.13
+  - Local:        http://localhost:3003
+  - Network:      http://0.0.0.0:3003
+  - Environments: .env.local
+
+ Ô£ô Starting...
+ Ô£ô Ready in 35s
+ Ôùï Compiling /src/middleware ...
+ Ô£ô Compiled /src/middleware in 3s (72 modules)
+ Ôùï Compiling /api/healthz ...
+ Ô£ô Compiled /api/healthz in 3.7s (54 modules)
+ GET /api/healthz 503 in 6325ms
+ Ôùï Compiling / ...
+ Ô£ô Compiled /dashboard in 252.5s (619 modules)
+ GET /dashboard 200 in 116814ms
+ Ôùï Compiling /api/guardrails/read ...
+ Ô£ô Compiled /api/guardrails/read in 1291ms (331 modules)
+ GET /api/guardrails/read 200 in 2978ms
+ GET /api/guardrails/read 200 in 3044ms
+ GET /api/guardrails/read 200 in 3092ms
+ GET /api/guardrails/read 200 in 3106ms
+ GET /api/guardrails/read 200 in 3164ms
+ GET /api/guardrails/read 200 in 3191ms
+ Ôùï Compiling /api/public/alert/last ...
+ Ô£ô Compiled /api/public/alert/last in 1108ms (331 modules)
+ Ô£ô Compiled (333 modules)
+ GET /api/public/metrics 200 in 3367ms
+ GET /api/public/metrics 200 in 3377ms
+ GET /api/public/metrics 200 in 3385ms
+ GET /api/public/alert/last 200 in 3504ms
+ GET /api/public/alert/last 200 in 3507ms
+ GET /api/public/alert/last 200 in 3512ms
+ Ôùï Compiling /api/public/smoke-last ...
+ Ô£ô Compiled /api/public/smoke-last in 1345ms (335 modules)
+ GET /api/public/smoke-last 200 in 2255ms
+ GET /api/public/smoke-last 200 in 2258ms
+ GET /api/public/smoke-last 200 in 2265ms
+ GET /api/guardrails/read 200 in 1172ms
+ GET /api/guardrails/read 200 in 1248ms
+ GET /api/public/alert/last 200 in 647ms
+ GET /api/public/alert/last 200 in 702ms
+ GET /api/guardrails/read 200 in 1309ms
+ GET /api/guardrails/read 200 in 1414ms
+ GET /api/public/alert/last 200 in 806ms
+ GET /api/public/alert/last 200 in 784ms
+ GET /api/guardrails/read 200 in 1157ms
+ GET /api/guardrails/read 200 in 1616ms
+ GET /api/public/alert/last 200 in 660ms
+ GET /api/public/alert/last 200 in 509ms
+ GET /api/guardrails/read 200 in 1348ms
+ GET /api/guardrails/read 200 in 1639ms
+ GET /api/public/alert/last 200 in 516ms
+ GET /api/public/alert/last 200 in 564ms
+ GET /api/guardrails/read 200 in 1413ms
+ GET /api/guardrails/read 200 in 1715ms
+ GET /api/public/alert/last 200 in 512ms
+ GET /api/public/alert/last 200 in 535ms
+ GET /api/guardrails/read 200 in 1426ms
+ GET /api/guardrails/read 200 in 1678ms
+ GET /api/public/alert/last 200 in 550ms
+ GET /api/public/alert/last 200 in 618ms
+ GET /api/guardrails/read 200 in 1496ms
+ GET /api/guardrails/read 200 in 1568ms
+ GET /api/public/alert/last 200 in 741ms
+ GET /api/public/alert/last 200 in 787ms

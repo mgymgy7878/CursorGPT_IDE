@@ -1,0 +1,21 @@
+﻿{
+    "platform_version":  "v1.1",
+    "services":  {
+                     "executor2":  "online",
+                     "marketdata":  "online",
+                     "web":  "online",
+                     "executor1":  "online"
+                 },
+    "timestamp":  "2025-10-17 20:51:13",
+    "deployment_ready":  true,
+    "endpoints_tested":  {
+                             "marketdata_metrics":  "200 OK",
+                             "marketdata_healthz":  "200 OK",
+                             "executor_metrics":  "200 OK",
+                             "web_dashboard":  "200 OK",
+                             "executor_healthz":  "200 OK",
+                             "web_technical_analysis":  "tested"
+                         },
+    "status":  "GREEN",
+    "build_status":  "SUCCESS"
+}

@@ -1,0 +1,69 @@
+╔═══════════════════════════════════════════════════════════╗
+║  🚀 SPARK TRADING - GO-LIVE CHECKLIST                    ║
+╚═══════════════════════════════════════════════════════════╝
+
+📋 PREFLIGHT (5 dk)
+  [ ] ./scripts/preflight-check.sh → ✅ All checks pass
+  [ ] Console temiz (no hydration warnings)
+  [ ] body{overflow:hidden}, main{overflow-y:auto}
+  [ ] No red toasts on page load
+  [ ] DEMO mode works (amber chip visible)
+
+🐦 CANARY (4 saat)
+  [ ] export FEATURE_ML_SCORING=preview
+  [ ] ./deploy.sh --canary
+  [ ] ./scripts/monitor-live.sh (background)
+  [ ] p95 ≤ 1000ms (4 saat)
+  [ ] staleness ≤ 30s (4 saat)
+  [ ] error_rate ≤ 1% (4 saat)
+  [ ] ml.score kardinalite ≥ 10/dk
+  [ ] confid median ≥ 0.55
+
+📈 %10 TRAFFIC (60 dk)
+  [ ] export FEATURE_ML_SCORING=0.1
+  [ ] ./deploy.sh --rolling
+  [ ] SLO'lar stabil (60 dk)
+  [ ] No critical alerts
+  [ ] Confidence dağılımı makul
+
+📈 %50 TRAFFIC (120 dk)
+  [ ] export FEATURE_ML_SCORING=0.5
+  [ ] ./deploy.sh --rolling
+  [ ] SLO'lar stabil (120 dk)
+  [ ] Kardinalite arttı (≥50/dk)
+  [ ] Bucket dağılımı dengeli
+
+📈 %100 TRAFFIC (24 saat)
+  [ ] export FEATURE_ML_SCORING=1.0
+  [ ] ./deploy.sh --rolling
+  [ ] 24 saat izleme
+  [ ] Tüm SLO'lar yeşil
+  [ ] v2.1 veri toplama aktif
+  [ ] Reliability diagram dolmaya başladı
+
+📊 24 SAATLİK RAPOR
+  [ ] GO_LIVE_PLAYBOOK.md → Rapor şablonu dolduruldu
+  [ ] Bucket hit-rate dengeli
+  [ ] Signal parts correlation ~0.33
+  [ ] Breach count <5
+  [ ] DLQ <2
+
+✅ BAŞARI KRİTERLERİ
+  [ ] p95 <1000ms (stabil)
+  [ ] staleness <30s (stabil)
+  [ ] error_rate <1% (stabil)
+  [ ] confid median ≥0.55
+  [ ] Canary şarkısı 60 BPM'de ♪
+
+🔴 ROLLBACK (Gerekirse)
+  [ ] export FEATURE_ML_SCORING=0
+  [ ] ./deploy.sh --rollback
+  [ ] Health check: curl /api/healthz
+  [ ] UI: DEMO chip görünür, toast yok
+  [ ] Team notify
+
+─────────────────────────────────────────────────────────────
+Butonu bas → İzle → Tepki ver → Tekrarla
+Tempo: 60 BPM | Fail-closed: Aktif | Sahne: Açık 🎭
+─────────────────────────────────────────────────────────────
+

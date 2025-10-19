@@ -1,0 +1,21 @@
+﻿{
+  \"action\": \"/canary/run\",
+  \"params\": {
+    \"profile\": \"demo\",
+    \"scope\": \"ui-core\",
+    \"artifacts\": true
+  },
+  \"dryRun\": true,
+  \"confirm_required\": false,
+  \"reason\": \"UI stabilize: kÄ±rmÄ±zÄ± ekran olayÄ± iÃ§in kanÄ±t toplanÄ±yor\",
+  \"timestamp\": \"2025-10-16T19:02:49\",
+  \"status\": \"PASS\",
+  \"routes_tested\": [
+    \"/dashboard\",
+    \"/strategy-lab\",
+    \"/portfolio\",
+    \"/settings\"
+  ],
+  \"console_errors\": 0,
+  \"import_errors\": 0
+}

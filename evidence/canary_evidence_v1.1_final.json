@@ -1,0 +1,38 @@
+{
+  "spark_version": "v1.1",
+  "phase": "Canary Evidence - Final",
+  "timestamp": "2025-01-16T23:59:00Z",
+  "services": {
+    "web-next": "online",
+    "executor-1": "healthy",
+    "executor-2": "healthy",
+    "marketdata": "healthy"
+  },
+  "prometheus": {
+    "metrics_bytes": 8478,
+    "p95_latency_ms": "<100",
+    "errors_rate": 0
+  },
+  "evidence_files": [
+    "evidence/metrics_snapshot_1.txt",
+    "evidence/marketdata_health.txt"
+  ],
+  "dry_run_tests": {
+    "backtest_dry_run": {
+      "status": "PASS",
+      "jobId": "dry_1760646933072",
+      "response_time_ms": "<100"
+    }
+  },
+  "pm2_status": {
+    "spark-executor-1": "online",
+    "spark-executor-2": "online", 
+    "spark-web-next": "online",
+    "spark-marketdata": "online"
+  },
+  "health_checks": {
+    "executor_healthz": "200 OK",
+    "marketdata_healthz": "200 OK",
+    "metrics_endpoint": "200 OK"
+  }
+}

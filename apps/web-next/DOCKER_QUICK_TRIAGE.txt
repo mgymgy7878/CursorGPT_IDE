@@ -1,0 +1,115 @@
+╔═══════════════════════════════════════════════════════════╗
+║  ⚡ DOCKER HIZLI TRİAJ                                   ║
+║  UI'ya Ulaşılamıyor → Container/Port/Next Sorunları    ║
+╚═══════════════════════════════════════════════════════════╝
+
+⚡ DOCKER HIZLI TRİAJ (PowerShell, Kopyala-Çalıştır)
+─────────────────────────────────────────────────────────────
+# 0) Host'ta 3003 dinleniyor mu?
+Test-NetConnection 127.0.0.1 -Port 3003
+
+# 1) Container'lar ve port publish'ları
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Beklenen: 0.0.0.0:3003->3003/tcp (veya 3000) gibi bir satır
+
+# 2) İlgili servisin log'u (adı web, app, frontend benzeri ise düzelt)
+$SVC=(docker ps --format "{{.Names}}" | Select-String -Pattern "web|app|front|next" | Select -First 1).ToString()
+if (-not $SVC) { "Container bulunamadı. 'docker compose up -d' deneyin."; } else {
+  docker logs --tail 50 $SVC
+}
+
+🔍 HIZLI TEŞHİS
+─────────────────────────────────────────────────────────────
+❌ docker ps "Ports" boş → Port publish EDİLMEMİŞ.
+
+✅ Ports 0.0.0.0:3003->3000/tcp ama tarayıcı hâlâ "refused" → 
+   Container içindeki app çalışmıyor ya da yalnız 127.0.0.1'e bağlı.
+
+❌ Log'da Next "ready" yok → App kalkmamış (build/type hatası).
+
+✅ EN SIK ÜÇ DÜZELTME (Tek Satır Panzehirler)
+─────────────────────────────────────────────────────────────
+
+1️⃣ NEXT'İ CONTAINER İÇİNDE DIŞA AÇ (0.0.0.0'a bağla)
+─────────────────────────────────────────────────────────────
+docker-compose.yml (veya komut) şu şekilde olmalı:
+
+services:
+  web:
+    build: .
+    working_dir: /app/apps/web-next
+    command: sh -c "pnpm install && pnpm dev --port 3003 --host 0.0.0.0"
+    environment:
+      - PORT=3003
+      - HOST=0.0.0.0
+    ports:
+      - "3003:3003"
+    volumes:
+      - .:/app
+
+Sonra: docker compose up --build -d
+
+2️⃣ İÇ PORT 3000 İSE PUBLISH'İ EŞLE
+─────────────────────────────────────────────────────────────
+Container 3000'de dinliyorsa dışardan 3003 istiyorsan:
+
+ports:
+  - "3003:3000"
+
+veya geçici:
+docker run -p 3003:3000 <image>
+
+3️⃣ ÇALIŞAN CONTAINER VAR AMA APP ÖLÜ → YENİDEN BAŞLAT & LOG
+─────────────────────────────────────────────────────────────
+docker compose restart
+docker logs -f $SVC
+# "ready - started server on 0.0.0.0:3003" satırını görmelisin
+
+🔍 İÇERİDEN NABIZ (App Gerçekten Dinliyor Mu?)
+─────────────────────────────────────────────────────────────
+# container'a gir
+docker exec -it $SVC sh
+# içeride:
+ss -ltnp | grep 3003 || ss -ltnp | grep 3000
+curl -I http://127.0.0.1:3003 || curl -I http://127.0.0.1:3000
+exit
+
+📊 SONUÇ ANALİZİ:
+✅ İçeride 200 dönüyor ama dışarıdan "refused" → Sorun publish'ta (ports).
+❌ İçeride de "refused" → Sorun app/host binding'te (host=0.0.0.0 yap).
+
+🌐 TARAYICI ADRESLERİ (HTTP!)
+─────────────────────────────────────────────────────────────
+http://localhost:3003/
+http://127.0.0.1:3003/
+
+⚠️ HTTPS'e zorlamayın; dev/compose tipik olarak HTTP.
+
+🧯 WINDOWS/WSL/DOCKER DESKTOP GOTCHA'LARI
+─────────────────────────────────────────────────────────────
+🔧 Firewall/Proxy loopback'i bozuyorsa: Proxy kapalı olsun.
+
+🐧 WSL ile çalışıyorsan: 
+   ip -4 addr show eth0 → çıkan IP'yle http://WSL_IP:3003/ dene.
+
+🔌 Portu başka süreç kapmışsa (host):
+   pnpm dlx kill-port 3003
+
+✅ YEŞİL EKRAN CHECKLIST
+─────────────────────────────────────────────────────────────
+□ docker ps → 0.0.0.0:3003->(3003|3000)/tcp
+□ Container log'unda "ready - started server on 0.0.0.0:3003"
+□ curl -I http://127.0.0.1:3003/api/healthz → 200
+□ Tarayıcı HTTP + localhost/127.0.0.1
+□ Proxy/VPN engellemiyor
+
+🎯 RİTİM: 60 BPM
+─────────────────────────────────────────────────────────────
+Başlat → Ölç → Düzelt
+
+Log, en dürüst sahne amiridir; "ready" gelince perde açılır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 MÜZİK!
+

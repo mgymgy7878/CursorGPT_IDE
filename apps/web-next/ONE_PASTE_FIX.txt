@@ -1,0 +1,82 @@
+╔═══════════════════════════════════════════════════════════╗
+║  ⚡ ONE-PASTE FIX - REFUSED'I SÖNDÜREN MAKRO             ║
+║  Kopyala-Çalıştır → Çalışır Hale Getir                  ║
+╚═══════════════════════════════════════════════════════════╝
+
+# === 0) SAHNEYİ TEMİZLE ===
+# portu kim kapmış gör → öldür → node zombilerini süpür
+$port=3003
+netstat -aon | findstr :$port
+$pid = (netstat -aon | findstr :$port | Select-String -Pattern "LISTENING\s+(\d+)$").Matches.Groups[1].Value
+if ($pid) { taskkill /PID $pid /F }
+
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# bazen HTTP.sys (PID 4) portu rezerve eder → urlacl temizle
+netsh http show urlacl | findstr /i ":$port" | Out-Null
+if ($LASTEXITCODE -eq 0) { try { netsh http delete urlacl url="http://+:$port/" } catch {} }
+
+# === 1) DOĞRU klasörden kur & temiz build çıktısı ===
+cd apps/web-next
+pnpm install
+rimraf .next 2>$null
+
+# === 2) host+port sabit dinle ve logla (ilk hata = altın bilet) ===
+$env:PORT="$port"; $env:HOST="0.0.0.0"
+pnpm dev --port $port --host 0.0.0.0 | tee dev.log
+
+✅ BEKLENEN LOG: ready - started server on 0.0.0.0:3003
+❌ Bu satır çıkmıyorsa: dev.log'daki ilk hata sorunun ta kendisi 
+   (module not found / TS error / vs.). Onu düzelt → komutu tekrar çalıştır.
+
+🔎 NABIZ & ERİŞİM (Sırayla Dene)
+─────────────────────────────────────────────────────────────
+# port dinliyor mu?
+Test-NetConnection 127.0.0.1 -Port 3003
+
+# sağlık nabzı
+curl -I http://127.0.0.1:3003/api/healthz
+
+# Tarayıcı URL'leri (HTTP!)
+http://localhost:3003/
+http://127.0.0.1:3003/
+http://[::1]:3003/     # yalnız IPv6 dinliyorsa
+
+🧯 SIK GÖRÜLEN TUZAKLAR → TEK SATIR PANZEHİR
+─────────────────────────────────────────────────────────────
+🔧 Yanlış paket/klasör:
+   pnpm --filter web-next dev --port 3003 --host 0.0.0.0
+
+🔌 Port başka süreçte:
+   pnpm dlx kill-port 3003
+
+🌐 Proxy/VPN loop'u:
+   Windows → Ağ & İnternet → Proxy → "Ayarları otomatik algıla" kapalı
+
+🔒 HTTPS'e zorlamak:
+   Dev sunucu HTTP; adreste https:// olmasın.
+
+🐧 WSL köprü bozuk: (WSL'den çalıştırıyorsan)
+   ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}' → 
+   tarayıcıdan http://WSL_IP:3003/
+
+⚙️ NODE versiyonu uyumsuz:
+   node -v (>=18) → değilse yükselt.
+
+✅ YEŞİL EKRAN KONTROL LİSTESİ
+─────────────────────────────────────────────────────────────
+□ netstat → LISTENING :3003
+□ Terminal → ready - started server on 0.0.0.0:3003
+□ curl /api/healthz → 200
+□ Tarayıcı → HTTP + localhost/127.0.0.1
+□ Proxy/VPN kapalı (loopback'e karışmıyor)
+
+🎯 RİTİM: 60 BPM
+─────────────────────────────────────────────────────────────
+Başlat → Ölç → Düzelt
+
+Logdaki ilk satır en dürüst hakemdir; ona kulak ver, perde açılır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 MÜZİK!
+

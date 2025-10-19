@@ -1,0 +1,24 @@
+﻿INCIDENT: UI-RED-SCREENS
+STATUS: CLOSED
+DATE: 2025-10-16 19:02:49
+
+ROOT CAUSE:
+ThemeToggle defaultâ†”named import mismatch in AppShell.tsx
+Component rendered as undefined, React threw "Element type is invalid"
+
+FIX:
+1. Corrected import: import ThemeToggle from "@/components/theme/ThemeToggle"
+2. Added must() guard for runtime validation
+3. Normalized shadcn imports to curly braces
+4. Added dev-only console.warn for import status
+
+EVIDENCE:
+- All routes render: /dashboard, /strategy-lab, /portfolio, /settings
+- StatusChip: Env: Mock, Feed: Healthy, Broker: Offline
+- No console errors, no Import HatasÄ± warnings
+
+PREVENTION:
+- ESLint: import/no-named-default:error, import/no-unresolved:error
+- shadcn/ui: always direct + curly braces
+- must() guard: dev-only undefined detection
+- CI: lint+build gate

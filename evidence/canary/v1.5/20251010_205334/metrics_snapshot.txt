@@ -1,0 +1,6 @@
+﻿# HELP spark mock metrics
+spark_backtest_cache_hit_total 180
+spark_backtest_cache_miss_total 1
+spark_backtest_overfitting_detected_total 0
+spark_backtest_opt_latency_ms_sum 25000
+spark_backtest_portfolio_diversification_benefit 0.26

@@ -1,0 +1,23 @@
+/* ===== Studio Soft Dark UI (append safe) ===== */
+.card { background: #0c0f12; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+.card-sub { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; }
+.inp { width: 100%; background: #0a0d10; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: .5rem .6rem; color: #e6eef6; outline: none; }
+.inp:focus { border-color: rgba(111, 180, 255, .6); box-shadow: 0 0 0 3px rgba(111, 180, 255, .15); }
+.btn { background: #1b7fff; color: white; border: none; border-radius: 10px; padding: .55rem .9rem; font-weight: 600; }
+.btn-danger { background: #d94b4b; color: #fff; border: none; border-radius: 10px; padding: .55rem .9rem; font-weight: 600; }
+.form-row { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .5rem; }
+.form-row>label { font-size: .86rem; color: #b9c6d2; }
+.muted { color: #9bb0bf; font-size: .85rem; }
+.progress { background: rgba(255,255,255,0.06); border-radius: 10px; height: 10px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, #1b7fff, #63a9ff); }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th, .tbl td { border-bottom: 1px solid rgba(255,255,255,0.06); padding: .5rem .6rem; text-align: left; }
+.tbl thead th { color: #b9c6d2; font-weight: 600; }
+/* modal basit stiller */
+.modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,.45); z-index: 50; display:flex; align-items:center; justify-content:center; padding: 1rem; }
+.modal { width: min(900px, 96vw); max-height: 90vh; overflow: auto; }
+.tabs { display:flex; gap:.5rem; }
+.tab { background: var(--bg-2); border:1px solid var(--border); border-radius: 10px; padding:.35rem .6rem; }
+.tab.active { background: var(--pri); border-color: transparent; color:#fff; }
+.pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .85rem; background: var(--bg-2); border:1px solid var(--border); border-radius: 10px; padding:.6rem; }
+

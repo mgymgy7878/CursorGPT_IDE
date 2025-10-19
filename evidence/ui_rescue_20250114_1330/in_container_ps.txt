@@ -1,0 +1,7 @@
+﻿  PID  PPID CMD
+    1     0 sh -lc corepack enable && pnpm -v || npm -g i pnpm@8 && pnpm install && pnpm exec next dev --port 3003 --hostname 0.0.0.0
+   45     1 node /usr/local/bin/pnpm exec next dev --port 3003 --hostname 0.0.0.0
+   56    45 node ./node_modules/.bin/../next/dist/bin/next dev --port 3003 --hostname 0.0.0.0
+   72    56 next-server (v14.2.13)
+  179     0 sh -lc ps -o pid,ppid,cmd -A
+  188   179 ps -o pid,ppid,cmd -A

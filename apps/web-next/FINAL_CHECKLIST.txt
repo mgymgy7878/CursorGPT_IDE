@@ -1,0 +1,80 @@
+╔═══════════════════════════════════════════════════════════╗
+║  🎬 FİNAL CHECKLIST - SAHAYA ÇIKIŞ                       ║
+╚═══════════════════════════════════════════════════════════╝
+
+📋 ÖN HAZIRLIK
+  [ ] Cep kartı yazdırıldı (POCKET_CARD.md)
+  [ ] Triage Matrix bookmark'landı
+  [ ] tmux kurulu (flight-deck için)
+  [ ] jq kurulu (quick-filters için)
+
+🎭 T-15: GREEN-ROOM
+  [ ] bash scripts/green-room-check.sh → ✅ All pass
+  [ ] UI: Console temiz (no hydration warnings)
+  [ ] UI: Tek scroll disiplini (body overflow:hidden)
+  [ ] UI: Ops Hızlı Yardım butonu görünür
+  [ ] UI: Build SHA copy çalışıyor
+
+🚀 T-0: CANARY BAŞLAT
+  [ ] export FEATURE_ML_SCORING=preview
+  [ ] ./deploy.sh --canary
+  [ ] bash scripts/monitor-live.sh & (background)
+  [ ] tmux flight-deck (opsiyonel)
+
+📊 PANEL 3+2 DOĞRULAMA
+  [ ] SLOTimechart yüklendi (p95/staleness/error_rate)
+  [ ] RecentActions: ml.score entries görünüyor
+  [ ] RiskGuardrails: threshold'lar net
+  [ ] DLQ sayacı ≤2
+  [ ] ml_bucket dengeli (0.5-0.8)
+
+💻 CLI NABIZ (30 sn)
+  [ ] curl healthz → 200 + X-Build-SHA
+  [ ] Public endpoints → 200 + _mock/DEMO
+  [ ] ML score → NaN guard aktif
+
+🎯 4 SAAT İZLEME (Canary)
+  [ ] p95 ≤1000ms (stabil)
+  [ ] staleness ≤30s (stabil)
+  [ ] error_rate ≤1% (stabil)
+  [ ] ml.score ≥10/dk
+  [ ] confid median ≥0.55
+
+🚨 ACİL DURUM REFLEKSLERİ (Hazır Ol)
+  [ ] p95 >1500ms → preview + confid↑
+  [ ] staleness >60s → executor ping + preview
+  [ ] error_rate >2% → ROLLBACK
+  [ ] confid <0.40 → weights sabitle + preview
+  [ ] DLQ >2 → executor restart
+
+📈 KADEMELİ AÇILIŞ
+  [ ] %10 (60 dk) → SLO'lar yeşil
+  [ ] %50 (120 dk) → Kardinalite arttı
+  [ ] %100 (24 saat) → Tüm metrikler stabil
+
+📋 24 SAATLİK RAPOR
+  [ ] Özet metrikleri dolduruldu
+  [ ] Kardinalite hesaplandı
+  [ ] Bucket hit-rate dengesi
+  [ ] İhlaller kaydedildi
+  [ ] Aksiyon belirlendi
+
+✅ BAŞARI KRİTERLERİ (24h Sonunda)
+  [ ] p95 <1000ms (24h ort)
+  [ ] staleness <30s (24h ort)
+  [ ] error_rate <1% (24h ort)
+  [ ] confid median ≥0.55
+  [ ] breach count <5
+  [ ] DLQ <2 (sürekli)
+  [ ] v2.1 veri toplama aktif
+
+🎵 RİTİM
+  [ ] Metronom 60 BPM
+  [ ] Küçük adım → Ölç → Kapat (gerekirse) → Tekrar aç
+  [ ] Fail-closed hep hazır
+  [ ] Canary şarkısı söyleniyor ♪
+
+─────────────────────────────────────────────────────────────
+🎭 Perde açık. Baton sende. Şimdi müzik! 🎬
+─────────────────────────────────────────────────────────────
+

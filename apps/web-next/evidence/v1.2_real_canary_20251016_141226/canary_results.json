@@ -1,0 +1,15 @@
+﻿{
+    "errors":  0,
+    "timestamp":  "2025-10-16 14:12:49",
+    "gates_passed":  [
+                         "healthz.status==UP",
+                         "slo.latencyP95\u003c150",
+                         "slo.errorRate\u003c2",
+                         "venues.btcturk.stalenessSec\u003c30"
+                     ],
+    "pass_rate":  "100%",
+    "status":  "PASS",
+    "max_staleness":  "0s",
+    "total_checks":  30,
+    "test_duration":  "5 minutes (30 checks)"
+}

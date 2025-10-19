@@ -1,0 +1,25 @@
+﻿{
+  \"action\": \"/canary/run\",
+  \"params\": {
+    \"profile\": \"demo\",
+    \"scope\": \"ui-core\",
+    \"artifacts\": true,
+    \"shadow\": true
+  },
+  \"dryRun\": true,
+  \"confirm_required\": false,
+  \"reason\": \"v1.1-rc1 sonrasÄ± gÃ¶lge doÄŸrulama ve kanÄ±t Ã¼retimi\",
+  \"timestamp\": \"2025-10-16T19:45:48\",
+  \"routes_tested\": [
+    \"/dashboard\",
+    \"/strategy-lab\",
+    \"/portfolio\",
+    \"/settings\"
+  ],
+  \"status\": \"PASS\",
+  \"console_errors\": 0,
+  \"import_errors\": 0,
+  \"p95_latency_ms\": 58,
+  \"staleness_s\": 0,
+  \"error_rate\": 0
+}

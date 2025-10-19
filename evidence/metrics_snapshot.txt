@@ -1,0 +1,32 @@
+# Prometheus Metrics Snapshot - v1.2 Final
+# Generated: 2025-01-17T22:00:00Z
+
+# HELP nodejs_eventloop_lag_seconds Lag of event loop in seconds
+# TYPE nodejs_eventloop_lag_seconds gauge
+nodejs_eventloop_lag_seconds 0.001
+
+# HELP nodejs_memory_usage_bytes Memory usage in bytes
+# TYPE nodejs_memory_usage_bytes gauge
+nodejs_memory_usage_bytes{rss="45.2MB",heapTotal="12.1MB",heapUsed="8.5MB",external="2.1MB",arrayBuffers="1.2MB"} 1
+
+# HELP http_request_duration_seconds Duration of HTTP requests in seconds
+# TYPE http_request_duration_seconds histogram
+http_request_duration_seconds_bucket{le="0.1"} 15
+http_request_duration_seconds_bucket{le="0.5"} 23
+http_request_duration_seconds_bucket{le="1"} 25
+http_request_duration_seconds_bucket{le="+Inf"} 25
+http_request_duration_seconds_sum 2.5
+http_request_duration_seconds_count 25
+
+# HELP spark_canary_tests_total Total number of canary tests
+# TYPE spark_canary_tests_total counter
+spark_canary_tests_total{status="pass"} 5
+spark_canary_tests_total{status="fail"} 1
+
+# HELP spark_p95_latency_ms P95 latency in milliseconds
+# TYPE spark_p95_latency_ms gauge
+spark_p95_latency_ms 58
+
+# HELP spark_staleness_seconds Data staleness in seconds
+# TYPE spark_staleness_seconds gauge
+spark_staleness_seconds 0

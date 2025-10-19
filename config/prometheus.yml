@@ -1,0 +1,155 @@
+# Spark TA Module - Prometheus Configuration
+# Save to: /etc/prometheus/prometheus.yml
+# Reload: sudo systemctl reload prometheus
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'spark-production'
+    environment: 'prod'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - localhost:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Spark Executor instances
+  - job_name: 'spark-executor'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - 'localhost:4001'
+          - 'localhost:4002'
+        labels:
+          service: 'executor'
+          app: 'spark-ta'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: 'localhost:(.*)'
+        replacement: 'executor-${1}'
+
+  # Spark Web-Next (if metrics enabled)
+  - job_name: 'spark-web-next'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - 'localhost:3000'
+        labels:
+          service: 'web-next'
+          app: 'spark-ta'
+
+  # Redis exporter (if using redis_exporter)
+  - job_name: 'redis'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - 'localhost:9121'
+        labels:
+          service: 'redis'
+          app: 'spark-ta'
+
+  # Node exporter (system metrics)
+  - job_name: 'node'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - 'localhost:9100'
+        labels:
+          service: 'node'
+          app: 'spark-ta'
+
+  # Docker metrics (if using cAdvisor)
+  - job_name: 'docker'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - 'localhost:8080'
+        labels:
+          service: 'cadvisor'
+          app: 'spark-ta'
+
+# Example alert rules (save as /etc/prometheus/rules/spark-alerts.yml)
+# groups:
+#   - name: spark-ta-alerts
+#     interval: 30s
+#     rules:
+#       # No leader elected
+#       - alert: SparkNoLeader
+#         expr: rate(leader_elected_total[10m]) == 0
+#         for: 15m
+#         labels:
+#           severity: critical
+#           service: spark-ta
+#         annotations:
+#           summary: "No Spark TA leader elected"
+#           description: "No leader has been elected in the last 15 minutes"
+#
+#       # High notification failure rate
+#       - alert: SparkNotificationFailureHigh
+#         expr: rate(notifications_failed_total[5m]) > 0.1
+#         for: 10m
+#         labels:
+#           severity: warning
+#           service: spark-ta
+#         annotations:
+#           summary: "High notification failure rate"
+#           description: "Notification failure rate is {{ $value }} per second"
+#
+#       # Alert spam (too many suppressions)
+#       - alert: SparkAlertSpam
+#         expr: rate(alerts_suppressed_total{reason="cooldown"}[5m]) > 0.5
+#         for: 10m
+#         labels:
+#           severity: info
+#           service: spark-ta
+#         annotations:
+#           summary: "High alert suppression rate"
+#           description: "Alert cooldown suppression rate is {{ $value }} per second"
+#
+#       # SSE error spike
+#       - alert: SparkSSEErrors
+#         expr: rate(streams_errors_total[5m]) > 1
+#         for: 5m
+#         labels:
+#           severity: warning
+#           service: spark-ta
+#         annotations:
+#           summary: "SSE stream error spike"
+#           description: "SSE error rate is {{ $value }} per second"
+#
+#       # Executor down
+#       - alert: SparkExecutorDown
+#         expr: up{job="spark-executor"} == 0
+#         for: 2m
+#         labels:
+#           severity: critical
+#           service: spark-ta
+#         annotations:
+#           summary: "Spark Executor instance down"
+#           description: "Executor instance {{ $labels.instance }} is down"
+#
+#       # High memory usage
+#       - alert: SparkHighMemory
+#         expr: process_resident_memory_bytes{job="spark-executor"} > 800000000
+#         for: 5m
+#         labels:
+#           severity: warning
+#           service: spark-ta
+#         annotations:
+#           summary: "High memory usage on {{ $labels.instance }}"
+#           description: "Memory usage is {{ $value | humanize }}B"
+

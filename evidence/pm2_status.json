@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-01-17T22:00:00Z",
+  "pm2_status": {
+    "executor-1": {
+      "status": "online",
+      "restarts": 2,
+      "cpu": "0%",
+      "memory": "0b"
+    },
+    "executor-2": {
+      "status": "online", 
+      "restarts": 2,
+      "cpu": "0%",
+      "memory": "0b"
+    },
+    "marketdata": {
+      "status": "online",
+      "restarts": 2,
+      "cpu": "0%",
+      "memory": "0b"
+    },
+    "web-next": {
+      "status": "online",
+      "restarts": 55,
+      "cpu": "0%",
+      "memory": "0b"
+    }
+  },
+  "total_services": 4,
+  "online_services": 4,
+  "health_status": "healthy"
+}

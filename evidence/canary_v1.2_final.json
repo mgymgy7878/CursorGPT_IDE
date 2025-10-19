@@ -1,0 +1,35 @@
+{
+  "spark_version": "v1.2",
+  "phase": "Canary Evidence - Final",
+  "timestamp": "2025-01-17T22:00:00Z",
+  "services": {
+    "web-next": "online",
+    "executor-1": "healthy",
+    "executor-2": "healthy",
+    "marketdata": "healthy"
+  },
+  "prometheus": {
+    "metrics_bytes": 7916,
+    "p95_latency_ms": "<100",
+    "errors_rate": 0
+  },
+  "evidence_files": [
+    "evidence/metrics_snapshot_1.txt",
+    "evidence/marketdata_health.txt"
+  ],
+  "ui_components": {
+    "copilot_panel": "ready",
+    "market_card": "ready",
+    "canary_card": "ready",
+    "observability_page": "ready"
+  },
+  "build_status": "success",
+  "typescript_errors": 0,
+  "test_results": {
+    "dashboard": "200 OK",
+    "strategy_lab": "200 OK",
+    "portfolio": "200 OK",
+    "settings": "200 OK",
+    "observability": "200 OK"
+  }
+}

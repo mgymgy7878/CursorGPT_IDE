@@ -1,0 +1,23 @@
+﻿# Mock Executor Test Results
+
+Timestamp: 2025-10-10 20:53:34
+
+## Health Check
+Status: OK (200)
+Service: mock-executor
+
+## Metrics Summary
+# HELP spark mock metrics
+spark_backtest_cache_hit_total 180
+spark_backtest_cache_miss_total 1
+spark_backtest_overfitting_detected_total 0
+spark_backtest_opt_latency_ms_sum 25000
+spark_backtest_portfolio_diversification_benefit 0.26
+
+
+## Endpoint Tests
+- /backtest/run: OK (45ms)
+- /backtest/walkforward: OK (4ms)
+- /backtest/portfolio: OK
+- /backtest/optimize: OK (2ms, 180 combinations)
+

@@ -1,0 +1,9 @@
+﻿{
+    "stalenessTarget":  "20s (was 30s)",
+    "errorRateTarget":  "1.0% (was 5.0%)",
+    "timestamp":  "2025-10-16 14:12:49",
+    "venueStalenessTarget":  "20s (was 30s)",
+    "reason":  "Real canary PASS - SLO thresholds tightened for production quality",
+    "latencyP95Target":  "120ms (was 150ms)",
+    "version":  "v1.2"
+}

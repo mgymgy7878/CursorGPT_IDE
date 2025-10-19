@@ -1,0 +1,36 @@
+﻿{
+    "status":  "UP",
+    "timestamp":  "2025-10-16T11:12:34.676Z",
+    "version":  "2.0.0",
+    "services":  {
+                     "ui":  "UP",
+                     "executor":  {
+                                      "status":  "UP",
+                                      "url":  "http://127.0.0.1:4001",
+                                      "latency":  1,
+                                      "error":  null
+                                  }
+                 },
+    "venues":  {
+                   "btcturk":  {
+                                   "stalenessSec":  0,
+                                   "status":  "MOCK"
+                               },
+                   "bist":  {
+                                "stalenessSec":  16,
+                                "status":  "MOCK"
+                            }
+               },
+    "slo":  {
+                "latencyP95":  1,
+                "stalenessSec":  0,
+                "errorRate":  0,
+                "uptimeMin":  0
+            },
+    "thresholds":  {
+                       "latencyP95Target":  120,
+                       "stalenessTarget":  20,
+                       "errorRateTarget":  1,
+                       "venueStalenessTarget":  20
+                   }
+}

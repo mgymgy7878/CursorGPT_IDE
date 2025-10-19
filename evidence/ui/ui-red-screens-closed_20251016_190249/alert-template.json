@@ -1,0 +1,26 @@
+﻿{
+  \"action\": \"/alerts/create\",
+  \"params\": {
+    \"name\": \"UI SLO Breach\",
+    \"expr\": \"(ui_http_p95_ms > 1200) or (ui_data_staleness_s > 30)\",
+    \"for\": \"2m\",
+    \"severity\": \"warning\",
+    \"labels\": {
+      \"service\": \"web-next\",
+      \"env\": \"demo\"
+    }
+  },
+  \"dryRun\": true,
+  \"confirm_required\": false,
+  \"reason\": \"SLO ihlali erken uyarÄ±\",
+  \"timestamp\": \"2025-10-16T19:03:22\",
+  \"alert_conditions\": [
+    \"P95 latency > 1200ms for 2 minutes\",
+    \"Data staleness > 30s for 2 minutes\"
+  ],
+  \"notification_channels\": [
+    \"slack:#spark-alerts\",
+    \"email:ops@spark.trade\"
+  ],
+  \"runbook\": \"docs/operations/KIRMIZI_DUGME_RUNBOOK.md\"
+}

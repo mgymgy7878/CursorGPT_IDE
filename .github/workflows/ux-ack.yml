@@ -1,0 +1,31 @@
+name: UX-ACK Gate
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Install
+        run: pnpm -w install
+      - name: Compute UX-ACK
+        id: ux
+        run: echo "hash=$(pnpm -s ui:hash -- --print | tail -n1)" >> $GITHUB_OUTPUT
+      - name: Check PR body
+        env:
+          HASH: ${{ steps.ux.outputs.hash }}
+        run: |
+          echo "Expected: $HASH"
+          body="${{ github.event.pull_request.body }}"
+          grep -q "$HASH" <<< "$body" || { echo "PR body missing $HASH"; exit 1; }
+      - name: Freeze enforcement (optional)
+        if: ${{ vars.FREEZE == '1' || env.FREEZE == '1' }}
+        run: |
+          pnpm -s lint:tokens
+          pnpm -s ui:test
+
+

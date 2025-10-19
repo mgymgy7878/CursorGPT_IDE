@@ -1,0 +1,49 @@
+﻿{
+  \"version\": \"v1.1.0-rc1\",
+  \"date\": \"2025-10-16T19:46:24\",
+  \"incident\": \"UI-RED-SCREENS\",
+  \"status\": \"CLOSED\",
+  \"commit\": \"web-next: fix ThemeToggle default import + add must() guard\",
+  \"tag\": \"v1.1.0-rc1\",
+  \"evidence\": {
+    \"incident_summary\": \"evidence/ui/ui-red-screens-closed_20251016_190249/incident-summary.txt\",
+    \"canary_results\": \"evidence\canary\v1.1-rc1_20251016_194548\canary-results.json\",
+    \"slo_metrics\": \"evidence\canary\v1.1-rc1_20251016_194548\slo-metrics.json\",
+    \"automation_playbook\": \"evidence/ui/ui-red-screens-closed_20251016_190249/AUTOMATION_PLAYBOOK.md\"
+  },
+  \"fix_summary\": {
+    \"root_cause\": \"ThemeToggle defaultâ†”named import mismatch in AppShell.tsx\",
+    \"solution\": [
+      \"Corrected import: import ThemeToggle from '@/components/theme/ThemeToggle'\",
+      \"Added must() guard for runtime undefined detection\",
+      \"Normalized shadcn imports to curly braces\",
+      \"Implemented App Shell architecture (single-scroll + single-bar)\"
+    ],
+    \"prevention\": [
+      \"ESLint: import/no-named-default:error, import/no-unresolved:error\",
+      \"shadcn/ui: always direct + curly braces\",
+      \"must() guard: dev-only undefined detection\",
+      \"CI: lint+build gate\"
+    ]
+  },
+  \"slo_verification\": {
+    \"p95_latency_ms\": 58,
+    \"target_p95_ms\": 1200,
+    \"staleness_s\": 0,
+    \"target_staleness_s\": 30,
+    \"error_rate\": 0,
+    \"target_error_rate\": 0.01,
+    \"verdict\": \"PASS\"
+  },
+  \"routes_tested\": [
+    \"/dashboard\",
+    \"/strategy-lab\",
+    \"/portfolio\",
+    \"/settings\"
+  ],
+  \"documentation\": [
+    \"docs/operations/INCIDENTS.md\",
+    \"docs/CI_GATE_CONFIG.md\",
+    \"docs/V1.1_CANARY_PREP.md\"
+  ]
+}

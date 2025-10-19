@@ -1,0 +1,14 @@
+{
+  "name": "@marketdata/btcturk",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    "./rest": "./src/rest.ts",
+    "./ws": "./src/ws.ts"
+  },
+  "dependencies": {
+    "@marketdata/common": "workspace:*"
+  }
+}
+

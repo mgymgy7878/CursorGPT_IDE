@@ -1,0 +1,48 @@
+﻿# HELP ui_latency_p95_ms P95 latency in milliseconds
+# TYPE ui_latency_p95_ms gauge
+ui_latency_p95_ms 17
+
+# HELP ui_error_rate_pct Error rate percentage
+# TYPE ui_error_rate_pct gauge
+ui_error_rate_pct 0
+
+# HELP ui_staleness_sec Staleness in seconds
+# TYPE ui_staleness_sec gauge
+ui_staleness_sec 0
+
+# HELP ui_uptime_min Uptime in minutes
+# TYPE ui_uptime_min counter
+ui_uptime_min 0
+
+# HELP executor_status Executor status (1=UP, 0=DOWN)
+# TYPE executor_status gauge
+executor_status 1
+
+# HELP executor_latency_ms Executor latency in milliseconds
+# TYPE executor_latency_ms gauge
+executor_latency_ms 17
+
+# HELP venue_staleness_btcturk_sec BTCTurk data staleness in seconds
+# TYPE venue_staleness_btcturk_sec gauge
+venue_staleness_btcturk_sec 0
+
+# HELP venue_staleness_bist_sec BIST data staleness in seconds
+# TYPE venue_staleness_bist_sec gauge
+venue_staleness_bist_sec 0
+
+# HELP venue_http_429_total Total rate limit violations by venue
+# TYPE venue_http_429_total counter
+venue_http_429_total 0
+
+# HELP ws_reconnects_total Total WebSocket reconnections
+# TYPE ws_reconnects_total counter
+ws_reconnects_total 0
+
+# HELP ws_messages_total Total WebSocket messages received
+# TYPE ws_messages_total counter
+ws_messages_total 0
+
+# HELP venue_timeout_total Total venue timeouts
+# TYPE venue_timeout_total counter
+venue_timeout_total 0
+

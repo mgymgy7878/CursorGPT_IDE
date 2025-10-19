@@ -1,0 +1,87 @@
+╔═══════════════════════════════════════════════════════════╗
+║  ⚡ HIZLI ÇÖZÜM - TEK ATIMLIK SEKANS                     ║
+║  ERR_CONNECTION_REFUSED → 3003'te Dinleyen Yok          ║
+╚═══════════════════════════════════════════════════════════╝
+
+1️⃣  PORTU TEMİZLE → SUNUCUYU NET BAŞLAT
+─────────────────────────────────────────────────────────────
+# 1. Portu kim kapmışsa öldür
+netstat -aon | findstr :3003
+# PID'i gördün mü? öldür:
+taskkill /PID <PID> /F
+
+# 2. Node dev zombisi varsa süpür
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# 3. Uygulamayı DOĞRU klasörden başlat
+cd apps/web-next
+pnpm install
+rimraf .next 2>$null
+
+# 4. Host+port sabit, gür sesle dinlet
+pnpm dev --port 3003 --host 0.0.0.0 | tee dev.log
+
+✅ BEKLENEN LOG: ready - started server on 0.0.0.0:3003
+❌ Bu satır gelmiyorsa: dev.log'daki ilk hata satırı sorun
+   (module not found, ts error, vs.). Onu düzelt → komutu tekrar çalıştır.
+
+2️⃣  DOĞRU ADRESTEN VUR
+─────────────────────────────────────────────────────────────
+# Aşağıdakileri sırayla dene (HTTP):
+http://localhost:3003/
+http://127.0.0.1:3003/
+http://[::1]:3003/     # yalnız IPv6 dinleme durumunda
+
+3️⃣  NABIZ
+─────────────────────────────────────────────────────────────
+curl -I http://127.0.0.1:3003/api/healthz
+
+✅ 200 dönmeli. Değilse dev.log'a bak.
+
+4️⃣  SIK DÜŞÜLEN TUZAKLAR (Tek Satırda Panzehir)
+─────────────────────────────────────────────────────────────
+🔧 Yanlış klasörden başlatmak:
+   pnpm --filter web-next dev --port 3003 --host 0.0.0.0
+
+🔌 Başka dev server portu tutuyor:
+   pnpm dlx kill-port 3003
+
+🌐 Proxy/VPN loop'u:
+   Windows → Ağ & İnternet → Proxy → "Ayarları otomatik algıla" kapalı
+
+🔒 HTTPS zorlaması:
+   Dev sunucu HTTP. Adreste https:// olmasın.
+
+🐧 WSL köprü sapıttı:
+   WSL içinden ip -4 addr show eth0 ile IP al → http://WSL_IP:3003/ dene.
+
+⚙️ PORT/HOST env çakışması:
+   cross-env PORT=3003 HOST=0.0.0.0 pnpm dev
+
+5️⃣  30 SN'LİK OTOMATİK GÖZLEM (İsteğe Bağlı)
+─────────────────────────────────────────────────────────────
+# Port açılınca durur:
+for ($i=0; $i -lt 30; $i++) { 
+  if ((Test-NetConnection 127.0.0.1 -Port 3003).TcpTestSucceeded) { 
+    "UP"; break 
+  } ; Start-Sleep 1 
+}
+
+✅ YEŞİL EKRAN KONTROL LİSTESİ
+─────────────────────────────────────────────────────────────
+□ netstat → LISTENING :3003
+□ Terminal → ready - started server on 0.0.0.0:3003
+□ curl /api/healthz → 200
+□ Tarayıcı → HTTP + localhost/127.0.0.1
+□ Proxy/VPN kapalı
+
+🎯 RİTİM: 60 BPM
+─────────────────────────────────────────────────────────────
+Başlat → Ölç → Düzelt
+
+Dev server logundaki ilk hata daima en dürüst sahne amiridir; 
+onu çözdüğünde perde açılır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 MÜZİK!
+

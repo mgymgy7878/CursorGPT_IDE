@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: Spark Alerts API (v2 extensions)
+  version: 1.0.0-5B
+servers:
+  - url: http://localhost:4001
+paths:
+  /alerts/update:
+    post:
+      summary: Partially update an alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: string }
+                notificationSettings:
+                  type: object
+                  properties:
+                    telegram: { type: boolean }
+                    webhook: { type: boolean }
+                cooldownOverrideSec:
+                  type: integer
+                  minimum: 0
+                  maximum: 86400
+      responses:
+        "200":
+          description: Updated alert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  alert:
+                    $ref: '#/components/schemas/Alert'
+        "400": { description: Invalid input }
+        "404": { description: Not found }
+  /alerts/export:
+    get:
+      summary: Export alerts as JSON
+      parameters:
+        - in: query
+          name: ids
+          schema: { type: string }
+          description: Comma-separated list of ids (optional; all if omitted)
+      responses:
+        "200":
+          description: Array of alert documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Alert' }
+  /alerts/import:
+    post:
+      summary: Import alerts in bulk
+      parameters:
+        - in: query
+          name: mode
+          schema: { type: string, enum: [create, upsert], default: create }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: '#/components/schemas/Alert' }
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  created: { type: integer }
+                  updated: { type: integer }
+                  skipped: { type: integer }
+  /alerts/clone:
+    post:
+      summary: Clone an alert with optional patch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: string }
+                patch: { $ref: '#/components/schemas/AlertPatch' }
+      responses:
+        "200":
+          description: Cloned alert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: string }
+                  alert: { $ref: '#/components/schemas/Alert' }
+  /alerts/bulk-enable:
+    post:
+      summary: Enable multiple alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200": { description: Enabled count returned }
+  /alerts/bulk-disable:
+    post:
+      summary: Disable multiple alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200": { description: Disabled count returned }
+  /alerts/bulk-delete:
+    post:
+      summary: Delete multiple alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200": { description: Deleted count returned }
+  /alerts/list:
+    get:
+      summary: List alerts with filters and pagination
+      parameters:
+        - in: query
+          name: symbol
+          schema: { type: string }
+        - in: query
+          name: type
+          schema: { type: string }
+        - in: query
+          name: active
+          schema: { type: integer, enum: [0,1] }
+        - in: query
+          name: sort
+          schema: { type: string, example: createdAt:desc }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50, minimum: 1, maximum: 200 }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        "200":
+          description: Paged result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Alert' }
+                  nextCursor: { type: string, nullable: true }
+components:
+  schemas:
+    AlertPatch:
+      type: object
+      properties:
+        symbol: { type: string }
+        timeframe: { type: string }
+        type: { type: string }
+        params: { type: object, additionalProperties: true }
+        notificationSettings:
+          type: object
+          properties:
+            telegram: { type: boolean }
+            webhook: { type: boolean }
+        cooldownOverrideSec:
+          type: integer
+          minimum: 0
+          maximum: 86400
+    Alert:
+      type: object
+      required: [id, symbol, timeframe, type, params, active, createdAt]
+      properties:
+        id: { type: string }
+        symbol: { type: string }
+        timeframe: { type: string }
+        type: { type: string }
+        params:
+          type: object
+          additionalProperties: true
+        active: { type: boolean }
+        createdAt: { type: integer }
+        lastTriggeredAt: { type: integer, nullable: true }
+        notificationSettings:
+          type: object
+          properties:
+            telegram: { type: boolean, default: true }
+            webhook: { type: boolean, default: false }
+        cooldownOverrideSec:
+          type: integer
+          minimum: 0
+          maximum: 86400
+          nullable: true
+

@@ -1,0 +1,64 @@
+apiVersion: 1
+
+alert_rules:
+  - name: Spark UI SLO Alerts
+    rules:
+      - alert: VenueStalenessHigh
+        expr: venue_staleness_btcturk_sec > 20
+        for: 2m
+        labels:
+          severity: warning
+          service: spark-ui
+        annotations:
+          summary: "BTCTurk data staleness is high"
+          description: "BTCTurk venue staleness is {{ $value }}s, exceeding 20s threshold"
+
+      - alert: VenueStalenessCritical
+        expr: venue_staleness_btcturk_sec > 40
+        for: 1m
+        labels:
+          severity: critical
+          service: spark-ui
+        annotations:
+          summary: "BTCTurk data staleness is critical"
+          description: "BTCTurk venue staleness is {{ $value }}s, exceeding 40s threshold"
+
+      - alert: WebSocketReconnectsHigh
+        expr: ws_reconnects_total > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: spark-ui
+        annotations:
+          summary: "WebSocket reconnections are high"
+          description: "WebSocket reconnections: {{ $value }}, exceeding 5 threshold"
+
+      - alert: RateLimitViolations
+        expr: venue_http_429_total > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: spark-ui
+        annotations:
+          summary: "Rate limit violations detected"
+          description: "Rate limit violations: {{ $value }}, exceeding 10 threshold"
+
+      - alert: UILatencyHigh
+        expr: ui_latency_p95_ms > 120
+        for: 2m
+        labels:
+          severity: warning
+          service: spark-ui
+        annotations:
+          summary: "UI latency is high"
+          description: "UI P95 latency is {{ $value }}ms, exceeding 120ms threshold"
+
+      - alert: UIErrorRateHigh
+        expr: ui_error_rate_pct > 1
+        for: 2m
+        labels:
+          severity: warning
+          service: spark-ui
+        annotations:
+          summary: "UI error rate is high"
+          description: "UI error rate is {{ $value }}%, exceeding 1% threshold"

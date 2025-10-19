@@ -1,0 +1,45 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "portfolio": "Portföy",
+    "copilot": "Copilot",
+    "correlation": "Korelasyon",
+    "signals": "Sinyaller",
+    "macro": "Makro",
+    "news": "Haberler",
+    "strategyLab": "Strategy Lab",
+    "backtest": "Backtest",
+    "strategies": "Stratejiler",
+    "audit": "Denetim",
+    "settings": "Ayarlar"
+  },
+  "audit": {
+    "time": "Zaman",
+    "actor": "Aktör",
+    "action": "İşlem",
+    "target": "Hedef",
+    "status": "Durum",
+    "auditId": "Audit ID"
+  },
+  "strategies": {
+    "title": "Stratejiler",
+    "create": "Strateji Oluştur",
+    "update": "Stratejiyi Güncelle",
+    "delete": "Stratejiyi Sil",
+    "start": "Başlat",
+    "stop": "Durdur",
+    "pause": "Duraklat"
+  },
+  "forms": {
+    "name": "Ad",
+    "symbol": "Sembol",
+    "timeframe": "Zaman Dilimi",
+    "type": "Tip",
+    "risk": "Risk",
+    "submit": "Gönder",
+    "cancel": "İptal",
+    "confirm": "Emin misiniz?"
+  }
+}
+
+

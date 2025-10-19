@@ -1,0 +1,23 @@
+﻿
+StatusCode Content                                                                                                     
+---------- -------                                                                                                     
+       200 {"ok":true,"symbol":"BTCTRY","data":{"data":[{"pair":"BTCTRY","pairNormalized":"BTC_TRY","timestamp":1760...
+
+
+
+---
+
+StatusCode Content                                                                                       
+---------- -------                                                                                       
+       200 {"ok":true,"service":"executor","ts":1760303787607,"mode":"full-mock","version":"v1.6-hybrid"}
+
+
+
+---
+
+StatusCode RawContentLength
+---------- ----------------
+       200            34920
+
+
+

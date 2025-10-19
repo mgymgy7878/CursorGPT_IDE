@@ -1,0 +1,159 @@
+{
+  "dashboard": {
+    "title": "Spark Trading Platform - Overview",
+    "tags": ["spark", "trading", "overview"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "P95 Latency (ms)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "latency_p95_ms",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "yaxes": [
+          { "format": "ms", "label": "Latency" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Error Rate (errors/sec)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(errors_total[5m])",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "yaxes": [
+          { "format": "short", "label": "Errors/sec" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Service Uptime",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up",
+            "legendFormat": "{{job}} - {{instance}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 8, "w": 8, "h": 4 },
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "type": "value", "value": "0", "text": "DOWN", "color": "red" },
+              { "type": "value", "value": "1", "text": "UP", "color": "green" }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 1, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Data Staleness (seconds)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "staleness_seconds",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 8, "y": 8, "w": 8, "h": 4 },
+        "yaxes": [
+          { "format": "s", "label": "Staleness" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Canary Pass Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "(canary_pass / canary_total) * 100",
+            "legendFormat": "Pass Rate %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 16, "y": 8, "w": 8, "h": 4 },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 80, "color": "yellow" },
+                { "value": 95, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Metrics Size (bytes)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(metrics_bytes_total[5m])",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 },
+        "yaxes": [
+          { "format": "bytes", "label": "Bytes/sec" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Request Rate (req/sec)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{instance}} - {{method}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 }
+      }
+    ]
+  }
+}
+

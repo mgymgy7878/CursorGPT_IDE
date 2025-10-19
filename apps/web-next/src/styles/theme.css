@@ -1,0 +1,21 @@
+/* Light / Dark kök değişkenleri */
+:root[data-theme="light"]{
+  --bg: #ffffff; --bg-2: #f7f9fb; --text: #0b1220; --muted:#5c6b7a;
+  --card: #ffffff; --card-b:#e8eef5;
+  --pri:#1b7fff; --pri-2:#63a9ff; --danger:#d94b4b;
+  --border: rgba(0,0,0,.08);
+}
+:root[data-theme="dark"]{
+  --bg:#070a0d; --bg-2:#0c0f12; --text:#e6eef6; --muted:#9bb0bf;
+  --card:#0c0f12; --card-b:rgba(255,255,255,.06);
+  --pri:#1b7fff; --pri-2:#63a9ff; --danger:#d94b4b;
+  --border: rgba(255,255,255,.08);
+}
+html, body { background: var(--bg); color: var(--text); }
+.card { background: var(--card); border: 1px solid var(--card-b); border-radius: 16px; }
+.inp { background: var(--bg-2); color: var(--text); border:1px solid var(--border); border-radius:10px; padding:.45rem .6rem; }
+.btn { background: var(--pri); color:#fff; border:none; border-radius:10px; padding:.55rem .9rem; font-weight:600; }
+.btn-danger { background: var(--danger); color:#fff; border:none; border-radius:10px; padding:.55rem .9rem; font-weight:600; }
+.muted { color: var(--muted); }
+
+

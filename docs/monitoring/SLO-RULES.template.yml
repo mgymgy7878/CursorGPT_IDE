@@ -1,0 +1,49 @@
+groups:
+  - name: spark-smoke
+    interval: 30s
+    rules:
+      - alert: SparkSmokeExitCodeCritical
+        expr: spark_smoke_exit_code != 0
+        for: 5m
+        labels:
+          severity: critical
+          job: spark-executor
+          service: spark
+        annotations:
+          summary: "Smoke exit_code critical"
+          description: "exit_code={{ $value }}"
+
+      - alert: SparkSmokeP95Warning
+        expr: spark_smoke_p95_latency_ms > ${TARGET_P95_MS}
+        for: 5m
+        labels:
+          severity: warning
+          job: spark-executor
+          service: spark
+        annotations:
+          summary: "Smoke p95 latency warning"
+          description: "p95={{ $value }}ms > ${TARGET_P95_MS}ms"
+
+      - alert: SparkSmokeP95Critical
+        expr: spark_smoke_p95_latency_ms > ${TARGET_P95_MS_CRIT}
+        for: 3m
+        labels:
+          severity: critical
+          job: spark-executor
+          service: spark
+        annotations:
+          summary: "Smoke p95 latency critical"
+          description: "p95={{ $value }}ms > ${TARGET_P95_MS_CRIT}ms"
+
+      - alert: SparkSmokeStalenessWarning
+        expr: spark_smoke_staleness_seconds > ${STALENESS_S}
+        for: 5m
+        labels:
+          severity: warning
+          job: spark-executor
+          service: spark
+        annotations:
+          summary: "Smoke staleness warning"
+          description: "staleness={{ $value }}s > ${STALENESS_S}s"
+
+

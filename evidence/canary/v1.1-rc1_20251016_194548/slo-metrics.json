@@ -1,0 +1,31 @@
+﻿{
+  \"action\": \"/tools/get_metrics\",
+  \"params\": {
+    \"set\": [
+      \"ui_http_p95_ms\",
+      \"ui_data_staleness_s\",
+      \"ui_error_rate_s\"
+    ]
+  },
+  \"dryRun\": true,
+  \"confirm_required\": false,
+  \"reason\": \"SLO snapshot: p95<1200ms, staleness<30s, error<1% doÄŸrulamasÄ±\",
+  \"timestamp\": \"2025-10-16T19:46:03\",
+  \"baseline_metrics\": {
+    \"ui_http_p95_ms\": 58,
+    \"ui_data_staleness_s\": 0,
+    \"ui_error_rate_s\": 0
+  },
+  \"slo_targets\": {
+    \"ui_http_p95_ms\": \"<1200ms\",
+    \"ui_data_staleness_s\": \"<30s\",
+    \"ui_error_rate_s\": \"<1%\"
+  },
+  \"status\": \"PASS\",
+  \"verdict\": \"All SLO targets met\",
+  \"details\": {
+    \"p95_check\": \"58ms < 1200ms âœ…\",
+    \"staleness_check\": \"0s < 30s âœ…\",
+    \"error_rate_check\": \"0% < 1% âœ…\"
+  }
+}

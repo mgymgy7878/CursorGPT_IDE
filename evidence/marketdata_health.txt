@@ -1,0 +1,5 @@
+﻿{
+    "status":  "ok",
+    "service":  "marketdata",
+    "timestamp":  1760646934587
+}

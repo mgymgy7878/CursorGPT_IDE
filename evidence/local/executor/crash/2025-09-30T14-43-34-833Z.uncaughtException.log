@@ -1,0 +1,5 @@
+{
+  "name": "ReferenceError",
+  "message": "Cannot access 'client' before initialization",
+  "stack": "ReferenceError: Cannot access 'client' before initialization\n    at <anonymous> (C:\\dev\\CursorGPT_IDE\\CursorGPT_IDE\\services\\executor\\src\\metrics.ts:13:67)\n    at ModuleJob.run (node:internal/modules/esm/module_job:345:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)"
+}

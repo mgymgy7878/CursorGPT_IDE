@@ -1,0 +1,27 @@
+﻿
+
+ComputerName     : 127
+                   .0.
+                   0.1
+RemoteAddress    : 127
+                   .0.
+                   0.1
+RemotePort       : 300
+                   3
+InterfaceAlias   : Loo
+                   pba
+                   ck 
+                   Pse
+                   udo
+                   -In
+                   ter
+                   fac
+                   e 1
+SourceAddress    : 127
+                   .0.
+                   0.1
+TcpTestSucceeded : Tru
+                   e
+
+
+

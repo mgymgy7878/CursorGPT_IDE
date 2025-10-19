@@ -1,0 +1,103 @@
+﻿[1m[90m[TAILING] Tailing last 50 lines for [spark-web-next] process (change the value with --lines option)[39m[22m
+[90mC:\dev\apps\web-next\logs\web-next-out.log last 50 lines:[39m
+[32m2|spark-we | [39m2025-10-17 20:05:47 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:05:47 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:05:51 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:05:51 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:05:51 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:05:51 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:05:54 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:05:54 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:05:54 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:05:54 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:05:57 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:05:57 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:05:57 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:05:57 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:06:01 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:06:01 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:06:01 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:06:01 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:06:04 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:06:04 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:06:04 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:06:04 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:06:07 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:06:07 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:06:07 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:06:07 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:06:10 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:06:10 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:06:10 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:06:10 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:06:14 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:06:14 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:06:14 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:06:14 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:23:35 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:23:35 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:23:35 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:23:35 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:23:38 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:23:38 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:23:38 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:23:38 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:23:41 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:23:41 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:23:41 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:23:41 +03:00:  Ô£ô Starting...
+[32m2|spark-we | [39m2025-10-17 20:23:44 +03:00:   Ôû▓ Next.js 14.2.13
+[32m2|spark-we | [39m2025-10-17 20:23:44 +03:00:   - Local:        http://localhost:3003
+[32m2|spark-we | [39m2025-10-17 20:23:44 +03:00: 
+[32m2|spark-we | [39m2025-10-17 20:23:44 +03:00:  Ô£ô Starting...
+
+[90mC:\dev\apps\web-next\logs\web-next-error.log last 50 lines:[39m
+[31m2|spark-we | [39me starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:05:51 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:05:51 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:05:51 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:05:54 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:05:54 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:05:54 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:05:54 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:05:58 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:05:58 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:05:58 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:05:58 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:06:01 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:06:01 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:06:01 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:06:01 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:06:04 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:06:04 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:06:04 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:06:04 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:06:07 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:06:07 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:06:07 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:06:07 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:06:11 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:06:11 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:06:11 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:06:11 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:06:14 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:06:14 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:06:14 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:06:14 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:23:36 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:23:36 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:23:36 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:23:36 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:23:38 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:23:38 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:23:38 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:23:38 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:23:41 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:23:41 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:23:41 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:23:41 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+[31m2|spark-we | [39m2025-10-17 20:23:44 +03:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[31m2|spark-we | [39m2025-10-17 20:23:44 +03:00:     at setupFsCheck (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-utils\filesystem.js:151:19)
+[31m2|spark-we | [39m2025-10-17 20:23:44 +03:00:     at async initialize (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\router-server.js:62:23)
+[31m2|spark-we | [39m2025-10-17 20:23:44 +03:00:     at async Server.<anonymous> (C:\dev\node_modules\.pnpm\next@14.2.13_@opentelemetry_03f369503f4a844fbc0cdd8cf887531e\node_modules\next\dist\server\lib\start-server.js:249:36)
+

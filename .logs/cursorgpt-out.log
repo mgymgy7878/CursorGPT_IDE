@@ -1,0 +1,20 @@
+[next.config] loaded: C:\dev\CursorGPT_IDE\apps\web-next\next.config.mjs cwd= C:\dev\CursorGPT_IDE\apps\web-next output= standalone
+[next.config] loaded: C:\dev\CursorGPT_IDE\apps\web-next\next.config.mjs cwd= C:\dev\CursorGPT_IDE\apps\web-next output= standalone
+   ▲ Next.js 15.5.4
+   - Local:        http://localhost:3004
+   - Network:      http://192.168.50.5:3004
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ✓ externalDir
+     · esmExternals: "loose"
+
+ ✓ Starting...
+ ✓ Ready in 3.6s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 1190ms (159 modules)
+GET /
+ ○ Compiling / ...
+GET /
+ ✓ Compiled / in 9.4s (785 modules)
+ GET / 200 in 1575ms
+ ✓ Compiled in 1576ms (305 modules)

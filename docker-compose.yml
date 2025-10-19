@@ -1,0 +1,72 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+    environment:
+      - PORT=3003
+      - HOST=0.0.0.0
+      - NEXT_TELEMETRY_DISABLED=1
+      - NODE_OPTIONS=--dns-result-order=ipv4first
+      - CI=true
+      - COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+      # HMR drift protection (Windows bind-mount)
+      - CHOKIDAR_USEPOLLING=1
+      - WATCHPACK_POLLING=true
+      - WATCHPACK_POLLING_INTERVAL=2000
+      - NEXT_WEBPACK_USEPOLLING=1
+      - NEXT_WEBPACK_USEPERSISTENTCACHE=false
+    ports:
+      - "3003:3003"
+    volumes:
+      # Named volume for .next cache (prevents Windows drift)
+      - web_next_cache:/app/apps/web-next/.next
+      # Anonymous volume for node_modules (keep in container)
+      - /app/node_modules
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: spark-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./ops/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: unless-stopped
+    networks:
+      - spark-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: spark-grafana
+    ports:
+      - "3009:3000"
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+      - spark-network
+    depends_on:
+      - prometheus
+
+networks:
+  spark-network:
+    driver: bridge
+
+volumes:
+  # Persistent cache for Next.js build artifacts
+  web_next_cache:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

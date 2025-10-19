@@ -1,0 +1,88 @@
+╔═══════════════════════════════════════════════════════════╗
+║  🎯 ALTIN ROTA - SAHADA EN KISA YOL                     ║
+║  "Ready - Started Server on 0.0.0.0:3003" + /api/healthz 200 ║
+╚═══════════════════════════════════════════════════════════╝
+
+🎯 ALTIN ROTA (Hangi Ortamda Çalışıyorsan Onu Uygula)
+─────────────────────────────────────────────────────────────
+
+A) LOKAL DEV (Docker Yoksa)
+─────────────────────────────────────────────────────────────
+# portu ve zombileri temizle
+pnpm dlx kill-port 3003 2>$null
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# doğru klasör ve net başlat
+cd apps/web-next
+pnpm install
+rimraf .next 2>$null
+pnpm dev --port 3003 --host 0.0.0.0 | tee dev.log
+
+B) DOCKER COMPOSE (Önerilen)
+─────────────────────────────────────────────────────────────
+# compose emin yapı: 0.0.0.0 ve doğru publish
+@"
+services:
+  web:
+    build: .
+    working_dir: /app/apps/web-next
+    command: sh -c "pnpm install && pnpm dev --port 3003 --host 0.0.0.0"
+    environment:
+      - PORT=3003
+      - HOST=0.0.0.0
+    ports:
+      - "3003:3003"   # içeride 3000 dinliyorsan "3003:3000" yap
+    volumes:
+      - .:/app
+"@ | Set-Content docker-compose.yml -Encoding utf8
+
+docker compose down -v
+docker network prune -f
+docker compose up --build -d
+
+# doğrula
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+docker logs -n 80 $(docker ps -q | Select-Object -First 1)
+
+C) WSL/DOCKER DESKTOP KÖPRÜ NAZLANIRSA
+─────────────────────────────────────────────────────────────
+wsl --shutdown
+net stop com.docker.service /y; net start com.docker.service
+
+✅ YEŞİL EKRAN 3'LÜ TEST
+─────────────────────────────────────────────────────────────
+# 1) port/publish
+docker ps --format "table {{.Names}}\t{{.Ports}}"   # veya netstat/Test-NetConnection
+
+# 2) ready satırı
+Select-String -Path .\apps\web-next\dev.log -Pattern 'ready - started'
+
+# 3) sağlık
+curl -I http://127.0.0.1:3003/api/healthz
+
+🧯 HÂLÂ İNAT EDERSE TEK SATIR PANZEHİR
+─────────────────────────────────────────────────────────────
+🔧 İç port 3000'mış → ports: ["3003:3000"] ve docker compose up -d
+
+🔧 App içeride 127.0.0.1'e bağlı → --host 0.0.0.0 ile başlat
+
+🔧 HTTP.sys rezerve etmiş → netsh http delete urlacl url=http://+:3003/
+
+🔧 IPv6 dinliyor → start http://[::1]:3003/
+
+🔧 "ready" yok ama logda hata var → logdaki ilk hata satırını düzelt (module not found / TS error)
+
+🎯 PERDEYİ AÇAN CÜMLE
+─────────────────────────────────────────────────────────────
+ready - started server on 0.0.0.0:3003
+
+Onu gördüğün an:
+✅ /dashboard yürür
+✅ /api/healthz 200 döner
+✅ Sonra canary şarkısına geri döneriz
+
+🎬 MÜZİK!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎵 SONRA CANARY ŞARKISINA GERİ DÖNERİZ! 🎵
+

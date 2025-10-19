@@ -1,0 +1,49 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'spark-trading-platform'
+    env: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alerts/spark.rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Executor services
+  - job_name: 'spark-executor'
+    static_configs:
+      - targets: 
+          - 'localhost:4001'
+          - 'localhost:4002'
+        labels:
+          service: 'executor'
+          component: 'backend'
+
+  # Marketdata service
+  - job_name: 'spark-marketdata'
+    static_configs:
+      - targets: ['localhost:5001']
+        labels:
+          service: 'marketdata'
+          component: 'backend'
+
+  # Web frontend (if metrics exposed)
+  - job_name: 'spark-web'
+    static_configs:
+      - targets: ['localhost:3003']
+        labels:
+          service: 'web-next'
+          component: 'frontend'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

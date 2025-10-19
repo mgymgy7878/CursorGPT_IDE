@@ -1,0 +1,69 @@
+╔═══════════════════════════════════════════════════════════╗
+║  🚑 SON-MİL PROBELERİ + GERİ DÖNÜŞ MATRİSİ              ║
+║  "Hâlâ Refused" → Son-Mil Probes + Rollback Matrix      ║
+╚═══════════════════════════════════════════════════════════╝
+
+🚑 SON-MİL PROBELERİ (90 sn)
+─────────────────────────────────────────────────────────────
+# 1) Host gerçekten dinliyor mu?
+$port=3003; Test-NetConnection 127.0.0.1 -Port $port
+
+# 2) Docker publish gerçekten var mı?
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+
+# 3) İçeriden nabız (app içeride ayakta mı?)
+$SVC=(docker ps --format "{{.Names}}" | Select-String -Pattern "web|app|front|next" | Select -First 1) | % ToString
+if ($SVC) {
+  docker exec -it $SVC sh -lc 'ss -ltnp | (grep 3003 || grep 3000) || true'
+  docker exec -it $SVC sh -lc 'curl -sI http://127.0.0.1:3003/api/healthz || curl -sI http://127.0.0.1:3000/healthz || true'
+}
+
+# 4) Lokal çalıştırıyorsan doğru paketi vur
+pnpm --filter web-next dev --port $port --host 0.0.0.0
+
+# 5) Node/pnpm sürümü net mi?
+node -v
+corepack enable && pnpm -v
+
+# 6) HSTS/https takılmasın (Edge/Chrome)
+# Adresi http://127.0.0.1:3003 olarak aç; gerekirse HSTS temizle (edge://net-internals/#hsts)
+
+# 7) Windows Firewall: Node/Docker'ı izinli yap (özel + genel ağ).
+# 8) IPv6 testi
+Invoke-WebRequest http://[::1]:3003 -Method Head -TimeoutSec 2
+
+🔁 GERİ DÖNÜŞ MATRİSİ (Tek Satır Panzehir)
+─────────────────────────────────────────────────────────────
+┌─────────────────────────────────────────────────────────────┐
+│ Belirti                    │ Neden                        │ Çözüm (kopyala-çalıştır)                    │
+├─────────────────────────────────────────────────────────────┤
+│ docker ps Ports boş        │ Publish yok                  │ docker compose down -v; docker compose up --build -d (compose'ta ports: ["3003:3003"] ya da iç port 3000 ise ["3003:3000"]) │
+│ İçeride ss boş             │ Next 127.0.0.1'e bağlı      │ Komut: pnpm dev --port 3003 --host 0.0.0.0 (compose HOST=0.0.0.0) │
+│ İçeride 200, dışarıda refused │ Publish eşleşmiyor        │ ports: ["3003:3000"] (iç port 3000 ise) → docker compose up -d │
+│ Host'ta başka süreç 3003'ü tutuyor │ Port çakışması      │ pnpm dlx kill-port 3003 veya taskkill /PID <pid> /F │
+│ Tarayıcı https'e zorluyor  │ HSTS/redirect               │ Adres çubuğu http; gerekirse HSTS temizle │
+│ Çalıştırınca build/type hatası │ Uygulama kalkmıyor      │ pnpm install && rimraf .next; pnpm tsc -b hatayı düzelt → pnpm dev │
+│ Workspace yanlış hedef     │ Yanlış paket                 │ pnpm --filter web-next dev --port 3003 --host 0.0.0.0 │
+│ Docker-Desktop/WSL köprü   │ Loopback karmaşası          │ WSL IP ile dene: `wsl.exe -d <distro> ip -4 addr show eth0 │
+└─────────────────────────────────────────────────────────────┘
+
+🟢 YEŞİL EKRAN CHECKLIST (3 Doğrulama Yeter)
+─────────────────────────────────────────────────────────────
+□ docker ps → 0.0.0.0:3003->(3003|3000)/tcp
+□ Log → ready - started server on 0.0.0.0:3003
+□ curl -I http://127.0.0.1:3003/api/healthz → 200
+
+🎯 BONUS: 3003 İnat Ederse Port Değiştir, Hipotezi Test Et
+─────────────────────────────────────────────────────────────
+$np=3100; pnpm dlx kill-port $np 2>$null; pnpm --filter web-next dev --port $np --host 0.0.0.0
+# sonra http://127.0.0.1:3100/
+
+🎯 RİTİM: 60 BPM
+─────────────────────────────────────────────────────────────
+Başlat → Ölç → Düzelt
+
+İlk hata satırı sahne amiridir; onu susturunca perde açılır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 MÜZİK!
+

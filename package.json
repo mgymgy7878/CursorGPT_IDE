@@ -1,0 +1,28 @@
+{
+  "name": "spark-trading-platform",
+  "version": "1.2.0",
+  "private": true,
+  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "dev": "pnpm --filter web-next dev",
+    "dev:all": "pnpm --parallel --filter ./services/* dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "pnpm -r exec rm -rf dist .next node_modules",
+    "dev:exec": "pnpm --filter @spark/executor dev",
+    "build:exec": "pnpm --filter @spark/executor build",
+    "ui:test": "pnpm --filter web-next exec playwright test",
+    "ui:test:update": "pnpm --filter web-next exec playwright test --update-snapshots",
+    "ui:hash": "tsx scripts/ux/contract-hash.ts",
+    "lint:tokens": "pnpm --filter web-next exec eslint --config eslint.tokens.config.js --ext .ts,.tsx src --max-warnings=0",
+    "verify": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/release/verify.ps1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "eslint-plugin-regex": "^1.10.0",
+    "prettier": "^3.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,93 @@
+groups:
+  - name: spark.latency
+    interval: 30s
+    rules:
+      - alert: HighLatency
+        expr: latency_p95_ms > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High P95 latency detected"
+          description: "P95 latency is {{ $value }}ms (threshold: 1000ms) for {{ $labels.instance }}"
+
+      - alert: CriticalLatency
+        expr: latency_p95_ms > 2000
+        for: 3m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Critical P95 latency"
+          description: "P95 latency is {{ $value }}ms (threshold: 2000ms) for {{ $labels.instance }}"
+
+  - name: spark.errors
+    interval: 30s
+    rules:
+      - alert: ErrorRateNonZero
+        expr: rate(errors_total[5m]) > 0
+        for: 3m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Error rate is non-zero"
+          description: "{{ $labels.instance }} has {{ $value }} errors/sec"
+
+      - alert: HighErrorRate
+        expr: rate(errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "High error rate detected"
+          description: "{{ $labels.instance }} has {{ $value }} errors/sec (threshold: 0.1/sec)"
+
+  - name: spark.health
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.job }} instance {{ $labels.instance }} is down"
+
+      - alert: HighStaleness
+        expr: staleness_seconds > 60
+        for: 5m
+        labels:
+          severity: warning
+          component: marketdata
+        annotations:
+          summary: "High data staleness"
+          description: "Data staleness is {{ $value }}s (threshold: 60s) for {{ $labels.instance }}"
+
+  - name: spark.canary
+    interval: 60s
+    rules:
+      - alert: CanaryFailureRate
+        expr: (canary_pass / canary_total) < 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: testing
+        annotations:
+          summary: "Canary test failure rate high"
+          description: "Canary pass rate is {{ $value | humanizePercentage }} (threshold: 80%)"
+
+      - alert: CanaryAllFailed
+        expr: canary_pass == 0 and canary_total > 0
+        for: 2m
+        labels:
+          severity: critical
+          component: testing
+        annotations:
+          summary: "All canary tests failed"
+          description: "0/{{ $labels.canary_total }} canary tests passed"
+

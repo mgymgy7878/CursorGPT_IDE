@@ -1,0 +1,107 @@
+╔═══════════════════════════════════════════════════════════╗
+║  🔧 90 SANİYELİK KARAR AĞACI                             ║
+║  ERR_CONNECTION_REFUSED → Sunucu Dinler Hale Getir      ║
+╚═══════════════════════════════════════════════════════════╝
+
+0️⃣  HEMEN NABIZ (10 sn)
+─────────────────────────────────────────────────────────────
+# Port durumunu ve kimin kapmış olduğunu gör
+Test-NetConnection 127.0.0.1 -Port 3003
+netstat -aon | findstr :3003
+
+📊 KARAR NOKTASI:
+❌ LISTENING yok → Sunucu kalkmamış → 1️⃣ adıma
+✅ LISTENING var ama başka PID → 2️⃣ adıma
+
+1️⃣  SUNUCU HİÇ KALKMAMIŞSA (30 sn)
+─────────────────────────────────────────────────────────────
+# Proje kökünden değil, app klasöründen başlat
+cd apps/web-next
+
+# "temiz sahne"
+pnpm install
+rimraf .next node_modules/.cache 2> NUL || true
+
+# yüksek sesle dinlet: host + port sabitle
+pnpm dev --port 3003 --host 0.0.0.0 | tee dev.log
+
+✅ BEKLENEN LOG: ready - started server on 0.0.0.0:3003
+❌ Çıkmazsa: dev.log'un ilk hata satırı sorunun kendisidir
+   (module not found, ts error, vs.). Onu düzeltip tekrar çalıştır.
+
+2️⃣  PORT'U BAŞKA SÜREÇ KAPMIŞSA (20 sn)
+─────────────────────────────────────────────────────────────
+netstat -aon | findstr :3003        # PID'i gör
+taskkill /PID <PID> /F              # Süreci öldür
+
+# veya tüm Node dev zombilerini temizle:
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+
+Sonra tekrar:
+cd apps/web-next
+pnpm dev --port 3003 --host 0.0.0.0
+
+3️⃣  TARAYICI ERİŞİMİ (10 sn)
+─────────────────────────────────────────────────────────────
+# Sırayla dene
+http://localhost:3003/
+http://127.0.0.1:3003/
+http://[::1]:3003/           # IPv6 dinliyorsa
+
+⚠️ HTTPS'e zorlamayın. Dev sunucu HTTP.
+
+4️⃣  SAĞLIK NABZI (5 sn)
+─────────────────────────────────────────────────────────────
+# Kalktıktan sonra
+curl -I http://127.0.0.1:3003/api/healthz
+
+✅ 200 dönmeli.
+
+5️⃣  WINDOWS/PROXY/WSL GOTCHALARI (10 sn)
+─────────────────────────────────────────────────────────────
+🔧 Proxy/VPN kapat: 
+   Ayarlar → Ağ & İnternet → Proxy → 
+   "Ayarları otomatik algıla" kapalı.
+
+🐧 WSL'de çalıştırıyorsan (nadiren köprü bozulur):
+# WSL içinden IP öğren
+ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'
+
+Sonra Windows tarayıcıdan http://WSL_IP:3003/ dene.
+
+🔌 Port rezerve (ör. çakışan dev server): 
+   pnpm dlx kill-port 3003
+
+6️⃣  PNPM WORKSPACE/DOĞRU SCRIPT (5 sn)
+─────────────────────────────────────────────────────────────
+# Kökten yanlış paketi çalıştırma ihtimaline karşı:
+pnpm --filter web-next dev --port 3003 --host 0.0.0.0
+
+# veya env ile sabitle:
+cross-env PORT=3003 HOST=0.0.0.0 pnpm dev
+
+7️⃣  SON ÇARE: HARD RESET (10 sn)
+─────────────────────────────────────────────────────────────
+cd apps/web-next
+pnpm install
+git clean -fdX .next                # yalnızca build çıktısını süpürür
+pnpm dev --port 3003 --host 0.0.0.0
+
+✅ MİNİK KONTROL LİSTESİ (5 işaret → yeşil ekran)
+─────────────────────────────────────────────────────────────
+□ netstat → LISTENING :3003
+□ Terminal → ready - started server on 0.0.0.0:3003
+□ curl /api/healthz → 200
+□ Tarayıcı → HTTP ve localhost/127.0.0.1
+□ Proxy/VPN kapalı
+
+🎯 RİTİM: 60 BPM
+─────────────────────────────────────────────────────────────
+Başlat → Ölç → Düzelt
+
+İlk hata satırı her zaman en dürüst sahne amiridir; 
+onu çözünce perde açılır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 MÜZİK!
+

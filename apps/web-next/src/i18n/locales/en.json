@@ -1,0 +1,45 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "portfolio": "Portfolio",
+    "copilot": "Copilot",
+    "correlation": "Correlation",
+    "signals": "Signals",
+    "macro": "Macro",
+    "news": "News",
+    "strategyLab": "Strategy Lab",
+    "backtest": "Backtest",
+    "strategies": "Strategies",
+    "audit": "Audit",
+    "settings": "Settings"
+  },
+  "audit": {
+    "time": "Time",
+    "actor": "Actor",
+    "action": "Action",
+    "target": "Target",
+    "status": "Status",
+    "auditId": "Audit ID"
+  },
+  "strategies": {
+    "title": "Strategies",
+    "create": "Create Strategy",
+    "update": "Update Strategy",
+    "delete": "Delete Strategy",
+    "start": "Start",
+    "stop": "Stop",
+    "pause": "Pause"
+  },
+  "forms": {
+    "name": "Name",
+    "symbol": "Symbol",
+    "timeframe": "Timeframe",
+    "type": "Type",
+    "risk": "Risk",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "confirm": "Are you sure?"
+  }
+}
+
+

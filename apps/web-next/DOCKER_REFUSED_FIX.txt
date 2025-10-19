@@ -1,0 +1,91 @@
+╔═══════════════════════════════════════════════════════════╗
+║  ⚡ "REFUSED" SÖNDÜREN TEK-SEKANS                        ║
+║  Docker Açık Ama 127.0.0.1:3003 "Refused"              ║
+╚═══════════════════════════════════════════════════════════╝
+
+⚡ "REFUSED" SÖNDÜREN TEK-SEKANS (PowerShell)
+─────────────────────────────────────────────────────────────
+# 0) Host'ta 3003 gerçekten dinliyor mu?
+Test-NetConnection 127.0.0.1 -Port 3003
+
+# 1) Docker tarafını görün: container + publish
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# 2) Varsa Next/log takibi için ismi yakala (web|app|front|next desenleri)
+$SVC=(docker ps --format "{{.Names}}" | Select-String -Pattern "web|app|front|next" | Select -First 1).ToString()
+
+# 3) Compose ile kesin düzeltme (host=0.0.0.0 + doğru port publish)
+#    ÇALIŞTIRMA: bulunduğun projenin kökünde aşağıdaki compose taslağına uygula ve up et.
+
+docker-compose.yml (emin versiyon – kopyala/yapıştır, adları uygunsa sadece çalışır)
+─────────────────────────────────────────────────────────────
+services:
+  web:
+    build: .
+    working_dir: /app/apps/web-next
+    command: sh -c "pnpm install && pnpm dev --port 3003 --host 0.0.0.0"
+    environment:
+      - PORT=3003
+      - HOST=0.0.0.0
+    ports:
+      - "3003:3003"   # Eğer Next içeride 3000'de dinliyorsa bunu "3003:3000" yap
+    volumes:
+      - .:/app
+
+# 4) Temiz kalkış
+docker compose down -v
+docker compose up --build -d
+
+# 5) Publish doğrula ve "ready" satırını gör
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+if ($SVC) { docker logs -f $SVC }
+
+# 6) Tarayıcı (HTTP!) ve nabız
+#    http://localhost:3003/  veya  http://127.0.0.1:3003/
+curl -I http://127.0.0.1:3003/api/healthz
+
+🔍 HIZLI TEŞHİS NASIL OKUNUR?
+─────────────────────────────────────────────────────────────
+❌ docker ps Ports sütunu boş → publish yok → compose'taki ports: ekle/düzelt, up --build -d.
+
+✅ Ports 0.0.0.0:3003->(3003|3000)/tcp ama hâlâ "refused" → 
+   container içindeki Next kalkmamış ya da --host 0.0.0.0 verilmemiş.
+
+❌ Log'da ready - started server on 0.0.0.0:3003 görmüyorsan: 
+   önceki satırdaki build/TS hatasını düzelt.
+
+🔍 İÇERDEN KONTROL (Şüpheyi Bitirir)
+─────────────────────────────────────────────────────────────
+if ($SVC) {
+  docker exec -it $SVC sh -lc 'ss -ltnp | (grep 3003 || grep 3000); curl -I http://127.0.0.1:3003 || curl -I http://127.0.0.1:3000'
+}
+
+📊 SONUÇ ANALİZİ:
+✅ İçeride 200 geliyor, dışarıda "refused" → publish hatası.
+❌ İçeride de "refused" → host binding hatası (--host 0.0.0.0 şart).
+
+🧯 SIK DÜŞÜLEN İKİ TUZAK → TEK SATIR PANZEHİR
+─────────────────────────────────────────────────────────────
+🔧 İç port 3000'dir: 
+   ports: ["3003:3000"]
+
+🔌 Host'ta başka süreç portu tutuyor: 
+   pnpm dlx kill-port 3003
+
+✅ YEŞİL EKRAN CHECKLIST
+─────────────────────────────────────────────────────────────
+□ docker ps → 0.0.0.0:3003->(3003|3000)/tcp
+□ Log → ready - started server on 0.0.0.0:3003
+□ curl -I /api/healthz → 200
+□ Tarayıcı → HTTP + localhost:3003
+□ Proxy/VPN engellemiyor
+
+🎯 RİTİM: 60 BPM
+─────────────────────────────────────────────────────────────
+Başlat → Ölç → Düzelt
+
+Log, en dürüst sahne amiridir; "ready" geldiği anda perde açılır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 MÜZİK!
+

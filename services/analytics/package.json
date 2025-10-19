@@ -1,0 +1,13 @@
+{
+  "name": "analytics",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run -c ./vitest.config.ts"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0",
+    "typescript": "^5.4.0"
+  }
+}
+

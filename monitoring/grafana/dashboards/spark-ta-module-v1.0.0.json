@@ -1,0 +1,220 @@
+{
+  "dashboard": {
+    "title": "Spark TA Module v1.0.0",
+    "tags": ["spark", "trading", "alerts", "technical-analysis"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "📊 Alert Lifecycle",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "alerts_active",
+            "legendFormat": "Active Alerts",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(alerts_created_total[5m]) * 60",
+            "legendFormat": "Created/min",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(alerts_triggered_total[5m]) * 60",
+            "legendFormat": "Triggered/min",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(alerts_suppressed_total[5m]) * 60",
+            "legendFormat": "Suppressed/min",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "🔔 Notification Delivery",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum(rate(notifications_sent_total[5m])) by (channel) * 60",
+            "legendFormat": "{{channel}} sent/min",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(notifications_failed_total[5m])) by (channel,reason) * 60",
+            "legendFormat": "{{channel}} failed ({{reason}})/min",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(notifications_suppressed_total[5m])) by (channel,reason) * 60",
+            "legendFormat": "{{channel}} suppressed ({{reason}})/min",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "👑 Leader Election",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 8, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "leader_elected_total",
+            "legendFormat": "Total Elections",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(leader_held_seconds[5m]) * 60",
+            "legendFormat": "Held Time (s/min)",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto",
+          "textMode": "auto"
+        }
+      },
+      {
+        "id": 4,
+        "title": "📡 SSE Streams",
+        "type": "timeseries",
+        "gridPos": { "x": 6, "y": 8, "w": 18, "h": 4 },
+        "targets": [
+          {
+            "expr": "streams_connected",
+            "legendFormat": "Connected Streams",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(streams_messages_total[5m]) * 60",
+            "legendFormat": "Messages/min",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(streams_errors_total[5m]) * 60",
+            "legendFormat": "Errors/min",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "🎯 Alert Types Breakdown",
+        "type": "piechart",
+        "gridPos": { "x": 0, "y": 12, "w": 8, "h": 6 },
+        "targets": [
+          {
+            "expr": "sum(rate(alerts_triggered_total[1h])) by (type)",
+            "legendFormat": "{{type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": { "displayMode": "table", "placement": "right" }
+        }
+      },
+      {
+        "id": 6,
+        "title": "⏱️ Suppression Reasons",
+        "type": "piechart",
+        "gridPos": { "x": 8, "y": 12, "w": 8, "h": 6 },
+        "targets": [
+          {
+            "expr": "sum(rate(alerts_suppressed_total[1h])) by (reason)",
+            "legendFormat": "{{reason}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "📈 Notification Success Rate",
+        "type": "gauge",
+        "gridPos": { "x": 16, "y": 12, "w": 8, "h": 6 },
+        "targets": [
+          {
+            "expr": "sum(rate(notifications_sent_total[5m])) / (sum(rate(notifications_sent_total[5m])) + sum(rate(notifications_failed_total[5m]))) * 100",
+            "legendFormat": "Success %",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 95, "color": "yellow" },
+                { "value": 98, "color": "green" }
+              ]
+            },
+            "min": 0,
+            "max": 100,
+            "unit": "percent"
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "🔥 Alert Errors",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 18, "w": 12, "h": 5 },
+        "targets": [
+          {
+            "expr": "sum(rate(alerts_errors_total[5m])) by (type) * 60",
+            "legendFormat": "{{type}} errors/min",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "⚡ Copilot Tool Performance",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 18, "w": 12, "h": 5 },
+        "targets": [
+          {
+            "expr": "sum(rate(copilot_action_total{result=\"success\"}[5m])) by (route) * 60",
+            "legendFormat": "{{route}} success/min",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(copilot_action_total{result=\"cache_hit\"}[5m])) by (route) * 60",
+            "legendFormat": "{{route}} cache/min",
+            "refId": "B"
+          }
+        ]
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,5 @@
+apps/web-next/.next
+**/.next
+node_modules
+npm-debug.log
+pnpm-debug.log

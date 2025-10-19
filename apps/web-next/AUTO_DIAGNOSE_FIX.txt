@@ -1,0 +1,106 @@
+╔═══════════════════════════════════════════════════════════╗
+║  ⚡ TEK-EKRAN OTO-TEŞHİS + DÜZELTME                     ║
+║  ERR_CONNECTION_REFUSED → Otomatik Teşhis + Fix         ║
+╚═══════════════════════════════════════════════════════════╝
+
+⚡ TEK-EKRAN OTO-TEŞHİS + DÜZELTME (PowerShell)
+─────────────────────────────────────────────────────────────
+# === 0) Teşhis: host ve docker görünümü
+Write-Host "`n[0] Host port nabzı" -ForegroundColor Cyan
+$port=3003
+$t = Test-NetConnection 127.0.0.1 -Port $port
+$t | Select-Object ComputerName, RemotePort, TcpTestSucceeded
+
+Write-Host "`n[0] Docker görünümü" -ForegroundColor Cyan
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Container adı (web|app|front|next)
+$SVC=(docker ps --format "{{.Names}}" | Select-String -Pattern "web|app|front|next" | Select -First 1) | ForEach-Object { $_.ToString() }
+
+# === 1) Duruma göre karar
+if (-not $SVC) {
+  Write-Host "`n[1] Docker container yok → İstersen lokal dev'e geçiyorum." -ForegroundColor Yellow
+  # Lokal dev: portu temizle + net başlat
+  try { pnpm dlx kill-port $port | Out-Null } catch {}
+  Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+  Set-Location -Path "apps/web-next"
+  pnpm install
+  rimraf .next 2>$null
+  $env:PORT="$port"; $env:HOST="0.0.0.0"
+  Write-Host "`n→ Lokal dev başlıyor: pnpm dev --port $port --host 0.0.0.0" -ForegroundColor Green
+  pnpm dev --port $port --host 0.0.0.0 | tee dev.log
+  exit
+}
+
+# Buradaysa docker var. Publish var mı?
+$ports=(docker ps --format "{{.Names}}|{{.Ports}}" | Where-Object {$_ -match $SVC}) -split "\|"
+$pub=$ports[1]
+
+if (-not $pub -or $pub -notmatch "0\.0\.0\.0:$port->") {
+  Write-Host "`n[1] Port publish YOK/yanlış → compose ile düzeltiyorum." -ForegroundColor Yellow
+  # compose patch: 3003 dış, 3003 iç (içte 3000 ise 3003:3000 yap)
+  @"
+services:
+  web:
+    build: .
+    working_dir: /app/apps/web-next
+    command: sh -c "pnpm install && pnpm dev --port 3003 --host 0.0.0.0"
+    environment:
+      - PORT=3003
+      - HOST=0.0.0.0
+    ports:
+      - "3003:3003"
+    volumes:
+      - .:/app
+"@ | Out-File -FilePath docker-compose.yml -Encoding utf8
+  docker compose down -v
+  docker compose up --build -d
+}
+
+Write-Host "`n[2] Container log (ready satırını ara)" -ForegroundColor Cyan
+docker logs --tail 80 $SVC
+
+Write-Host "`n[3] İçeriden gerçekten dinliyor mu?" -ForegroundColor Cyan
+docker exec -it $SVC sh -lc 'ss -ltnp | (grep 3003 || grep 3000) || true'
+
+Write-Host "`n[4] Sağlık nabzı" -ForegroundColor Cyan
+curl -I http://127.0.0.1:$port/api/healthz
+
+🔍 ÇIKTIYI OKUMA — HANGİ DURUMDA NE YAPACAKSIN?
+─────────────────────────────────────────────────────────────
+❌ docker ps Ports boş → compose'taki ports: yanlış/eksik. 
+   Yukarıdaki makro docker-compose.yml'i doğru şekilde yazar ve up --build -d yapar.
+
+✅ Log'da şu satırı görmelisin: ready - started server on 0.0.0.0:3003.
+   Görmüyorsan hemen üstündeki ilk hata (module not found / TS error) düzeltilecek asıl konudur.
+
+🔍 İçeriden ss -ltnp 3003/3000 göstermiyorsa → Next.js --host 0.0.0.0 almamış; 
+   makro bunu da veriyor.
+
+📊 İçeride 200 dönüyor, dışarıda refused → publish eşleşmesi hatalı: 
+   iç port 3000 ise ports: ["3003:3000"].
+
+✅ MİNİ KONTROL LİSTESİ (Yeşil Ekran)
+─────────────────────────────────────────────────────────────
+□ docker ps → 0.0.0.0:3003->(3003|3000)/tcp görünüyor
+□ Log → ready - started server on 0.0.0.0:3003
+□ curl -I http://127.0.0.1:3003/api/healthz → 200
+□ Tarayıcı HTTP ile http://localhost:3003/
+□ Proxy/VPN loopback'i bozmuyor
+
+🔬 BİLİMSEL ÖZ
+─────────────────────────────────────────────────────────────
+"Refused", fiziksel olarak kapıda bekçi yok demek. 
+Ya dinleyen süreç yok, ya yanlış kapıyı açtık. 
+Yukarıdaki sekans bekçiyi kapıya koyar, kapıyı da sokağa açar. 
+Devamında gerçek veriyi bağlayıp duman testini koşabilirsin.
+
+🎯 RİTİM: 60 BPM
+─────────────────────────────────────────────────────────────
+Başlat → Ölç → Düzelt
+
+Log, en dürüst sahne amiridir; "ready" geldiği anda perde açılır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 MÜZİK!
+

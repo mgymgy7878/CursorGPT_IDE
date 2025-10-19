@@ -1,0 +1,28 @@
+name: Docs Lint
+
+on:
+  pull_request:
+    paths: ["**/*.md", ".markdownlint.json", ".mlc_config.json"]
+  workflow_dispatch:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install linters
+        run: |
+          npm i -g markdownlint-cli markdown-link-check
+          echo '{ "ignorePatterns": [ { "pattern": "^https?://127\\.0\\.0\\.1" } ] }' > .mlc_config.json
+          echo '{ "default": true, "MD013": false, "MD033": false }' > .markdownlint.json
+      - name: markdownlint
+        run: markdownlint **/*.md --config .markdownlint.json
+      - name: markdown-link-check
+        run: |
+          git ls-files '*.md' | xargs -I{} markdown-link-check -q -c .mlc_config.json {}
+
+
