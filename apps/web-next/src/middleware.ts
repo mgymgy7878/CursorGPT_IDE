@@ -125,7 +125,7 @@ export function middleware(request: NextRequest) {
     "style-src 'self'",
     "img-src 'self' data: https:",
     "font-src 'self' data:",
-    "connect-src 'self'",
+    "connect-src 'self' http: https: ws: wss:",
     "frame-ancestors 'none'",
     'upgrade-insecure-requests'
   ].join('; ');

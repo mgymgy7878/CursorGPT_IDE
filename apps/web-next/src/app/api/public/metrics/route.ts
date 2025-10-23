@@ -1,37 +1,31 @@
 import { NextResponse } from 'next/server';
+import { metrics } from '@/server/metrics';
 
-/**
- * /api/public/metrics - Prometheus metrics proxy
- * Graceful degradation: Returns 200 with _mock flag on executor offline
- */
-export async function GET() {
-  try{
-    const r = await fetch('http://127.0.0.1:4001/metrics', { 
-      cache: 'no-store' as any,
-      signal: AbortSignal.timeout(3000) // 3s timeout
-    });
-    
-    if(!r?.ok){ 
-      // Executor offline or error - return 200 with mock flag
-      return NextResponse.json({ 
-        _mock: true, 
-        status: 'DEMO',
-        _err: `executor_http_${r.status}` 
-      }, { status: 200 });
-    }
-    
-    const txt = await r.text();
-    return new NextResponse(txt, { 
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
-    });
-  }catch(e: any){
-    // Network error or timeout - return 200 with mock flag
-    return NextResponse.json({ 
-      _mock: true, 
-      status: 'DEMO',
-      _err: e?.message || 'executor_offline' 
-    }, { status: 200 });
-  }
+// Dinamik çalış: build-time SSG denemesini engelle
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+type NumRec = Record<string, number>;
+const startedAt = Date.now();
+
+function num(v: unknown, d = 0): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : d;
 }
 
+export async function GET() {
+  // Mock health (UI bağlamak için): gerçek entegrasyonda doldurulacak
+  const counters: NumRec = { ...metrics.counters } as NumRec;
+  const gauges: NumRec = { ...metrics.gauges } as NumRec;
+
+  if (!Number.isFinite(gauges['spark_ws_staleness_seconds'])) {
+    gauges['spark_ws_staleness_seconds'] = 2;
+  }
+  const body = {
+    gauges: { ws_staleness_s: num(gauges['spark_ws_staleness_seconds'], 2), p95_ms: 58 },
+    counters: { ui_msgs_total: num(counters['ui_msgs_total'], 42), api_errors_total: num(counters['api_errors_total'], 0) },
+    status: { env: 'Mock', feed: 'healthy', broker: 'offline' },
+  };
+  return NextResponse.json(body, { status: 200, headers: { 'Cache-Control': 'no-store' } });
+}
 

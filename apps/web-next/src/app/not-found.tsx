@@ -11,3 +11,5 @@ export default function NotFound() {
     </main>
   );
 }
+
+export const dynamic = "force-dynamic";

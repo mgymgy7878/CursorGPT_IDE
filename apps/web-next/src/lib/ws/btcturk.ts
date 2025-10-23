@@ -1,4 +1,5 @@
 import type { Ticker } from '@/types/market';
+import { incCounter, setGauge, metrics } from '@/server/metrics';
 
 type OnBatch = (tickers: Ticker[]) => void;
 
@@ -89,8 +90,21 @@ export function connectBtcturk(
         if (tickers.length) {
           onBatch(tickers);
         }
+        // Basic counters for channel types
+        for (const msg of arr) {
+          const ch = Array.isArray(msg) ? msg[0] : msg?.type;
+          if (ch === 422) incCounter('spark_ws_trades_msgs_total', 1);
+          if (ch === 431 || ch === 432) incCounter('spark_ws_orderbook_msgs_total', 1);
+        }
+        // Update staleness gauge
+        if (metrics.gauges.spark_ws_last_message_ts) {
+          const now = Date.now();
+          const last = metrics.gauges.spark_ws_last_message_ts || now;
+          setGauge('spark_ws_staleness_seconds', Math.max(0, (now - last) / 1000));
+        }
       } catch (err) {
         console.warn('BTCTurk WS parse error:', err);
+        incCounter('spark_ws_trades_errors_total', 1);
       }
     };
     
@@ -108,6 +122,7 @@ export function connectBtcturk(
     
     ws.onerror = (err) => {
       console.error('❌ BTCTurk WS error:', err);
+      incCounter('spark_ws_orderbook_errors_total', 1);
     };
   };
 
@@ -120,3 +135,102 @@ export function connectBtcturk(
   };
 }
 
+
+// Below: class-based BTCTurk client with pause/resume and reconnect
+export type BtcturkEvent =
+  | { type: 'open' }
+  | { type: 'close' }
+  | { type: 'ticker'; pair: string; last: number; bid: number; ask: number; ts: number };
+
+type Pair = string;
+type SubMsg = [151, { type: 151; channel: string; event: string; join: boolean }];
+
+export class BtcturkWS {
+  private ws?: WebSocket;
+  private backoff = 1000;
+  private closed = false;
+
+  public lastMessageTs = 0;
+  public connected = false;
+
+  constructor(
+    private url: string,
+    private pairs: Pair[],
+    private onEvent: (e: BtcturkEvent) => void,
+  ) {}
+
+  // Optional additional subscriptions for trades (422) and orderbook (431/432)
+  subscribeTrades(pair: string) {
+    this.sub(true, [pair]);
+  }
+
+  subscribeOrderBook(pair: string) {
+    this.sub(true, [pair]);
+  }
+
+  connect() {
+    if (!this.url) throw new Error('NEXT_PUBLIC_WS_BTCTURK missing');
+    this.closed = false;
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () => {
+      this.connected = true;
+      this.backoff = 1000;
+      this.onEvent({ type: 'open' });
+      this.subscribeAll(true);
+    };
+
+    this.ws.onmessage = (ev) => {
+      this.lastMessageTs = Date.now();
+      const msg = safeParse(ev.data as string);
+      if (Array.isArray(msg)) {
+        const ch = msg[0];
+        const payload = msg[1];
+        if (ch === 402 && payload) {
+          const pair = String(payload.P ?? payload.p ?? payload.pair ?? '').toUpperCase();
+          const last = toNum(payload.A ?? payload.last ?? payload.a);
+          const bid = toNum(payload.B ?? payload.bid ?? payload.b);
+          const ask = toNum(payload.S ?? payload.ask ?? payload.s);
+          if (pair && Number.isFinite(last)) {
+            this.onEvent({ type: 'ticker', pair, last, bid, ask, ts: this.lastMessageTs });
+          }
+        }
+        // Trades channel (422) and OrderBook (431/432) counters (best-effort)
+        if (ch === 422) {
+          try { (window as any)?.sparkCounters?.inc?.('spark_ws_btcturk_trades_total'); } catch {}
+        }
+        if (ch === 431 || ch === 432) {
+          try { (window as any)?.sparkCounters?.inc?.('spark_ws_btcturk_orderbook_updates_total'); } catch {}
+        }
+      }
+    };
+
+    this.ws.onerror = () => { try { this.ws?.close(); } catch {} };
+    this.ws.onclose = () => {
+      this.connected = false;
+      this.onEvent({ type: 'close' });
+      if (!this.closed) this.reconnect();
+    };
+  }
+
+  pause(pairs = this.pairs) { this.sub(false, pairs); }
+  resume(pairs = this.pairs) { this.sub(true, pairs); }
+  setPairs(pairs: Pair[]) { this.pairs = pairs; this.subscribeAll(true); }
+  dispose() { this.closed = true; try { this.ws?.close(); } catch {} }
+
+  private subscribeAll(join: boolean) { this.sub(join, this.pairs); }
+  private sub(join: boolean, pairs: Pair[]) {
+    for (const p of pairs) this.send([151, { type: 151, channel: '402', event: p.toUpperCase(), join }]);
+  }
+  private send(msg: SubMsg) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(msg));
+  }
+  private reconnect() {
+    const delay = Math.min(this.backoff + 500, 30000) + Math.floor(Math.random() * 400);
+    this.backoff = delay;
+    setTimeout(() => { if (!this.closed) this.connect(); }, delay);
+  }
+}
+
+function safeParse(s: string): any { try { return JSON.parse(s); } catch { return null; } }
+function toNum(x: any): number { const n = Number(x); return Number.isFinite(n) ? n : NaN; }

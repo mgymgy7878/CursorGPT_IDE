@@ -8,7 +8,8 @@
 		"dev:win": "node scripts/dev-win.mjs",
 		"dev:auto": "node scripts/dev-auto.mjs",
 		"build": "cross-env NEXT_DISABLE_ESLINT=1 next build",
-		"start": "next start -p 3003",
+    "start": "next start -p 3003",
+    "start:prod:standalone": "node .next/standalone/server.js",
 		"clean": "node -e \"require('fs').rmSync('./.next',{recursive:true,force:true});\"",
 		"lint": "next lint",
 		"typecheck": "tsc --noEmit",
@@ -17,6 +18,7 @@
 		"i18n:check": "node ../../scripts/i18n-check.mjs"
 	},
 	"dependencies": {
+		"@monaco-editor/react": "^4.7.0",
 		"@types/ws": "^8.18.1",
 		"lightweight-charts": "^5.0.9",
 		"next": "14.2.13",

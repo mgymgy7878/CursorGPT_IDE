@@ -6,6 +6,7 @@ import { CommandButton } from "./CommandButton";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import navItems from "@/config/nav.json";
 import { inferRolesFromCookie } from "@/lib/auth";
+import { usePathname } from "next/navigation";
 
 // ⬇️ MUST() KORUMASI - UNDEFINED TESPİT
 function must<T>(x: T, name: string): T {
@@ -38,13 +39,12 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children, title, subtitle }: AppShellProps) {
-  const roles = inferRolesFromCookie(
-    typeof document === "undefined"
-      ? undefined
-      : (document.cookie || "").includes("spark_session=")
-        ? "1"
-        : undefined
-  );
+  const pathname = usePathname();
+  // Gerçek JWT'yi cookie'den çek ve role çıkarımı yap; yoksa guest
+  const token = typeof document === 'undefined'
+    ? undefined
+    : (document.cookie.split('; ').find(c => c.startsWith('spark_session='))?.split('=')[1] ?? undefined);
+  const roles = inferRolesFromCookie(token);
   const filtered = Array.isArray(navItems)
     ? (navItems as any[]).filter((i) => !i.roles || i.roles.some((r: string) => (roles as any).includes(r)))
     : [];
@@ -66,7 +66,7 @@ export default function AppShell({ children, title, subtitle }: AppShellProps) {
                 key={item.path}
                 href={item.path}
                 className={
-                  item.path === "/dashboard"
+                  pathname && (pathname === item.path || pathname.startsWith(item.path + '/'))
                     ? "block px-3 py-2 rounded-lg bg-neutral-800 text-white"
                     : "block px-3 py-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800"
                 }

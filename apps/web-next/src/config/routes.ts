@@ -1,3 +1,11 @@
+export const appPaths = {
+  dashboard: "/dashboard",
+  strategyLab: "/strategy-lab",
+  audit: "/audit",
+  portfolio: "/portfolio",
+  settings: "/settings",
+} as const;
+
 export type Role = "guest" | "user" | "admin";
 
 export const redirects: Array<{ from: string; to: string }> = [

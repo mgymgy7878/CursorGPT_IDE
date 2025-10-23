@@ -1,14 +1,11 @@
-[
-  { "path": "/dashboard", "label": "Anasayfa", "icon": "Home" },
-  { "path": "/portfolio", "label": "Portföy", "icon": "PieChart", "roles": ["user", "admin"] },
-  { "path": "/strategies", "label": "Stratejiler", "icon": "List", "roles": ["user", "admin"] },
-  { "path": "/running", "label": "Çalışan Stratejiler", "icon": "Activity", "roles": ["user", "admin"] },
-  { "path": "/strategy-lab", "label": "Strateji Lab", "icon": "FlaskConical", "roles": ["user", "admin"] },
-  { "path": "/backtest", "label": "Backtest", "icon": "BarChart", "roles": ["user", "admin"] },
-  { "path": "/technical-analysis", "label": "Teknik Analiz", "icon": "LineChart", "roles": ["user", "admin"] },
-  { "path": "/alerts", "label": "Uyarılar", "icon": "Bell", "roles": ["user", "admin"] },
-  { "path": "/observability", "label": "Gözlemlenebilirlik", "icon": "ActivitySquare", "roles": ["user", "admin"] },
-  { "path": "/settings", "label": "Ayarlar", "icon": "Settings" }
-]
+{
+  "items": [
+    "/dashboard",
+    "/strategy-lab",
+    "/audit",
+    "/portfolio",
+    "/settings"
+  ]
+}
 
 

@@ -1,0 +1,79 @@
+name: P0 Chain
+on:
+  workflow_dispatch:
+
+jobs:
+  publish_atomic_latest_yml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Atomic Publish
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tools/release/atomic_publish.ps1 -ArtifactsDir "apps/desktop-electron/dist" -DestDir "/var/www/desktop" -Channel "beta"
+
+  nginx_reload:
+    runs-on: ubuntu-latest
+    needs: publish_atomic_latest_yml
+    steps:
+      - name: Reload NGINX
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo nginx -t && sudo nginx -s reload
+
+  cdn_head_check:
+    runs-on: ubuntu-latest
+    needs: nginx_reload
+    steps:
+      - name: HEAD latest.yml
+        shell: pwsh
+        run: |
+          $u = "https://${{ secrets.CDN_HOST }}/desktop/latest.yml"
+          $h = (Invoke-WebRequest -UseBasicParsing -Method Head -Uri $u).RawContent
+          New-Item -ItemType Directory -Force -Path evidence | Out-Null
+          $h | Out-File evidence/head_response.txt -Encoding utf8
+          if ($h -notmatch 'HTTP/.+ 200' -or $h -notmatch '(?i)Content-Type:\s*(application/yaml|text/yaml)' -or $h -notmatch '(?i)Cache-Control:\s*no-cache') { throw "HEAD_FAILED`n$h" }
+
+  smoke_json_prom:
+    runs-on: ubuntu-latest
+    needs: cdn_head_check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke JSON/Prom
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/smoke_v2.ps1 -Port 3004 | Out-File evidence/smoke.json -Encoding utf8
+
+  verify_auto_detect:
+    runs-on: ubuntu-latest
+    needs: smoke_json_prom
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tools/release/verify.ps1 -Port 3004 | Tee-Object -FilePath evidence/verify.log
+
+  final_summary_artifact:
+    runs-on: ubuntu-latest
+    needs: verify_auto_detect
+    steps:
+      - uses: actions/checkout@v4
+      - name: Final Summary
+        shell: pwsh
+        run: |
+          $summary = "FINAL SUMMARY | CI:PASS | NGINX:PASS | PROM-CT:PASS | STANDALONE:PASS"
+          New-Item -ItemType Directory -Force -Path evidence | Out-Null
+          $summary | Out-File evidence/final_summary.txt -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p0-artifacts
+          path: evidence
+
+

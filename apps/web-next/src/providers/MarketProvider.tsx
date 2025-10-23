@@ -39,9 +39,13 @@ export default function MarketProvider({ children }: { children: React.ReactNode
   const setTicker = useMarketStore(s => s.setTicker);
   const markStatus = useMarketStore(s => s.markStatus);
   useEffect(() => {
+    const USE_MOCK = process.env.NEXT_PUBLIC_WS_MOCK === "1";
     const url = process.env.NEXT_PUBLIC_WS_BINANCE as string | undefined;
-    const close = url ? connectBinance(url, { onTick: setTicker, onReconnect: () => markStatus('degraded') })
-                      : connectMock({ onTick: setTicker, onReconnect: () => markStatus('degraded') });
+    const close = USE_MOCK
+      ? connectMock({ onTick: setTicker, onReconnect: () => markStatus('degraded') })
+      : url
+        ? connectBinance(url, { onTick: setTicker, onReconnect: () => markStatus('degraded') })
+        : connectMock({ onTick: setTicker, onReconnect: () => markStatus('degraded') });
     return () => close?.();
   }, [setTicker, markStatus]);
   return <>{children}</>;

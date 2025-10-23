@@ -45,4 +45,6 @@ export default function Error({
   );
 }
 
+export const dynamic = "force-dynamic";
+
 

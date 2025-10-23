@@ -6,7 +6,7 @@ import ErrorSink from "@/components/core/ErrorSink";
 import CommandPalette from "@/components/ui/CommandPalette";
 import FloatingActions from "@/components/layout/FloatingActions";
 import ChunkGuard from "@/components/ChunkGuard";
-import MarketProvider from "@/app/providers/MarketProvider";
+import MarketProvider from "@/providers/MarketProvider";
 import "@/styles/theme.css";
 
 export const metadata = {
@@ -27,7 +27,6 @@ export default function RootLayout({
         <ThemeProvider>
           <MarketProvider>
             {children}
-            {/* @ts-expect-error - client-only guard */}
             <ChunkGuard />
             <Toaster />
             <ErrorSink />

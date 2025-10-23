@@ -1,0 +1,18 @@
+﻿# TYPE spark_ws_last_message_ts gauge
+spark_ws_last_message_ts 0
+# TYPE spark_ws_staleness_seconds gauge
+spark_ws_staleness_seconds 0
+# TYPE spark_ws_btcturk_msgs_total counter
+spark_ws_btcturk_msgs_total 0
+# TYPE spark_ws_trades_msgs_total counter
+spark_ws_trades_msgs_total 0
+# TYPE spark_ws_orderbook_msgs_total counter
+spark_ws_orderbook_msgs_total 0
+# TYPE spark_ws_trades_errors_total counter
+spark_ws_trades_errors_total 0
+# TYPE spark_ws_orderbook_errors_total counter
+spark_ws_orderbook_errors_total 0
+# HELP spark_metrics_ts_ms Metrics snapshot timestamp in ms
+# TYPE spark_metrics_ts_ms gauge
+spark_metrics_ts_ms 1761248938434
+
