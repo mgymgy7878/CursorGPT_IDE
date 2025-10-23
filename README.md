@@ -12,6 +12,7 @@ AI destekli, çoklu borsa entegrasyonuna sahip, strateji üreten ve risk kontrol
 - [Docs/Roadmap](docs/ROADMAP.md)
 - [Docs/API](docs/API.md)
 - [Docs/Metrics & Canary](docs/METRICS_CANARY.md)
+- [Docs/All-in-One](docs/SPARK_ALL_IN_ONE.md)
 
 ## Çalıştırma (lokal)
 ```bash
