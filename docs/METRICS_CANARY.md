@@ -23,29 +23,67 @@ Content-Type: text/plain; version=0.0.4; charset=utf-8
 - ❌ **`text/plain` yalnız başına YETERLI DEĞİL** - `version` parametresi zorunlu
 - ❌ **Yanlış Content-Type**: Scraper hataları ve metric kaybı
 
+### Resmi Kaynak
+
+**Prometheus Common Library (expfmt):**  
+https://chromium.googlesource.com/external/github.com/prometheus/common/+/refs/tags/v0.63.0/expfmt/expfmt.go
+
+```go
+// FmtText is a Content-Type for the text protocol.
+FmtText Format = `text/plain; version=` + TextVersion + `; charset=utf-8`
+```
+
+### RFC 9512: YAML Media Type
+
+YAML dosyaları için resmi media type:
+
+```
+Content-Type: application/yaml
+```
+
+**Kaynak:** https://www.rfc-editor.org/rfc/rfc9512.html  
+**IANA Registry:** https://www.iana.org/assignments/media-types/application/yaml
+
+**NOT:** Eski `text/yaml` ve `text/x-yaml` deprecated olarak kabul edilir.
+
 ### Doğrulama
 
-**HEAD İsteği ile:**
+**PowerShell ile (Öneri):**
+```powershell
+# GET request ile content-type ve body kontrol
+$r = Invoke-WebRequest http://127.0.0.1:3003/api/public/metrics.prom -Headers @{Accept='text/plain'}
+$r.Headers['Content-Type']
+# Beklenen: text/plain; version=0.0.4; charset=utf-8
+
+$r.Content | Select-String "spark_up"
+# Beklenen: spark_up 1
+```
+
+**cURL ile:**
 ```bash
-curl -I http://127.0.0.1:3004/api/public/metrics.prom
+curl -I http://127.0.0.1:3003/api/public/metrics.prom
 
 # Beklenen çıktı:
 # HTTP/1.1 200 OK
 # Content-Type: text/plain; version=0.0.4; charset=utf-8
+# Cache-Control: no-store, no-cache, must-revalidate
 # ...
 ```
 
-**PowerShell ile:**
+**YAML Content-Type Doğrulama:**
 ```powershell
-$response = Invoke-WebRequest -Uri "http://127.0.0.1:3004/api/public/metrics.prom" -Method Head -UseBasicParsing
-$response.Headers.'Content-Type'
+# Test YAML dosyası oluştur
+New-Item -ItemType File -Path .\public\test.yaml -Value "a: 1" -Force | Out-Null
 
-# Beklenen: text/plain; version=0.0.4; charset=utf-8
+# Content-Type kontrol
+$ry = Invoke-WebRequest http://127.0.0.1:3003/test.yaml
+$ry.Headers['Content-Type']
+# Beklenen: application/yaml (eğer NGINX/server yapılandırılmışsa)
 ```
 
 **Smoke Test ile:**
 ```bash
-powershell -File scripts/smoke_v2.ps1 -Port 3004
+powershell -File scripts/smoke_v2.ps1 -Port 3003
 # Ready via: prom
 # Prometheus endpoint başarıyla tespit edildi
 ```
@@ -53,8 +91,11 @@ powershell -File scripts/smoke_v2.ps1 -Port 3004
 ### Referanslar
 
 - [Prometheus Exposition Formats](https://prometheus.io/docs/instrumenting/exposition_formats/)
+- [Prometheus Common Library - expfmt.go](https://chromium.googlesource.com/external/github.com/prometheus/common/+/refs/tags/v0.63.0/expfmt/expfmt.go)
 - [Content Negotiation](https://prometheus.io/docs/instrumenting/content_negotiation/)
 - [Text Format Spec](https://github.com/prometheus/docs/blob/main/content/docs/instrumenting/exposition_formats.md#text-format-details)
+- [RFC 9512: YAML Media Type](https://www.rfc-editor.org/rfc/rfc9512.html)
+- [NGINX Headers Module](https://nginx.org/en/docs/http/ngx_http_headers_module.html)
 
 ---
 
@@ -347,5 +388,33 @@ node .next/standalone/server.js
 
 ---
 
+## 📁 Evidence & Compliance Proofs
+
+Prometheus 0.0.4 ve RFC 9512 uyumluluk kanıtları `evidence/` klasöründe toplanmıştır:
+
+**Dosyalar:**
+- `evidence/metrics.prom.http.txt` - Tam HTTP request/response
+- `evidence/metrics.prom.ctype.txt` - Content-Type header
+- `evidence/nginx.add_header.lines.txt` - NGINX header konfigürasyonu
+- `evidence/nginx.types.yaml.lines.txt` - YAML media type tanımı
+- `evidence/README.md` - Evidence dokümantasyonu
+
+**Doğrulama:**
+```powershell
+# Evidence dosyalarını listele
+Get-ChildItem evidence\*.txt
+
+# Prometheus Content-Type kanıtı
+Get-Content evidence\metrics.prom.ctype.txt
+
+# NGINX YAML konfigürasyonu
+Get-Content evidence\nginx.types.yaml.lines.txt
+```
+
+**Detaylar:** [evidence/README.md](../evidence/README.md)
+
+---
+
 **Son Güncelleme:** 2025-10-24  
-**Bakım:** Metrics formatı değişikliklerinde güncellenir
+**Bakım:** Metrics formatı değişikliklerinde güncellenir  
+**Evidence:** Branch `docs/v1.0-headers-metrics`

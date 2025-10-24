@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Input validation: BTCTRY, ETHUSDT, vb.
 const SYMBOL_REGEX = /^[A-Z]{2,10}$/;

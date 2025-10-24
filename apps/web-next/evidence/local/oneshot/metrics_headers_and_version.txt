@@ -1,24 +1,24 @@
 ﻿
 === HEADERS (3004) ===
 
-Key                       Value                                                                                        
----                       -----                                                                                        
-Content-Security-Policy   default-src 'self'; base-uri 'self'; img-src 'self' data: https:; font-src 'self' data:; c...
-x-content-type-options    nosniff                                                                                      
-x-frame-options           DENY                                                                                         
-referrer-policy           strict-origin-when-cross-origin                                                              
-strict-transport-security max-age=31536000; includeSubDomains                                                          
-x-build-sha               dev                                                                                          
-x-trace-id                web-1761247158256-ef41a4ea                                                                   
-x-ux-guard                miss                                                                                         
-x-xss-protection          1; mode=block                                                                                
-vary                      RSC, Next-Router-State-Tree, Next-Router-Prefetch                                            
-Connection                keep-alive                                                                                   
-Keep-Alive                timeout=5                                                                                    
-Transfer-Encoding         chunked                                                                                      
-Cache-Control             no-store                                                                                     
-Content-Type              application/json                                                                             
-Date                      Thu, 23 Oct 2025 19:19:18 GMT                                                                
+Key                       Value                                                
+---                       -----                                                
+Content-Security-Policy   default-src 'self'; base-uri 'self'; img-src 'self...
+x-content-type-options    nosniff                                              
+x-frame-options           DENY                                                 
+referrer-policy           strict-origin-when-cross-origin                      
+strict-transport-security max-age=31536000; includeSubDomains                  
+x-build-sha               dev                                                  
+x-trace-id                web-1761281864520-855089c5                           
+x-ux-guard                miss                                                 
+x-xss-protection          1; mode=block                                        
+vary                      RSC, Next-Router-State-Tree, Next-Router-Prefetch    
+Connection                keep-alive                                           
+Keep-Alive                timeout=5                                            
+Transfer-Encoding         chunked                                              
+Cache-Control             no-store                                             
+Content-Type              application/json                                     
+Date                      Fri, 24 Oct 2025 04:57:44 GMT                        
 
 
 
