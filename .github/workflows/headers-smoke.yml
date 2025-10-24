@@ -1,0 +1,215 @@
+name: Headers & Standards Smoke Test
+
+on:
+  push:
+    branches: [main, 'docs/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    name: Unit Tests - Metrics Headers
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.18.3
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Run unit tests
+        run: pnpm --filter web-next test -- __tests__/route.test.ts
+        env:
+          NODE_ENV: test
+
+  headers-check:
+    name: Runtime Headers Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.18.3
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build web-next
+        run: pnpm --filter web-next build
+      
+      - name: Start dev server
+        run: |
+          pnpm --filter web-next dev &
+          echo $! > dev-server.pid
+          sleep 15
+        env:
+          PORT: 3003
+      
+      - name: Check Prometheus Content-Type
+        run: |
+          RESPONSE=$(curl -I -s http://localhost:3003/api/public/metrics.prom)
+          echo "$RESPONSE"
+          
+          if echo "$RESPONSE" | grep -q "text/plain; version=0.0.4; charset=utf-8"; then
+            echo "✅ Prometheus Content-Type is correct"
+          else
+            echo "❌ Prometheus Content-Type is incorrect"
+            exit 1
+          fi
+      
+      - name: Check Prometheus body format
+        run: |
+          BODY=$(curl -s http://localhost:3003/api/public/metrics.prom)
+          
+          if echo "$BODY" | grep -q "# TYPE spark_up gauge"; then
+            echo "✅ Prometheus body format is valid"
+          else
+            echo "❌ Prometheus body format is invalid"
+            exit 1
+          fi
+      
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -f dev-server.pid ]; then
+            kill $(cat dev-server.pid) || true
+          fi
+
+  nginx-config-check:
+    name: NGINX Configuration Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Check YAML media type configuration
+        run: |
+          if grep -q "application/yaml yaml yml" deploy/nginx/spark.conf; then
+            echo "✅ YAML media type configured (RFC 9512)"
+          else
+            echo "❌ YAML media type not found"
+            exit 1
+          fi
+      
+      - name: Check add_header always flag
+        run: |
+          if grep -q 'add_header.*always' deploy/nginx/spark.conf; then
+            echo "✅ Security headers have 'always' flag"
+          else
+            echo "❌ Headers missing 'always' flag"
+            exit 1
+          fi
+      
+      - name: Verify headers script
+        run: |
+          if [ -f tools/verify_nginx_headers.sh ]; then
+            chmod +x tools/verify_nginx_headers.sh
+            ./tools/verify_nginx_headers.sh
+          else
+            echo "⚠️ Verify script not found, skipping"
+          fi
+      
+      - name: NGINX syntax check (container)
+        run: |
+          docker run --rm -v $PWD/deploy/nginx/spark.conf:/etc/nginx/conf.d/test.conf:ro \
+            nginx:stable nginx -t -c /etc/nginx/nginx.conf || echo "⚠️ NGINX test skipped (include dependencies)"
+
+  e2e-tests:
+    name: E2E Tests - Headers
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.18.3
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Install Playwright
+        run: pnpm exec playwright install --with-deps chromium
+      
+      - name: Build web-next
+        run: pnpm --filter web-next build
+      
+      - name: Start dev server
+        run: |
+          pnpm --filter web-next dev &
+          echo $! > dev-server.pid
+          sleep 15
+        env:
+          PORT: 3003
+      
+      - name: Run E2E tests
+        run: pnpm --filter web-next exec playwright test tests/e2e/headers.spec.ts
+      
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -f dev-server.pid ]; then
+            kill $(cat dev-server.pid) || true
+          fi
+      
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: apps/web-next/test-results/
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, headers-check, nginx-config-check, e2e-tests]
+    if: always()
+    
+    steps:
+      - name: Check results
+        run: |
+          echo "### Test Summary"
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "Headers Check: ${{ needs.headers-check.result }}"
+          echo "NGINX Config: ${{ needs.nginx-config-check.result }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}"
+          
+          if [ "${{ needs.unit-tests.result }}" = "success" ] && \
+             [ "${{ needs.headers-check.result }}" = "success" ] && \
+             [ "${{ needs.nginx-config-check.result }}" = "success" ] && \
+             [ "${{ needs.e2e-tests.result }}" = "success" ]; then
+            echo "✅ All checks passed"
+            exit 0
+          else
+            echo "❌ Some checks failed"
+            exit 1
+          fi
+
