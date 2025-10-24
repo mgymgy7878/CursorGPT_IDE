@@ -1,0 +1,189 @@
+// Enhanced Prisma Schema for v1.4.0
+// Critical improvements: Decimal precision, Enum types, Enhanced uniqueness
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS - Type Safety
+// ============================================
+
+enum TradeStatus {
+  pending
+  submitted
+  filled
+  settled
+  cancelled
+  rejected
+  expired
+}
+
+enum StrategyStatus {
+  draft
+  active
+  paused
+  stopped
+  archived
+}
+
+enum BacktestStatus {
+  pending
+  running
+  completed
+  failed
+  cancelled
+}
+
+enum IdempotencyStatus {
+  pending   // Request in progress (prevents race)
+  completed // Request completed
+  failed    // Request failed
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  
+  strategies Strategy[]
+  backtests  Backtest[]
+}
+
+model Strategy {
+  id          String         @id @default(cuid())
+  name        String
+  code        String         @db.Text
+  params      Json
+  status      StrategyStatus @default(draft)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  backtests   Backtest[]
+  trades      Trade[]
+  positions   Position[]
+  
+  @@index([userId, status])
+  @@index([status, updatedAt])
+}
+
+model Backtest {
+  id          String         @id @default(cuid())
+  strategyId  String
+  strategy    Strategy       @relation(fields: [strategyId], references: [id])
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  params      Json
+  results     Json
+  startDate   DateTime
+  endDate     DateTime
+  status      BacktestStatus @default(pending)
+  createdAt   DateTime       @default(now())
+  completedAt DateTime?
+  
+  @@index([strategyId, status])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model Trade {
+  id            String      @id @default(cuid())
+  strategyId    String
+  strategy      Strategy    @relation(fields: [strategyId], references: [id])
+  symbol        String
+  side          String      // buy, sell
+  type          String      // market, limit
+  
+  // ✅ CRITICAL: Decimal for precise financial calculations
+  price         Decimal     @db.Decimal(38, 18)
+  quantity      Decimal     @db.Decimal(38, 18)
+  commission    Decimal     @db.Decimal(38, 18) @default(0)
+  pnl           Decimal?    @db.Decimal(38, 18)
+  
+  status        TradeStatus @default(pending)
+  exchange      String
+  clientOrderId String?     // Exchange order ID
+  createdAt     DateTime    @default(now())
+  filledAt      DateTime?
+  
+  // ✅ Prevent duplicate exchange orders
+  @@unique([exchange, clientOrderId])
+  @@index([strategyId, createdAt])
+  @@index([symbol, exchange])
+  @@index([status, createdAt])
+}
+
+model Position {
+  id         String   @id @default(cuid())
+  strategyId String?  // ✅ ADD: Strategy ownership
+  symbol     String
+  side       String   // long, short
+  
+  // ✅ CRITICAL: Decimal precision
+  quantity   Decimal  @db.Decimal(38, 18)
+  avgPrice   Decimal  @db.Decimal(38, 18)
+  
+  exchange   String
+  updatedAt  DateTime @updatedAt
+  
+  strategy   Strategy? @relation(fields: [strategyId], references: [id])
+  
+  // ✅ CRITICAL: Prevent paper/real collision
+  @@unique([strategyId, symbol, exchange])
+  @@index([exchange, symbol])
+  @@index([strategyId, updatedAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  actor     String
+  payload   Json     // ✅ Masked sensitive data
+  hash      String   // ✅ HMAC-SHA256 for integrity
+  timestamp DateTime @default(now())
+  
+  @@index([action, timestamp])
+  @@index([actor, timestamp])
+  @@index([hash]) // For deduplication
+}
+
+model IdempotencyKey {
+  key        String            @id
+  status     IdempotencyStatus @default(pending)
+  result     Json?
+  createdAt  DateTime          @default(now())
+  ttlAt      DateTime          // Auto-expire after 24-48h
+  
+  @@index([ttlAt])      // For efficient GC
+  @@index([createdAt])  // For monitoring
+  @@index([status, ttlAt]) // For cleanup queries
+}
+
+// ============================================
+// NOTES
+// ============================================
+
+// Migration from Float to Decimal:
+// ALTER TABLE "Trade" ALTER COLUMN "price" TYPE NUMERIC(38,18) USING "price"::numeric;
+// ALTER TABLE "Trade" ALTER COLUMN "quantity" TYPE NUMERIC(38,18) USING "quantity"::numeric;
+// ALTER TABLE "Trade" ALTER COLUMN "commission" TYPE NUMERIC(38,18) USING "commission"::numeric;
+// ALTER TABLE "Trade" ALTER COLUMN "pnl" TYPE NUMERIC(38,18) USING "pnl"::numeric;
+
+// GC Cron for IdempotencyKey:
+// DELETE FROM "IdempotencyKey" WHERE "ttlAt" < now();
+
+// Index usage monitoring:
+// SELECT schemaname, tablename, indexname, idx_scan FROM pg_stat_user_indexes;
+

@@ -1,0 +1,224 @@
+# Prometheus Alert Rules for Spark Trading Platform
+# Include this in prometheus.yml:
+#   rule_files:
+#     - /etc/prometheus/alert.rules.yml
+
+groups:
+  - name: spark_core
+    interval: 30s
+    rules:
+      # ============================================
+      # Service Health
+      # ============================================
+      
+      - alert: SparkUpMissing
+        expr: absent(spark_up)
+        for: 2m
+        labels:
+          severity: critical
+          component: core
+        annotations:
+          summary: "Spark service down"
+          description: "spark_up metric missing for 2 minutes"
+      
+      # ============================================
+      # Error Rate & SLO
+      # ============================================
+      
+      - alert: HighErrorRate
+        expr: |
+          rate(http_requests_total{code=~"5.."}[5m]) 
+          / 
+          rate(http_requests_total[5m]) > 0.01
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High error rate (>1%)"
+          description: "5xx error rate exceeded 1% for 10 minutes"
+      
+      - alert: ErrorBudgetBurnRateHigh
+        expr: |
+          (
+            rate(http_requests_total{code=~"5.."}[1h]) 
+            / 
+            rate(http_requests_total[1h])
+          ) > 0.02
+          or
+          (
+            rate(http_requests_total{code=~"5.."}[4h]) 
+            / 
+            rate(http_requests_total[4h])
+          ) > 0.01
+        for: 15m
+        labels:
+          severity: warning
+          component: slo
+        annotations:
+          summary: "Error budget burn rate critical"
+          description: "SLO error budget depleting rapidly - consider feature freeze"
+      
+      # ============================================
+      # Latency
+      # ============================================
+      
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "P95 latency >200ms"
+          description: "API P95 latency exceeded 200ms for 5 minutes"
+      
+      - alert: CriticalLatency
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 1.0
+        for: 2m
+        labels:
+          severity: critical
+          component: performance
+        annotations:
+          summary: "P95 latency >1s (critical)"
+          description: "API P95 latency exceeded 1s"
+      
+      # ============================================
+      # WebSocket & Data Staleness
+      # ============================================
+      
+      - alert: WSStaleness
+        expr: spark_ws_staleness_seconds > 30
+        for: 2m
+        labels:
+          severity: warning
+          component: websocket
+        annotations:
+          summary: "WebSocket data stale (>30s)"
+          description: "No WebSocket messages received for {{ $value }}s"
+      
+      - alert: WSCriticalStaleness
+        expr: spark_ws_staleness_seconds > 120
+        for: 1m
+        labels:
+          severity: critical
+          component: websocket
+        annotations:
+          summary: "WebSocket data critically stale (>120s)"
+          description: "WebSocket connection may be dead"
+      
+      - alert: BISTStaleness
+        expr: spark_bist_staleness_seconds > 30
+        for: 2m
+        labels:
+          severity: warning
+          component: market-data
+        annotations:
+          summary: "BIST data stale (>30s)"
+          description: "BIST feed not updating"
+      
+      # ============================================
+      # Database
+      # ============================================
+      
+      - alert: DatabaseConnectionFailure
+        expr: spark_db_connection_errors_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection errors"
+          description: "Unable to connect to PostgreSQL"
+      
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95, 
+            rate(spark_db_query_duration_seconds_bucket[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries (P95 >50ms)"
+          description: "Database performance degraded"
+      
+      # ============================================
+      # Risk & Trading
+      # ============================================
+      
+      - alert: KillSwitchActive
+        expr: spark_risk_killswitch_active == 1
+        for: 1m
+        labels:
+          severity: critical
+          component: risk
+        annotations:
+          summary: "Kill switch activated"
+          description: "All trading halted by kill switch"
+      
+      - alert: HighRiskBlocks
+        expr: rate(spark_risk_block_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: risk
+        annotations:
+          summary: "High risk block rate"
+          description: "Many orders blocked by risk guards"
+      
+      # ============================================
+      # Exchange API
+      # ============================================
+      
+      - alert: ExchangeAPIFailure
+        expr: rate(spark_exchange_api_errors_total[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: critical
+          component: exchange
+        annotations:
+          summary: "Exchange API high error rate"
+          description: "Exchange API calls failing frequently"
+      
+      - alert: ExchangeRateLimitHit
+        expr: spark_exchange_rate_limit_hits_total > 0
+        for: 1m
+        labels:
+          severity: warning
+          component: exchange
+        annotations:
+          summary: "Exchange rate limit hit"
+          description: "Approaching or hit exchange API rate limits"
+      
+      # ============================================
+      # System Resources
+      # ============================================
+      
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage (>1GB)"
+          description: "Process memory usage is high"
+      
+      - alert: ClockSkew
+        expr: abs(spark_time_skew_seconds) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "Clock skew detected (>5s)"
+          description: "System clock differs from provider by {{ $value }}s"
+
