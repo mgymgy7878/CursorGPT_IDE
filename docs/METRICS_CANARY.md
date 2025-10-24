@@ -388,5 +388,33 @@ node .next/standalone/server.js
 
 ---
 
+## 📁 Evidence & Compliance Proofs
+
+Prometheus 0.0.4 ve RFC 9512 uyumluluk kanıtları `evidence/` klasöründe toplanmıştır:
+
+**Dosyalar:**
+- `evidence/metrics.prom.http.txt` - Tam HTTP request/response
+- `evidence/metrics.prom.ctype.txt` - Content-Type header
+- `evidence/nginx.add_header.lines.txt` - NGINX header konfigürasyonu
+- `evidence/nginx.types.yaml.lines.txt` - YAML media type tanımı
+- `evidence/README.md` - Evidence dokümantasyonu
+
+**Doğrulama:**
+```powershell
+# Evidence dosyalarını listele
+Get-ChildItem evidence\*.txt
+
+# Prometheus Content-Type kanıtı
+Get-Content evidence\metrics.prom.ctype.txt
+
+# NGINX YAML konfigürasyonu
+Get-Content evidence\nginx.types.yaml.lines.txt
+```
+
+**Detaylar:** [evidence/README.md](../evidence/README.md)
+
+---
+
 **Son Güncelleme:** 2025-10-24  
-**Bakım:** Metrics formatı değişikliklerinde güncellenir
+**Bakım:** Metrics formatı değişikliklerinde güncellenir  
+**Evidence:** Branch `docs/v1.0-headers-metrics`
