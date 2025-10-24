@@ -1,5 +1,42 @@
 # CHANGELOG
 
+## [1.3.1] - 2025-10-24
+
+### 🎯 P0 Standards Compliance
+- ✅ **Prometheus 0.0.4 Text Format Endpoint** - `/api/public/metrics.prom` with official Content-Type
+- ✅ **RFC 9512 YAML Media Type** - Standardized `application/yaml` configuration
+- ✅ **NGINX Production Config** - Security headers, SSL/TLS, rate limiting ready
+- ✅ **Automated Testing** - 11 tests (6 unit + 5 E2E) with CI/CD pipeline
+- ✅ **Evidence Collection System** - Compliance proof automation
+
+### 🧪 Testing & CI/CD
+- ✅ Jest unit tests for Prometheus endpoint (6 tests)
+- ✅ Playwright E2E tests for headers compliance (5 tests)
+- ✅ GitHub Actions workflow: `headers-smoke.yml` (5 jobs)
+- ✅ Validation scripts: Bash + PowerShell
+- ✅ All CI jobs passing on main branch
+
+### 📚 Documentation
+- ✅ Comprehensive project analysis (1,360 lines)
+- ✅ Action plan with code examples (779 lines)
+- ✅ Executive summary report (216 lines)
+- ✅ CI troubleshooting guide (237 lines)
+- ✅ Evidence system documentation
+
+### 🔧 Bug Fixes
+- Fixed: BTCTurk ticker route missing `dynamic = 'force-dynamic'` export
+- Fixed: NGINX config syntax for standalone testing
+- Fixed: Playwright installation in CI pipeline
+- Updated: NGINX validation script (permissive types check)
+
+### 📦 Infrastructure
+- New: `deploy/nginx/spark.conf` - Production NGINX configuration
+- New: `.env.example` - Environment variables with deployment settings
+- New: `tools/verify_nginx_headers.sh` - NGINX validation script
+- New: `scripts/smoke_headers_prom.ps1` - Quick smoke test
+
+---
+
 ## [1.2.0] - 2025-01-17
 
 ### 🎨 UI Finalization
