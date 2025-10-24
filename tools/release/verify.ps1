@@ -1,4 +1,14 @@
-﻿param([int]$Port=3003,[switch]$Accept307=$true)
+﻿param(
+  [int]$Port=3003,
+  [switch]$Accept307=$true,
+  [switch]$StrictLint=$false
+)
+
+# ENV ile strict lint kontrolü
+if ($env:SPARK_VERIFY_STRICT_LINT -eq '1') {
+  $StrictLint = $true
+}
+
 $base = "http://127.0.0.1:$Port"
 function S($u){ try { iwr $u -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop } catch { $null } }
 
@@ -23,14 +33,16 @@ $okR2 = ($r2 -and (($r2.StatusCode -eq 308 -and $r2.Headers.Location -eq "/dashb
 $okL  = ($ln -match '0 (problems|issues|error|ihlal)')
 $okU  = ($ux -match 'UX-ACK:')
 
-# Lint devde advisory: env SPARK_VERIFY_STRICT_LINT=1 ise katı; değilse informatif
-$strictLint = ($env:SPARK_VERIFY_STRICT_LINT -eq '1')
-if (-not $strictLint) {
-  # Lint sonucunu toplam PASS kararından çıkar
+# LINT MODE: Advisory (default) vs Strict
+if (-not $StrictLint) {
+  # Advisory mode: lint hataları exit kodunu etkilemez
+  $lintStatus = if ($okL) { 'ADVISORY_PASS' } else { 'ADVISORY_WARN' }
   $result = if ($okH -and $okR1 -and $okR2 -and $okU) { 'PASS ✅' } else { 'FAIL ❌' }
 } else {
+  # Strict mode: lint dahil edilir
+  $lintStatus = if ($okL) { 'STRICT_PASS' } else { 'STRICT_FAIL' }
   $result = if ($okH -and $okR1 -and $okR2 -and $okL -and $okU) { 'PASS ✅' } else { 'FAIL ❌' }
 }
 
-Write-Output ("SUMMARY HEALTH:{0} REDIR1:{1} REDIR2:{2} UXACK:{3} LintOK:{4} RESULT:{5} PORT:{6} SOURCE:{7} STRICT_LINT:{8}" -f $okH,$okR1,$okR2,($ux -replace '\r?\n',' '),($ln -replace '\r?\n',' '),$result,$Port,$source,$strictLint)
+Write-Output ("SUMMARY HEALTH:{0} REDIR1:{1} REDIR2:{2} UXACK:{3} LINT:{4} RESULT:{5} PORT:{6} SOURCE:{7} STRICT:{8}" -f $okH,$okR1,$okR2,($ux -replace '\r?\n',' '),$lintStatus,$result,$Port,$source,$StrictLint)
 exit ([int](-not ($result -like 'PASS*')))
