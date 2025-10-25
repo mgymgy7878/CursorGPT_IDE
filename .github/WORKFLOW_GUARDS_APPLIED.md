@@ -1,3 +1,11 @@
+---
+Title: Workflow Conditional Guard Implementation Summary
+Owner: Spark Eng (Platform)
+Status: Stable
+LastUpdated: 2025-10-25
+Links: PR-#3
+---
+
 # Workflow Koşullu Guard Uygulaması — Özet
 
 **Tarih:** 2025-10-25  

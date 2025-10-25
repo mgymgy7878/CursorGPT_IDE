@@ -1,3 +1,11 @@
+---
+Title: Incident Report Template
+Owner: Spark Eng (Platform)
+Status: Stable
+LastUpdated: 2025-10-25
+Links: PR-#3
+---
+
 # Incident Report
 
 **Incident ID:** INC-[YYYYMMDD]-[NNN]  

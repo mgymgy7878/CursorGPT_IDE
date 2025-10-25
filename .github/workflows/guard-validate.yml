@@ -2,10 +2,10 @@ name: Guard Validate
 
 on:
   pull_request:
-    branches: [ main, master, '**' ]
     paths:
       - '.github/workflows/**'
-      - '.github/scripts/validate-workflow-guards.ps1'
+      - '.github/scripts/**'
+      - '.github/*.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

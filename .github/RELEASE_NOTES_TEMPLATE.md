@@ -1,3 +1,11 @@
+---
+Title: Release Notes Template
+Owner: Spark Eng (Platform)
+Status: Stable
+LastUpdated: 2025-10-25
+Links: PR-#3
+---
+
 # Release Notes: v[VERSION]
 
 **Date:** [YYYY-MM-DD]  

@@ -1,3 +1,11 @@
+---
+Title: GitHub Actions Context Warnings Explanation
+Owner: Spark Eng (Platform)
+Status: Stable
+LastUpdated: 2025-10-25
+Links: PR-#3
+---
+
 # GitHub Actions Context Uyarıları — Açıklama
 
 ## Özet
