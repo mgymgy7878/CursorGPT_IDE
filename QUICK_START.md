@@ -71,6 +71,19 @@ pnpm -F web-next build
 
 ---
 
+## 🚨 Two Common Issues (DON'T CONFUSE)
+
+### Issue 1: Web Not Loading (127.0.0.1:3003)
+→ Dev server not started. See below ⬇️
+
+### Issue 2: Electron "js-yaml" Error
+→ Separate desktop app. **Doesn't affect web-next!**  
+→ Fix: Reinstall desktop app OR use web interface
+
+**Details:** `WEB_VS_ELECTRON_ISSUES.md`
+
+---
+
 ## 🚑 Emergency Fix
 
 **Internal Server Error (500)?**
