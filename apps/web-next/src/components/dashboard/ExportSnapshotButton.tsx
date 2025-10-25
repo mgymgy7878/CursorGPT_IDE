@@ -14,7 +14,7 @@ export default function ExportSnapshotButton({ hours = 24, label = "📤 Dışa 
   async function exportSnapshot(selectedFormat: "json" | "csv") {
     setLoading(true);
     try {
-      const res = await fetch("/api/snapshot/export", {
+      const res = await fetch("/api/snapshot/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ format: selectedFormat, hours })

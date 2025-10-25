@@ -1,5 +1,7 @@
 # Spark Trading Platform
 
+> **IC Stickies**: [docs/IC_STICKY_LABELS.txt](docs/IC_STICKY_LABELS.txt) · **Haftalık Drill**: [docs/WEEKLY_DRILL.md](docs/WEEKLY_DRILL.md)
+
 AI destekli, çoklu borsa entegrasyonuna sahip, strateji üreten ve risk kontrollü çalışan trading platformu.
 
 ## Hızlı Durum
@@ -19,3 +21,15 @@ AI destekli, çoklu borsa entegrasyonuna sahip, strateji üreten ve risk kontrol
 pnpm -w --filter web-next dev
 # prod (standalone): pnpm -w --filter web-next build && node apps/web-next/.next/standalone/server.js
 ```
+
+### Windows Build Notu (Standalone)
+- Next.js `output: 'standalone'` çıktısı Windows'ta symlink/junction gerektirebilir. **Developer Mode** (Settings → For Developers) açın veya PowerShell'i **Administrator** olarak çalıştırın; alternatif: **WSL/Linux** runner'da build.
+- Symlink readiness kontrolü: `powershell -File .\scripts\win_symlink_readiness.ps1`
+- Çalıştırma: `node apps/web-next/.next/standalone/server.js`
+
+### CI — Web Next Standalone
+[![web-next-standalone](https://github.com/mgymgy7878/CursorGPT_IDE/actions/workflows/web-next-standalone.yml/badge.svg)](https://github.com/mgymgy7878/CursorGPT_IDE/actions/workflows/web-next-standalone.yml)
+
+**WSL Build (lokal):** `bash scripts/build_web_next_wsl.sh`  
+**Çalıştırma (self-host):** `node apps/web-next/.next/standalone/server.js`  
+**CI Artefact:** Workflow sonunda `web-next-standalone.tgz` indirilir (7 gün saklama)

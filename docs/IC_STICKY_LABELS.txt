@@ -1,0 +1,21 @@
+## IC_STICKY_LABELS (sahaya yapıştırmalık)
+
+[IC-GO — 4 satır]
+I am IC. (komuta bende)
+Karar penceresi: 5 dk
+8/8 proceed | 1-2 hold | ≥3 rollback
+Kanıt kanalı: #war-room-spark
+
+[ABORT — 4 satır]
+p95 > 400ms **VEYA** 5xx > 3% **VEYA** WS staleness > 120s
+Korelasyon tetikleyicileri (eşzamanlı spike'lar)
+Rollback komutu: release:rollback <tag>
+Kanıt: metrics+logs (timestamp'li)
+
+[15s Handoff Fısıltısı]
+IC→IC: durum, en kritik 1 risk, tek sonraki adım, saat/dk.
+
+[Haftalık Mini-Tatbikat ≤10 dk]
+60sn rollback drill (komut+geri alma doğrulaması)
+5dk 8 sinyal senfonisi (p95, 5xx, WS lag, reconnect, CPU, mem, RPS, error budget)
+
