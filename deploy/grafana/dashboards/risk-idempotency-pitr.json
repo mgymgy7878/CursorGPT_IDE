@@ -1,0 +1,228 @@
+{
+  "dashboard": {
+    "title": "Spark Trading - Risk & Infrastructure",
+    "tags": ["spark", "risk", "infrastructure"],
+    "timezone": "UTC",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Risk Blocks Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(spark_risk_block_total[5m])",
+            "legendFormat": "{{reason}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "yaxes": [
+          { "format": "ops", "label": "Blocks/sec" },
+          { "format": "short" }
+        ],
+        "alert": {
+          "name": "High Risk Block Rate",
+          "conditions": [
+            {
+              "evaluator": { "type": "gt", "params": [0.1] },
+              "operator": { "type": "and" },
+              "query": { "params": ["A", "5m", "now"] },
+              "reducer": { "type": "avg" },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "message": "Risk block rate is above threshold",
+          "name": "Risk block rate alert",
+          "noDataState": "no_data"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Idempotency Conflicts",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(idempotency_conflict_total[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "Conflict Rate %"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "justifyMode": "center",
+          "textMode": "value_and_name"
+        },
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "value": null, "color": "green" },
+            { "value": 0.5, "color": "yellow" },
+            { "value": 1, "color": "red" }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "pgBouncer Pool Utilization",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "pgbouncer_pools_server_active / pgbouncer_pools_server_total * 100",
+            "legendFormat": "Pool %"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "value": null, "color": "green" },
+            { "value": 70, "color": "yellow" },
+            { "value": 90, "color": "red" }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "HTTP Request Duration (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{method}} {{path}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "yaxes": [
+          { "format": "s", "label": "Duration" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "CSP Violations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(csp_violations_total[5m])",
+            "legendFormat": "{{directive}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "yaxes": [
+          { "format": "ops", "label": "Violations/sec" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "WAL Archiving Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "pg_stat_archiver_archived_count",
+            "legendFormat": "Archived"
+          },
+          {
+            "expr": "pg_stat_archiver_failed_count",
+            "legendFormat": "Failed"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 8, "x": 0, "y": 16 },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 7,
+        "title": "Database Size",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "pg_database_size_bytes / 1024 / 1024 / 1024",
+            "legendFormat": "Size (GB)"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 8, "x": 8, "y": 16 },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 8,
+        "title": "Outbox Event Lag",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "outbox_lag_seconds",
+            "legendFormat": "Lag (seconds)"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 8, "x": 16, "y": 16 },
+        "yaxes": [
+          { "format": "s", "label": "Lag" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Money Utils Operations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(money_operations_total[5m])",
+            "legendFormat": "{{operation}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+        "yaxes": [
+          { "format": "ops", "label": "Operations/sec" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Position Unique Violations",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(position_unique_violation_total[1h]))",
+            "legendFormat": "Violations/hour"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "textMode": "value_and_name"
+        },
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "value": null, "color": "green" },
+            { "value": 1, "color": "yellow" },
+            { "value": 10, "color": "red" }
+          ]
+        }
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "style": "dark",
+    "time": { "from": "now-6h", "to": "now" },
+    "timepicker": {
+      "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h"]
+    },
+    "version": 1
+  }
+}

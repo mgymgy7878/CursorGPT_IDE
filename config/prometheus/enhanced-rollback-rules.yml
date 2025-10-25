@@ -1,0 +1,209 @@
+# Enhanced Rollback Rules
+# Additional safeguards beyond standard triggers
+
+groups:
+  - name: enhanced_rollback
+    interval: 15s
+    rules:
+      # 1. Correlation-based rollback
+      # If risk blocks AND errors both increase together → likely deployment issue
+      - alert: CorrelatedDegradation
+        expr: |
+          (
+            rate(spark_risk_block_total[5m]) > 0.5
+          ) and (
+            rate(http_requests_total{status=~"5.."}[5m]) / 
+            rate(http_requests_total[5m]) > 0.01
+          )
+        for: 3m
+        labels:
+          severity: critical
+          auto_rollback: "true"
+        annotations:
+          summary: "Correlated risk blocks and errors detected"
+          description: "Risk block rate: {{ $value | humanize }}/min AND 5xx rate elevated - likely deployment issue"
+          runbook_url: "https://wiki/runbooks/rollback"
+          action: "IMMEDIATE ROLLBACK - Deployment correlation detected"
+
+      # 2. Non-improving latency despite low CPU
+      # P95 high + CPU low = application backpressure/lock contention
+      - alert: NonImprovingLatency
+        expr: |
+          (
+            histogram_quantile(0.95, 
+              rate(http_request_duration_seconds_bucket[5m])
+            ) > 0.2
+          ) and (
+            avg(rate(process_cpu_seconds_total[5m])) < 0.6
+          )
+        for: 5m
+        labels:
+          severity: critical
+          auto_rollback: "true"
+        annotations:
+          summary: "High latency with low CPU - internal backpressure"
+          description: "P95: {{ $value }}s, CPU < 60% - likely lock contention or inefficient code"
+          runbook_url: "https://wiki/runbooks/rollback"
+          action: "ROLLBACK - Application backpressure detected"
+
+      # 3. Memory leak detection during canary
+      - alert: MemoryLeakDuringCanary
+        expr: |
+          (
+            rate(process_resident_memory_bytes[15m]) > 10485760
+          ) and (
+            process_resident_memory_bytes > 2147483648
+          )
+        for: 10m
+        labels:
+          severity: warning
+          auto_rollback: "false"
+        annotations:
+          summary: "Memory leak suspected during deployment"
+          description: "Memory growing at {{ $value | humanize }}B/s, total > 2GB"
+          runbook_url: "https://wiki/runbooks/memory-leak"
+          action: "MONITOR CLOSELY - Consider rollback if continues"
+
+      # 4. Database connection leak
+      - alert: DatabaseConnectionLeak
+        expr: |
+          (
+            rate(database_connections_active[10m]) > 0.1
+          ) and (
+            database_connections_active > 80
+          )
+        for: 5m
+        labels:
+          severity: critical
+          auto_rollback: "true"
+        annotations:
+          summary: "Database connection leak detected"
+          description: "Connections growing: {{ $value }}/s, total > 80"
+          runbook_url: "https://wiki/runbooks/rollback"
+          action: "ROLLBACK - Connection leak will exhaust pool"
+
+      # 5. Outbox lag explosion
+      - alert: OutboxLagExplosion
+        expr: |
+          (
+            outbox_lag_seconds > 30
+          ) and (
+            rate(outbox_lag_seconds[5m]) > 2
+          )
+        for: 3m
+        labels:
+          severity: warning
+          auto_rollback: "false"
+        annotations:
+          summary: "Outbox processing lag growing rapidly"
+          description: "Lag: {{ $value }}s and growing at 2s/s"
+          runbook_url: "https://wiki/runbooks/outbox"
+          action: "INVESTIGATE - May need publisher adjustment"
+
+      # 6. Idempotency key buildup
+      - alert: IdempotencyKeyBuildup
+        expr: |
+          (
+            idempotency_keys_pending > 5000
+          ) and (
+            rate(idempotency_keys_pending[10m]) > 10
+          )
+        for: 5m
+        labels:
+          severity: warning
+          auto_rollback: "false"
+        annotations:
+          summary: "Idempotency keys accumulating"
+          description: "Pending keys: {{ $value }}, growing at 10/s"
+          runbook_url: "https://wiki/runbooks/idempotency"
+          action: "MONITOR - Check GC cron and key cardinality"
+
+      # 7. WebSocket disconnect storm
+      - alert: WebSocketDisconnectStorm
+        expr: |
+          rate(websocket_disconnections_total[2m]) > 10
+        for: 2m
+        labels:
+          severity: critical
+          auto_rollback: "true"
+        annotations:
+          summary: "WebSocket disconnect storm detected"
+          description: "Disconnections: {{ $value }}/s - likely deployment issue"
+          runbook_url: "https://wiki/runbooks/rollback"
+          action: "ROLLBACK - Mass disconnections indicate incompatibility"
+
+      # 8. Decimal precision errors (if instrumented)
+      - alert: DecimalPrecisionErrors
+        expr: |
+          rate(money_precision_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          auto_rollback: "true"
+        annotations:
+          summary: "Financial calculation precision errors detected"
+          description: "Precision errors: {{ $value }}/s - CRITICAL for trading"
+          runbook_url: "https://wiki/runbooks/rollback"
+          action: "IMMEDIATE ROLLBACK - Financial integrity compromised"
+
+---
+
+## Usage in Canary Deployment
+
+### Automatic Rollback Decision Tree
+
+```
+1. Check standard triggers (P95, 5xx, staleness, etc.)
+   └─ ANY trigger fires → ROLLBACK
+
+2. Check correlation-based triggers
+   └─ Risk blocks + Errors correlated → ROLLBACK
+   └─ High latency + Low CPU → ROLLBACK
+
+3. Check resource leaks
+   └─ Memory leak detected → MONITOR (rollback if worsens)
+   └─ Connection leak → ROLLBACK
+   └─ WebSocket storm → ROLLBACK
+
+4. Check data integrity
+   └─ Decimal errors → IMMEDIATE ROLLBACK
+   └─ Idempotency buildup → MONITOR
+```
+
+### Integration with Rollback Script
+
+```powershell
+# Rollback script checks these alerts
+$alerts = Invoke-RestMethod "http://localhost:9090/api/v1/alerts"
+$autoRollback = $alerts.data.alerts | Where-Object { 
+    $_.labels.auto_rollback -eq "true" -and $_.state -eq "firing" 
+}
+
+if ($autoRollback.Count -gt 0) {
+    Write-Host "🚨 Auto-rollback triggered by: $($autoRollback[0].labels.alertname)"
+    .\scripts\rollback.ps1 -Reason $autoRollback[0].labels.alertname -Stage $CurrentStage
+}
+```
+
+---
+
+## Testing Triggers
+
+```bash
+# Test correlation trigger (development only!)
+# Simulate risk blocks + errors
+curl -X POST http://localhost:4001/api/test/simulate-risk-blocks
+curl -X POST http://localhost:4001/api/test/simulate-errors
+
+# Test latency trigger
+curl -X POST http://localhost:4001/api/test/simulate-lock-contention
+
+# Verify alerts fire
+curl -s http://localhost:9090/api/v1/alerts | jq '.data.alerts[] | select(.labels.auto_rollback=="true")'
+```
+
+---
+
+**Last Updated:** 2024-10-24  
+**Version:** v1.4.0-prep  
+**Owner:** DevOps Lead

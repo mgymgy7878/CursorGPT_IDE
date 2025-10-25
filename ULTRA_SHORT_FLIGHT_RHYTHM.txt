@@ -1,0 +1,112 @@
+# 🚀 T+0→T+30 ULTRA-KISA UÇUŞ RİTMİ (Cebe Sığar)
+
+## 6-STEP FLIGHT RHYTHM
+
+### 1. 3SN FISIRTI (8 eşik)
+
+Nefes: Hepsi ≤ eşik mi?
+- **Evet:** devam
+- **Hayır:** HOLD
+
+```
+p95≤200 | 5xx≤1% | ws≤30s | risk<0.5 | idem≤1% | csp≤+10% | evloop≤50ms | gc≤20ms
+```
+
+### 2. 90SN START (4'lü zincir)
+
+```bash
+bash scripts/60s-preflight.sh v1.4.0 && \
+bash scripts/micro-blast-radius-test.sh https://canary v1.4.0 30 && \
+bash scripts/check-artifact-completeness.sh && \
+bash scripts/green-button-ritual.sh v1.4.0
+```
+
+**Sonuç:** 40+ kanıt kilitlenir
+
+### 3. 10-DAKİKA DÖNGÜSÜ ×3
+
+War-room tek satır kaydı → eğimler düz mü?
+
+**Kontrol:** Trend analizi (slope check)
+
+### 4. HOLD KURALI
+
+**İki ardışık HOLD** = geri sar (≤5 dk)
+
+### 5. 3 KIRMIZI = ANINDA ROLLBACK
+
+❌ **p95>400ms** OR **5xx>3%** OR **WS>120s**
+
+**Komut:**
+```powershell
+pwsh scripts/rollback.ps1 -Reason "trigger" -Stage "current-%"
+```
+
+### 6. T+24H MİKRO-DEBRİEF
+
+5 maddelik şablonla kalıcı öğrenme
+
+**Template:** T24H_MICRO_DEBRIEF.md
+
+---
+
+## MİNİ ANOMALİ KARAR AĞACI (cebe sığar)
+
+### Senaryo 1: Backpressure
+
+**Sinyal:** P95↑ & CPU↓
+
+**Aksiyon:**
+1. Ölçek/limit → test
+2. Değilse → **ROLLBACK**
+
+### Senaryo 2: Korelasyonlu Felç
+
+**Sinyal:** 5xx↑ & risk_block↑ (3 dk)
+
+**Aksiyon:**
+1. **ROLLBACK** (immediate)
+2. Kök neden analizi
+
+### Senaryo 3: Sızıntı/Lag
+
+**Sinyal:** conn_creep↑ OR evloop_p95>50ms
+
+**Aksiyon:**
+1. Pod yenile
+2. Sürerse → **ROLLBACK**
+
+### Senaryo 4: Kuyruk Tıkanıklığı
+
+**Sinyal:** Outbox lag>30s OR idemp_conflict>1%
+
+**Aksiyon:**
+1. Yayıcıyı sakinleştir, kuyruk temizle
+2. Büyürse → **ROLLBACK**
+
+---
+
+## KANIT HUD (hatırlatıcı)
+
+**K** - Kontrol  
+**A** - Anomi  
+**N** - Not  
+**İ** - İlerle/İptal  
+**T** - Tanık
+
+*Şüphede kalırsan küçük geri sar, yeniden ölç.*
+
+---
+
+## FINAL MANTRA
+
+**Hipotez → Ölçüm → Kanıt → Zarif Geri Dönüş**
+
+Metrikler şarkısını söylüyor; **sen orkestrayı yönetiyorsun**.
+
+**BAS VE UÇ!** 🚀🔬💚
+
+---
+
+_Ultra-Short Flight Rhythm | T+0→T+30 | v1.4.0-ultimate-final_
+

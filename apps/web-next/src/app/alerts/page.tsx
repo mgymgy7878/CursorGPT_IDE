@@ -155,7 +155,7 @@ export default function AlertsPage() {
                     </button>
                   </div>
                 </td>
-                <td className="py-3 px-4"><AlertsControl id={a.id} onResult={(m)=>console.log(m)} /></td>
+                <td className="py-3 px-4"><AlertsControl id={a.id} onResult={(m: any)=>console.log(m)} /></td>
               </tr>
             ))}
             {items.length === 0 && (

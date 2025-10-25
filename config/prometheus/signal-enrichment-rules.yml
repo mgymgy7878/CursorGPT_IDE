@@ -1,0 +1,194 @@
+# Signal Enrichment Rules
+# Golden signals + bloat controls for early detection
+
+groups:
+  - name: signal_enrichment
+    interval: 30s
+    rules:
+      # 1. Node.js Event Loop Lag (Backpressure Detector)
+      # High event loop lag + high HTTP latency = application bottleneck
+      - alert: EventLoopBackpressure
+        expr: |
+          (
+            histogram_quantile(0.95, 
+              rate(nodejs_eventloop_lag_seconds_bucket[5m])
+            ) > 0.050
+          ) and (
+            histogram_quantile(0.95, 
+              rate(http_request_duration_seconds_bucket[5m])
+            ) > 0.250
+          )
+        for: 5m
+        labels:
+          severity: critical
+          auto_rollback: "true"
+        annotations:
+          summary: "Event loop lag + HTTP latency indicate backpressure"
+          description: "Event loop P95: {{ $value }}s, likely lock contention or blocking I/O"
+          action: "ROLLBACK - Application backpressure detected"
+          runbook_url: "https://wiki/runbooks/event-loop-lag"
+
+      # 2. GC Pause Duration (Latency Spike Trigger)
+      # Average GC pause > 20ms indicates memory pressure
+      - alert: GCPauseDurationHigh
+        expr: |
+          (
+            rate(nodejs_gc_duration_seconds_sum[5m]) / 
+            rate(nodejs_gc_duration_seconds_count[5m])
+          ) > 0.020
+        for: 5m
+        labels:
+          severity: warning
+          auto_rollback: "false"
+          stage_hold: "true"
+        annotations:
+          summary: "High GC pause duration - memory pressure"
+          description: "Avg GC pause: {{ $value | humanizeDuration }} (>20ms)"
+          action: "HOLD STAGE - Monitor memory, consider rollback if worsens"
+          runbook_url: "https://wiki/runbooks/gc-pressure"
+
+      # 3. Postgres Dead Tuples Bloat
+      # Dead tuples indicate auto-vacuum falling behind
+      - alert: PostgresDeadTuplesBloat
+        expr: |
+          pg_stat_user_tables_n_dead_tup > 1000000
+        for: 10m
+        labels:
+          severity: warning
+          auto_rollback: "false"
+        annotations:
+          summary: "Postgres table bloat detected"
+          description: "Dead tuples: {{ $value | humanize }} (>1M) on table {{ $labels.relname }}"
+          action: "MONITOR - May need manual VACUUM"
+          runbook_url: "https://wiki/runbooks/postgres-bloat"
+
+      # 4. Connection Creep (pgBouncer Early Warning)
+      # Derivative of active connections > 5 connections/min
+      - alert: ConnectionCreep
+        expr: |
+          (
+            deriv(pgbouncer_pools_server_active[5m]) > 5
+          ) and (
+            pgbouncer_pools_server_active / 
+            pgbouncer_pools_server_total > 0.70
+          )
+        for: 3m
+        labels:
+          severity: critical
+          auto_rollback: "true"
+        annotations:
+          summary: "Database connections growing rapidly"
+          description: "Connection growth: {{ $value }}/min, pool at 70%+"
+          action: "ROLLBACK - Connection leak will exhaust pool"
+          runbook_url: "https://wiki/runbooks/connection-leak"
+
+      # 5. Idempotency Key Burst (Single User Abuse)
+      # Same user creating >100 keys in 10s
+      - alert: IdempotencyKeyBurst
+        expr: |
+          sum by (user_id) (
+            rate(idempotency_keys_created_total[10s])
+          ) > 10
+        for: 30s
+        labels:
+          severity: warning
+          auto_rollback: "false"
+        annotations:
+          summary: "Idempotency key burst from user {{ $labels.user_id }}"
+          description: "Creating {{ $value }} keys/sec - possible abuse or client bug"
+          action: "INVESTIGATE - May need rate limiting"
+          runbook_url: "https://wiki/runbooks/idempotency-abuse"
+
+      # 6. Outbox Clock Skew (Producer Timestamp Drift)
+      # Lag spikes due to producer clock skew
+      - alert: OutboxClockSkew
+        expr: |
+          abs(
+            outbox_producer_timestamp_seconds - 
+            outbox_dispatcher_timestamp_seconds
+          ) > 3
+        for: 2m
+        labels:
+          severity: warning
+          auto_rollback: "false"
+        annotations:
+          summary: "Outbox producer clock skew detected"
+          description: "Clock skew: {{ $value }}s - may cause lag anomalies"
+          action: "MONITOR - Check NTP sync on producer nodes"
+          runbook_url: "https://wiki/runbooks/clock-skew"
+
+---
+
+## 📊 Metric Instrumentation (Add to Code)
+
+### Event Loop Lag
+
+```typescript
+// services/web/src/metrics.ts
+import { Histogram } from 'prom-client';
+import { performance } from 'perf_hooks';
+
+export const eventLoopLag = new Histogram({
+  name: 'nodejs_eventloop_lag_seconds',
+  help: 'Event loop lag in seconds',
+  buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1],
+});
+
+// Measure event loop lag every second
+setInterval(() => {
+  const start = performance.now();
+  setImmediate(() => {
+    const lag = (performance.now() - start) / 1000;
+    eventLoopLag.observe(lag);
+  });
+}, 1000);
+```
+
+### GC Duration
+
+```typescript
+// services/web/src/metrics.ts
+import { Summary } from 'prom-client';
+import v8 from 'v8';
+
+export const gcDuration = new Summary({
+  name: 'nodejs_gc_duration_seconds',
+  help: 'GC pause duration in seconds',
+  labelNames: ['gc_type'],
+});
+
+// Monitor GC events
+if (global.gc) {
+  const gcStats = v8.getHeapStatistics();
+  // Hook into GC events and record duration
+}
+```
+
+### Outbox Timestamps
+
+```typescript
+// services/shared/lib/outbox-dispatcher.ts
+export const outboxProducerTimestamp = new Gauge({
+  name: 'outbox_producer_timestamp_seconds',
+  help: 'Timestamp from outbox event producer',
+});
+
+export const outboxDispatcherTimestamp = new Gauge({
+  name: 'outbox_dispatcher_timestamp_seconds',
+  help: 'Timestamp when dispatcher processes event',
+});
+```
+
+---
+
+## 🎯 Success Criteria (One-Line)
+
+**Add to Release Notes:**
+
+> "Canary 1→100%: **0 rollback**, **p95 ≤ 200ms**, **5xx ≤ 1%**, **ws_stale_p95 ≤ 30s**, **idemp_conflict ≤ 1%**, **CSP viol ≤ baseline+10%**; event-loop p95 ≤ 50ms, GC avg ≤ 20ms."
+
+---
+
+**Last Updated:** 2024-10-24  
+**Version:** v1.4.0-ultimate  
+**Owner:** Incident Commander
