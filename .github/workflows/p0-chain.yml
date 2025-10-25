@@ -19,6 +19,7 @@ jobs:
     needs: publish_atomic_latest_yml
     steps:
       - name: Reload NGINX
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -32,6 +33,7 @@ jobs:
     needs: nginx_reload
     steps:
       - name: HEAD latest.yml
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         shell: pwsh
         run: |
           $u = "https://${{ secrets.CDN_HOST }}/desktop/latest.yml"

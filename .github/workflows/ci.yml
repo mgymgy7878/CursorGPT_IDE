@@ -3,7 +3,19 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/package.json'
+      - 'pnpm-lock.yaml'
+      - 'apps/**'
+      - 'services/**'
+      - 'packages/**'
+      - '!**/*.md'
+      - '!docs/**'
+      - '!.github/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
