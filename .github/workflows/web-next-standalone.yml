@@ -13,12 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - uses: pnpm/action-setup@v3
+          cache: 'pnpm'
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
-      - name: Enable corepack
-        run: corepack enable
+      - name: Verify pnpm version
+        run: pnpm -v
       - name: Install deps (pnpm -w)
         run: pnpm -w i --frozen-lockfile
       - name: Build web-next (standalone)

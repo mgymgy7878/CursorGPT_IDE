@@ -16,16 +16,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
+      
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Metrics Warmup (dynamic)
         shell: pwsh
@@ -38,13 +38,29 @@ jobs:
           }
           if(-not $ok){ Write-Host "Warmup did not confirm 200 after 5 tries (continuing)" }
 
+      - name: Install Dependencies
+        shell: pwsh
+        run: |
+          pnpm -v
+          pnpm -w install --frozen-lockfile
+      
       - name: Run Canary Smoke
         id: smoke
         shell: pwsh
         env:
           SMOKE_TOKEN: ${{ secrets.SMOKE_TOKEN }}
         run: |
-          powershell -ExecutionPolicy Bypass -File scripts/canary-smoke-v1.11.2.ps1
+          $ErrorActionPreference = "Stop"
+          Write-Output "::group::Canary Smoke Execution"
+          try {
+            powershell -ExecutionPolicy Bypass -File scripts/canary-smoke-v1.11.2.ps1
+            Write-Output "::endgroup::"
+            Write-Output "✅ Canary smoke PASS"
+          } catch {
+            Write-Output "::endgroup::"
+            Write-Output "::error title=Canary Smoke Failed::$($_.Exception.Message)"
+            exit 1
+          }
 
       - name: Upload Smoke Evidence
         uses: actions/upload-artifact@v4
