@@ -5,6 +5,8 @@
 1. **Setup environment:**
    ```bash
    cp .env.example .env.local
+   # Edit .env.local with your backend URLs if available
+   # Or keep defaults for mock mode
    ```
 
 2. **Terminal A — Start dev WebSocket server (optional):**
@@ -12,7 +14,7 @@
    pnpm ws:dev
    # Output: [dev-ws] listening on ws://127.0.0.1:4001
    ```
-   This makes the WS status dot green. Without it, WS dot will be red (expected).
+   This makes WS status dot green. Without it, WS will show connecting/down (expected in mock mode).
 
 3. **Terminal B — Start Next.js dev server:**
    ```bash
@@ -20,13 +22,26 @@
    # Opens at http://localhost:3003
    ```
 
+**Expected Status Dots:**
+- **Mock Mode** (no backend): API ✅, WS ⚠️, Engine ✅
+- **With pnpm ws:dev**: API ✅, WS ✅, Engine ✅
+- **With Real Backend**: All ✅ (from real services)
+
 ## Status Dots
 
 The top status bar shows three health indicators:
 
 - **API:** `/api/public/error-budget` (5s poll)
-- **WS:** `NEXT_PUBLIC_WS_URL` (20s ping)
+  - Tries: `PROMETHEUS_URL` → fallback mock
+  - Source shown in response: `{ ..., source: 'prometheus' | 'mock' }`
+
+- **WS:** Market store connection status
+  - Uses: `useMarketStore(s => s.status === 'healthy')`
+  - Dev fallback: pnpm ws:dev (local echo server)
+
 - **Engine:** `/api/public/engine-health` (10s poll)
+  - Tries: `ENGINE_URL/health` → fallback mock
+  - Source shown in response: `{ ..., source: 'mock' }`
 
 ## Troubleshooting
 
