@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   return NextResponse.json({
     status: 'OK',
-    errorBudget: 0.98,
+    running: true,
     updatedAt: new Date().toISOString()
   })
 }
+

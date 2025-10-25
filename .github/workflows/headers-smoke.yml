@@ -6,20 +6,39 @@ on:
   pull_request:
     paths:
       - 'apps/**'
-      - 'packages/**'
       - 'services/**'
       - 'deploy/nginx/**'
-      - 'tools/verify_nginx_headers.sh'
-      - '!**/*.md'
-      - '!docs/**'
+    paths-ignore:
+      - '**/*.md'
+      - '.github/**'
+      - 'apps/web-next/**'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  paths:
+    runs-on: ubuntu-latest
+    outputs:
+      run_headers: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'apps/**'
+              - 'services/**'
+              - 'deploy/nginx/**'
+              - '!apps/web-next/**'
+
   unit-tests:
     name: Unit Tests - Metrics Headers
+    needs: paths
+    if: ${{ needs.paths.outputs.run_headers == 'true' }}
     runs-on: ubuntu-latest
     
     steps:
@@ -57,6 +76,8 @@ jobs:
 
   headers-check:
     name: Runtime Headers Check
+    needs: paths
+    if: ${{ needs.paths.outputs.run_headers == 'true' }}
     runs-on: ubuntu-latest
     
     steps:
@@ -130,6 +151,8 @@ jobs:
 
   nginx-config-check:
     name: NGINX Configuration Validation
+    needs: paths
+    if: ${{ needs.paths.outputs.run_headers == 'true' }}
     runs-on: ubuntu-latest
     
     steps:
@@ -170,6 +193,8 @@ jobs:
 
   e2e-tests:
     name: E2E Tests - Headers
+    needs: paths
+    if: ${{ needs.paths.outputs.run_headers == 'true' }}
     runs-on: ubuntu-latest
     
     steps:
@@ -234,8 +259,8 @@ jobs:
   summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [unit-tests, headers-check, nginx-config-check, e2e-tests]
-    if: always()
+    needs: [paths, unit-tests, headers-check, nginx-config-check, e2e-tests]
+    if: always() && needs.paths.outputs.run_headers == 'true'
     
     steps:
       - name: Check results

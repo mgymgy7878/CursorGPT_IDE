@@ -2,12 +2,15 @@ name: Contract & Chaos Tests
 
 on:
   pull_request:
-    branches: [main, develop]
     paths:
       - 'services/**'
-      - 'apps/**'
+      - 'packages/**'
       - 'tests/contract/**'
       - 'tests/chaos/**'
+    paths-ignore:
+      - '**/*.md'
+      - '.github/**'
+      - 'apps/web-next/**'
   push:
     branches: [main]
   schedule:
@@ -25,8 +28,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  paths:
+    runs-on: ubuntu-latest
+    outputs:
+      run_contract: ${{ steps.filter.outputs.svc }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            svc:
+              - 'services/**'
+              - 'packages/**'
+              - 'tests/contract/**'
+              - 'tests/chaos/**'
+
   contract-tests:
     name: Contract Tests
+    needs: paths
+    if: ${{ needs.paths.outputs.run_contract == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -101,9 +122,12 @@ jobs:
 
   chaos-tests:
     name: Chaos Engineering Tests
+    needs: paths
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.event.inputs.run_chaos == 'true'
+    if: |
+      (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_chaos == 'true')) &&
+      (github.event_name != 'pull_request' || needs.paths.outputs.run_contract == 'true')
 
     services:
       postgres:
@@ -234,8 +258,8 @@ jobs:
   resilience-report:
     name: Generate Resilience Report
     runs-on: ubuntu-latest
-    needs: [contract-tests, chaos-tests]
-    if: always()
+    needs: [paths, contract-tests, chaos-tests]
+    if: always() && (github.event_name != 'pull_request' || needs.paths.outputs.run_contract == 'true')
 
     steps:
       - name: Checkout code
