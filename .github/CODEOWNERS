@@ -9,3 +9,6 @@
 # CI-related documentation
 .github/*.md @mgymgy7878
 
+# UI application (web-next)
+apps/web-next/** @mgymgy7878
+
