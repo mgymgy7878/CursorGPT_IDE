@@ -1,0 +1,117 @@
+name: UI D2 SMOKE Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/web-next/**'
+      - 'scripts/d2-smoke-check.ps1'
+      - 'docs/METRICS_CANARY.md'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'apps/web-next/**'
+      - 'scripts/d2-smoke-check.ps1'
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm -w install --frozen-lockfile
+
+      - name: Start web-next dev server
+        shell: pwsh
+        run: |
+          Write-Host "Starting web-next dev server..." -ForegroundColor Cyan
+          $job = Start-Job -ScriptBlock {
+            Set-Location $using:PWD
+            pnpm --filter web-next dev
+          }
+          Write-Host "Waiting for server to start (15 seconds)..." -ForegroundColor Gray
+          Start-Sleep -Seconds 15
+          
+          # Check if server is up
+          $maxRetries = 10
+          $retryCount = 0
+          $serverUp = $false
+          
+          while(-not $serverUp -and $retryCount -lt $maxRetries){
+            try {
+              $response = Invoke-WebRequest -Uri "http://127.0.0.1:3003/api/public/engine-health" -TimeoutSec 3 -ErrorAction Stop
+              if($response.StatusCode -eq 200){
+                $serverUp = $true
+                Write-Host "✅ Server is up and responding" -ForegroundColor Green
+              }
+            } catch {
+              $retryCount++
+              Write-Host "Retry $retryCount/$maxRetries - Server not ready yet..." -ForegroundColor Yellow
+              Start-Sleep -Seconds 2
+            }
+          }
+          
+          if(-not $serverUp){
+            Write-Host "❌ Server failed to start" -ForegroundColor Red
+            Stop-Job $job
+            exit 1
+          }
+
+      - name: Run D2 SMOKE Check
+        shell: pwsh
+        run: |
+          Write-Host "Running D2 SMOKE check..." -ForegroundColor Cyan
+          pwsh scripts/d2-smoke-check.ps1 | Tee-Object -FilePath smoke_output.txt
+          
+      - name: Display smoke results
+        if: always()
+        shell: pwsh
+        run: |
+          if(Test-Path smoke_output.txt){
+            Write-Host "`n=== SMOKE OUTPUT ===" -ForegroundColor Cyan
+            Get-Content smoke_output.txt
+          }
+
+      - name: Upload SMOKE artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-output
+          path: smoke_output.txt
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        shell: pwsh
+        run: |
+          Write-Host "`n=== CI SMOKE SUMMARY ===" -ForegroundColor Yellow
+          Write-Host "Workflow: UI D2 SMOKE Test" -ForegroundColor White
+          Write-Host "Runner: windows-latest" -ForegroundColor White
+          Write-Host "Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor White
+          
+          if(Test-Path smoke_output.txt){
+            $output = Get-Content smoke_output.txt -Raw
+            if($output -match "SMOKE: PASS"){
+              Write-Host "Result: ✅ PASS" -ForegroundColor Green
+            } elseif($output -match "SMOKE: ATTENTION.*mock mode"){
+              Write-Host "Result: 🟡 ATTENTION (Mock Mode - Expected)" -ForegroundColor Yellow
+            } else {
+              Write-Host "Result: ⚠️ ATTENTION" -ForegroundColor Yellow
+            }
+          }
+
