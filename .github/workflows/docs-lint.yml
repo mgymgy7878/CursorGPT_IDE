@@ -4,9 +4,7 @@ on:
   pull_request:
     paths:
       - 'docs/**'
-      - '.github/pull_request_template.md'
-      - '.markdownlint.json'
-      - '.mlc_config.json'
+      - 'README.md'
   workflow_dispatch:
 
 jobs:
