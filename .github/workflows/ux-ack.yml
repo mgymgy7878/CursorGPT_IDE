@@ -29,8 +29,11 @@ jobs:
           ACTUAL=$(pnpm -v)
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
-      - name: Install
-        run: pnpm -w install --frozen-lockfile --strict-peer-dependencies
+      - name: Fetch dependencies
+        run: pnpm fetch --prod=false
+      
+      - name: Install (offline)
+        run: pnpm -w install --offline --frozen-lockfile --strict-peer-dependencies
       - name: Compute UX-ACK
         id: ux
         run: echo "hash=$(pnpm -s ui:hash -- --print | tail -n1)" >> $GITHUB_OUTPUT

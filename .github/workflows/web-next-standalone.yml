@@ -33,8 +33,11 @@ jobs:
           echo "Expected: $EXPECTED, Actual: $ACTUAL"
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm version mismatch"; exit 1; }
       
-      - name: Install deps (pnpm -w)
-        run: pnpm -w i --frozen-lockfile --strict-peer-dependencies
+      - name: Fetch dependencies (pre-warm store)
+        run: pnpm fetch --prod=false
+      
+      - name: Install deps (offline mode)
+        run: pnpm -w i --offline --frozen-lockfile --strict-peer-dependencies
       - name: Build web-next (standalone)
         run: pnpm -w --filter web-next build
       - name: Pack standalone artefact
