@@ -1,0 +1,37 @@
+name: Guard Validate
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/**'
+      - '.github/*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Workflow Fork Guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate workflow fork guards
+        shell: pwsh
+        run: ./.github/scripts/validate-workflow-guards.ps1
+      
+      - name: Report status
+        if: always()
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✅ All workflows with secrets have fork guards"
+          else
+            echo "❌ Some workflows lack fork guards - see job logs"
+            exit 1
+          fi
+

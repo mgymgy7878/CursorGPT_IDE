@@ -2,9 +2,16 @@ name: Headers & Standards Smoke Test
 
 on:
   push:
-    branches: [main, 'docs/**']
-  pull_request:
     branches: [main]
+  pull_request:
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'services/**'
+      - 'deploy/nginx/**'
+      - 'tools/verify_nginx_headers.sh'
+      - '!**/*.md'
+      - '!docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
