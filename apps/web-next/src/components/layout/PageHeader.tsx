@@ -5,7 +5,7 @@ type Chip = { label: string; tone?: 'success' | 'warn' | 'info' | 'muted' };
 type Action = { label: string; onClick: () => void; variant?: 'primary' | 'ghost' };
 
 export interface PageHeaderProps {
-  title: string;
+  title: string | React.ReactNode;
   subtitle?: string;
   chips?: Chip[];
   actions?: Action[];

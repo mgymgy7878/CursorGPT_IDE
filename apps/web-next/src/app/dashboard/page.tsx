@@ -5,6 +5,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import StatusPills from '@/components/layout/StatusPills';
 import Metric from '@/components/ui/Metric';
 import LiveMarketCard from '@/components/marketdata/LiveMarketCard';
+import ErrorBudgetBadge from '@/components/ops/ErrorBudgetBadge';
 import { formatDuration } from '@/lib/format';
 import { t } from '@/lib/i18n';
 import { useMarketStore } from '@/stores/marketStore';
@@ -33,7 +34,12 @@ export default function DashboardPage() {
   return (
     <div className="px-6 py-4 min-h-screen bg-neutral-950">
       <PageHeader
-        title="Spark Trading"
+        title={
+          <div className="flex items-center gap-2">
+            Spark Trading
+            <ErrorBudgetBadge />
+          </div>
+        }
         subtitle="Dashboard"
         chips={[
           { label: `${t('dashboard.target')}: 1200 ms`, tone: 'muted' },

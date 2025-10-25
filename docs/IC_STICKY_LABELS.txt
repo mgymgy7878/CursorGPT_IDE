@@ -1,9 +1,10 @@
 ## IC_STICKY_LABELS (sahaya yapıştırmalık)
 
-[IC-GO — 4 satır]
+[IC-GO — 5 satır]
 I am IC. (komuta bende)
 Karar penceresi: 5 dk
 8/8 proceed | 1-2 hold | ≥3 rollback
+Error Budget kalan %: __  (yeşil≥60 | sarı 30–60 | kırmızı<30)
 Kanıt kanalı: #war-room-spark
 
 [ABORT — 4 satır]

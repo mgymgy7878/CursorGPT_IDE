@@ -34,6 +34,10 @@ app.post('/backtest/dry-run', async (req) => {
   };
 });
 
+// --- Error Budget
+import errorBudgetRoute from './routes/errorBudget.js';
+await app.register(errorBudgetRoute);
+
 // --- Start
 const PORT = Number(process.env.PORT || 4001);
 const HOST = process.env.HOST || '0.0.0.0';
