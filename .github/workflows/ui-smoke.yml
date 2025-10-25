@@ -55,15 +55,19 @@ jobs:
           echo $! > webnext.pid
           sleep 10
       
-      - name: Probe mock endpoints
+      - name: Probe health endpoints
         run: |
           echo "Testing error budget endpoint..."
-          curl -fsS http://127.0.0.1:3100/api/public/error-budget | jq .status
+          EB=$(curl -fsS http://127.0.0.1:3100/api/public/error-budget)
+          echo "$EB" | jq .
+          echo "$EB" | jq -e '.status == "OK" and .errorBudget >= 0 and .errorBudget <= 1'
           
           echo "Testing engine health endpoint..."
-          curl -fsS http://127.0.0.1:3100/api/public/engine-health | jq .status
+          ENG=$(curl -fsS http://127.0.0.1:3100/api/public/engine-health)
+          echo "$ENG" | jq .
+          echo "$ENG" | jq -e '.status == "OK"'
           
-          echo "✅ All health endpoints responding"
+          echo "✅ All health endpoints responding with valid schema"
       
       - name: Stop server
         if: always()

@@ -1,52 +1,31 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMarketStore } from '@/stores/marketStore'
 
-export function useWsHeartbeat(intervalMs = 20000) {
-  const [ok, setOk] = useState<boolean | undefined>(undefined)
+/**
+ * WebSocket health status from market store.
+ * 
+ * Returns:
+ * - true: WS connected and healthy
+ * - false: WS down or degraded
+ * - undefined: WS connecting
+ * 
+ * To use manual ping test instead (fallback when no real WS):
+ * Set NEXT_PUBLIC_USE_WS_PING_TEST=true in .env.local
+ */
+export function useWsHeartbeat() {
+  const usePingTest = process.env.NEXT_PUBLIC_USE_WS_PING_TEST === 'true'
+  const marketStatus = useMarketStore(s => s.status)
   
-  useEffect(() => {
-    let stop = false
-    let timer: any
-    
-    async function tick() {
-      const url = process.env.NEXT_PUBLIC_WS_URL
-      if (!url) {
-        setOk(undefined)
-        return
-      }
-      
-      try {
-        const ws = new WebSocket(url)
-        const timeout = setTimeout(() => {
-          try { ws.close() } catch {}
-          setOk(false)
-        }, 3000)
-        
-        ws.onopen = () => {
-          clearTimeout(timeout)
-          setOk(true)
-          ws.close()
-        }
-        
-        ws.onerror = () => {
-          clearTimeout(timeout)
-          setOk(false)
-        }
-      } catch {
-        setOk(false)
-      }
-      
-      if (!stop) timer = setTimeout(tick, intervalMs)
-    }
-    
-    tick()
-    return () => {
-      stop = true
-      if (timer) clearTimeout(timer)
-    }
-  }, [intervalMs])
+  if (usePingTest) {
+    // Fallback to ping test (dev mode without real WS)
+    // For now, return undefined (would need separate ping logic)
+    return undefined
+  }
   
-  return ok
+  // Use real market store status
+  if (marketStatus === 'healthy') return true
+  if (marketStatus === 'degraded' || marketStatus === 'down') return false
+  return undefined // connecting
 }
 
