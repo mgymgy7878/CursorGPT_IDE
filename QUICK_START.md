@@ -71,6 +71,23 @@ pnpm -F web-next build
 
 ---
 
+## 🚑 Emergency Fix
+
+**Internal Server Error (500)?**
+
+```powershell
+# One command to fix everything
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force; Set-Location apps/web-next; @'
+NEXT_PUBLIC_API_URL=http://127.0.0.1:3001
+NEXT_PUBLIC_WS_URL=ws://127.0.0.1:4001
+NEXT_PUBLIC_GUARD_VALIDATE_URL=https://github.com/mgymgy7878/CursorGPT_IDE/actions/workflows/guard-validate.yml
+'@ | Out-File .env.local -Encoding utf8 -Force; If (Test-Path .next) { Remove-Item .next -Recurse -Force }; pnpm install; Write-Host "✅ Fixed! Start: pnpm ws:dev (Terminal 1), pnpm dev (Terminal 2)" -ForegroundColor Green
+```
+
+**Full guide:** `INSTANT_FIX.md`
+
+---
+
 ## 🛠️ Top 3 Issues
 
 ### 1. pnpm Not Found
