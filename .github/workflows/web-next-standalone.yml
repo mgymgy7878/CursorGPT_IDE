@@ -1,0 +1,35 @@
+name: web-next-standalone
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'apps/web-next/**'
+      - '.github/workflows/web-next-standalone.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install deps (pnpm -w)
+        run: pnpm -w i --frozen-lockfile
+      - name: Build web-next (standalone)
+        run: pnpm -w --filter web-next build
+      - name: Pack standalone artefact
+        run: |
+          tar -czf web-next-standalone.tgz -C apps/web-next/.next/standalone .
+      - name: Upload artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-next-standalone
+          path: web-next-standalone.tgz
+          retention-days: 7
+

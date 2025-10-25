@@ -59,6 +59,16 @@ const nextConfig = {
       },
     ];
   },
+  // Backward compatibility: /api/snapshot/export → /api/snapshot/download
+  redirects: async () => {
+    return [
+      {
+        source: '/api/snapshot/export',
+        destination: '/api/snapshot/download',
+        permanent: true, // 308 Permanent Redirect
+      },
+    ];
+  },
 };
 
 export default nextConfig;
