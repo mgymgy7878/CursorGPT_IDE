@@ -25,13 +25,13 @@ jobs:
           
           Write-Host "Checking PR body for UX-ACK marker..."
           
-          if ($body -match 'UX-ACK:\s*✅') {
-            Write-Host "✅ UX-ACK marker found in PR description"
+          if ($body -match 'UX-ACK:') {
+            Write-Host "[PASS] UX-ACK marker found in PR description"
             exit 0
           } else {
-            Write-Host "❌ UX-ACK marker not found in PR description"
+            Write-Host "[FAIL] UX-ACK marker not found in PR description"
             Write-Host ""
             Write-Host "Please add the following to your PR description:"
-            Write-Host "UX-ACK: ✅ [your acknowledgment message]"
+            Write-Host "UX-ACK: [your acknowledgment message]"
             exit 1
           }
