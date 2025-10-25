@@ -1,0 +1,26 @@
+apiVersion: 1
+
+providers:
+  - name: 'spark-web-dashboards'
+    orgId: 1
+    folder: 'SRE'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+
+# KULLANIM:
+# 1. Grafana Docker:
+#    docker run -d -p 3000:3000 \
+#      -v $(pwd)/monitoring/grafana:/var/lib/grafana/dashboards \
+#      -v $(pwd)/monitoring/grafana/provisioning:/etc/grafana/provisioning \
+#      grafana/grafana
+#
+# 2. Grafana açık:
+#    http://localhost:3000 (admin/admin)
+#
+# 3. Dashboard kontrol:
+#    Dashboards → SRE folder → Error Budget Remaining %
+
