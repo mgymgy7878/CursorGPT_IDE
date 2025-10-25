@@ -67,6 +67,7 @@ jobs:
         run: pnpm install --offline --frozen-lockfile --strict-peer-dependencies
 
       - name: Run contract tests
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         run: pnpm test:contract
         env:
           PACT_BROKER_URL: http://localhost:9292
@@ -211,7 +212,7 @@ jobs:
           retention-days: 30
 
       - name: Notify on failure
-        if: failure()
+        if: failure() && !github.event.pull_request.head.repo.fork
         uses: slackapi/slack-github-action@v1
         with:
           payload: |

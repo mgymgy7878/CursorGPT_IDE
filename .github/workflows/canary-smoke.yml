@@ -63,6 +63,7 @@ jobs:
       - name: Run Canary Smoke
         id: smoke
         shell: pwsh
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         env:
           SMOKE_TOKEN: ${{ secrets.SMOKE_TOKEN || '' }}
         run: |
