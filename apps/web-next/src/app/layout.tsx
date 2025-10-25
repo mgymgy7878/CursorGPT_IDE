@@ -7,6 +7,8 @@ import CommandPalette from "@/components/ui/CommandPalette";
 import FloatingActions from "@/components/layout/FloatingActions";
 import ChunkGuard from "@/components/ChunkGuard";
 import MarketProvider from "@/providers/MarketProvider";
+import StatusBar from "@/components/status-bar";
+import LeftNav from "@/components/left-nav";
 import "@/styles/theme.css";
 
 export const metadata = {
@@ -26,7 +28,15 @@ export default function RootLayout({
       <body className="h-full bg-surface text-neutral-100 overflow-hidden">
         <ThemeProvider>
           <MarketProvider>
-            {children}
+            <div className="h-full flex flex-col">
+              <StatusBar />
+              <div className="flex flex-1 overflow-hidden">
+                <LeftNav />
+                <main className="flex-1 overflow-auto">
+                  {children}
+                </main>
+              </div>
+            </div>
             <ChunkGuard />
             <Toaster />
             <ErrorSink />
