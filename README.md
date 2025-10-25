@@ -29,6 +29,7 @@ pnpm -w --filter web-next dev
 
 ### CI — Web Next Standalone
 [![web-next-standalone](https://github.com/mgymgy7878/CursorGPT_IDE/actions/workflows/web-next-standalone.yml/badge.svg)](https://github.com/mgymgy7878/CursorGPT_IDE/actions/workflows/web-next-standalone.yml)
+[![Guard Validate](https://github.com/mgymgy7878/CursorGPT_IDE/actions/workflows/guard-validate.yml/badge.svg)](https://github.com/mgymgy7878/CursorGPT_IDE/actions/workflows/guard-validate.yml)
 
 **WSL Build (lokal):** `bash scripts/build_web_next_wsl.sh`  
 **Çalıştırma (self-host):** `node apps/web-next/.next/standalone/server.js`  
