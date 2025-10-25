@@ -1,0 +1,32 @@
+// Outbox Pattern for Event-Driven Architecture
+// Ensures at-least-once delivery to external systems
+
+model Outbox {
+  id        String   @id @default(cuid())
+  topic     String   // Event topic (e.g., "order.created", "position.updated")
+  payload   Json     // Event payload
+  status    String   @default("pending") // pending|sent|failed
+  retries   Int      @default(0)
+  maxRetries Int     @default(3)
+  createdAt DateTime @default(now())
+  sentAt    DateTime?
+  failedAt  DateTime?
+  error     String?
+  
+  @@index([status, createdAt])
+  @@index([topic, status])
+  @@map("outbox")
+}
+
+// Example event types
+// {
+//   "topic": "order.created",
+//   "payload": {
+//     "orderId": "ord_123",
+//     "symbol": "BTCUSDT",
+//     "side": "buy",
+//     "type": "market",
+//     "quantity": 0.01,
+//     "timestamp": "2024-10-24T12:00:00Z"
+//   }
+// }

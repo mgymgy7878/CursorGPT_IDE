@@ -24,7 +24,8 @@ export default function StrategyControls({ name, scope="paper", onResult }: Prop
   }, [countdown]);
 
   async function doPreview(op: Op){
-    startTransition(async () => {
+    startTransition(() => {
+      (async () => {
       setErr(undefined); setPreview(null); setShow(true);
       const payload = {
         action: "strategy.preview",
@@ -73,6 +74,7 @@ export default function StrategyControls({ name, scope="paper", onResult }: Prop
           details: `${name} (${scope}) preview ${op}`
         })
       }).catch(() => {}); // Silent fail for audit
+      })();
     });
   }
 
@@ -85,7 +87,8 @@ export default function StrategyControls({ name, scope="paper", onResult }: Prop
       }
     }
     
-    startTransition(async () => {
+    startTransition(() => {
+      (async () => {
       setErr(undefined);
       const payload = {
         action: "strategy.control",
@@ -151,6 +154,7 @@ export default function StrategyControls({ name, scope="paper", onResult }: Prop
           details: `${name} (${scope}) ${op} success`
         })
       }).catch(() => {});
+      })();
     });
   }
 

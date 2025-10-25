@@ -124,14 +124,14 @@ export default function SLOTimechart({ metric = "p95_ms", window = "7d" }: Props
               <CartesianGrid strokeDasharray="3 3" stroke="#404040" />
               <XAxis 
                 dataKey="timestamp" 
-                tickFormatter={(ts) => new Date(ts).toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' })}
+                tickFormatter={(ts: any) => new Date(ts).toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' })}
                 stroke="#737373"
                 style={{ fontSize: '10px' }}
               />
               <YAxis 
                 stroke="#737373"
                 style={{ fontSize: '10px' }}
-                tickFormatter={(v) => metric === "error_rate" ? `${(v * 100).toFixed(0)}%` : v.toFixed(0)}
+                tickFormatter={(v: any) => metric === "error_rate" ? `${(v * 100).toFixed(0)}%` : v.toFixed(0)}
               />
               <Tooltip 
                 contentStyle={{
@@ -140,9 +140,10 @@ export default function SLOTimechart({ metric = "p95_ms", window = "7d" }: Props
                   borderRadius: "8px",
                   fontSize: "12px"
                 }}
-                labelFormatter={(ts) => new Date(ts).toLocaleString('tr-TR')}
+                labelFormatter={(ts: any) => new Date(ts).toLocaleString('tr-TR')}
                 formatter={(value: any) => [config.formatter(value), config.label]}
               />
+              {/* @ts-ignore - ReferenceLine type issue with recharts */}
               <ReferenceLine 
                 y={config.threshold} 
                 stroke="#ef4444" 

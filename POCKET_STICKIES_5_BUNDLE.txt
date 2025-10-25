@@ -1,0 +1,95 @@
+# 🚀 CEPLİK YAPIŞTIRICILARI - 5'li Mini Demet (Tek Ekran)
+
+## 1) LIFTOFF (90s, kanıt üretir)
+
+```bash
+bash scripts/60s-preflight.sh v1.4.0 && \
+bash scripts/micro-blast-radius-test.sh https://canary v1.4.0 30 && \
+bash scripts/check-artifact-completeness.sh && \
+bash scripts/green-button-ritual.sh v1.4.0
+```
+
+---
+
+## 2) WAR-ROOM TEK SATIR (HUD)
+
+```bash
+echo "$(date -Is) | stage=$STAGE | p95=__ms 5xx=__% ws=__s idem=__% risk=__/min csp=__ evloop=__ms gc=__ms | karar="
+```
+
+---
+
+## 3) ORBIT KEEP-ALIVE (10 dk ritüeli)
+
+```bash
+STAGE=prod PROMETHEUS_URL=http://prom:9090 bash tools/orbit-keepalive.sh
+```
+
+**Cron:**
+```
+*/10 * * * * STAGE=prod PROMETHEUS_URL=http://prom:9090 bash tools/orbit-keepalive.sh
+```
+
+---
+
+## 4) ÜÇ KIRMIZI → ABORT (≤5dk, kanıt korumalı)
+
+```powershell
+pwsh scripts/rollback.ps1 -Reason "trigger" -Stage "current-%"
+```
+
+---
+
+## 5) T+24H MİKRO DEBRİEF (5 madde)
+
+```bash
+cp T24H_MICRO_DEBRIEF.md evidence/debrief_$(date -Is).md && $EDITOR $_
+```
+
+---
+
+## EŞİK FISILTISI (8 sinyal, tek satır)
+
+```
+p95≤200 | 5xx≤1% | ws≤30s | risk<0.5 | idem≤1% | csp≤+10% | evloop≤50ms | gc≤20ms
+```
+
+---
+
+## KARAR TABLOSU (ceplik)
+
+| Durum | Aksiyon |
+|-------|---------|
+| **8/8 yeşil** | proceed |
+| **1-2 tur "hold" üst üste** | mikro geri sar, yeniden ölç |
+| **3 kırmızı veya korelasyon** | **rollback** |
+
+**3 Kırmızı:**
+- p95>400ms OR 5xx>3% OR ws>120s
+- Korelasyon: 5xx↑ AND risk_block↑ (3dk)
+- Backpressure: evloop>50ms AND CPU<60%
+
+---
+
+## K·A·N·İ·T HUD (永久 AKTİF)
+
+**K** - Kontrol  
+**A** - Anomi  
+**N** - Not  
+**İ** - İlerle/İptal  
+**T** - Tanık
+
+*Şüphede kalırsan küçük geri sar, yeniden ölç.*
+
+---
+
+## FINAL WHISPER
+
+**Bilim konuşsun, sen orkestrayı yönet.**
+
+**BAS VE UÇ — KANITLA HIZLI.** 🚀🛰️💚
+
+---
+
+_Pocket Stickies | 5-Bundle | v1.4.0 | Tek ekran, copy-paste-fly_
+

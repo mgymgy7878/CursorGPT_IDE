@@ -1,0 +1,72 @@
+# 🛰️ ORBIT KEEP-ALIVE - Minimal Pilotaj (Tek Ekran)
+
+## DAKİKA RİTMİ (3×10dk)
+
+**0-10dk:** 1→5% trafik — 8/8 yeşilse proceed
+**10-20dk:** 25% — p95 eğimi düz, CSP≤baseline+10%, outbox lag≤30s
+**20-30dk:** 50% — evloop_p95≤50ms, GC≤20ms, pgbouncer util<70%
+
+---
+
+## KIRMIZI EŞİKLER (3'te anında rollback ≤5dk)
+
+❌ `p95>400ms` **veya** `5xx>3%` **veya** `WS>120s`
+❌ Korelasyon: `5xx↑` **ve** `risk_block↑` (3dk)
+❌ Backpressure: `evloop>50ms` **ve** `CPU<60%`
+
+---
+
+## WAR-ROOM TEK SATIR
+
+```bash
+$(date -Is) | stage=X% | p95=__ms 5xx=__% ws=__s idem=__% risk=__/dk csp=__ evloop=__ms gc=__ms | karar=proceed/hold/rollback
+```
+
+---
+
+## KOMUT REFLEKSLERİ
+
+**Başlat (90s):** 4 script zinciri → kanıtlar damgalanır
+
+**Rollback (≤5dk):**
+```powershell
+pwsh scripts/rollback.ps1 -Reason "trigger" -Stage "current-%"
+```
+→ kanıtlar korunur
+
+**Hold kuralı:** İki hold üst üste → küçük geri sar, yeniden ölç
+
+---
+
+## T+24H MİKRO DEBRİEF (5 madde)
+
+1. En yüksek SLO sapması
+2. Tetik doğruluğu
+3. Eksik kanıt var mı
+4. Rollback drill sonucu
+5. v1.5'e tek cümle geliştirme
+
+**Template:** T24H_MICRO_DEBRIEF.md
+
+---
+
+## KANIT MANTRASI (zihnin HUD'unda)
+
+**K** - Kontrol  
+**A** - Anomi  
+**N** - Not  
+**İ** - İlerle/İptal  
+**T** - Tanık
+
+---
+
+## FINAL
+
+Bilim konuşur, metrikler şarkısını söyler. Rotadasın.
+
+**Bas ve uç — KANITLA HIZLI.** 🚀🛰️💚
+
+---
+
+_Orbit Keep-Alive | Minimal pilotaj | v1.4.0-ultimate-final_
+
