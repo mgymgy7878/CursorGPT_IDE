@@ -13,16 +13,39 @@ on:
       - 'apps/**'
       - 'services/**'
       - 'packages/**'
-      - '!**/*.md'
-      - '!docs/**'
-      - '!.github/**'
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'apps/web-next/**'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  paths:
+    runs-on: ubuntu-latest
+    outputs:
+      run_ci: ${{ steps.filter.outputs.core }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            core:
+              - '**/*.ts'
+              - '**/*.tsx'
+              - 'apps/**'
+              - 'services/**'
+              - 'packages/**'
+              - '!apps/web-next/**'
+
   verify:
+    needs: paths
+    if: ${{ needs.paths.outputs.run_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

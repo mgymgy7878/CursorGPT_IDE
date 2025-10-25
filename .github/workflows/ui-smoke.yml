@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - 'apps/web-next/**'
-      - '!apps/web-next/**/*.md'
+    paths-ignore:
+      - 'apps/web-next/**/*.md'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
