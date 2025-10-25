@@ -2,7 +2,11 @@ name: Docs Lint
 
 on:
   pull_request:
-    paths: ["**/*.md", ".markdownlint.json", ".mlc_config.json"]
+    paths:
+      - 'docs/**'
+      - '.github/pull_request_template.md'
+      - '.markdownlint.json'
+      - '.mlc_config.json'
   workflow_dispatch:
 
 jobs:
