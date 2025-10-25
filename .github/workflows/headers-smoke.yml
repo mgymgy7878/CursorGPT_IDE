@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit-tests:
     name: Unit Tests - Metrics Headers
@@ -19,14 +23,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 10.18.3
+          run_install: false
+      
+      - name: Verify pnpm version
+        run: |
+          EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          ACTUAL=$(pnpm -v)
+          test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
       
       - name: Run unit tests
         run: pnpm --filter web-next test -- __tests__/route.test.ts
@@ -45,14 +57,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 10.18.3
+          run_install: false
+      
+      - name: Verify pnpm version
+        run: |
+          EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          ACTUAL=$(pnpm -v)
+          test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
       
       - name: Build web-next
         run: pnpm --filter web-next build
@@ -147,14 +167,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 10.18.3
+          run_install: false
+      
+      - name: Verify pnpm version
+        run: |
+          EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          ACTUAL=$(pnpm -v)
+          test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
       
       - name: Install Playwright Browsers
         run: pnpm --filter web-next exec playwright install chromium --with-deps
