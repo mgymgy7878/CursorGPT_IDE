@@ -36,6 +36,18 @@ pnpm -w --filter web-next dev
 **Çalıştırma (self-host):** `node apps/web-next/.next/standalone/server.js`  
 **CI Artefact:** Workflow sonunda `web-next-standalone.tgz` indirilir (7 gün saklama)
 
-**Ops:** Error Budget rozeti Dashboard'da görünür. Endpoint: `/api/public/error-budget` (Prometheus ENV: `PROM_URL`, `SLO_WINDOW=5m`, `SLO_ALLOWED_ERROR_RATE=0.01`)
+**Ops:** Error Budget rozeti Dashboard'da görünür. Endpoint: `/api/public/error-budget`
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ENGINE_URL` | - | Strategy engine health endpoint (optional, fallback to mock) |
+| `PROMETHEUS_URL` | - | Prometheus server for real error budget (optional, fallback to mock) |
+| `NEXT_PUBLIC_API_URL` | `http://127.0.0.1:3001` | Frontend API URL |
+| `NEXT_PUBLIC_WS_URL` | `ws://127.0.0.1:4001` | WebSocket endpoint |
+| `NEXT_PUBLIC_GUARD_VALIDATE_URL` | Workflow URL | Guard Validate badge link |
+
+**See:** `apps/web-next/.env.example` for template
 
 **Monitoring:** SLO burn alerts ve Grafana panelleri → [monitoring/README.md](monitoring/README.md) (DRY-RUN template)
