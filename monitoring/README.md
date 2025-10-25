@@ -148,3 +148,50 @@ http://localhost:3003/dashboard
 **Status:** DRY-RUN TEMPLATE  
 **Production Ready:** Konfigürasyon güncellemesi gerekli
 
+---
+
+## 🚀 Quick Start (Local)
+
+### Prometheus
+```bash
+docker run -d -p 9090:9090 \
+  -v $(pwd)/monitoring/prometheus:/etc/prometheus \
+  --name spark-prometheus \
+  prom/prometheus
+```
+
+### Alertmanager
+```bash
+export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+
+docker run -d -p 9093:9093 \
+  -v $(pwd)/monitoring/alertmanager:/etc/alertmanager \
+  -e SLACK_WEBHOOK_URL=$SLACK_WEBHOOK_URL \
+  --name spark-alertmanager \
+  prom/alertmanager
+```
+
+### Grafana
+```bash
+docker run -d -p 3000:3000 \
+  -v $(pwd)/monitoring/grafana:/var/lib/grafana/dashboards \
+  -v $(pwd)/monitoring/grafana/provisioning:/etc/grafana/provisioning \
+  --name spark-grafana \
+  grafana/grafana
+```
+
+### Access
+- **Prometheus:** http://localhost:9090
+- **Alertmanager:** http://localhost:9093
+- **Grafana:** http://localhost:3000 (admin/admin)
+
+### Environment Variables
+```bash
+# Executor service
+export PROM_URL=http://localhost:9090
+export SLO_ALLOWED_ERROR_RATE=0.01  # 1% (99% SLO)
+
+# Alertmanager
+export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+```
+

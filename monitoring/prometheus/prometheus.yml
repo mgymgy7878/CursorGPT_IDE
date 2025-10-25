@@ -1,0 +1,42 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - 'slo_burn_alerts.yaml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Spark Executor
+  - job_name: 'executor'
+    static_configs:
+      - targets: ['executor:4001']
+    metrics_path: '/metrics'
+
+  # Spark Web-Next
+  - job_name: 'web-next'
+    static_configs:
+      - targets: ['web-next:3003']
+    metrics_path: '/api/public/metrics.prom'
+
+# KULLANIM:
+# 1. Docker ile başlat:
+#    docker run -d -p 9090:9090 \
+#      -v $(pwd)/monitoring/prometheus:/etc/prometheus \
+#      prom/prometheus
+#
+# 2. Targets'ı doğrula:
+#    curl http://localhost:9090/api/v1/targets
+#
+# 3. Alert rules kontrol:
+#    curl http://localhost:9090/api/v1/rules
+
