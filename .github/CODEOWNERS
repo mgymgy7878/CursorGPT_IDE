@@ -1,0 +1,11 @@
+# Code Owners
+
+# Workflows require Platform team review
+.github/workflows/** @mgymgy7878
+
+# Scripts require Platform team review
+.github/scripts/** @mgymgy7878
+
+# CI-related documentation
+.github/*.md @mgymgy7878
+

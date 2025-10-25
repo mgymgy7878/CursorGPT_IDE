@@ -239,3 +239,13 @@ pnpm test:e2e
 **Approved by:** <!-- Name and date -->  
 **Date:** <!-- YYYY-MM-DD -->  
 **Status:** <!-- APPROVED FOR PRODUCTION / NEEDS WORK -->
+
+---
+
+## 🔐 CI Requirements Checklist
+
+- [ ] PR açıklamasında **UX-ACK:** satırı var
+- [ ] Secret kullanan workflow adımlarında **fork guard** var (`if: ${{ !github.event.pull_request.head.repo.fork }}`)
+- [ ] `.github/workflows/` değişikliği yaptıysam, **Guard Validate** check green
+
+**Not:** Guard Validate otomatik kontrol eder. Detaylar için [CONTRIBUTING.md](../CONTRIBUTING.md) bakınız.
