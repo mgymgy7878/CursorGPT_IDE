@@ -4,20 +4,37 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+      
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+      
+      - name: Verify pnpm version (from packageManager)
+        run: |
+          EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          ACTUAL=$(pnpm -v)
+          echo "Expected: $EXPECTED, Actual: $ACTUAL"
+          test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm version mismatch"; exit 1; }
+      
       - name: Install
-        run: pnpm -w install --frozen-lockfile
+        run: pnpm -w install --frozen-lockfile --strict-peer-dependencies
+      
       - name: UI Fast Verify
         run: pnpm verify
 

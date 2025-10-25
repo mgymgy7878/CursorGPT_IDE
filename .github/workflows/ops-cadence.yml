@@ -1,0 +1,78 @@
+name: Ops Cadence - Game Day & Graduation
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"   # Weekly game day (Monday 09:00 UTC)
+    - cron: "0 9 1 * *"   # Monthly graduation (1st of month 09:00 UTC)
+  workflow_dispatch:       # Manual trigger
+
+jobs:
+  game-day:
+    if: github.event.schedule == '0 9 * * 1' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    name: Weekly Game Day (Chaos + Contract + Rollback)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Micro Blast Radius Test
+        run: bash scripts/micro-blast-radius-test.sh https://canary v1.4.0 30
+
+      - name: Rollback Drill (Dry Run)
+        run: pwsh -NoProfile -File scripts/rollback.ps1 -Reason "weekly-drill" -Stage "drill" -DryRun
+
+      - name: Generate Game Day Summary
+        run: |
+          bash scripts/generate-release-oneliner.sh v1.4.0 \
+            | tee evidence/game_day_$(date -Iseconds).txt
+
+      - name: Upload Game Day Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-day-evidence-${{ github.run_number }}
+          path: evidence/game_day_*.txt
+
+  graduation:
+    if: github.event.schedule == '0 9 1 * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    name: Monthly Graduation (SLO Burn Check + Evidence Audit)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Snapshot Metrics
+        run: |
+          bash scripts/snapshot-metrics.sh 100 \
+            | tee evidence/graduation_snapshot_$(date -Iseconds).txt
+
+      - name: Check Artifact Completeness
+        run: bash scripts/check-artifact-completeness.sh
+
+      - name: Generate Graduation Report
+        run: |
+          echo "GRADUATION REPORT - $(date -Iseconds)" > evidence/graduation_$(date +%Y-%m).md
+          echo "SLO Burn: Check Prometheus for error_budget_burn_30d" >> evidence/graduation_$(date +%Y-%m).md
+          echo "Artifacts: $(ls -1 evidence/ | wc -l) files" >> evidence/graduation_$(date +%Y-%m).md
+          cat evidence/graduation_$(date +%Y-%m).md
+
+      - name: Upload Graduation Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: graduation-evidence-${{ github.run_number }}
+          path: |
+            evidence/graduation_*.md
+            evidence/graduation_snapshot_*.txt
+

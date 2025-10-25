@@ -21,11 +21,23 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
           run_install: false
+      
+      - name: Verify pnpm version
+        shell: pwsh
+        run: |
+          $expected = (Get-Content package.json | ConvertFrom-Json).packageManager.Split('@')[1]
+          $actual = (pnpm -v).Trim()
+          Write-Output "Expected: $expected, Actual: $actual"
+          if ($actual -ne $expected) {
+            Write-Output "::error::pnpm version mismatch"
+            exit 1
+          }
 
       - name: Metrics Warmup (dynamic)
         shell: pwsh
@@ -41,8 +53,7 @@ jobs:
       - name: Install Dependencies
         shell: pwsh
         run: |
-          pnpm -v
-          pnpm -w install --frozen-lockfile
+          pnpm -w install --frozen-lockfile --strict-peer-dependencies
       
       - name: Run Canary Smoke
         id: smoke
