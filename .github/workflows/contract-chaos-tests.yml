@@ -70,7 +70,7 @@ jobs:
         run: pnpm test:contract
         env:
           PACT_BROKER_URL: http://localhost:9292
-          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN || '' }}
 
       - name: Publish pacts to broker
         if: github.ref == 'refs/heads/main'
@@ -228,7 +228,7 @@ jobs:
               ]
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
 
   resilience-report:
     name: Generate Resilience Report

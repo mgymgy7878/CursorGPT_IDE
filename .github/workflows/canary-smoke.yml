@@ -64,7 +64,7 @@ jobs:
         id: smoke
         shell: pwsh
         env:
-          SMOKE_TOKEN: ${{ secrets.SMOKE_TOKEN }}
+          SMOKE_TOKEN: ${{ secrets.SMOKE_TOKEN || '' }}
         run: |
           $ErrorActionPreference = "Stop"
           Write-Output "::group::Canary Smoke Execution"

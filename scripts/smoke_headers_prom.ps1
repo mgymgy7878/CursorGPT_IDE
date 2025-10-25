@@ -3,11 +3,11 @@
 
 param(
     [int]$Port = 3003,
-    [string]$Host = "127.0.0.1"
+    [string]$HostName = "127.0.0.1"
 )
 
 $ErrorActionPreference = "SilentlyContinue"
-$base = "http://${Host}:${Port}"
+$base = "http://${HostName}:${Port}"
 
 # Test Prometheus endpoint
 try {

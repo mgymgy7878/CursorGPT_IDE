@@ -45,7 +45,7 @@ jobs:
           body="${{ github.event.pull_request.body }}"
           grep -q "$HASH" <<< "$body" || { echo "PR body missing $HASH"; exit 1; }
       - name: Freeze enforcement (optional)
-        if: ${{ vars.FREEZE == '1' || env.FREEZE == '1' }}
+        if: ${{ (vars.FREEZE || '') == '1' || (env.FREEZE || '') == '1' }}
         run: |
           pnpm -s lint:tokens
           pnpm -s ui:test
