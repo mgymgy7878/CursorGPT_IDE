@@ -32,6 +32,64 @@ pnpm -F web-next dev -- --port 3004
 
 ## Development Servers
 
+### Internal Server Error (500) on Dashboard
+
+**Symptoms:** Opening http://127.0.0.1:3003 or /dashboard shows "Internal Server Error"
+
+**Common Cause:** .env.local has `ENGINE_URL` or `PROMETHEUS_URL` set, but backend services aren't running. API routes try to proxy and fail.
+
+**Quick Fix (Reset to Mock Mode):**
+```powershell
+# Automated reset script
+.\scripts\reset-to-mock.ps1
+```
+
+**Manual Fix:**
+```bash
+# 1. Stop dev servers (Ctrl+C)
+
+# 2. Edit apps/web-next/.env.local
+# REMOVE or comment out these lines:
+# ENGINE_URL=...
+# PROMETHEUS_URL=...
+
+# Keep only:
+NEXT_PUBLIC_API_URL=http://127.0.0.1:3001
+NEXT_PUBLIC_WS_URL=ws://127.0.0.1:4001
+NEXT_PUBLIC_GUARD_VALIDATE_URL=https://...
+
+# 3. Clear cache
+cd apps/web-next
+Remove-Item .next -Recurse -Force  # PowerShell
+# OR
+rm -rf .next  # Bash
+
+# 4. Restart
+pnpm install
+pnpm dev
+```
+
+**Verify Fix:**
+```bash
+# Test mock endpoints
+curl http://127.0.0.1:3003/api/public/engine-health
+# Should return: { "status": "OK", "source": "mock", ... }
+
+curl http://127.0.0.1:3003/api/public/error-budget
+# Should return: { "errorBudget": 0.98, "source": "mock", ... }
+```
+
+**Expected Status Bar:**
+- API: ✅ (mock)
+- WS: ✅ (dev-ws if running, or ⚠️)
+- Engine: ✅ (mock)
+
+**If Still Failing:**
+1. Check dev server terminal for first error line
+2. Verify no `ENGINE_URL`/`PROMETHEUS_URL` in .env.local
+3. Check for import/alias errors in console
+4. Try: `pnpm clean && pnpm install`
+
 ### Next.js Not Starting (Port 3003)
 
 **Common Causes:**
@@ -420,6 +478,52 @@ gh run view <run-id>
 ## Database/State Issues
 
 *(Reserved for future backend integration)*
+
+---
+
+## Electron Desktop App Issues
+
+**Note:** This is a SEPARATE application, not part of web-next.
+
+### Cannot find module 'js-yaml'
+
+**Symptoms:** Desktop app fails to start with "Cannot find module 'js-yaml'"
+
+**Cause:** Electron app packaged without `js-yaml` dependency
+
+**Not Related To:** Current web-next project (different codebase)
+
+**Solutions:**
+
+**1. Reinstall Desktop App:**
+```powershell
+# Uninstall via Windows Settings
+# Then reinstall from installer
+```
+
+**2. If You Have Source Code:**
+```bash
+# Add to package.json dependencies (NOT devDependencies)
+npm install --save js-yaml
+
+# Rebuild
+npm run build
+npm run pack  # or electron-builder build
+```
+
+**3. Check electron-builder config:**
+```json
+// package.json or electron-builder.yml
+{
+  "build": {
+    "files": ["**/*"],
+    "asar": true,
+    "asarUnpack": ["node_modules/js-yaml/**"]
+  }
+}
+```
+
+**Important:** Desktop app errors DO NOT affect web-next (browser-based). Focus on web-next for current project.
 
 ---
 
