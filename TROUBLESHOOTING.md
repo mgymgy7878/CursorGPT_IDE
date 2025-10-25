@@ -5,6 +5,17 @@
 
 ---
 
+## ⚡ Common Confusion: Web vs Electron
+
+**Two SEPARATE issues often confused:**
+
+1. **Web-next (127.0.0.1:3003) not loading** → Port issue, dev server not started
+2. **Electron "js-yaml" error** → Separate desktop app, doesn't affect web-next
+
+**See `WEB_VS_ELECTRON_ISSUES.md` for clear separation and solutions.**
+
+---
+
 ## Quick Diagnostics
 
 ### Port Conflicts
