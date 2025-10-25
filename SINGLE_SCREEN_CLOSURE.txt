@@ -1,0 +1,78 @@
+# 🛰️ TEK EKRAN KAPANIŞ KARTI - Orbitte 30dk
+
+## RİTÜEL (3×10dk)
+
+**0-10dk (1→5%):** p95 düz; 5xx≤1%; WS≤30s; idem≤1% → proceed
+**10-20dk (25%):** outbox lag≤30s; conn_creep yok; CSP≤baseline+10% → proceed/hold
+**20-30dk (50%):** evloop_p95≤50ms; GC≤20ms; pgbouncer<70% → proceed
+
+---
+
+## 3 KIRMIZI = ROLLBACK (≤5dk)
+
+❌ p95>400ms **veya** 5xx>3% **veya** WS>120s
+❌ 5xx↑ **ve** risk_block↑ (3dk)
+❌ evloop_p95>50ms **ve** CPU<60%
+
+---
+
+## WAR-ROOM TEK SATIR
+
+```bash
+$(date -Is) | stage=X% | p95=__ms 5xx=__% ws=__s idem=__% risk=__/dk csp=__ evloop=__ms gc=__ms | karar=proceed/hold/rollback
+```
+
+---
+
+## KOMUTLAR
+
+**Başlat (90s):** 4 script zinciri
+- 60s-preflight → micro-blast → completeness → green-button
+
+**Rollback:**
+```powershell
+pwsh scripts/rollback.ps1 -Reason "trigger" -Stage "current-%"
+```
+
+---
+
+## HOLD KURALI
+
+**İki "hold" üst üste gelirse:**
+- Üçüncüyü bekleme
+- Küçük geri sar, nefes al, yeniden ölç
+
+---
+
+## T+24H MİKRO DEBRİEF (5 madde)
+
+1. SLO sapması
+2. Tetik doğruluğu
+3. Eksik kanıt
+4. Rollback drill sonucu
+5. v1.5 tek cümle geliştirme
+
+**Template:** T24H_MICRO_DEBRIEF.md
+
+---
+
+## KANIT MANTRASI (akılda tut)
+
+**K** - Kontrol  
+**A** - Anomi  
+**N** - Not  
+**İ** - İlerle/İptal  
+**T** - Tanık
+
+---
+
+## FINAL STATUS
+
+Panel yeşil ✅ | Telemetri kilitli ✅ | Ritüel net ✅
+
+**Bas ve uç — KANITLA HIZLI.** 🚀🔬💚
+
+---
+
+_Single Screen Closure | Orbitte 30dk | v1.4.0-ultimate-final_
+

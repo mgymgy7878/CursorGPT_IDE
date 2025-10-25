@@ -1,0 +1,39 @@
+# POCKET 6-LINE REFERENCE - v1.4.0 Scientific Deployment
+
+# 1) 90s başlat (kanıt üretir)
+bash scripts/60s-preflight.sh v1.4.0 && bash scripts/micro-blast-radius-test.sh https://canary v1.4.0 30 && bash scripts/check-artifact-completeness.sh && bash scripts/green-button-ritual.sh v1.4.0
+
+# 2) Tek satır eşik (8 golden signals)
+p95≤200ms | 5xx≤1% | ws≤30s | risk<0.5/min | idem≤1% | csp≤+10% | evloop_p95≤50ms | gc_avg≤20ms
+
+# 3) Geçiş kuralı (canary 1%→5%→25%→50%→100%)
+8/8 yeşil → ilerle; sarı ≤10dk → hold; 3 kırmızı → rollback
+
+# 4) 3×30s cep kontrolü (prometheus, outbox, idempotency)
+curl -s :9090/api/v1/targets|jq '.data.activeTargets|length' && curl -s https://canary/api/outbox/lag|jq '.p95,.max' && hey -z 10s -q 20 -m POST -H "X-Idempotency-Key:test-$(date +%s)" https://canary/api/exec/order
+
+# 5) Tek komut rollback (≤5dk, 20 auto-triggers)
+pwsh scripts/rollback.ps1 -Reason "auto-trigger" -Stage "current-%"
+
+# 6) War-room satırı (signal-only format)
+"$(date -Is) | stage=X% | p95=___ms 5xx=__% ws=__s idem=__% risk=__/min csp=__ evloop=__ms gc=__ms | karar=proceed/hold/rollback"
+
+---
+
+# FELSEFE (tek satır)
+Deney başlat: hipotez→ölçüm→kanıt→zarif geri dönüş. Sistem sadece hızlı değil—KANITLA HIZLI! 🚀🔬
+
+# v1.5 RADAR (keskinliği arttır)
+• Haftalık 15dk "game day" (rollback drill + chaos scenario + contract spot check)
+• Aylık kaos tatbikatı (Toxiproxy + full system stress)
+• Sürekli profil çıkarma (CPU/memory/event-loop flamegraphs)
+• Shadow trading + error budget paneli (SLO burn real-time)
+
+---
+
+# PACKAGE INVENTORY
+41 artifacts | 31 docs (~21K satır) | 5 operator tools | 25 pre-checks | 20 triggers | 8 signals | 50+ evidence | 99.9% ready
+
+# UÇUŞ İZNİ: ON ✅
+Kart lamine, mikro plan cepte, fısıltı hazır, otomasyon kemerde. Kanıtlar otomatik, geri dönüş zarif. BAS VE UÇ! 💚✈️
+

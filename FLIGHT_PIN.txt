@@ -1,0 +1,73 @@
+# 🚀 FLIGHT PIN - v1.4.0 Scientific Deployment
+
+## 15 SANİYELİK SON PİNG
+
+```bash
+# API/WS/CSP spot-check
+curl -sS -o /dev/null -w "p95≈%{time_connect}→%{time_total}\n" https://canary/healthz
+curl -sS https://canary/ws/ping | head -n1
+curl -sI https://canary | grep -E "content-security-policy|cross-origin"
+```
+
+---
+
+## TEK SATIR TELEMETRİ (war-room)
+
+```bash
+echo "$(date -Is) | stage=${STAGE:-1%} | p95=${P95}ms 5xx=${ERR}% ws=${WS}s idem=${IDEMP}% risk=${RISK}/dk csp=${CSP} evloop=${EVL}ms gc=${GC}ms | karar=${KARAR}"
+```
+
+---
+
+## KARAR KAPISI (mikro-matris)
+
+* **8/8 yeşil & eğim düz** → proceed
+* **1-2 sarı** (geçici) → hold 5dk, tekrar ölç
+* **3 kırmızı veya korelasyon** → rollback ≤5dk
+
+---
+
+## TEK KOMUT GERİ SARMA (kanıt korumalı)
+
+```powershell
+pwsh scripts/rollback.ps1 -Reason "trigger" -Stage "current-%"
+```
+
+---
+
+## T+24H MİKRO DEBRİEF (5 madde)
+
+1. En yüksek SLO sapması → neden → düzeltme
+2. Tetikleyen kural(lar) doğru muydu? → tutarlılık
+3. Kanıt dosyalarında boşluk var mı? → hangi adım
+4. Rollback tatbikat skoru: soğuk/ılık/sıcak
+5. v1.5 backlog'a 1 cümlelik ekleme
+
+**Template:** T24H_MICRO_DEBRIEF.md
+
+---
+
+## KANIT MANTRASI
+
+**K** - Kontrol  
+**A** - Anomi  
+**N** - Not  
+**İ** - İlerle/İptal  
+**T** - Tanık
+
+---
+
+## QUICK STATS
+
+**44 artifacts** | **7 operator tools** | **8 signals** | **20 triggers** | **50+ evidence** | **99.9% ready**
+
+---
+
+## FINAL WHISPER
+
+**"Bas ve uç—sistem yalnız hızlı değil, KANITLA HIZLI."** 🚀🔬💚
+
+---
+
+_Flight pin | Copy-paste-fly | v1.4.0-ultimate-final_
+

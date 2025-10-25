@@ -1,0 +1,89 @@
+# 🚀 ORBİTTE İLK 30 DAKİKA - Cebe Sığan Rehber
+
+## KANIT MANTRASI
+
+**K** - Kontrol · **A** - Anomi · **N** - Not · **İ** - İlerle/İptal · **T** - Tanık
+
+---
+
+## 1) 3×10DK SİNYAL RİTMİ
+
+**0-10dk (1%→5%):**
+- p95 trend düz
+- 5xx ≤1%
+- WS ≤30s
+- idem ≤1%
+
+**10-20dk (25%):**
+- outbox lag ≤30s
+- conn_creep yok
+- CSP ≤baseline+10%
+
+**20-30dk (50%):**
+- evloop_p95 ≤50ms
+- GC_avg ≤20ms
+- pgbouncer util <70%
+
+---
+
+## 2) 3 KIRMIZI = ANINDA ROLLBACK (≤5dk)
+
+❌ **p95>400ms** OR **5xx>3%** OR **WS>120s**  
+❌ **5xx↑** AND **risk_block↑** (3dk)  
+❌ **evloop_p95>50ms** AND **CPU<60%**
+
+**Komut:**
+```powershell
+pwsh scripts/rollback.ps1 -Reason "trigger" -Stage "current-%"
+```
+
+---
+
+## 3) WAR-ROOM TEK SATIR
+
+```
+date | stage | 8 sinyal | karar
+```
+
+**Karar:** proceed / hold / rollback
+
+---
+
+## 4) KANIT DEMİRLEMESİ (otomatik)
+
+✅ Başlat zinciri → 40+ dosya  
+✅ Her aşama → snapshot + not  
+✅ Rollback olursa → neden+zaman+iyileştirme
+
+---
+
+## 5) T+24H MİKRO DEBRİEF (5 madde)
+
+1. En büyük SLO sapması
+2. Tetik doğruluğu
+3. Eksik kanıt
+4. Rollback tatbikat sonucu
+5. v1.5'e tek cümle geliştirme
+
+**Template:** T24H_MICRO_DEBRIEF.md
+
+---
+
+## ⚠️ HOLD KURALI
+
+**İki "hold" üst üste gelirse:**
+- Üçüncüyü bekleme
+- **Küçük geri sar, nefes al, tekrar ölç**
+
+---
+
+## FINAL TELKİN
+
+**Hipotezini uçur, sinyali dinle, kanıtı damgala; gerekirse zarifçe geri sar.**
+
+**Sistem yalnız hızlı değil — KANITLA HIZLI.** 🚀🔬💚
+
+---
+
+_Orbit First 30min | Copy-paste-fly | v1.4.0-ultimate-final_
+

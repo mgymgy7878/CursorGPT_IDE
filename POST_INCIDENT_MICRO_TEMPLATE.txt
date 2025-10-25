@@ -1,0 +1,100 @@
+# POST-INCIDENT MİKRO ŞABLON - Tek Bakış
+
+**Format:** Minimal ama eksiksiz  
+**Kullanım:** Her olaydan sonra doldur (≤5 dk)
+
+---
+
+## INCIDENT SUMMARY
+
+**Olay Adı:** _________________________________
+
+**Tarih/TS:** _________________ UTC
+
+**Süre:** _______ dakika (başlangıç→kapanış)
+
+**Stage:** ________ % (canary/production)
+
+---
+
+## TRIGGER & IMPACT
+
+**Eşik/Trigger:** _________________________________
+
+**Tetikleyen Sinyal(ler):**
+- [ ] p95 > 400ms
+- [ ] 5xx > 3%
+- [ ] WS staleness > 120s
+- [ ] Event-loop > 50ms
+- [ ] GC pause > 20ms
+- [ ] Korelasyon (5xx↑ & risk_block↑)
+- [ ] Diğer: _________________________________
+
+**Etki (SLO/SLS):**
+- SLO sapması: ________ (ör. P95: 250ms, eşik: 200ms)
+- Etkilenen kullanıcı: ________ (% veya sayı)
+- Kayıp istek: ________ req/s
+
+---
+
+## ROOT CAUSE (1 cümle)
+
+_________________________________________________________________________________________________
+
+---
+
+## DÜZELTMEüzü (1 adım)
+
+**Immediate Fix:**
+_________________________________________________________________________________________________
+
+**Long-term Prevention:**
+_________________________________________________________________________________________________
+
+**Owner:** _______________
+
+**ETA:** _______________
+
+---
+
+## KARAR & AKSIYON
+
+**Karar:** Proceed / Hold / Rollback (birini seç)
+
+**Rollback:** [ ] Evet [ ] Hayır
+
+**Süre (rollback):** ________ dakika (hedef: ≤5 dk)
+
+**Kanıt Dosyası:** evidence/_________________________________
+
+---
+
+## DEBRIEF NOTES
+
+**Ne iyi gitti:**
+- _________________________________
+
+**Ne iyileştirilebilir:**
+- _________________________________
+
+**v1.5 Backlog Item:**
+- _________________________________
+
+---
+
+## KANIT KONTROL
+
+- [ ] War-room satırı kaydedildi
+- [ ] Rollback evidence korundu
+- [ ] Prometheus snapshot alındı
+- [ ] T+24h debrief planlandı
+
+---
+
+**Signed:** _______________ (IC)  
+**Date:** _______________
+
+---
+
+_Post-Incident Micro Template | v1.4.0 | Fill in ≤5min_
+

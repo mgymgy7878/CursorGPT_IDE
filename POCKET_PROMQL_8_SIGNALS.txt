@@ -1,0 +1,54 @@
+# 8 Golden Signals - Pocket PromQL (Copy-Paste)
+
+## 1. API P95 (ms) - Threshold: ≤200ms
+
+```promql
+histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="api"}[5m]))*1000
+```
+
+## 2. HTTP 5xx Rate (%) - Threshold: ≤1%
+
+```promql
+rate(http_requests_total{status=~"5..",job="api"}[5m]) / rate(http_requests_total{job="api"}[5m]) * 100
+```
+
+## 3. WS Staleness P95 (s) - Threshold: ≤30s
+
+```promql
+histogram_quantile(0.95, rate(ws_staleness_seconds_bucket[5m]))
+```
+
+## 4. Risk Blocks (per min) - Threshold: <0.5/min
+
+```promql
+rate(risk_blocks_total[5m])
+```
+
+## 5. Idempotency Conflict (%) - Threshold: ≤1%
+
+```promql
+rate(idempotency_conflict_total[5m]) / rate(http_requests_total{job="api"}[5m]) * 100
+```
+
+## 6. CSP Violations (per min) - Threshold: ≤baseline+10%
+
+```promql
+rate(csp_violations_total[1m])
+```
+
+## 7. Event-Loop Lag P95 (ms) - Threshold: ≤50ms
+
+```promql
+histogram_quantile(0.95, rate(event_loop_lag_ms_bucket[5m]))
+```
+
+## 8. GC Pause Average (ms) - Threshold: ≤20ms
+
+```promql
+avg_over_time(gc_pause_ms[5m])
+```
+
+---
+
+_Pocket PromQL | 8 Golden Signals | v1.4.0 | Copy-paste ready_
+

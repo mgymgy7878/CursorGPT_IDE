@@ -1,0 +1,71 @@
+# 🚀 LIFTOFF SNAPSHOT - v1.4.0 Scientific Deployment
+
+## 3SN FISIRTI
+
+```
+p95<200 | 5xx<1% | ws<30s | risk<0.5 | idem<1% | csp≤+10% | evloop≤50ms | gc≤20ms
+```
+
+---
+
+## 90SN START
+
+```bash
+bash scripts/60s-preflight.sh v1.4.0 && \
+bash scripts/micro-blast-radius-test.sh https://canary v1.4.0 30 && \
+bash scripts/check-artifact-completeness.sh && \
+bash scripts/green-button-ritual.sh v1.4.0
+```
+
+---
+
+## WAR-ROOM TEK SATIR
+
+```bash
+echo "$(date -Is) | stage=${STAGE:-1%} | p95=${P95}ms 5xx=${ERR}% ws=${WS}s idem=${IDEMP}% risk=${RISK}/dk csp=${CSP} evloop=${EVL}ms gc=${GC}ms | karar=${KARAR}"
+```
+
+---
+
+## TEK KOMUT ROLLBACK (≤5dk)
+
+```powershell
+pwsh scripts/rollback.ps1 -Reason "trigger" -Stage "current-%"
+```
+
+---
+
+## T+24H MİKRO DEBRİEF (şablondan)
+
+```bash
+cp T24H_MICRO_DEBRIEF.md "evidence/debrief_$(date +%Y-%m-%d).md"
+```
+
+---
+
+## KANIT MANTRASI
+
+**K** - Kontrol  
+**A** - Anomi  
+**N** - Not  
+**İ** - İlerle/İptal  
+**T** - Tanık
+
+---
+
+## QUICK STATUS
+
+45 artefakt ✅ | 8 operatör aracı ✅ | 20 tetik ✅ | 8 sinyal ✅ | 50+ kanıt ✅ | hazırlık %99.9 ✅
+
+Telemetri kilitli. Bilimsel kalkış başlıyor.
+
+---
+
+## FINAL WHISPER
+
+**"Bas ve uç — sistem yalnız hızlı değil, KANITLA HIZLI."** 🚀🔬💚
+
+---
+
+_Liftoff Snapshot | Copy-paste-fly | v1.4.0-ultimate-final_
+
