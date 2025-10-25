@@ -35,3 +35,5 @@ pnpm -w --filter web-next dev
 **CI Artefact:** Workflow sonunda `web-next-standalone.tgz` indirilir (7 gün saklama)
 
 **Ops:** Error Budget rozeti Dashboard'da görünür. Endpoint: `/api/public/error-budget` (Prometheus ENV: `PROM_URL`, `SLO_WINDOW=5m`, `SLO_ALLOWED_ERROR_RATE=0.01`)
+
+**Monitoring:** SLO burn alerts ve Grafana panelleri → [monitoring/README.md](monitoring/README.md) (DRY-RUN template)

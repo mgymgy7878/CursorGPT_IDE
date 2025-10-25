@@ -1,0 +1,106 @@
+{
+  "title": "Error Budget Remaining %",
+  "type": "graph",
+  "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 8
+  },
+  "targets": [
+    {
+      "expr": "(\n  (0.001 - (\n    sum(rate(http_requests_total{status=~\"5..\"}[5m]))\n    /\n    sum(rate(http_requests_total[5m]))\n  ))\n  / 0.001\n) * 100",
+      "legendFormat": "Error Budget Remaining %",
+      "refId": "A"
+    }
+  ],
+  "yaxes": [
+    {
+      "format": "percent",
+      "label": "Remaining %",
+      "min": 0,
+      "max": 100
+    }
+  ],
+  "thresholds": [
+    {
+      "value": 30,
+      "colorMode": "critical",
+      "op": "lt",
+      "fill": true,
+      "line": true
+    },
+    {
+      "value": 60,
+      "colorMode": "warning",
+      "op": "lt",
+      "fill": false,
+      "line": true
+    }
+  ],
+  "alert": {
+    "name": "Error Budget Critical",
+    "conditions": [
+      {
+        "evaluator": {
+          "params": [30],
+          "type": "lt"
+        },
+        "operator": {
+          "type": "and"
+        },
+        "query": {
+          "params": ["A", "5m", "now"]
+        },
+        "reducer": {
+          "params": [],
+          "type": "avg"
+        },
+        "type": "query"
+      }
+    ],
+    "executionErrorState": "alerting",
+    "frequency": "1m",
+    "handler": 1,
+    "message": "Error Budget < 30% (CRITICAL)",
+    "noDataState": "no_data",
+    "notifications": []
+  },
+  "description": "SRE Error Budget kalan yüzdesi (Google SRE Workbook). Yeşil≥60%, Sarı 30-60%, Kırmızı<30%.",
+  "datasource": "Prometheus",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "red",
+            "value": null
+          },
+          {
+            "color": "yellow",
+            "value": 30
+          },
+          {
+            "color": "green",
+            "value": 60
+          }
+        ]
+      },
+      "unit": "percent"
+    }
+  },
+  "options": {
+    "legend": {
+      "displayMode": "list",
+      "placement": "bottom"
+    },
+    "tooltip": {
+      "mode": "single"
+    }
+  }
+}
+

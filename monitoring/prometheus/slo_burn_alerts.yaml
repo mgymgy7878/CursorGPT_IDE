@@ -1,0 +1,111 @@
+# SLO Burn Rate Alerts (Dry-Run Template)
+# Rehber: Google SRE Workbook – Alerting on SLOs
+# Varsayımlar: 30d pencere, hedef başarı 99.9% => allowed_error=0.001
+# Değerleri ortamınıza göre güncelleyin.
+# Kaynak: https://sre.google/workbook/alerting-on-slos/
+
+# UYARI: Bu bir TEMPLATE'dir. Production'da kullanmadan önce:
+#   1. $allowed_error değerini SLO'nuza göre ayarlayın
+#   2. http_requests_total metric'inin var olduğunu doğrulayın
+#   3. Alert manager konfigürasyonunu test edin
+#   4. Runbook URL'lerini güncelleyin
+
+labels:
+  role: sre
+  service: spark-web
+
+variables:
+  allowed_error: 0.001   # 1 - SLO (örn: 99.9% SLO → 0.001)
+  slo_window_days: 30
+
+# Kısa pencere: 5m; Uzun pencere: 1h ve 6h
+# error_ratio = 5xx_rate / total_rate
+# burn_rate = error_ratio / allowed_error
+#
+# Google SRE önerisi:
+# - Hızlı burn (14.4x): 2% budget/1h tüketimi
+# - Yavaş burn (6x): 5% budget/6h tüketimi
+
+groups:
+- name: slo-burn
+  interval: 30s
+  rules:
+  # HIZLI BURN ALARM (Critical)
+  # 5 dakika pencerede 14.4x burn → ~2% budget/1h
+  - alert: SLOBurnFast
+    expr: |
+      (
+        (sum(rate(http_requests_total{status=~"5.."}[5m]))
+         /
+         sum(rate(http_requests_total[5m])))
+        / 0.001
+      ) > 14.4
+    for: 5m
+    labels:
+      severity: page
+      team: sre
+    annotations:
+      summary: "SLO burn (hızlı) >14.4x (≈2% budget/1h tüketimi)"
+      description: "Son 5 dakikada hata oranı SLO'nun 14.4 katına çıktı. 1 saat içinde error budget'in %2'si tükenecek."
+      runbook: "https://sre.google/workbook/alerting-on-slos/"
+      dashboard: "http://grafana/d/error-budget"
+
+  # ORTA BURN ALARM (Warning)
+  # 30 dakika pencerede 6x burn → ~5% budget/6h
+  - alert: SLOBurnMedium
+    expr: |
+      (
+        (sum(rate(http_requests_total{status=~"5.."}[30m]))
+         /
+         sum(rate(http_requests_total[30m])))
+        / 0.001
+      ) > 6
+    for: 30m
+    labels:
+      severity: warn
+      team: sre
+    annotations:
+      summary: "SLO burn (orta) >6x (≈5% budget/6h tüketimi)"
+      description: "Son 30 dakikada hata oranı SLO'nun 6 katına çıktı. 6 saat içinde error budget'in %5'i tükenecek."
+      runbook: "https://sre.google/workbook/alerting-on-slos/"
+      dashboard: "http://grafana/d/error-budget"
+
+  # YAVAŞ BURN ALARM (Info)
+  # 6 saat pencerede 3x burn → %10 budget/1d
+  - alert: SLOBurnSlow
+    expr: |
+      (
+        (sum(rate(http_requests_total{status=~"5.."}[6h]))
+         /
+         sum(rate(http_requests_total[6h])))
+        / 0.001
+      ) > 3
+    for: 6h
+    labels:
+      severity: info
+      team: sre
+    annotations:
+      summary: "SLO burn (yavaş) >3x (≈10% budget/1d tüketimi)"
+      description: "Son 6 saatte hata oranı SLO'nun 3 katına çıktı. 1 gün içinde error budget'in %10'u tükenecek."
+      runbook: "https://sre.google/workbook/alerting-on-slos/"
+      dashboard: "http://grafana/d/error-budget"
+
+# KULLANIM:
+# 1. Prometheus config'e ekle:
+#    rule_files:
+#      - 'slo_burn_alerts.yaml'
+#
+# 2. Variables'ı düzenle:
+#    - allowed_error: SLO'nuza göre (99.9% → 0.001, 99% → 0.01)
+#    - slo_window_days: Alert evaluation window
+#
+# 3. Alert Manager'ı konfigüre et (Slack/PagerDuty)
+#
+# 4. Test et:
+#    curl http://prometheus:9090/api/v1/rules
+#
+# 5. Dry-run'dan production'a geçiş:
+#    - Runbook URL'lerini güncelleyin
+#    - Dashboard link'lerini ayarlayın
+#    - Alert routing rules ekleyin
+
