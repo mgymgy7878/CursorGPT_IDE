@@ -1,482 +1,492 @@
-# Spark TA Module v1.0.0 - Troubleshooting Guide
+# Troubleshooting Guide
 
-## 🔍 Quick Diagnostics
-
-```bash
-# Check all services
-docker ps | grep spark
-
-# Check logs
-docker logs executor-1 --tail 50
-docker logs web-next-1 --tail 50
-docker logs spark-redis --tail 50
-
-# Check health
-bash scripts/health-check.sh
-```
+**Platform:** Spark Trading  
+**Last Updated:** 2025-10-25
 
 ---
 
-## ❌ Common Issues & Solutions
+## Quick Diagnostics
 
-### 1. Port Already in Use
+### Port Conflicts
 
-**Symptom:**
+**Symptoms:** "Port already in use" errors
+
+**Check:**
+```powershell
+Get-NetTCPConnection -LocalPort 3003,4001 -ErrorAction SilentlyContinue
 ```
-Error: bind: address already in use
-```
 
-**Solution:**
-```bash
+**Fix:**
+```powershell
 # Find process using port
-lsof -i :4001  # Executor
-lsof -i :3000  # Web-Next
-lsof -i :6379  # Redis
+Get-Process -Id (Get-NetTCPConnection -LocalPort 3003).OwningProcess
 
-# Kill process or change port in .env
-EXECUTOR_PORT=4002
-WEB_PORT=3001
+# Kill process (if safe)
+Stop-Process -Id <PID>
+
+# OR use different port
+pnpm -F web-next dev -- --port 3004
 ```
 
 ---
 
-### 2. Redis Connection Refused
+## Development Servers
 
-**Symptom:**
-```
-Error: connect ECONNREFUSED redis:6379
-```
+### Next.js Not Starting (Port 3003)
+
+**Common Causes:**
+1. Port in use
+2. .env.local misconfigured
+3. Node modules outdated
 
 **Solution:**
 ```bash
-# Check Redis is running
-docker ps | grep redis
+cd apps/web-next
 
-# Check Redis health
-docker exec spark-redis redis-cli PING
-# Should return: PONG
+# 1. Check port
+Get-NetTCPConnection -LocalPort 3003
 
-# Restart Redis
-docker restart spark-redis
+# 2. Verify environment
+cat .env.local  # Should match .env.example
 
-# Check REDIS_URL in .env
-REDIS_URL=redis://spark-redis:6379
+# 3. Clean install
+pnpm clean
+pnpm install --frozen-lockfile
+
+# 4. Restart
+pnpm dev
 ```
 
----
+### WebSocket Server Not Starting (Port 4001)
 
-### 3. No Leader Elected
-
-**Symptom:**
-```
-# No "became leader" in logs
-docker logs executor-1 | grep leader
-# Empty output
-```
+**Symptoms:** WS status dot stays red
 
 **Solution:**
 ```bash
-# Check SCHEDULER_ENABLED
-grep SCHEDULER_ENABLED .env
-# Should be: true
+cd apps/web-next
 
-# Check Redis lock
-docker exec spark-redis redis-cli GET spark:alerts:scheduler:lock
-# If stuck, delete:
-docker exec spark-redis redis-cli DEL spark:alerts:scheduler:lock
+# Check if running
+Get-NetTCPConnection -LocalPort 4001
 
-# Restart executors
-docker restart executor-1 executor-2
+# Start dev WS server
+pnpm ws:dev
 
-# Wait 35 seconds and check again
-sleep 35
-docker logs executor-1 | grep "became leader"
+# Verify
+# Should see: [dev-ws] listening on ws://127.0.0.1:4001
+```
+
+**Note:** WS server is optional for mock mode. Real backend uses different port.
+
+---
+
+## TypeScript Errors
+
+### Build Fails with Type Errors
+
+**Symptoms:** `pnpm build` fails with TypeScript errors
+
+**Diagnosis:**
+```bash
+cd apps/web-next
+pnpm typecheck
+
+# Save for comparison
+pnpm typecheck 2>&1 > ../../evidence/ui/types-current.txt
+```
+
+**Solutions:**
+
+**1. Quick Fix (Development):**
+```bash
+# Use development mode (skips type check)
+pnpm dev  # No type checking
+```
+
+**2. Proper Fix (Follow Issue #11):**
+```bash
+# See KICKOFF_GUIDE.md for complete fix
+# Use centralized types from types/chart.ts
+# Apply Zod schemas from schema/api.ts
+```
+
+**3. Rollback Recent Changes:**
+```bash
+git log --oneline -5
+git revert <commit-sha>
+git push
+```
+
+### Recharts Type Conflicts
+
+**Error:** "JSX element class does not support attributes"
+
+**Cause:** Recharts component type mismatch
+
+**Fix:**
+```typescript
+// Add @ts-ignore with explanation
+{/* @ts-ignore - ReferenceLine type issue with recharts */}
+<ReferenceLine y={threshold} stroke="#ef4444" />
+
+// OR use centralized types
+import type { ChartPoint } from '@/types/chart';
+const data: ChartPoint[] = transformedData;
 ```
 
 ---
 
-### 4. SSE Stream Not Working
+## CI/CD Issues
 
-**Symptom:**
-```
-# Browser shows "pending" forever
-# No data: events
-```
+### Guard Validate Failing
 
-**Solution:**
+**Symptoms:** PR blocked by Guard Validate check
 
-**A) Check Nginx Configuration:**
-```nginx
-# MUST have these for SSE:
-proxy_buffering off;
-proxy_cache off;
-add_header X-Accel-Buffering no;
-chunked_transfer_encoding off;
+**Diagnosis:**
+```powershell
+# Run locally
+.\.github\scripts\validate-workflow-guards.ps1
+
+# Check output
+cat evidence/ci/WORKFLOW_GUARDS_EVIDENCE.md
 ```
 
-**B) Check WebSocket Connection:**
-```bash
-# Test SSE endpoint
-curl -N http://localhost:3000/api/marketdata/stream?symbol=BTCUSDT\&timeframe=1m
+**Common Causes:**
+1. New workflow using secrets without fork guard
+2. Modified existing guard pattern
+3. Script syntax error
 
-# Should see:
-# data: {"type":"open"}
-# data: {"type":"kline",...}
+**Fix:**
+```yaml
+# Add fork guard to secret-using steps
+- name: Step with secret
+  if: ${{ !github.event.pull_request.head.repo.fork }}
+  env:
+    SECRET: ${{ secrets.MY_SECRET || '' }}
 ```
 
-**C) Check Binance Connectivity:**
-```bash
-# Test Binance WS from container
-docker exec web-next-1 curl -I https://stream.binance.com/
-```
+### UX-ACK Gate Failing
 
----
+**Symptoms:** PR blocked by ux_ack check
 
-### 5. Alerts Not Triggering
-
-**Symptom:**
-```
-# Created alert but no triggers
-curl http://localhost:4001/metrics | grep alerts_triggered_total
-# Always 0
-```
-
-**Solution:**
-
-**A) Check Alert is Active:**
-```bash
-curl -s http://localhost:4001/alerts/list | jq '.items[] | {id, active}'
-# active should be true
-```
-
-**B) Check Scheduler Running:**
-```bash
-docker logs executor-1 | grep pollOnce
-# Should see regular "pollOnce" logs every 30s
-```
-
-**C) Check Alert Evaluation:**
-```bash
-# Enable verbose logging (add to .env)
-LOG_LEVEL=debug
-
-# Restart
-docker restart executor-1
-
-# Check logs for evaluation details
-docker logs executor-1 | grep evaluateOne
-```
-
-**D) Check Cooldown:**
-```bash
-# If recently triggered, might be in cooldown
-curl -s http://localhost:4001/metrics | grep alerts_suppressed_total
-# Check reason="cooldown" count
-```
-
----
-
-### 6. Notifications Not Sending
-
-**Symptom:**
-```
-# Alert triggers but no Telegram/Webhook
-curl http://localhost:4001/metrics | grep notifications_sent_total
-# Always 0
-```
-
-**Solution:**
-
-**A) Check Telegram Config:**
-```bash
-# Verify env vars
-grep TELEGRAM .env
-# TELEGRAM_BOT_TOKEN=...
-# TELEGRAM_CHAT_ID=...
-
-# Test token
-curl https://api.telegram.org/bot<YOUR_TOKEN>/getMe
-# Should return bot info
-```
-
-**B) Check Webhook Config:**
-```bash
-# Verify allowed hosts
-grep NOTIFY_ALLOWED_HOSTS .env
-# Should include your webhook domain
-
-# Test webhook URL
-curl -X POST https://your-webhook.com/test
-```
-
-**C) Check Notification Errors:**
-```bash
-docker logs executor-1 | grep notify
-# Look for error details
-
-curl -s http://localhost:4001/metrics | grep notifications_failed_total
-# Check failure reasons
-```
-
----
-
-### 7. High Memory Usage
-
-**Symptom:**
-```
-docker stats
-# Executor or Web-Next using >2GB
-```
-
-**Solution:**
-
-**A) Check for Memory Leaks:**
-```bash
-# Monitor over time
-docker stats --no-stream | grep executor
-
-# If growing steadily, restart
-docker restart executor-1
-```
-
-**B) Reduce Cache Size:**
-```bash
-# In code: reduce toolCache TTL or MAX_CONNECTIONS
-```
-
-**C) Enable Redis Memory Limits:**
-```bash
-# Add to redis.conf or docker command
-maxmemory 512mb
-maxmemory-policy allkeys-lru
-```
-
----
-
-### 8. Metrics Not Showing in Grafana
-
-**Symptom:**
-```
-# Dashboard empty or "No data"
-```
-
-**Solution:**
-
-**A) Check Prometheus Scraping:**
-```bash
-# Open Prometheus UI
-open http://localhost:9090
-
-# Go to Status → Targets
-# Check spark-executor target is UP
-```
-
-**B) Check Metrics Endpoint:**
-```bash
-curl http://localhost:4001/metrics | grep alerts_active
-# Should return numeric value
-```
-
-**C) Check Grafana Data Source:**
-```
-# Grafana → Configuration → Data Sources
-# Test connection to Prometheus
-```
-
-**D) Check Time Range:**
-```
-# Grafana dashboard → Time picker
-# Ensure "Last 1 hour" or appropriate range
-```
-
----
-
-### 9. Chart Not Rendering
-
-**Symptom:**
-```
-# /technical-analysis page blank or error
-```
-
-**Solution:**
-
-**A) Check Browser Console:**
-```
-F12 → Console
-# Look for errors (CORS, fetch failed, etc.)
-```
-
-**B) Check Marketdata Endpoint:**
-```bash
-curl http://localhost:3000/api/marketdata/candles?symbol=BTCUSDT\&timeframe=1h\&limit=100
-# Should return JSON array
-```
-
-**C) Check Lightweight Charts:**
-```bash
-# Clear cache and reload
-Ctrl+Shift+R (Windows/Linux)
-Cmd+Shift+R (Mac)
-```
-
----
-
-### 10. Docker Build Fails
-
-**Symptom:**
-```
-ERROR [executor 5/8] RUN pnpm install
-```
-
-**Solution:**
-
-**A) Clear Build Cache:**
-```bash
-docker builder prune -a
-
-# Rebuild
-docker compose build --no-cache
-```
-
-**B) Check Node/pnpm Version:**
-```dockerfile
-# In Dockerfile, ensure compatible versions
-FROM node:18-alpine
-RUN npm install -g pnpm@8
-```
-
-**C) Check Network:**
-```bash
-# Test npm registry
-curl https://registry.npmjs.org/
-
-# Use --network=host if needed
-docker build --network=host .
-```
-
----
-
-## 🔬 Advanced Diagnostics
-
-### Redis Key Inspection:
-```bash
-# List all alert keys
-docker exec spark-redis redis-cli --scan --pattern "spark:alerts:*"
-
-# Get alert count
-docker exec spark-redis redis-cli SCARD spark:alerts:alerts:index
-
-# Get specific alert
-docker exec spark-redis redis-cli HGET spark:alerts:alert:<ID> json
-```
-
-### Network Debugging:
-```bash
-# Check container network
-docker network inspect spark_default
-
-# Test inter-container connectivity
-docker exec executor-1 ping spark-redis
-docker exec executor-1 curl http://web-next:3000/health
-```
-
-### Performance Profiling:
-```bash
-# Check CPU usage
-docker stats --no-stream
-
-# Check I/O
-docker exec spark-redis redis-cli INFO stats | grep total_commands
-
-# Check connection count
-docker exec spark-redis redis-cli INFO clients
-```
-
----
-
-## 📞 Getting Help
-
-### Log Collection:
-```bash
-# Collect all logs
-mkdir -p logs
-docker logs executor-1 > logs/executor.log 2>&1
-docker logs web-next-1 > logs/web.log 2>&1
-docker logs spark-redis > logs/redis.log 2>&1
-
-# Collect metrics snapshot
-curl http://localhost:4001/metrics > logs/metrics.txt
-
-# Collect system info
-docker info > logs/docker-info.txt
-docker compose config > logs/compose-config.yml
-```
-
-### Issue Report Template:
+**Fix:** Add to PR description:
 ```markdown
-**Environment:**
-- OS: (Linux/Mac/Windows)
-- Docker version: (docker --version)
-- Spark TA version: (git describe --tags)
+## UX-ACK
 
-**Issue:**
-(Describe the problem)
+UX-ACK: ✅ I reviewed the changes; [brief description]; no runtime impact.
+```
 
-**Steps to Reproduce:**
-1. ...
-2. ...
+### UI Smoke Test Slow or Flaky
 
-**Expected Behavior:**
-(What should happen)
+**Symptoms:** Test takes >90s or fails intermittently
 
-**Actual Behavior:**
-(What actually happens)
+**Diagnosis:**
+```bash
+cd apps/web-next
+pnpm test -- --reporter=verbose
 
-**Logs:**
-(Attach logs from above)
+# Check endpoint response times
+curl -w "@curl-format.txt" http://127.0.0.1:3003/api/public/engine-health
+```
 
-**Metrics:**
-(Include relevant metrics)
+**Solutions:**
+
+**1. Reduce Test Timeout:**
+```typescript
+// tests/health.smoke.ts
+const timeout = 3000; // Reduce from 5000
+```
+
+**2. Add Retry Logic (CI):**
+```yaml
+# .github/workflows/ui-smoke.yml
+- name: Run smoke tests
+  uses: nick-invision/retry@v2
+  with:
+    timeout_minutes: 5
+    max_attempts: 3
+    command: pnpm -F web-next test:smoke
 ```
 
 ---
 
-## 🛠️ Emergency Procedures
+## Backend Integration
 
-### Full System Reset:
+### Status Dots Not Green
+
+**Symptoms:** API/WS/Engine dots showing red or yellow
+
+**Diagnosis:**
+
+**1. Check Mock Mode (Default):**
 ```bash
-# Stop all services
-docker compose down
+# Should work without backend
+cd apps/web-next
+cat .env.local  # Should have no ENGINE_URL/PROMETHEUS_URL
+pnpm dev
 
-# Remove volumes (⚠️ DELETES DATA)
-docker volume rm spark_redis-data
-
-# Restart
-docker compose up -d
+# Expected: API ✅, WS ⚠️, Engine ✅ (mock)
 ```
 
-### Disable Scheduler (Emergency):
+**2. Check Real Backend Mode:**
 ```bash
-# Stop alert processing immediately
-docker exec executor-1 sh -c "export SCHEDULER_ENABLED=false && kill -HUP 1"
+# Verify backend services running
+curl http://127.0.0.1:3001/health       # Engine
+curl http://localhost:9090/-/healthy    # Prometheus
 
-# Or restart with flag
-docker stop executor-1
-docker run -e SCHEDULER_ENABLED=false executor-1
+# Check WS connection
+# Should have executor running on 4001
+
+# Verify .env.local
+cat apps/web-next/.env.local
+# Should have:
+# ENGINE_URL=http://127.0.0.1:3001
+# PROMETHEUS_URL=http://localhost:9090
 ```
 
-### Rollback:
-```bash
-# Checkout previous version
-git checkout ta-module-v0.9.0
+**3. Mixed Mode (Hybrid):**
+- Set only ENGINE_URL → API/Engine real, WS mock
+- Set only PROMETHEUS_URL → API real, Engine/WS mock
 
-# Redeploy
-bash scripts/deploy.sh
+### Double WebSocket Connection
+
+**Symptoms:** Slow WS status updates, connection warnings
+
+**Cause:** Both dev-ws and real backend running on 4001
+
+**Fix:**
+```bash
+# Stop dev-ws when using real backend
+# (Find process and kill)
+Get-Process | Where-Object { $_.ProcessName -like "*node*" -and $_.MainWindowTitle -like "*dev-ws*" } | Stop-Process
+
+# OR change dev-ws port
+# Edit apps/web-next/scripts/dev-ws.ts: port = 4002
 ```
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-10-11  
-**Status:** Production Ready
+## Rollback Procedures
 
+### Rollback Single Commit
+
+**Scenario:** Recent change broke something
+
+**Steps:**
+```bash
+# 1. Find commit
+git log --oneline -10
+
+# 2. Revert (creates new commit)
+git revert <commit-sha>
+
+# 3. Push
+git push
+
+# 4. Verify
+pnpm -F web-next typecheck
+pnpm -F web-next build
+```
+
+### Rollback PR (Already Merged)
+
+**Scenario:** Merged PR causing issues
+
+**Steps:**
+```bash
+# 1. Find merge commit
+git log --oneline --merges -5
+
+# 2. Revert merge
+git revert -m 1 <merge-commit-sha>
+
+# 3. Explain in commit
+git commit --amend
+# Add: "Revert PR #X due to [reason]. See issue #Y."
+
+# 4. Push
+git push
+
+# 5. Create issue for proper fix
+gh issue create --title "Fix regression from PR #X"
+```
+
+### Emergency: Direct Push to Main
+
+**⚠️ Use only in production emergency**
+
+```bash
+# 1. Get admin bypass (if needed)
+# Contact repo owner for temporary bypass
+
+# 2. Make minimal fix
+git checkout main
+git pull
+# ... make fix ...
+git commit -m "hotfix: [critical issue]"
+
+# 3. Push with admin
+git push
+
+# 4. Document
+gh issue create --title "Hotfix: [what was fixed]" --label "hotfix"
+
+# 5. Re-enable protection
+# Restore branch protection rules ASAP
+```
+
+---
+
+## Performance Issues
+
+### Build Time Excessive (>5 min)
+
+**Diagnosis:**
+```bash
+cd apps/web-next
+time pnpm build  # Measure
+
+# Check cache
+du -sh .next/cache
+```
+
+**Solutions:**
+```bash
+# 1. Clear cache
+rm -rf .next
+
+# 2. Increase Node memory
+NODE_OPTIONS="--max-old-space-size=4096" pnpm build
+
+# 3. Check dependencies
+pnpm outdated
+```
+
+### Type Checking Slow (>30s)
+
+**Solutions:**
+```bash
+# 1. Use incremental mode (already default)
+# 2. Skip lib check
+# tsconfig.json: "skipLibCheck": true  # (already set)
+
+# 3. Exclude unnecessary files
+# tsconfig.json: "exclude": ["node_modules", ".next"]
+```
+
+---
+
+## Security Issues
+
+### Secrets Exposed in Fork PR
+
+**Symptoms:** GitHub Actions trying to use secrets in fork PR
+
+**Expected Behavior:** Should be blocked by fork guard
+
+**Verification:**
+```powershell
+.\.github\scripts\validate-workflow-guards.ps1
+```
+
+**If guard missing:**
+```yaml
+# Add to workflow step
+if: ${{ !github.event.pull_request.head.repo.fork }}
+```
+
+### Weekly Audit Failing
+
+**Symptoms:** Guard audit creates issue every Monday
+
+**Diagnosis:**
+```powershell
+# Run audit manually
+gh workflow run guard-audit.yml
+
+# Check run logs
+gh run list --workflow=guard-audit.yml --limit 1
+gh run view <run-id>
+```
+
+**Common Causes:**
+1. New workflow without guards
+2. Modified guard pattern
+3. Validator script outdated
+
+**Fix:** See "Guard Validate Failing" above
+
+---
+
+## Database/State Issues
+
+*(Reserved for future backend integration)*
+
+---
+
+## Getting Help
+
+### Internal Resources
+
+1. **Documentation:**
+   - KICKOFF_GUIDE.md — Development guide
+   - NEXT_SPRINT_PLAN.md — Sprint planning
+   - README.md — Quick start
+
+2. **Evidence:**
+   - evidence/ci/ — CI logs
+   - evidence/ui/ — UI test results
+   - evidence/validation/ — Platform health
+
+3. **Scripts:**
+   - scripts/30min-validation.ps1 — Health check
+   - scripts/type-delta.ts — TypeScript progress
+   - .github/scripts/validate-workflow-guards.ps1 — Security
+
+### External Resources
+
+1. **Next.js:** https://nextjs.org/docs
+2. **Recharts:** https://recharts.org/en-US/api
+3. **Zod:** https://zod.dev
+4. **GitHub Actions:** https://docs.github.com/actions
+
+---
+
+## Common Error Messages
+
+### "Cannot find module '@/types/chart'"
+
+**Solution:**
+```bash
+# Verify tsconfig paths
+cat apps/web-next/tsconfig.json | grep -A 5 '"@/*"'
+
+# Should show:
+# "@/*": ["./src/*"]
+
+# Restart dev server
+pnpm dev
+```
+
+### "Module not found: Can't resolve 'zod'"
+
+**Solution:**
+```bash
+cd apps/web-next
+pnpm add zod
+```
+
+### "Context access might be invalid"
+
+**Note:** This is a VS Code false positive. See `.github/WORKFLOW_CONTEXT_WARNINGS.md`
+
+**Solution:** Ignore or disable in `.vscode/settings.json`:
+```json
+{
+  "github-actions.workflows.validateContext": false
+}
+```
+
+---
+
+*Last Updated: 2025-10-25*  
+*For issues not covered here, create GitHub issue with label `question`*
