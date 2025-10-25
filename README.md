@@ -33,3 +33,5 @@ pnpm -w --filter web-next dev
 **WSL Build (lokal):** `bash scripts/build_web_next_wsl.sh`  
 **Çalıştırma (self-host):** `node apps/web-next/.next/standalone/server.js`  
 **CI Artefact:** Workflow sonunda `web-next-standalone.tgz` indirilir (7 gün saklama)
+
+**Ops:** Error Budget rozeti Dashboard'da görünür. Endpoint: `/api/public/error-budget` (Prometheus ENV: `PROM_URL`, `SLO_WINDOW=5m`, `SLO_ALLOWED_ERROR_RATE=0.01`)
