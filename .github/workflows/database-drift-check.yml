@@ -7,6 +7,10 @@ on:
       - '**/prisma/**'
       - 'services/**/schema.prisma'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   drift-check:
     name: Prisma Schema Drift Detection
@@ -49,8 +53,11 @@ jobs:
           ACTUAL=$(pnpm -v)
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+      - name: Fetch dependencies
+        run: pnpm fetch --prod=false
+      
+      - name: Install dependencies (offline)
+        run: pnpm install --offline --frozen-lockfile --strict-peer-dependencies
       
       - name: Generate Prisma Client
         run: pnpm exec prisma generate

@@ -37,8 +37,11 @@ jobs:
           ACTUAL=$(pnpm -v)
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+      - name: Fetch dependencies
+        run: pnpm fetch --prod=false
+      
+      - name: Install dependencies (offline)
+        run: pnpm install --offline --frozen-lockfile --strict-peer-dependencies
       
       - name: Run unit tests
         run: pnpm --filter web-next test -- __tests__/route.test.ts
@@ -71,8 +74,11 @@ jobs:
           ACTUAL=$(pnpm -v)
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+      - name: Fetch dependencies
+        run: pnpm fetch --prod=false
+      
+      - name: Install dependencies (offline)
+        run: pnpm install --offline --frozen-lockfile --strict-peer-dependencies
       
       - name: Build web-next
         run: pnpm --filter web-next build
@@ -181,8 +187,11 @@ jobs:
           ACTUAL=$(pnpm -v)
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+      - name: Fetch dependencies
+        run: pnpm fetch --prod=false
+      
+      - name: Install dependencies (offline)
+        run: pnpm install --offline --frozen-lockfile --strict-peer-dependencies
       
       - name: Install Playwright Browsers
         run: pnpm --filter web-next exec playwright install chromium --with-deps
