@@ -1,3 +1,12 @@
 *.ps1 text eol=crlf
 *.sh  text eol=lf
 *     text=auto
+
+# Büyük binary ve yedekleri LFS dışına/commit dışına it
+GPT_Backups/** -diff -merge
+*.zip -diff -merge
+*.7z -diff -merge
+*.mp4 -diff -merge
+*.iso -diff -merge
+*.exe -diff -merge
+data/chunks_head/** -diff -merge
