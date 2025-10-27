@@ -1,0 +1,40 @@
+name: Lighthouse CI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'apps/web-next/**'
+      - 'packages/**'
+      - '.lighthouserc.json'
+
+jobs:
+  lhci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build packages
+        run: pnpm -w -r build
+      
+      - name: Install Lighthouse CI
+        run: npm i -g @lhci/cli
+      
+      - name: Start dev server
+        run: |
+          pnpm --filter web-next dev -- --port 3003 &
+          sleep 10
+      
+      - name: Run Lighthouse CI
+        run: lhci autorun --config=.lighthouserc.json
+

@@ -1,0 +1,46 @@
+name: Axe Accessibility Tests
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'apps/web-next/**'
+      - 'tests/a11y/**'
+
+jobs:
+  axe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build packages
+        run: pnpm -w -r build
+      
+      - name: Install Playwright
+        run: pnpm exec playwright install --with-deps
+      
+      - name: Start dev server
+        run: |
+          pnpm --filter web-next dev -- --port 3003 &
+          sleep 10
+      
+      - name: Run Axe tests
+        run: pnpm exec playwright test tests/a11y/axe.spec.ts
+      
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-violations
+          path: test-results/
+
