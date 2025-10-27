@@ -1,0 +1,43 @@
+name: ui-smoke-dev
+on:
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'apps/web-next/**'
+      - 'scripts/**'
+      - 'docs/**'
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile
+      - name: Start web-next dev (bg)
+        working-directory: apps/web-next
+        run: |
+          echo "::group::DEV START" 
+          pnpm dev &
+          echo "::endgroup::"
+      - name: Wait for 3003
+        shell: pwsh
+        run: |
+          $ok=$false; for($i=0;$i -lt 30;$i++){ try { Invoke-WebRequest http://127.0.0.1:3003/api/health -UseBasicParsing -TimeoutSec 2 | Out-Null; $ok=$true; break } catch { Start-Sleep -Seconds 2 } } ; if(-not $ok){ Write-Error 'web-next not ready' }
+      - name: Run smoke evidence script
+        shell: pwsh
+        run: pwsh scripts/ui-ux-smoke-evidence.ps1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-ux-evidence
+          path: evidence/ui-ux/**

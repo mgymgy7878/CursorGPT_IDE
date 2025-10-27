@@ -1,5 +1,4 @@
 {
-  // CI 'docs' job gürültüsünü azalt: satır uzunluğu ve inline HTML serbest
   "MD013": false,
   "MD033": false,
   "MD041": true,

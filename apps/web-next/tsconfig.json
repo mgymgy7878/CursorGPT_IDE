@@ -3,8 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@spark/*": ["../../packages/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@spark/*": [
+        "../../packages/*"
+      ]
     },
     "moduleResolution": "Bundler",
     "lib": [
@@ -30,6 +34,12 @@
     "target": "ES2017",
     "strictNullChecks": true
   },
-  "include": ["./**/*"],
-  "exclude": ["node_modules", ".next"]
+  "include": [
+    "./**/*",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next"
+  ]
 }
