@@ -4,14 +4,33 @@
 <!-- PR'ın amacını kısa ve net bir şekilde açıklayın -->
 
 ## UX/Accessibility Kontrolü
-- [ ] **UX-ACK**: Hangi Nielsen Norman veya WCAG 2.1 prensibi ile uyumlu?
-  - [ ] NN/g: <!-- örn: Visibility of System Status, Error Prevention -->
-  - [ ] WCAG: <!-- örn: 1.4.3 Contrast, 2.1.1 Keyboard -->
-- [ ] **Evidence**: Kanıt dokümanları eklendi mi?
-  - [ ] Lighthouse raporu (Performance ≥ 0.90, A11y ≥ 0.90)
-  - [ ] Axe DevTools çıktısı (critical violations = 0)
-  - [ ] Ekran görüntüsü (before/after)
-  - [ ] Video/GIF (etkileşim akışları için)
+
+### UX-ACK (Required)
+Hangi Nielsen Norman veya WCAG 2.1 prensibi ile uyumlu?
+
+**WCAG 2.1 Compliance:**
+- [ ] **1.4.3 Contrast (Minimum)**: Tüm metinler ≥4.5:1 kontrast oranı
+- [ ] **2.1.1 Keyboard**: Tüm interaktif elementler klavye ile erişilebilir
+- [ ] **3.3.2 Labels or Instructions**: Form input'ları proper `<label>` ilişkili
+- [ ] **4.1.2 Name, Role, Value**: ARIA attributes doğru kullanıldı
+- [ ] **4.1.3 Status Messages**: Canlı bölgeler için `role="status"` + `aria-live`
+
+**Nielsen Norman Group:**
+- [ ] **Visibility of System Status**: Kullanıcı sistemin durumunu her zaman görür
+- [ ] **Error Prevention**: Destructive action'lar confirmation ister
+- [ ] **Recognition Rather Than Recall**: Net etiketler, görsel hiyerarşi
+
+### Evidence (Required)
+Kanıt dokümanları eklendi mi?
+
+- [ ] **Lighthouse Raporu**: CI artifacts link veya JSON summary
+  - [ ] Performance Score ≥ 0.90
+  - [ ] Accessibility Score ≥ 0.90
+  - [ ] 5 sayfa test edildi (/, /portfolio, /strategies, /running, /settings)
+- [ ] **Axe DevTools**: Critical violations = 0 screenshot'u
+- [ ] **Page Screenshots**: Etkilenen tüm sayfalar (before/after)
+- [ ] **Bundle Size**: Initial load < 250KB (build output)
+- [ ] **Smoke Test**: `pwsh scripts/smoke-ui.ps1` passed
 
 ## Teknik Kontrol
 - [ ] Unit testler geçti (`pnpm test`)
