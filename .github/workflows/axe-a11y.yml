@@ -26,13 +26,23 @@ jobs:
       - name: Build packages
         run: pnpm -w -r build
       
+      - name: Build web-next (standalone)
+        run: pnpm --filter web-next build
+      
+      - name: Copy standalone assets
+        run: node tools/copy-standalone-assets.cjs
+      
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps
       
-      - name: Start dev server
+      - name: Start production server
         run: |
-          pnpm --filter web-next dev -- --port 3003 &
-          sleep 10
+          pnpm --filter web-next start -- -p 3003 &
+      
+      - name: Wait for server warmup
+        run: |
+          npx wait-on http://127.0.0.1:3003 --timeout 30000
+          sleep 15
       
       - name: Run Axe tests
         run: pnpm exec playwright test tests/a11y/axe.spec.ts
