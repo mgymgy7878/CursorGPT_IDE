@@ -1,0 +1,22 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://127.0.0.1:3003/",
+        "http://127.0.0.1:3003/portfolio",
+        "http://127.0.0.1:3003/strategies",
+        "http://127.0.0.1:3003/settings"
+      ],
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", {"minScore": 0.90}],
+        "categories:accessibility": ["error", {"minScore": 0.90}],
+        "unused-javascript": "warn",
+        "total-byte-weight": ["warn", {"maxNumericValue": 250000}]
+      }
+    }
+  }
+}
+

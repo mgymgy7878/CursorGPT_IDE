@@ -1,251 +1,51 @@
-# Pull Request
+# Pull Request Özeti
 
-## 📋 Summary
+## Değişiklik Tanımı
+<!-- PR'ın amacını kısa ve net bir şekilde açıklayın -->
 
-<!-- Brief description of what this PR does -->
+## UX/Accessibility Kontrolü
+- [ ] **UX-ACK**: Hangi Nielsen Norman veya WCAG 2.1 prensibi ile uyumlu?
+  - [ ] NN/g: <!-- örn: Visibility of System Status, Error Prevention -->
+  - [ ] WCAG: <!-- örn: 1.4.3 Contrast, 2.1.1 Keyboard -->
+- [ ] **Evidence**: Kanıt dokümanları eklendi mi?
+  - [ ] Lighthouse raporu (Performance ≥ 0.90, A11y ≥ 0.90)
+  - [ ] Axe DevTools çıktısı (critical violations = 0)
+  - [ ] Ekran görüntüsü (before/after)
+  - [ ] Video/GIF (etkileşim akışları için)
 
-## 🎯 Type of Change
+## Teknik Kontrol
+- [ ] Unit testler geçti (`pnpm test`)
+- [ ] E2E testler geçti (`pnpm test:e2e`)
+- [ ] Type check başarılı (`pnpm typecheck`)
+- [ ] Linter temiz (`pnpm lint`)
+- [ ] Bundle size kontrol edildi (< 250KB target)
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Performance improvement
-- [ ] Refactoring (no functional changes)
-- [ ] CI/CD improvements
-- [ ] Infrastructure changes
+## Güvenlik ve Risk
+- [ ] **Rollback Planı**: Sorun çıkarsa geri alma adımları
+  - <!-- örn: Feature flag kapanacak, ENV değişkeni eski değere dönecek -->
+- [ ] Breaking change var mı? **Evet / Hayır**
+- [ ] Database migration gerekli mi? **Evet / Hayır**
+- [ ] API contract değişikliği var mı? **Evet / Hayır**
 
-## 🔗 Related Issues
+## Dokümantasyon
+- [ ] README.md güncellendi (gerekiyorsa)
+- [ ] API_REFERENCE.md güncellendi (gerekiyorsa)
+- [ ] CHANGELOG.md'ye eklendi
+- [ ] Inline code comment'lar eklendi (karmaşık logic için)
 
-<!-- Link to related issues -->
-Closes #
-Related to #
+## Hijyen Kontrolleri
+- [ ] `node_modules/` eklenmedi (CI guard otomatik kontrol eder)
+- [ ] `.env` veya secret'lar commit edilmedi
+- [ ] Console.log/debug kodları temizlendi
+- [ ] TODO comment'lar issue'ya dönüştürüldü
 
-## 📝 Changes Made
-
-<!-- List of specific changes -->
-
-- 
-- 
-- 
-
-## ✅ Validation & Sign-off Checklist
-
-### 1. Code Quality
-
-- [ ] Code follows project style guidelines
-- [ ] Self-review completed
-- [ ] Comments added for complex logic
-- [ ] No console.log or debug code left
-- [ ] ESLint passes with no warnings
-- [ ] TypeScript strict mode passes
-
-### 2. Testing
-
-- [ ] Unit tests added/updated
-- [ ] Integration tests added/updated
-- [ ] E2E tests added/updated (if applicable)
-- [ ] All tests pass locally
-- [ ] Test coverage maintained or improved
-- [ ] Contract tests updated (for API changes)
-- [ ] Chaos tests considered (for resilience features)
-
-### 3. Database Changes
-
-- [ ] Migration scripts included
-- [ ] Migration tested (up and down)
-- [ ] Schema drift check passed
-- [ ] Indexes added for performance
-- [ ] Data integrity verified
-- [ ] Rollback tested
-
-### 4. Security & Compliance
-
-- [ ] No secrets or sensitive data exposed
-- [ ] CSP/COEP headers verified (for frontend)
-- [ ] Input validation added
-- [ ] SQL injection prevented (parameterized queries)
-- [ ] XSS prevention applied
-- [ ] KVKK/GDPR compliance maintained (for user data)
-
-### 5. Performance
-
-- [ ] N+1 queries avoided
-- [ ] Caching strategy considered
-- [ ] Database queries optimized
-- [ ] Bundle size impact checked (for frontend)
-- [ ] Memory leaks checked
-- [ ] Load testing performed (for high-impact features)
-
-### 6. Monitoring & Observability
-
-- [ ] Prometheus metrics added/updated
-- [ ] Alert rules updated (if needed)
-- [ ] Logs added for key operations
-- [ ] Error tracking configured
-- [ ] Performance metrics baseline established
-
-**New Metrics** (if applicable):
-```
-metric_name{label1="value1"} - Description
-metric_name_total - Description
-```
-
-### 7. Documentation
-
-- [ ] README updated (if needed)
-- [ ] API documentation updated
-- [ ] Changelog entry added
-- [ ] Runbook updated (for ops changes)
-- [ ] Architecture diagrams updated (for major changes)
-
-### 8. Rollback & Recovery
-
-**Rollback Plan Link:** 
-<!-- Link to rollback documentation or steps -->
-
-**Rollback Triggers:**
-- [ ] Error rate > 5% for 5 minutes
-- [ ] P95 latency > 2x baseline
-- [ ] Critical alert fired
-- [ ] Manual trigger from on-call
-
-**Rollback Procedure:**
-<!-- Quick rollback steps -->
-```bash
-# Example:
-git checkout v1.3.1
-pnpm install && pnpm build
-systemctl restart spark-trading-api
-```
-
-### 9. Evidence & Compliance
-
-**Evidence Path:** `evidence/`
-
-Evidence files collected:
-- [ ] Validation test results
-- [ ] Performance benchmarks
-- [ ] Security scan results
-- [ ] Manual testing screenshots/logs
-
-### 10. Deployment
-
-- [ ] Feature flag configured (if applicable)
-- [ ] Deployment plan documented
-- [ ] Blue-green deployment ready (if applicable)
-- [ ] Canary rollout plan (if applicable)
-- [ ] On-call team notified
-- [ ] Deployment window identified
-
-**Deployment Type:**
-- [ ] Standard deployment
-- [ ] Blue-green deployment
-- [ ] Canary deployment (% rollout)
-- [ ] Feature flag rollout
-
-## 📊 Metrics Baseline
-
-<!-- Establish baseline for comparison -->
-
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| P95 Latency | XXXms | XXXms | +/-X% |
-| Error Rate | X.XX% | X.XX% | +/-X% |
-| DB Query Time | XXXms | XXXms | +/-X% |
-| Bundle Size | XXkB | XXkB | +/-X% |
-
-## 🖼️ Screenshots (if applicable)
-
-<!-- Add screenshots for UI changes -->
-
-## 🧪 Testing Evidence
-
-### Unit Tests
-```bash
-# Test command and results
-pnpm test
-# ✅ 125 tests passing
-```
-
-### Integration Tests
-```bash
-# Test command and results
-pnpm test:integration
-# ✅ 42 tests passing
-```
-
-### E2E Tests
-```bash
-# Test command and results
-pnpm test:e2e
-# ✅ 18 tests passing
-```
-
-### Manual Testing
-<!-- Describe manual testing performed -->
-
-- [ ] Happy path tested
-- [ ] Error cases tested
-- [ ] Edge cases tested
-- [ ] Cross-browser tested (for frontend)
-- [ ] Mobile responsive tested (for frontend)
-
-## 🚨 Breaking Changes
-
-<!-- If this PR introduces breaking changes, describe them here -->
-
-**Migration Guide:**
-<!-- Steps for users to adapt to breaking changes -->
-
-## 📚 References
-
-<!-- Links to related documentation, discussions, etc. -->
-
-- 
-- 
-
-## 🔍 Reviewer Checklist
-
-<!-- For reviewers -->
-
-- [ ] Code logic is sound
-- [ ] Tests are comprehensive
-- [ ] Documentation is clear
-- [ ] Security considerations addressed
-- [ ] Performance impact acceptable
-- [ ] Rollback plan is viable
-- [ ] Evidence is sufficient
-
-## 🎉 Post-Merge Checklist
-
-<!-- To be completed after merge -->
-
-- [ ] Monitor metrics for 48 hours
-- [ ] No critical alerts fired
-- [ ] Performance within expected ranges
-- [ ] Error rates nominal
-- [ ] User feedback collected
-- [ ] Documentation published
+## Deployment Notu
+<!-- Production deployment öncesi dikkat edilmesi gerekenler -->
+- **ENV değişkenleri**: <!-- örn: BINANCE_API_URL production'da set edilmeli -->
+- **Canary stratejisi**: <!-- örn: %10 trafik → 24h bekle → %100 -->
+- **İlk gözlem noktaları**: <!-- örn: /api/health, P95 latency, error rate -->
 
 ---
 
-**Sign-off:**
-
-- [ ] I have read and followed the [VALIDATION_SIGNOFF_CHECKLIST](../docs/VALIDATION_SIGNOFF_CHECKLIST.md)
-- [ ] I confirm this PR is production-ready
-- [ ] I am available for post-deployment monitoring
-
-**Approved by:** <!-- Name and date -->  
-**Date:** <!-- YYYY-MM-DD -->  
-**Status:** <!-- APPROVED FOR PRODUCTION / NEEDS WORK -->
-
----
-
-## 🔐 CI Requirements Checklist
-
-- [ ] PR açıklamasında **UX-ACK:** satırı var
-- [ ] Secret kullanan workflow adımlarında **fork guard** var (`if: ${{ !github.event.pull_request.head.repo.fork }}`)
-- [ ] `.github/workflows/` değişikliği yaptıysam, **Guard Validate** check green
-
-**Not:** Guard Validate otomatik kontrol eder. Detaylar için [CONTRIBUTING.md](../CONTRIBUTING.md) bakınız.
+### Reviewer için notlar
+<!-- Code review yapan kişiye özel bilgi, test senaryoları, manuel test adımları -->
