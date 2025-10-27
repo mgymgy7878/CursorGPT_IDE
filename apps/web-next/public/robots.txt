@@ -1,0 +1,13 @@
+# Spark Trading - Robots.txt
+# Development/staging environment
+
+User-agent: *
+Disallow: /api/
+Disallow: /settings
+Disallow: /_next/
+
+# Allow public pages
+Allow: /
+Allow: /*.css$
+Allow: /*.js$
+
