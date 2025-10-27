@@ -15,6 +15,8 @@ AI destekli, çoklu borsa entegrasyonuna sahip, strateji üreten ve risk kontrol
 - [Docs/API](docs/API.md)
 - [Docs/Metrics & Canary](docs/METRICS_CANARY.md)
 - [Docs/All-in-One](docs/SPARK_ALL_IN_ONE.md)
+- **[Docs/UI & UX Planı](docs/UI_UX_PLAN.md)**
+- **[Docs/UI & UX Backlog](docs/UI_UX_BACKLOG.md)**
 
 ## Çalıştırma (lokal)
 ```bash
