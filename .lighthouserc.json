@@ -5,6 +5,7 @@
         "http://127.0.0.1:3003/",
         "http://127.0.0.1:3003/portfolio",
         "http://127.0.0.1:3003/strategies",
+        "http://127.0.0.1:3003/running",
         "http://127.0.0.1:3003/settings"
       ],
       "numberOfRuns": 1
