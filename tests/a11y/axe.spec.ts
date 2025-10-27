@@ -13,7 +13,6 @@ const PAGES = [
   { path: "/portfolio", name: "Portföy" },
   { path: "/strategies", name: "Stratejilerim" },
   { path: "/running", name: "Çalışan Stratejiler" },
-  { path: "/strategy-lab", name: "Strategy Lab" },
   { path: "/settings", name: "Ayarlar" },
 ];
 
