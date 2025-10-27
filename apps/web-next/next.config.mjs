@@ -67,6 +67,27 @@ const nextConfig = {
         destination: '/api/snapshot/download',
         permanent: true, // 308 Permanent Redirect
       },
+      // Trailing slash redirects (prevent CLS/LCP variance)
+      {
+        source: '/settings/',
+        destination: '/settings',
+        permanent: true,
+      },
+      {
+        source: '/portfolio/',
+        destination: '/portfolio',
+        permanent: true,
+      },
+      {
+        source: '/strategies/',
+        destination: '/strategies',
+        permanent: true,
+      },
+      {
+        source: '/running/',
+        destination: '/running',
+        permanent: true,
+      },
     ];
   },
 };

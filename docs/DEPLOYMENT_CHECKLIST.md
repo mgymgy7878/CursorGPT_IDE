@@ -207,9 +207,35 @@ export async function POST(req: Request) {
 - Server-side only: Prisma + encrypted at rest
 - Rotate keys every 90 days (compliance)
 
-**CSP Headers:**
+**CSP Headers (Already Configured):**
+
+`next.config.mjs` already includes CSP headers:
+```javascript
+headers: async () => ({
+  source: '/(.*)',
+  headers: [
+    { key: 'Content-Security-Policy', value: "default-src 'self'; connect-src 'self' ws: wss:" },
+    { key: 'X-Content-Type-Options', value: 'nosniff' },
+    { key: 'X-Frame-Options', value: 'DENY' },
+    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  ]
+})
 ```
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' wss://stream.binance.com;
+
+**For production (Nginx/CDN):**
+- Add `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+- Rate limiting: 100 req/min per IP
+- DDoS protection: Cloudflare or AWS Shield
+
+**Redirects (308 Permanent):**
+
+Trailing slash redirects prevent CLS/LCP variance:
+```javascript
+redirects: async () => [
+  { source: '/settings/', destination: '/settings', permanent: true },
+  { source: '/portfolio/', destination: '/portfolio', permanent: true },
+  // ... all core pages
+]
 ```
 
 ---
