@@ -1,0 +1,10 @@
+groups:
+- name: spark-dynamic
+  rules:
+  - alert: kill-switch-armed
+    expr: executor_kill_switch_armed == 1
+    for: 0m
+    labels: { severity: info, source: spark }
+    annotations:
+      summary: "Kill-switch armed"
+      description: "Yeni canlı işlemler engellendi"

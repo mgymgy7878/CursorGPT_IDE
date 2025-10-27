@@ -1,0 +1,52 @@
+groups:
+- name: release_ops
+  rules:
+  - alert: CanaryErrorRateHigh
+    expr: (rate(spark_private_errors_total[10m]) / clamp_min(rate(spark_private_calls_total[10m]),1e-9)) > 0.05
+    for: 20m
+    labels:
+      severity: warning
+      team: trading
+    annotations:
+      summary: "Error rate > 5% during canary"
+      description: "Private API error rate is {{ $value | humanizePercentage }} for 20 minutes"
+      
+  - alert: CanaryNoCalls
+    expr: rate(spark_private_calls_total[15m]) == 0
+    for: 30m
+    labels:
+      severity: info
+      team: trading
+    annotations:
+      summary: "No private calls for 30m during canary"
+      description: "No private API calls detected for 30 minutes"
+      
+  - alert: WSDisconnectHigh
+    expr: increase(spark_ws_disconnects_total[15m]) > 5
+    for: 5m
+    labels:
+      severity: warning
+      team: trading
+    annotations:
+      summary: "High WebSocket disconnects"
+      description: "{{ $value }} WebSocket disconnects in 15 minutes"
+      
+  - alert: RiskBreachDetected
+    expr: increase(spark_risk_breach_total[1h]) > 0
+    for: 1m
+    labels:
+      severity: critical
+      team: trading
+    annotations:
+      summary: "Risk breach detected"
+      description: "{{ $value }} risk breaches in the last hour"
+      
+  - alert: APISlowResponse
+    expr: histogram_quantile(0.95, rate(spark_api_duration_seconds_bucket[5m])) > 2
+    for: 10m
+    labels:
+      severity: warning
+      team: trading
+    annotations:
+      summary: "API response time high"
+      description: "95th percentile API response time is {{ $value }}s" 

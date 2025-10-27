@@ -1,0 +1,30 @@
+rule_files:
+  - optimizer.yml
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'optimizer_queue_depth{priority="high"}'
+        values: [0 0 0 0 0 0 0 0 0 0 0]
+      - series: 'optimizer_queue_depth{priority="normal"}'
+        values: [0 0 0 0 0 0 0 0 0 0 0]
+      - series: 'optimizer_queue_depth{priority="low"}'
+        values: [0 0 0 0 0 0 0 0 0 0 0]
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: OptimizerQueueBacklogHigh
+        exp_alerts: []   # under 200, should NOT fire
+  - interval: 1m
+    input_series:
+      - series: 'optimizer_queue_depth{priority="high"}'
+        values: [0 0 0 0 0 0 0 0 0 0 0]
+      - series: 'optimizer_queue_depth{priority="normal"}'
+        values: [0 0 0 0 0 0 0 0 0 0 0]
+      - series: 'optimizer_queue_depth{priority="low"}'
+        values: [0 0 0 0 0 0 0 0 0 0 0]
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: OptimizerQueueBacklogHigh
+        exp_alerts:
+          - exp_labels:
+              priority: low

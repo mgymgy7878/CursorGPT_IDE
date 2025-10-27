@@ -1,0 +1,103 @@
+{
+  "nonce": "20250820-281000-147258",
+  "started_utc": "2025-08-20T28:10:00Z",
+  "status": "ERROR",
+  "reason": "ROBUST_OR_FRAGILITY_WEAK",
+  "thresholds": {
+    "robust_base_ge": 4,
+    "fragility_top_ge": 0.6,
+    "oos_positive_ratio_ge": 0.6,
+    "compute_total_ms_leq": 3000
+  },
+  "dataset": {
+    "source": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 12000,
+    "from_utc": "2025-08-11T06:22:00.000Z",
+    "to_utc": "2025-08-19T14:21:00.000Z"
+  },
+  "grid_base": {
+    "overs": [
+      10,
+      15,
+      20,
+      25,
+      30,
+      35,
+      40
+    ],
+    "overb": [
+      60,
+      65,
+      70,
+      75,
+      80,
+      85,
+      90
+    ],
+    "robust_count_sharpe_gt1": 8,
+    "robust_ratio": 0.16,
+    "sharpe_max": 9.42,
+    "sharpe_min": -10.04,
+    "sharpe_delta": 19.46
+  },
+  "stress": {
+    "cost_scenarios": 4,
+    "noise_replicas": 20,
+    "fragility_top": 0.55,
+    "robust_count_stress_gt1": null
+  },
+  "best_candidate": {
+    "oversold": 10,
+    "overbought": 75,
+    "sharpe": 9.42,
+    "cagr_pct": 8.01,
+    "max_dd_pct": 0.41,
+    "trades": 4,
+    "exposure_pct": 2.13,
+    "fragility_score": 0.55
+  },
+  "oos_recheck": {
+    "folds": 5,
+    "positive_ratio": 0.4,
+    "median_sharpe": 0,
+    "min_sharpe": 0,
+    "metrics": [
+      {
+        "sharpe": 12.8,
+        "cagr_pct": 20.44,
+        "max_dd_pct": 0.41
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 18.4,
+        "cagr_pct": 22.04,
+        "max_dd_pct": 0.21
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      }
+    ]
+  },
+  "perf": {
+    "compute_total_ms": 304
+  },
+  "evidence_paths": {
+    "index": "docs\\evidence\\v1.4-rsi14mr-triage\\20250820-281000-147258\\index.json",
+    "metrics": "docs\\evidence\\v1.4-rsi14mr-triage\\20250820-281000-147258\\metrics.json",
+    "summary_csv": "docs\\evidence\\v1.4-rsi14mr-triage\\20250820-281000-147258\\summary.csv",
+    "manifest": "docs\\evidence\\v1.4-rsi14mr-triage\\20250820-281000-147258\\manifest.sha256"
+  }
+}

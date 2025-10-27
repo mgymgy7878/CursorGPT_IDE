@@ -1,51 +1,43 @@
-import type { Role } from "@/config/routes";
+// Client-side auth helpers
 
-function parseJwt(token: string): any | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const pad = b64.length % 4 === 2 ? "==" : b64.length % 4 === 3 ? "=" : "";
-    const b64p = b64 + pad;
-    // Prefer atob/TextDecoder for edge/browser, fallback to Buffer in Node
-    let jsonStr: string;
-    if (typeof atob === 'function') {
-      const binStr = atob(b64p);
-      const bytes = Uint8Array.from(binStr, c => c.charCodeAt(0));
-      jsonStr = new TextDecoder().decode(bytes);
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const buf = require('buffer').Buffer.from(b64p, 'base64');
-      jsonStr = buf.toString('utf-8');
+let cachedToken: string | null = null;
+
+export function setAuthToken(token: string) {
+  cachedToken = token;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('admin-token', token);
+    document.cookie = `admin-token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+  }
+}
+
+export function getAuthToken(): string | null {
+  if (cachedToken) return cachedToken;
+  
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('admin-token');
+    if (stored) {
+      cachedToken = stored;
+      return stored;
     }
-    return JSON.parse(jsonStr);
-  } catch {
-    return null;
+  }
+  
+  return null;
+}
+
+export function clearAuthToken() {
+  cachedToken = null;
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('admin-token');
+    document.cookie = 'admin-token=; path=/; max-age=0';
   }
 }
 
-export function inferRolesFromCookie(cookieValue?: string): Role[] {
-  if (!cookieValue) return ["guest"] as Role[];
-  const payload = parseJwt(cookieValue);
-  if (!payload) return ["guest"] as Role[];
-
-  const nowSec = Math.floor(Date.now() / 1000);
-  if (typeof payload.exp === "number" && payload.exp < nowSec) {
-    return ["guest"] as Role[];
-  }
-  const claimRoles = Array.isArray(payload.roles) ? payload.roles as string[] : [];
-  const mapped: Role[] = claimRoles.includes("admin")
-    ? ["admin"]
-    : claimRoles.includes("user")
-    ? ["user"]
-    : ["guest"];
-  return mapped;
+export function isAuthenticated(): boolean {
+  return getAuthToken() !== null;
 }
 
-export function hasAccess(path: string, roles: Role[], roleOfRoute: Record<string, Role[]>): boolean {
-  const need = roleOfRoute[path];
-  if (!need) return true;
-  return roles.some((r) => need.includes(r));
+export function getAuthHeaders(): HeadersInit {
+  const token = getAuthToken();
+  return token ? { 'x-admin-token': token } : {};
 }
-
 

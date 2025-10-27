@@ -1,0 +1,129 @@
+name: Weekly Chaos Testing
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6 AM UTC
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  weekly-chaos:
+    runs-on: windows-latest
+    name: Weekly Chaos Testing
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+        
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.14.0
+        
+    - name: Install Dependencies
+      run: pnpm install
+      
+    - name: Chaos Test - Burst Simulation
+      run: pnpm run chaos:burst
+      
+    - name: Chaos Test - I/O Wait Simulation
+      run: powershell -ExecutionPolicy Bypass -File scripts/chaos-test.ps1 io
+      
+    - name: Chaos Test - Child Hang Simulation
+      run: powershell -ExecutionPolicy Bypass -File scripts/chaos-test.ps1 hang
+      
+    - name: Evidence Collection
+      run: |
+        mkdir -p evidence/_chaos
+        Get-Content evidence/runner/stall-events.jsonl -Tail 20 > evidence/_chaos/chaos-events.jsonl
+        powershell -ExecutionPolicy Bypass -File scripts/daily-report.ps1
+        
+    - name: Upload Chaos Evidence
+      uses: actions/upload-artifact@v4
+      with:
+        name: weekly-chaos-evidence-${{ github.run_id }}
+        path: |
+          evidence/_chaos/**
+          evidence/reports/daily_report_*.zip
+        retention-days: 90
+        
+    - name: Chaos Test Results Summary
+      run: |
+        echo "## Weekly Chaos Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(Get-Date)" >> $GITHUB_STEP_SUMMARY
+        echo "**Test Types:** Burst, I/O Wait, Child Hang" >> $GITHUB_STEP_SUMMARY
+        
+        if (Test-Path "evidence/runner/stall-events.jsonl") {
+          $chaosEvents = Get-Content "evidence/runner/stall-events.jsonl" -Tail 10 | Where-Object { $_ -match '"commandType":"chaos-' }
+          echo "**Chaos Events Captured:** $($chaosEvents.Count)" >> $GITHUB_STEP_SUMMARY
+          
+          $rootCauses = $chaosEvents | ForEach-Object { 
+            try { ($_ | ConvertFrom-Json).rootCause } catch { "unknown" }
+          } | Group-Object | ForEach-Object { "$($_.Name): $($_.Count)" }
+          
+          echo "**Root Causes:** $($rootCauses -join ', ')" >> $GITHUB_STEP_SUMMARY
+        }
+        
+        echo "**Evidence Uploaded:** weekly-chaos-evidence-${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+
+  monthly-deep-chaos:
+    runs-on: windows-latest
+    name: Monthly Deep Chaos Testing
+    if: github.event_name == 'schedule' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+        
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.14.0
+        
+    - name: Install Dependencies
+      run: pnpm install
+      
+    - name: Deep Chaos Test - All Scenarios
+      run: pnpm run chaos:test
+      
+    - name: Config Validation
+      run: pnpm run config:validate
+      
+    - name: Evidence Rotation Test
+      run: pnpm run evidence:rotate
+      
+    - name: Deep Chaos Analysis
+      run: |
+        echo "## Monthly Deep Chaos Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(Get-Date)" >> $GITHUB_STEP_SUMMARY
+        echo "**Tests Run:** All chaos scenarios + config validation + evidence rotation" >> $GITHUB_STEP_SUMMARY
+        
+        # Analyze root-cause distribution
+        if (Test-Path "evidence/runner/stall-events.jsonl") {
+          $allEvents = Get-Content "evidence/runner/stall-events.jsonl" | Where-Object { $_ -match '"rootCause"' }
+          $rootCauseDist = $allEvents | ForEach-Object {
+            try { ($_ | ConvertFrom-Json).rootCause } catch { "unknown" }
+          } | Group-Object | Sort-Object Count -Descending
+          
+          echo "**Root-Cause Distribution:**" >> $GITHUB_STEP_SUMMARY
+          foreach ($rc in $rootCauseDist) {
+            echo "- $($rc.Name): $($rc.Count)" >> $GITHUB_STEP_SUMMARY
+          }
+        }
+        
+        # Check evidence integrity
+        if (Test-Path "evidence/runner/daily_report_manifest.json") {
+          $manifest = Get-Content "evidence/runner/daily_report_manifest.json" | ConvertFrom-Json
+          echo "**Evidence Integrity:** $($manifest.files.Count) files, $($manifest.total_size_mb) MB" >> $GITHUB_STEP_SUMMARY
+        }

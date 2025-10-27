@@ -1,0 +1,111 @@
+groups:
+  - name: spark-futures
+    interval: 30s
+    rules:
+      # Futures order latency alert
+      - alert: FuturesOrderLatencyHighP95
+        expr: |
+          histogram_quantile(0.95, 
+            sum by (le, symbol, type) (
+              rate(spark_futures_order_place_latency_ms_bucket[5m])
+            )
+          ) > 1200
+        for: 5m
+        labels:
+          severity: warning
+          component: futures
+          layer: execution
+        annotations:
+          summary: "Futures order place latency yüksek (p95 > 1200ms)"
+          description: "Symbol {{ $labels.symbol }} type {{ $labels.type }} order latency p95: {{ $value | humanizeDuration }}"
+          runbook: "Check Binance Futures API status and network latency"
+          
+      # Futures order rejection rate alert
+      - alert: FuturesOrderRejectRateHigh
+        expr: |
+          sum by (reason) (
+            rate(spark_futures_order_reject_total[5m])
+          ) > 0.02
+        for: 3m
+        labels:
+          severity: critical
+          component: futures
+          layer: execution
+        annotations:
+          summary: "Futures order reject oranı yüksek"
+          description: "Reject rate {{ $value }}/s for reason: {{ $labels.reason }} (threshold: 0.02/s)"
+          runbook: "Check API credentials, margin, and risk limits"
+          
+      # WebSocket reconnect spike alert
+      - alert: FuturesWsReconnectSpike
+        expr: |
+          sum(rate(spark_futures_ws_reconnects_total[5m])) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          component: futures
+          layer: data
+        annotations:
+          summary: "Futures WebSocket reconnect sıçraması"
+          description: "WS reconnect rate: {{ $value }}/s (threshold: 0.5/s)"
+          runbook: "Check network stability and Binance WebSocket service status"
+          
+      # Futures data staleness alert
+      - alert: FuturesDataStale
+        expr: |
+          time() - max(spark_futures_ws_connection_duration_seconds) > 300
+        for: 2m
+        labels:
+          severity: warning
+          component: futures
+          layer: data
+        annotations:
+          summary: "Futures veri tazeliği düşük"
+          description: "WebSocket connection duration suggests stale data (> 5 minutes)"
+          runbook: "Check WebSocket connection status and restart if needed"
+          
+      # Unrealized PnL drop alert
+      - alert: FuturesUnrealizedPnLDrop
+        expr: |
+          (
+            sum(spark_futures_pnl_unrealized_usd) 
+            - sum(spark_futures_pnl_unrealized_usd offset 10m)
+          ) < -50
+        for: 5m
+        labels:
+          severity: warning
+          component: futures
+          layer: risk
+        annotations:
+          summary: "Futures unrealized PnL düşüşü"
+          description: "Unrealized PnL dropped by ${{ $value | humanize }} in last 10 minutes (threshold: -$50)"
+          runbook: "Review open positions and market conditions"
+          
+      # High margin ratio alert (approaching liquidation)
+      - alert: FuturesMarginRatioHigh
+        expr: |
+          spark_futures_margin_ratio > 0.80
+        for: 1m
+        labels:
+          severity: critical
+          component: futures
+          layer: risk
+        annotations:
+          summary: "Futures margin ratio yüksek (liquidation riski)"
+          description: "Margin ratio: {{ $value | humanizePercentage }} (threshold: 80%)"
+          runbook: "Reduce position size or add margin immediately"
+          
+      # WebSocket disconnected alert
+      - alert: FuturesWsDisconnected
+        expr: |
+          spark_futures_ws_connection_status == 0
+        for: 1m
+        labels:
+          severity: warning
+          component: futures
+          layer: data
+        annotations:
+          summary: "Futures WebSocket bağlantı kesildi"
+          description: "Stream {{ $labels.stream_type }} is disconnected"
+          runbook: "Check WebSocket service and API credentials"
+

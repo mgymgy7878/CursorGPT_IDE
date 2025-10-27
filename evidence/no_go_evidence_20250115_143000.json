@@ -1,0 +1,44 @@
+{
+  "timestamp": "2025-01-15T14:30:00Z",
+  "action": "T+30 GO/NO-GO Değerlendirmesi",
+  "result": "NO-GO",
+  "reason": "Servisler offline - Executor ve Web-next başlatılamıyor",
+  "details": {
+    "executor_status": {
+      "port": 4001,
+      "health_check": "FAILED",
+      "error": "Uzak sunucuya bağlanılamıyor",
+      "process_status": "NOT_RUNNING"
+    },
+    "web_next_status": {
+      "port": 3003,
+      "health_check": "FAILED", 
+      "error": "Uzak sunucuya bağlanılamıyor",
+      "process_status": "NOT_RUNNING"
+    },
+    "system_info": {
+      "node_version": "v22.20.0",
+      "pnpm_version": "10.14.0",
+      "dependencies_installed": true,
+      "workspace_status": "READY"
+    },
+    "rollback_applied": {
+      "AI_CHUNK_UPLOAD_ENABLED": false,
+      "SSE_RETRY_ENABLED": false,
+      "reason": "Servisler offline durumda"
+    }
+  },
+  "next_steps": [
+    "Executor servisini manuel başlatma",
+    "Web-next servisini manuel başlatma", 
+    "Port çakışmalarını kontrol etme",
+    "Dependencies ve build hatalarını düzeltme",
+    "Tekrar GO/NO-GO değerlendirmesi"
+  ],
+  "recommendations": [
+    "Node.js sürüm uyumluluğunu kontrol et",
+    "Port 4001 ve 3003'ün kullanımda olup olmadığını kontrol et",
+    "Executor ve Web-next log dosyalarını incele",
+    "Build process'ini adım adım çalıştır"
+  ]
+}

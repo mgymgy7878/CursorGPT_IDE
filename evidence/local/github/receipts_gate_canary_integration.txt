@@ -1,0 +1,35 @@
+file=receipts-gate.yml
+integration_date=2025-01-08
+status=INTEGRATED
+
+CANARY_INTEGRATION_ADDED:
+✓ Trigger Spark Canary (dry-run) step added (line 40-50)
+✓ Schedule-only trigger: if: github.event_name == 'schedule'
+✓ Environment variables: SPARK_API_URL, SPARK_API_TOKEN
+✓ Curl POST to /canary/run endpoint
+✓ Payload: {"name":"btcturk-ui-canary","mode":"dry-run"}
+✓ Artifact: canary_resp.json (tee output)
+✓ UTC 02:00 cron active log maintained
+
+WORKFLOW_FLOW:
+1. Checkout → Setup Node.js → Install dependencies
+2. Run receipts check
+3. Trigger Spark Canary (schedule only)
+4. Log UTC 02:00 cron active
+
+EVIDENCE_COLLECTION:
+✓ canary_resp.json artifact for daily analysis
+✓ Latency metrics collection ready
+✓ P95 targets: placed→ACK <1000ms, event→DB <300ms
+
+MINI_SPRINT_READY:
+✓ Nightly → Canary integration complete
+✓ BTCTurk WS migration planning ready
+✓ Connection states: OPEN/CLOSED/DEGRADED
+✓ Evidence report system planned
+
+NEXT_DEPLOYMENT:
+- Add SPARK_API_URL and SPARK_API_TOKEN secrets to GitHub
+- Test manual workflow run
+- Verify canary_resp.json artifact generation
+- Monitor daily P95 latency summaries

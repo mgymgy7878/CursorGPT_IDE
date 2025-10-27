@@ -1,0 +1,4 @@
+﻿port: 3004
+msgs_total delta: 94
+staleness s: 0.0386199527142419
+SMOKE: PASS

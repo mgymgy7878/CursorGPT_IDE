@@ -1,0 +1,54 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "name": "Alerts (Firing)",
+        "type": "dashboard",
+        "builtIn": 1,
+        "enable": true,
+        "hide": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "iconColor": "red",
+        "expr": "ALERTS{alertstate=\"firing\"}",
+        "titleFormat": "{{alertname}}",
+        "textFormat": "severity={{severity}} exchange={{exchange}} service={{service}}",
+        "step": "60s"
+      },
+      {
+        "name": "Alerts (Pending)",
+        "type": "dashboard",
+        "builtIn": 1,
+        "enable": true,
+        "hide": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "iconColor": "orange",
+        "expr": "ALERTS{alertstate=\"pending\"}",
+        "titleFormat": "pending: {{alertname}}",
+        "textFormat": "labels={{$labels}}",
+        "step": "60s"
+      },
+      {
+        "name": "Deploys",
+        "type": "dashboard",
+        "builtIn": 1,
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "enableDashboardAnnotations": false,
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": ["deploy"]
+        }
+      }
+    ]
+  },
+  "usage": "Merge with existing dashboard JSON annotations section"
+}
+

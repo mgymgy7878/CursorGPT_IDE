@@ -1,0 +1,20 @@
+Spark Trading Platform Configuration Backup
+============================================
+Date: 2025-09-11 00:03:27
+Node Version: v18.18.2
+PNPM Version: 10.14.0
+Files Backed Up: 15
+Location: C:\dev\CursorGPT_IDE\backups\config-20250911-000326
+
+Recent Changes:
+- Node 20 LTS engine requirements added
+- Husky + lint-staged configured
+- GitHub Actions CI workflow created
+- Log rotation implemented
+- pnpm overrides for security patches
+- VSCode settings optimized
+
+To restore:
+1. Copy files from this backup to project root
+2. Run: pnpm -w install
+3. Run: pnpm run dev:verify

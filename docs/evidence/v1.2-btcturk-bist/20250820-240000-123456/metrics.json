@@ -1,0 +1,13 @@
+{
+  "btcturk": {
+    "n": 5,
+    "http_status": 200,
+    "api_latency_ms": [738.69, 353.80, 651.94, 666.36, 378.34],
+    "api_latency_p95_ms": 738.69,
+    "schema_ok": 1
+  },
+  "bist": {
+    "status_component": "SKIPPED",
+    "reason": "NO_FEED_URL"
+  }
+} 

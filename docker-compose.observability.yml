@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: spark-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./ops/prometheus:/etc/prometheus/rules.d
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - sparknet
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: spark-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=spark123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - sparknet
+
+  # Spark Trading Platform Services
+  executor:
+    build:
+      context: .
+      dockerfile: services/executor/Dockerfile
+    environment:
+      - PORT=4001
+      - NODE_ENV=production
+      - METRICS_ENABLED=true
+    ports:
+      - "4001:4001"
+    networks:
+      - sparknet
+    depends_on:
+      - prometheus
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+    environment:
+      - PORT=3003
+      - HOST=0.0.0.0
+      - NEXT_PUBLIC_EXECUTOR_ORIGIN=http://executor:4001
+      - METRICS_ENABLED=true
+    depends_on:
+      - executor
+    ports:
+      - "3003:3003"
+    networks:
+      - sparknet
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  sparknet:
+    driver: bridge

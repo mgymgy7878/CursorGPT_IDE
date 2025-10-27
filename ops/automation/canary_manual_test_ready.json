@@ -1,0 +1,24 @@
+{
+  "action": "/canary/run",
+  "params": {
+    "name": "btcturk-ui-canary",
+    "mode": "dry-run"
+  },
+  "dryRun": true,
+  "confirm_required": false,
+  "reason": "Nightly öncesi manuel doğrulama - mini-sprint 48h tamamlandı",
+  "metadata": {
+    "mini_sprint_completed": true,
+    "deliverables": [
+      "canary_parser_step",
+      "artifact_upload",
+      "btcturk_ws_client",
+      "btcturk_store_ws",
+      "btcturk_ui_status"
+    ],
+    "ready_for_manual_test": true,
+    "workflow_enhanced": true,
+    "websocket_implementation": true,
+    "ui_status_indicators": true
+  }
+}

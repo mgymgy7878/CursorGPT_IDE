@@ -1,0 +1,28 @@
+﻿{
+    "timestamp":  "2025-10-06T09:10:38Z",
+    "total_size_mb":  0.01,
+    "files":  [
+                  {
+                      "size_mb":  0,
+                      "path":  "C:\\dev\\CursorGPT_IDE\\CursorGPT_IDE\\evidence\\runner\\daily_report_manifest.json",
+                      "name":  "daily_report_manifest.json",
+                      "hash":  "6F06AFC2F652A7246535556062CF4A8C3A32602E6A8ACDEF721287E86F5D885D",
+                      "modified":  "2025-10-06T08:41:19Z"
+                  },
+                  {
+                      "size_mb":  0,
+                      "path":  "C:\\dev\\CursorGPT_IDE\\CursorGPT_IDE\\evidence\\runner\\smoke.txt",
+                      "name":  "smoke.txt",
+                      "hash":  "DF9FA32460DA66E0B662A927CE8C8225C816F134C3DC7916A0699CC638B5A06C",
+                      "modified":  "2025-10-06T08:35:32Z"
+                  },
+                  {
+                      "size_mb":  0.01,
+                      "path":  "C:\\dev\\CursorGPT_IDE\\CursorGPT_IDE\\evidence\\runner\\stall-events.jsonl",
+                      "name":  "stall-events.jsonl",
+                      "hash":  "2AC710CFFA631796D9D09F97858B6DF8570029BAE2E5FD7D3A06C24AF0DD8600",
+                      "modified":  "2025-10-06T09:10:12Z"
+                  }
+              ],
+    "retention_days":  14
+}

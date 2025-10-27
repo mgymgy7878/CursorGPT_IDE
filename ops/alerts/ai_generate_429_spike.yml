@@ -1,0 +1,13 @@
+groups:
+- name: ai-generate-rate-limit
+  rules:
+  - alert: ai_generate_429_spike
+    expr: rate(http_requests_total{status="429",route="/api/ai/generate"}[5m]) > 1
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "AI generate 429 spike (>1 r/s, 5m)"
+      description: "Rate limit errors exceeded 1 request/second over the last 5 minutes for /api/ai/generate."
+
+

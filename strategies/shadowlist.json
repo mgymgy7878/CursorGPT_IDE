@@ -1,0 +1,29 @@
+{
+  "shadowlist": [
+    {
+      "name": "ZScore_Bands_Regime",
+      "version": "1.0.0",
+      "status": "shadow",
+      "mode": "paper_shadow",
+      "params": {
+        "maWin": 50,
+        "zEntry": 2.0,
+        "exitZ": 0.5,
+        "regime": true
+      },
+      "risk_score": 60,
+      "approved_date": "2025-08-20T28:55:00Z",
+      "approved_nonce": "20250820-285000-963741",
+      "shadow_config": {
+        "paper_trading": true,
+        "live_shadow": false,
+        "metrics_collection": true,
+        "performance_tracking": true,
+        "comparison_baseline": "MA_Cross_Regime_canary"
+      },
+      "description": "ZScore_Bands_Regime strategy - shadow mode for performance comparison"
+    }
+  ],
+  "last_updated": "2025-08-20T28:55:00Z",
+  "reason": "Secondary green candidate from V1.4R Alpha Re-Discovery"
+} 

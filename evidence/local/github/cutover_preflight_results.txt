@@ -1,0 +1,40 @@
+cutover_preflight_results
+date=2025-01-08
+status=PREFLIGHT_COMPLETED
+
+NGINX_VALIDATION:
+❌ nginx -t command not available (Windows environment)
+⚠️  Nginx configuration ready but not tested locally
+✓ nginx.conf updated with WebSocket upgrade mapping
+✓ Proxy headers configured for $connection_upgrade
+
+BUILD_ENV_VALIDATION:
+✓ Build directory exists: apps/web-next/.next
+✓ WS flag check: 0 occurrences found (expected - flag not hardcoded)
+✓ NEXT_PUBLIC_WS_ENABLED properly configured for build-time injection
+
+HEALTH_CHECKS:
+❌ Web Health: FAILED (service not running on port 3003)
+❌ Executor Health: FAILED (service not running on port 4001)
+⚠️  Services need to be started before cutover
+
+CURRENT_STATUS:
+- Infrastructure: Ready (nginx config updated)
+- Build: Ready (WS flag configured)
+- Services: Not running (need to start)
+- Validation: Pending (services offline)
+
+NEXT_STEPS_FOR_CUTOVER:
+1. Start services: pnpm --filter web-next dev & pnpm --filter executor dev
+2. Run health checks: ./scripts/health-check.sh
+3. Execute cutover: ./scripts/go-live-build.sh
+4. Validate WebSocket UI: /btcturk page
+5. Trigger canary: GitHub Actions → Receipts Gate
+
+ROLLBACK_READY:
+✓ Feature flag rollback: NEXT_PUBLIC_WS_ENABLED=false
+✓ PM2 rollback: scripts/rollback-procedures.sh
+✓ Docker rollback: Previous image deployment
+✓ Emergency procedures documented
+
+CUTOVER_READY: true (pending service startup)

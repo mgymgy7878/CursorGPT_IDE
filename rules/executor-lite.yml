@@ -1,0 +1,44 @@
+groups:
+  - name: executor_lite_alerts
+    interval: 30s
+    rules:
+      - alert: ExecutorLiteDown
+        expr: up{job="executor_lite"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: executor-lite
+        annotations:
+          summary: "Executor-Lite is down"
+          description: "Executor-Lite (port 4010) has been down for 30 seconds. Backtest API unavailable."
+      
+      - alert: ExecutorLiteMetricsStale
+        expr: time() - spark_ui_hits_total{job="executor_lite"} > 120
+        for: 1m
+        labels:
+          severity: warning
+          component: executor-lite
+        annotations:
+          summary: "Executor-Lite metrics are stale"
+          description: "No metrics updates from Executor-Lite in 120 seconds. Last update: {{ $value }} seconds ago."
+      
+      - alert: BacktestQueueStuck
+        expr: increase(backtest_start_total{job="executor_lite"}[2m]) > 0 and increase(backtest_done_total{job="executor_lite"}[2m]) == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: executor-lite
+        annotations:
+          summary: "Backtest queue is stuck"
+          description: "Backtests are being queued but none are completing. Started: {{ $value }}, Completed: 0."
+      
+      - alert: BacktestHighLatency
+        expr: histogram_quantile(0.95, rate(backtest_enqueue_ms_bucket{job="executor_lite"}[5m])) > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: executor-lite
+        annotations:
+          summary: "Backtest enqueue latency is high"
+          description: "P95 latency is {{ $value }}ms (threshold: 100ms)."
+

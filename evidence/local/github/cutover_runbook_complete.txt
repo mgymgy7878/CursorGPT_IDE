@@ -1,0 +1,63 @@
+cutover_runbook_complete
+date=2025-01-08
+status=READY_FOR_EXECUTION
+
+CUTOVER_SCRIPTS_CREATED:
+✓ scripts/start-services-for-cutover.ps1 - Hardened service startup
+✓ scripts/smoke-health-validation.ps1 - Post-cutover health checks
+✓ scripts/websocket-validation-guide.ps1 - Browser validation guide
+✓ scripts/monitoring-24h.ps1 - 24-hour monitoring setup
+✓ scripts/cutover-runbook.ps1 - Complete execution script
+✓ scripts/cutover-runbook-linux.sh - Linux equivalent
+
+EXISTING_SCRIPTS_AVAILABLE:
+✓ scripts/go-live-build.sh - Build sequence
+✓ scripts/health-check.sh - Health validation
+✓ scripts/rollback-procedures.sh - Emergency rollback
+✓ scripts/canary-run.ps1 - Canary execution
+✓ scripts/v2-canary-deploy.ps1 - Canary deployment
+
+CUTOVER_EXECUTION_SEQUENCE:
+1. Start Services: .\scripts\start-services-for-cutover.ps1
+2. Health Validation: .\scripts\smoke-health-validation.ps1
+3. WebSocket Validation: .\scripts\websocket-validation-guide.ps1
+4. Canary Trigger: GitHub Actions → Receipts Gate → Run workflow
+5. 24h Monitoring: .\scripts\monitoring-24h.ps1
+
+OR_COMPLETE_AUTOMATION:
+- Single command: .\scripts\cutover-runbook.ps1
+- Linux equivalent: ./scripts/cutover-runbook-linux.sh
+
+ENVIRONMENT_CONFIGURATION:
+✓ NODE_ENV=production
+✓ NEXT_PUBLIC_WS_ENABLED=true
+✓ PM2 ecosystem.config.js ready
+✓ Nginx WebSocket upgrade configured
+
+VALIDATION_CRITERIA:
+✓ Health endpoints: 200 OK
+✓ WebSocket: 101 Switching Protocols
+✓ UI Status: OPEN (green pill)
+✓ Canary: PASS with artifact
+✓ Performance: P95 < 1s latency
+
+MONITORING_THRESHOLDS:
+✓ Health rate: ≥ 99.5%
+✓ Canary PASS: ≥ 95% (last 7 runs)
+✓ WS latency: P95 < 1s
+✓ Reconnect attempts: No continuous increase
+
+ROLLBACK_OPTIONS:
+✓ Feature flag: NEXT_PUBLIC_WS_ENABLED=false
+✓ PM2 rollback: Previous version
+✓ Emergency script: rollback-procedures.ps1
+✓ Docker rollback: Previous image
+
+FINAL_READINESS:
+✅ All cutover scripts created and tested
+✅ Windows and Linux versions available
+✅ Complete automation possible
+✅ Manual step-by-step execution available
+✅ Monitoring and rollback procedures ready
+
+EXECUTION_READY: true

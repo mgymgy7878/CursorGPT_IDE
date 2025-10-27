@@ -1,105 +1,179 @@
 "use client";
-import AppShell from "@/components/layout/AppShell";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
-import { PageHeader } from "@/components/common/PageHeader";
-import { ApiForm } from "@/components/settings/SecretInput";
-import { toast } from "@/components/toast/Toaster";
+import useSWR from "swr";
+import { useState } from "react";
+import type { Settings, ExchangeKeys, ThemeMode, Language } from "@/types/settings";
 
-export default function Settings() {
-  const handleSave = async (provider: string, values: Record<string, string>) => {
-    // This would call /api/settings/save with encrypted values
-    console.log(`Saving ${provider}:`, values);
-    
-    // Audit log
-    // await fetch("/api/audit/push", {
-    //   method: "POST",
-    //   body: JSON.stringify({ action: `settings.${provider}.save` }),
-    // });
+const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
-    toast({ 
-      type: "success", 
-      title: "Ayarlar Kaydedildi",
-      description: `${provider} bağlantı bilgileri güvenli şekilde kaydedildi.`
-    });
-  };
+export default function SettingsPage() {
+  const { data, mutate, isLoading } = useSWR<Settings>("/api/settings", fetcher);
+  const [saving, setSaving] = useState(false);
 
-  const handleTest = async (provider: string, values: Record<string, string>) => {
-    // This would call /api/settings/test to verify credentials
-    console.log(`Testing ${provider}:`, values);
-    
-    toast({ 
-      type: "info", 
-      title: "Bağlantı Test Ediliyor",
-      description: `${provider} bağlantısı kontrol ediliyor...`
-    });
-
-    // Simulate test
-    setTimeout(() => {
-      toast({ 
-        type: "success", 
-        title: "Bağlantı Başarılı",
-        description: `${provider} API bağlantısı doğrulandı.`
-      });
-    }, 1500);
-  };
+  async function save(partial: Partial<Settings>) {
+    setSaving(true);
+    await fetch("/api/settings", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(partial) });
+    await mutate();
+    setSaving(false);
+  }
 
   return (
-    <AppShell>
-      <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
-      <div className="px-6 pb-10">
-        <Tabs defaultValue="exchange">
-          <TabsList>
-            <TabsTrigger value="exchange">Borsa API</TabsTrigger>
-            <TabsTrigger value="ai">AI / Copilot</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="exchange">
-            <div className="space-y-6">
-              <ApiForm 
-                title="Binance" 
-                fields={[
-                  { name: "API Key", envKey: "BINANCE_API_KEY" },
-                  { name: "Secret Key", envKey: "BINANCE_SECRET_KEY" }
-                ]}
-                onSave={(values) => handleSave("Binance", values)}
-                onTest={(values) => handleTest("Binance", values)}
-              />
-              
-              <ApiForm 
-                title="BTCTurk" 
-                fields={[
-                  { name: "API Key", envKey: "BTCTURK_API_KEY" },
-                  { name: "Secret Key", envKey: "BTCTURK_SECRET_KEY" }
-                ]}
-                onSave={(values) => handleSave("BTCTurk", values)}
-                onTest={(values) => handleTest("BTCTurk", values)}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="ai">
-            <div className="space-y-6">
-              <ApiForm 
-                title="OpenAI" 
-                fields={[
-                  { name: "API Key", envKey: "OPENAI_API_KEY" }
-                ]}
-                onSave={(values) => handleSave("OpenAI", values)}
-                onTest={(values) => handleTest("OpenAI", values)}
-              />
-              
-              <ApiForm 
-                title="Anthropic" 
-                fields={[
-                  { name: "API Key", envKey: "ANTHROPIC_API_KEY" }
-                ]}
-                onSave={(values) => handleSave("Anthropic", values)}
-                onTest={(values) => handleTest("Anthropic", values)}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Ayarlar</h1>
+          <p className="text-sm opacity-70">Tema, dil, borsa/AI anahtarları.</p>
+        </div>
+        <span className="text-xs text-gray-500">{data?.updatedAt && new Date(data.updatedAt).toLocaleString()}</span>
       </div>
-    </AppShell>
+
+      {/* Tercihler */}
+      <section className="rounded-2xl border bg-white p-4 space-y-3">
+        <h2 className="text-sm font-semibold">Tercihler</h2>
+        <div className="flex flex-wrap gap-3">
+          <Select
+            label="Tema"
+            value={data?.theme ?? "light"}
+            onChange={(v) => save({ theme: v as ThemeMode })}
+            options={[{v:"light",t:"Açık"},{v:"dark",t:"Koyu"}]}
+          />
+          <Select
+            label="Dil"
+            value={data?.language ?? "tr"}
+            onChange={(v) => save({ language: v as Language })}
+            options={[{v:"tr",t:"Türkçe"},{v:"en",t:"English"}]}
+          />
+        </div>
+      </section>
+
+      {/* Borsa Anahtarları */}
+      <ExchangeCard
+        title="Binance"
+        initial={data?.exchanges?.binance}
+        testPath="/api/exchange/binance/test"
+        onSave={(k) => save({ exchanges: { ...data?.exchanges, binance: k } })}
+      />
+      <ExchangeCard
+        title="BTCTurk"
+        initial={data?.exchanges?.btcturk}
+        testPath="/api/exchange/btcturk/test"
+        onSave={(k) => save({ exchanges: { ...data?.exchanges, btcturk: k } })}
+      />
+
+      {/* AI Key */}
+      <section className="rounded-2xl border bg-white p-4 space-y-3">
+        <h2 className="text-sm font-semibold">AI</h2>
+        <ApiKeyRow
+          label="OpenAI API Key"
+          placeholder="sk-..."
+          initial={data?.ai?.openaiKey ?? ""}
+          onSave={(key) => save({ ai: { openaiKey: key } })}
+        />
+      </section>
+
+      {isLoading || saving ? <div className="text-sm text-gray-500">Kaydediliyor...</div> : null}
+    </div>
+  );
+}
+
+function Select({
+  label, value, onChange, options,
+}: { label:string; value:string; onChange:(v:string)=>void; options:{v:string;t:string}[] }) {
+  return (
+    <label className="text-sm">
+      <div className="mb-1 text-gray-600">{label}</div>
+      <select
+        className="rounded-xl border px-3 py-2"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {options.map(o => <option key={o.v} value={o.v}>{o.t}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function ApiKeyRow({
+  label, placeholder, initial, onSave,
+}: { label:string; placeholder:string; initial:string; onSave:(key:string)=>void }) {
+  const [v, setV] = useState(initial);
+  const [show, setShow] = useState(false);
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+      <label className="flex-1 text-sm">
+        <div className="mb-1 text-gray-600">{label}</div>
+        <input
+          type={show ? "text" : "password"}
+          className="w-full rounded-xl border px-3 py-2 font-mono"
+          placeholder={placeholder}
+          value={v}
+          onChange={(e) => setV(e.target.value)}
+        />
+      </label>
+      <div className="flex gap-2">
+        <button onClick={() => setShow(!show)} className="rounded-xl border px-3 py-2">
+          {show ? "Gizle" : "Göster"}
+        </button>
+        <button onClick={() => onSave(v)} className="rounded-xl border bg-gray-900 text-white px-3 py-2">
+          Kaydet
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ExchangeCard({
+  title, initial, testPath, onSave,
+}: {
+  title: string;
+  initial?: ExchangeKeys;
+  testPath: string;
+  onSave: (k: ExchangeKeys) => void;
+}) {
+  const [apiKey, setApiKey] = useState(initial?.apiKey ?? "");
+  const [secret, setSecret] = useState(initial?.secret ?? "");
+  const [testing, setTesting] = useState<null | "ok" | "fail">(null);
+
+  async function test() {
+    setTesting(null);
+    const r = await fetch(testPath, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ apiKey, secret }),
+    });
+    setTesting(r.ok ? "ok" : "fail");
+  }
+
+  return (
+    <section className="rounded-2xl border bg-white p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold">{title} API Anahtarları</h2>
+        <span className={`text-xs ${testing==="ok"?"text-green-600":testing==="fail"?"text-red-600":"text-gray-400"}`}>
+          {testing==="ok" ? "✓ Bağlantı başarılı" : testing==="fail" ? "× Bağlantı başarısız" : "—"}
+        </span>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-sm">
+          <div className="mb-1 text-gray-600">API Key</div>
+          <input
+            className="w-full rounded-xl border px-3 py-2 font-mono"
+            value={apiKey} onChange={(e)=>setApiKey(e.target.value)} placeholder="..." />
+        </label>
+        <label className="text-sm">
+          <div className="mb-1 text-gray-600">Secret</div>
+          <input
+            type="password"
+            className="w-full rounded-xl border px-3 py-2 font-mono"
+            value={secret} onChange={(e)=>setSecret(e.target.value)} placeholder="..." />
+        </label>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={test} className="rounded-xl border px-3 py-2">Bağlantıyı Test Et</button>
+        <button
+          onClick={() => onSave({ apiKey, secret })}
+          className="rounded-xl border bg-gray-900 text-white px-3 py-2"
+        >
+          Kaydet
+        </button>
+      </div>
+    </section>
   );
 }

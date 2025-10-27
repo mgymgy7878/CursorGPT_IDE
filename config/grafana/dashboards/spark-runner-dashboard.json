@@ -1,0 +1,213 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Spark Runner Watchdog",
+    "tags": ["spark", "runner", "watchdog"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Stalls (24h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(spark_runner_stalls_total[24h])",
+            "legendFormat": "Total Stalls"
+          },
+          {
+            "expr": "sum(increase(spark_runner_stalls_total[24h])) by (root_cause)",
+            "legendFormat": "{{root_cause}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 10}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Stall Rate (5m)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(spark_runner_stalls_total[5m])",
+            "legendFormat": "Stall Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "reqps",
+            "custom": {
+              "hideFrom": {"legend": false, "tooltip": false, "vis": false}
+            }
+          }
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "Value": "Stall Rate"
+              }
+            }
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Execution Duration (P50/P95)",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "spark_runner_execution_duration_seconds_bucket",
+            "legendFormat": "{{le}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        },
+        "gridPos": {"h": 8, "w": 18, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Execution Status (24h)",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "sum(increase(spark_runner_executions_total[24h])) by (status)",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Auto-Skip Events (24h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(spark_runner_executions_total{status=\"skipped\"}[24h]))",
+            "legendFormat": "Auto-Skips"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 3},
+                {"color": "red", "value": 5}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Execution Duration Percentiles",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(spark_runner_execution_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "P50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(spark_runner_execution_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(spark_runner_execution_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "P99"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "s"
+          }
+        },
+        "gridPos": {"h": 4, "w": 18, "x": 0, "y": 16}
+      }
+    ],
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "refresh": "30s",
+    "annotations": {
+      "list": [
+        {
+          "name": "Deploy Events",
+          "enable": true,
+          "datasource": "prometheus",
+          "expr": "increase(spark_deploy_events_total[1m]) > 0",
+          "iconColor": "blue",
+          "titleFormat": "Deploy: {{value}}"
+        },
+        {
+          "name": "Canary Events", 
+          "enable": true,
+          "datasource": "prometheus",
+          "expr": "increase(spark_canary_events_total[1m]) > 0",
+          "iconColor": "green",
+          "titleFormat": "Canary: {{value}}"
+        },
+        {
+          "name": "Rollback Events",
+          "enable": true,
+          "datasource": "prometheus", 
+          "expr": "increase(spark_rollback_events_total[1m]) > 0",
+          "iconColor": "red",
+          "titleFormat": "Rollback: {{value}}"
+        },
+        {
+          "name": "Fast Burn Alerts",
+          "enable": true,
+          "datasource": "prometheus",
+          "expr": "ALERTS{alertname=\"RunnerStallFastBurn\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Fast Burn Alert"
+        },
+        {
+          "name": "Slow Burn Alerts", 
+          "enable": true,
+          "datasource": "prometheus",
+          "expr": "ALERTS{alertname=\"RunnerStallSlowBurn\",alertstate=\"firing\"}",
+          "iconColor": "orange",
+          "titleFormat": "Slow Burn Alert"
+        }
+      ]
+    }
+  }
+}

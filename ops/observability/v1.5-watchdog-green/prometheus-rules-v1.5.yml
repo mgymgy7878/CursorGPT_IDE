@@ -1,0 +1,36 @@
+groups:
+  - name: runner.core
+    interval: 30s
+    rules:
+      - alert: RunnerMetricsDown
+        expr: up{job="spark-executor"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          service: runner
+        annotations:
+          summary: "Executor metrics down"
+          description: "spark-executor hedefi 5 dakikadır DOWN."
+
+      - alert: RunnerPredictiveBreachSoon
+        expr: increase(spark_runner_predictive_alerts_total[10m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: platform
+          service: runner
+        annotations:
+          summary: "Predictive breach incoming"
+          description: "Self-learning modül yaklaşan ihlali öngördü; paneli kontrol edin."
+
+      - alert: RunnerConfidenceDrops
+        expr: spark_runner_confidence_score{type="threshold"} < 0.6
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          service: runner
+        annotations:
+          summary: "Runner confidence düştü"
+          description: "Öğrenen sistem güveni 0.6 altına indi (15m). Drift ya da veri kalitesi sorununu inceleyin."

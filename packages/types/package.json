@@ -1,0 +1,24 @@
+{
+  "name": "@spark/types-legacy",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "clean": "rimraf dist .tsbuildinfo",
+    "build": "tsup src/index.ts --dts --format esm,cjs --clean",
+    "typecheck": "tsc -p tsconfig.typecheck.json --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.4",
+    "rimraf": "^5.0.5"
+  }
+}

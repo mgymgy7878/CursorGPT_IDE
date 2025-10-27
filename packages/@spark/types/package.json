@@ -1,0 +1,29 @@
+{
+  "name": "@spark/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./*": "./dist/*"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && tsup src/index.ts --dts --format esm,cjs",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.122"
+  }
+}

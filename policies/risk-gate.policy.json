@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/json-schema",
+  "version": "1.0.0",
+  "description": "Fusion risk-skor → tetikleyici politika (LOW/MEDIUM/HIGH)",
+  "signals": {
+    "confidence_score": { "source": "spark_runner_confidence_score", "window": "10m", "type": "gauge" },
+    "exec_p95_s":       { "source": "record:exec_p95_s_10m",        "window": "10m", "type": "recording" },
+    "predictive_10m":   { "source": "increase(spark_runner_predictive_alerts_total[10m])", "type": "rate" }
+  },
+  "score": {
+    "weights": { "confidence_score": 0.60, "exec_p95_s": 0.15, "predictive_10m": 0.25 },
+    "normalize": {
+      "confidence_score": "1 - x",
+      "exec_p95_s": "min(x/60,1)",        // SLO: p95 ≤ 60s
+      "predictive_10m": "min(x/2,1)"      // 0→2 aralığı makul sinyal
+    }
+  },
+  "bands": [
+    { "name": "LOW",    "range": [0, 30) },
+    { "name": "MEDIUM", "range": [30, 70] },
+    { "name": "HIGH",   "range": (70, 100] }
+  ],
+  "actions": {
+    "LOW":    { "mode": "resume", "rps_limit": null, "notes": "normal" },
+    "MEDIUM": { "mode": "limit",  "rps_limit": 0.5,  "notes": "oranı %50 düşür" },
+    "HIGH":   { "mode": "pause",  "pause_minutes": 15, "notes": "risk-gate high → 15dk duraklat" }
+  },
+  "safety": {
+    "require_canary": true,
+    "cooldown_seconds": 300,
+    "min_action_duration_seconds": 600,
+    "dryRun": false
+  }
+}

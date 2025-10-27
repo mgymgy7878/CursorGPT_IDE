@@ -1,0 +1,45 @@
+name: guardrails-smoke
+on: 
+  push: 
+    branches: ["**"]
+  pull_request: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: http://127.0.0.1:4001
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: 
+          version: 9
+      - run: pnpm -w install
+      - run: pnpm -w build
+      - run: node services/executor/dist/index.cjs &
+      - name: Wait for executor
+        run: |
+          for i in {1..40}; do
+            curl -sf "$BASE_URL/health" >/dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "executor not ready" >&2; exit 1
+      - name: Submit params (heredoc)
+        run: |
+          curl -sf -H 'Content-Type: application/json' -X POST \
+            -d @- "$BASE_URL/params/submit" <<'JSON'
+          {"strategy":"meanrev","oldParams":{},"newParams":{"k":2}}
+          JSON
+      - run: curl -sf "$BASE_URL/params/pending"
+      - run: curl -sf "$BASE_URL/canary/strategies?dry=true"
+      - name: Approve params (heredoc)
+        run: |
+          curl -sf -H 'Content-Type: application/json' -X POST \
+            -d @- "$BASE_URL/params/approve" <<'JSON'
+          {"strategy":"meanrev","actor":"ci","reason":"smoke test"}
+          JSON
+      - run: curl -sf "$BASE_URL/params/history"
+      - run: curl -sf "$BASE_URL/metrics" | grep -E "guardrails_param_apply_total|guardrails_pending_age_seconds|guardrails_blocks_total"

@@ -1,188 +1,169 @@
-"use client";
-import { useEffect, useState } from "react";
+'use client';
+
+import { useApi } from '@/lib/useApi';
+import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+
+interface ServiceHealth {
+  ok: boolean;
+  error?: string;
+  latency?: number;
+}
 
 interface HealthData {
-  status: "UP" | "DEGRADED" | "DOWN";
-  slo?: {
-    latencyP95: number | null;
-    stalenessSec: number;
-    errorRate: number;
-    uptimeMin: number;
-  };
-  thresholds?: {
-    latencyP95Target: number;
-    stalenessTarget: number;
-    errorRateTarget: number;
+  executor: ServiceHealth;
+  ml?: ServiceHealth;
+  streams?: ServiceHealth;
+  canary?: {
+    lastTest: string;
+    passed: boolean;
+    message?: string;
   };
 }
 
-export default function SystemHealthDot() {
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [loading, setLoading] = useState(true);
+export function SystemHealthDot() {
+  const { data, error } = useApi<HealthData>('/api/services/health', {
+    refreshInterval: 10000 // 10s
+  });
 
-  useEffect(() => {
-    let alive = true;
+  const [showDetails, setShowDetails] = useState(false);
 
-    const checkHealth = async () => {
-      try {
-        const response = await fetch("/api/healthz", {
-          cache: "no-store",
-        });
-        
-        const data = await response.json();
-        
-        if (alive) {
-          setHealth(data);
-          setLoading(false);
-        }
-      } catch (err) {
-        if (alive) {
-          setHealth({ status: "DOWN" });
-          setLoading(false);
-        }
-      }
-    };
-
-    checkHealth();
-
-    // Poll every 30 seconds
-    const interval = setInterval(() => {
-      if (!document.hidden && alive) {
-        checkHealth();
-      }
-    }, 30000);
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden && alive) {
-        checkHealth();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      alive = false;
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
-  if (loading) {
+  if (error || !data) {
     return (
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-neutral-600 animate-pulse"></div>
-        <span className="text-xs text-neutral-500">Checking...</span>
+      <div 
+        className="flex items-center gap-2 cursor-pointer"
+        onClick={() => setShowDetails(!showDetails)}
+      >
+        <div className="w-3 h-3 bg-gray-400 rounded-full animate-pulse" />
+        <span className="text-sm text-gray-500">Durum kontrol ediliyor...</span>
       </div>
     );
   }
 
-  if (!health) {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-red-500"></div>
-        <span className="text-xs text-red-400">Unknown</span>
-      </div>
-    );
-  }
+  const allHealthy = data.executor?.ok && 
+    (data.ml?.ok !== false) && 
+    (data.streams?.ok !== false) &&
+    (data.canary?.passed !== false);
 
-  // Determine color based on status and SLO thresholds
-  let dotColor = "bg-green-500";
-  let textColor = "text-green-400";
-  let statusText = "Healthy";
+  const someDown = !data.executor?.ok || 
+    data.ml?.ok === false || 
+    data.streams?.ok === false;
 
-  if (health.status === "DOWN") {
-    dotColor = "bg-red-500";
-    textColor = "text-red-400";
-    statusText = "Down";
-  } else if (health.status === "DEGRADED") {
-    dotColor = "bg-amber-500";
-    textColor = "text-amber-400";
-    statusText = "Degraded";
-  } else if (health.slo && health.thresholds) {
-    // Check SLO thresholds
-    const { latencyP95, errorRate, stalenessSec } = health.slo;
-    const { latencyP95Target, errorRateTarget, stalenessTarget } = health.thresholds;
+  const canaryFailed = data.canary && !data.canary.passed;
 
-    if (
-      (latencyP95 !== null && latencyP95 > latencyP95Target * 1.5) ||
-      errorRate > errorRateTarget * 1.5 ||
-      stalenessSec > stalenessTarget
-    ) {
-      dotColor = "bg-amber-500";
-      textColor = "text-amber-400";
-      statusText = "Warning";
-    }
-  }
+  const getStatusColor = () => {
+    if (canaryFailed) return 'text-yellow-500';
+    if (someDown) return 'text-red-500';
+    if (allHealthy) return 'text-green-500';
+    return 'text-gray-400';
+  };
+
+  const getStatusText = () => {
+    if (canaryFailed) return 'Canary Uyarısı';
+    if (someDown) return 'Bazı Servisler Kapalı';
+    if (allHealthy) return 'Tüm Sistemler Çalışıyor';
+    return 'Durum Belirsiz';
+  };
+
+  const getStatusIcon = () => {
+    if (canaryFailed) return <AlertCircle className="h-4 w-4" />;
+    if (someDown) return <XCircle className="h-4 w-4" />;
+    if (allHealthy) return <CheckCircle className="h-4 w-4" />;
+    return null;
+  };
 
   return (
-    <div className="flex items-center gap-2 group relative">
-      <div className={`w-2 h-2 rounded-full ${dotColor} animate-pulse`}></div>
-      <span className={`text-xs ${textColor}`}>{statusText}</span>
-      
-      {/* Tooltip with SLO metrics */}
-      {health.slo && (
-        <div className="absolute top-full right-0 mt-2 hidden group-hover:block z-50">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3 shadow-xl min-w-[200px]">
-            <div className="text-xs space-y-2">
-              <div className="font-semibold text-white mb-2">SLO Metrics</div>
-              
-              <div className="flex justify-between">
-                <span className="text-neutral-400">P95 Latency:</span>
-                <span className={`font-mono ${
-                  health.slo.latencyP95 !== null && 
-                  health.thresholds && 
-                  health.slo.latencyP95 > health.thresholds.latencyP95Target
-                    ? "text-amber-400"
-                    : "text-white"
-                }`}>
-                  {health.slo.latencyP95 !== null ? `${health.slo.latencyP95}ms` : "—"}
-                </span>
-              </div>
+    <div className="relative">
+      <div 
+        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={() => setShowDetails(!showDetails)}
+      >
+        <div className={`w-3 h-3 rounded-full ${
+          canaryFailed ? 'bg-yellow-500 animate-pulse' :
+          someDown ? 'bg-red-500 animate-pulse' :
+          allHealthy ? 'bg-green-500' : 'bg-gray-400'
+        }`} />
+        <span className={`text-sm font-medium ${getStatusColor()}`}>
+          {getStatusText()}
+        </span>
+        {getStatusIcon()}
+      </div>
 
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Staleness:</span>
-                <span className={`font-mono ${
-                  health.thresholds && 
-                  health.slo.stalenessSec > health.thresholds.stalenessTarget
-                    ? "text-amber-400"
-                    : "text-white"
-                }`}>
-                  {health.slo.stalenessSec}s
-                </span>
-              </div>
+      {showDetails && (
+        <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-neutral-900 rounded-lg shadow-xl border border-gray-200 dark:border-neutral-800 p-4 z-50">
+          <h4 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">
+            Sistem Durumu Detayları
+          </h4>
 
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Error Rate:</span>
-                <span className={`font-mono ${
-                  health.thresholds && 
-                  health.slo.errorRate > health.thresholds.errorRateTarget
-                    ? "text-amber-400"
-                    : "text-white"
-                }`}>
-                  {health.slo.errorRate.toFixed(1)}%
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Uptime:</span>
-                <span className="font-mono text-white">
-                  {health.slo.uptimeMin}m
-                </span>
-              </div>
-
-              {health.thresholds && (
-                <>
-                  <div className="border-t border-neutral-800 my-2"></div>
-                  <div className="text-[10px] text-neutral-500">
-                    <div>Targets: P95 &lt;{health.thresholds.latencyP95Target}ms</div>
-                    <div>Staleness &lt;{health.thresholds.stalenessTarget}s</div>
-                    <div>Errors &lt;{health.thresholds.errorRateTarget}%</div>
+          <div className="space-y-2">
+            <ServiceStatus name="Executor" service={data.executor} />
+            {data.ml && <ServiceStatus name="ML Engine" service={data.ml} />}
+            {data.streams && <ServiceStatus name="Streams" service={data.streams} />}
+            
+            {data.canary && (
+              <div className="pt-2 mt-2 border-t border-gray-200 dark:border-neutral-800">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Canary Test
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {data.canary.passed ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-yellow-500" />
+                    )}
+                    <span className={`text-sm font-medium ${
+                      data.canary.passed ? 'text-green-600' : 'text-yellow-600'
+                    }`}>
+                      {data.canary.passed ? 'Geçti' : 'Uyarı'}
+                    </span>
                   </div>
-                </>
-              )}
-            </div>
+                </div>
+                {data.canary.message && (
+                  <p className="text-xs text-gray-500 mt-1">{data.canary.message}</p>
+                )}
+                <p className="text-xs text-gray-400 mt-1">
+                  Son test: {new Date(data.canary.lastTest).toLocaleString('tr-TR')}
+                </p>
+              </div>
+            )}
           </div>
+
+          <button
+            onClick={() => setShowDetails(false)}
+            className="w-full mt-3 px-3 py-1.5 text-sm bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded transition-colors"
+          >
+            Kapat
+          </button>
         </div>
+      )}
+    </div>
+  );
+}
+
+function ServiceStatus({ name, service }: { name: string; service: ServiceHealth }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-gray-600 dark:text-gray-400">{name}</span>
+      <div className="flex items-center gap-2">
+        {service.ok ? (
+          <CheckCircle className="h-4 w-4 text-green-500" />
+        ) : (
+          <XCircle className="h-4 w-4 text-red-500" />
+        )}
+        <span className={`text-sm font-medium ${
+          service.ok ? 'text-green-600' : 'text-red-600'
+        }`}>
+          {service.ok ? 'Çalışıyor' : 'Kapalı'}
+        </span>
+        {service.latency && (
+          <span className="text-xs text-gray-500">
+            ({service.latency}ms)
+          </span>
+        )}
+      </div>
+      {!service.ok && service.error && (
+        <p className="text-xs text-red-500 mt-1">{service.error}</p>
       )}
     </div>
   );

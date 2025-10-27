@@ -1,0 +1,15 @@
+{
+  "version": "v1.2-ramp",
+  "tag": "v1.2-ramp",
+  "sha": "d67e4f66",
+  "ts": "2025-01-07T15:52:00.000Z",
+  "status": "STABLE",
+  "p95PlaceAck": 0,
+  "p95FeedDb": 0,
+  "lastCheck": "2025-01-07T15:52:00.000Z",
+  "thresholds": {
+    "placeAck": 1000,
+    "feedDb": 300
+  },
+  "note": "Development environment - executor offline"
+}

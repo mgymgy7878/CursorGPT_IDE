@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: spark-synthetic
+  labels:
+    app: spark-synthetic
+spec:
+  schedule: "*/1 * * * *"  # Every minute
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: curl
+            image: curlimages/curl:8.7.1
+            args:
+            - /bin/sh
+            - -c
+            - |
+              BASE="http://spark-executor-svc/api"
+              set -e
+              
+              echo "[SYNTHETIC] Starting synthetic probes..."
+              
+              # 1. Public health check
+              code1=$(curl -s -o /dev/null -w "%{http_code}" $BASE/public/health)
+              echo "synth_public_health $code1"
+              
+              # 2. Private health check
+              code2=$(curl -s -o /dev/null -w "%{http_code}" $BASE/private/health)
+              echo "synth_private_health $code2"
+              
+              # 3. Shadow order test (non-destructive)
+              code3=$(curl -s -o /dev/null -w "%{http_code}" \
+                -H "Content-Type: application/json" \
+                -H "X-Org-Id: synthetic" \
+                -H "X-Api-Key: synthetic-key" \
+                -d '{"symbol":"BTCUSDT","side":"BUY","type":"LIMIT","price":"65000","quantity":"0.0001"}' \
+                $BASE/private/order/shadow || echo "000")
+              echo "synth_shadow_order $code3"
+              
+              # 4. Ready endpoint check
+              code4=$(curl -s -o /dev/null -w "%{http_code}" $BASE/public/ready)
+              echo "synth_ready_check $code4"
+              
+              # 5. Metrics endpoint check
+              code5=$(curl -s -o /dev/null -w "%{http_code}" $BASE/public/metrics/prom)
+              echo "synth_metrics_check $code5"
+              
+              echo "[SYNTHETIC] Probes completed"
+              
+              # Exit with error if any critical check fails
+              if [ "$code1" != "200" ] || [ "$code2" != "200" ] || [ "$code4" != "200" ]; then
+                echo "[SYNTHETIC] Critical probe failed"
+                exit 1
+              fi 

@@ -1,0 +1,1 @@
+﻿{"pending":true,"message":"Risk threshold change requires confirmation","params":{"killSwitch":true,"maxNotionalPerTradeUSDT":200,"exchange":"binance:futures","maxDailyDrawdownPct":3,"requireStopLoss":true,"maxLeverage":5},"confirm_token":"risk_1757523635608_547c1n","timestamp":1757523635608}

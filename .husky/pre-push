@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+pnpm guard:cursor || { pnpm fix:cursor && pnpm guard:cursor; } 

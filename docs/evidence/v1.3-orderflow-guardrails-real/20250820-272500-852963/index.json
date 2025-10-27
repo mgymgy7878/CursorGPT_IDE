@@ -1,0 +1,30 @@
+{
+  "nonce": "20250820-272500-852963",
+  "started_utc": "2025-08-20T27:25:00Z",
+  "status": "PARTIAL",
+  "reason": "MISSING_KEYS",
+  "thresholds": {
+    "place_ack_p95_ms_leq": 1000,
+    "warn_ms": 1500
+  },
+  "orderflow": {
+    "n": 0,
+    "symbol": "BTCUSDT",
+    "qty": "0.00015",
+    "price_usdt": null,
+    "place_ack_ms": [],
+    "place_ack_p95_ms": null,
+    "retries": 0,
+    "errors": 0
+  },
+  "guardrails": {
+    "max_notional_usdt": 20,
+    "blocked_count": 0,
+    "kill_switch": 0
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-orderflow-guardrails-real/20250820-272500-852963/index.json",
+    "metrics": "docs/evidence/v1.3-orderflow-guardrails-real/20250820-272500-852963/metrics.json",
+    "manifest": "docs/evidence/v1.3-orderflow-guardrails-real/20250820-272500-852963/manifest.sha256"
+  }
+} 

@@ -1,0 +1,15 @@
+{
+  "action": "/alerts/create",
+  "params": {
+    "name": "canary-latency-p95",
+    "type": "promql",
+    "query": "histogram_quantile(0.95, sum by (le) (rate(canary_order_latency_seconds_bucket[5m])))",
+    "threshold": 1.0,
+    "comparison": ">",
+    "for": "3m",
+    "notify": ["ops","trading"]
+  },
+  "dryRun": false,
+  "confirm_required": false,
+  "reason": "Canary place→ACK p95 1s üstüne çıkarsa uyar"
+}

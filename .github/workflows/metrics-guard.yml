@@ -1,0 +1,37 @@
+name: Metrics Guard
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  metrics_guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 10.14.0 }
+      - run: pnpm -w install
+      - name: Build & boot minimal stack
+        run: |
+          pnpm -w build
+          pnpm -F services/streams build
+          pnpm -F services/executor build
+          node services/executor/dist/server.js & sleep 3
+      - name: Exporter presence checks
+        run: |
+          curl -sS localhost:4001/metrics | tee /tmp/metrics.txt
+          grep -q '^ws_msgs_total' /tmp/metrics.txt
+          grep -q '^ws_gap_ms_bucket' /tmp/metrics.txt
+          grep -q '^ingest_latency_ms_bucket' /tmp/metrics.txt
+      - name: Prom rules unit tests
+        run: |
+          # Install promtool if not available
+          if ! command -v promtool &> /dev/null; then
+            wget https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.45.0.linux-amd64.tar.gz
+            tar xzf prometheus-2.45.0.linux-amd64.tar.gz
+            export PATH=$PATH:$(pwd)/prometheus-2.45.0.linux-amd64
+          fi
+          promtool test rules rules/streams.test.yml

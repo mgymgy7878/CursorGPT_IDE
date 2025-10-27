@@ -1,0 +1,12 @@
+groups:
+- name: ai-generate-error-rate
+  rules:
+  - alert: ai_generate_error_rate_gt_1pct
+    expr: (sum(rate(ai_generate_total{status!~"2xx"}[5m])) / sum(rate(ai_generate_total[5m]))) > 0.01 and sum(increase(ai_generate_total[5m])) > 50
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: AI generate error rate > 1% (5m) with >50 req/5m
+      description: Non-2xx ratio exceeded 1% over 5m with more than 50 requests in the same window.
+

@@ -1,0 +1,7 @@
+{
+  "version": "v1.8-b0",
+  "auc": 0.64,
+  "precision_at_20": 0.59,
+  "recall_at_20": 0.42,
+  "timestamp": 1759919886671
+}

@@ -1,0 +1,71 @@
+{
+  "name": "MA Cross Strategy",
+  "description": "Simple moving average crossover strategy for trend following",
+  "symbol": "BTCUSDT",
+  "timeframe": "1h",
+  "indicators": {
+    "sma": {
+      "period": 20,
+      "source": "close"
+    },
+    "ema": {
+      "period": 50,
+      "source": "close"
+    }
+  },
+  "conditions": {
+    "sma_cross_up_ema": {
+      "type": "cross_up",
+      "indicator1": "sma_20",
+      "indicator2": "ema_50"
+    },
+    "sma_cross_down_ema": {
+      "type": "cross_down",
+      "indicator1": "sma_20",
+      "indicator2": "ema_50"
+    }
+  },
+  "rules": {
+    "entry": [
+      {
+        "condition": "sma_cross_up_ema",
+        "action": "BUY",
+        "quantity": 0.01,
+        "price": "MARKET"
+      },
+      {
+        "condition": "sma_cross_down_ema",
+        "action": "SELL",
+        "quantity": 0.01,
+        "price": "MARKET"
+      }
+    ],
+    "exit": [
+      {
+        "condition": "sma_cross_down_ema",
+        "action": "CLOSE_LONG",
+        "quantity": 0.01,
+        "price": "MARKET"
+      },
+      {
+        "condition": "sma_cross_up_ema",
+        "action": "CLOSE_SHORT",
+        "quantity": 0.01,
+        "price": "MARKET"
+      }
+    ]
+  },
+  "risk": {
+    "riskPct": 2.0,
+    "maxPos": 2,
+    "maxDailyLoss": 100,
+    "stopLoss": 5.0,
+    "takeProfit": 10.0
+  },
+  "metadata": {
+    "author": "Spark Trading",
+    "version": "1.0.0",
+    "tags": ["trend", "crossover", "moving-average"],
+    "created": "2024-08-18T12:00:00Z"
+  }
+} 

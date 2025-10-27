@@ -1,0 +1,9 @@
+{
+  "ports_before": "Port kontrolü sonucu:\r\n- Port 3003: BOŞ\r\n- Port 4001: BOŞ\r\n- PM2 temizlendi, portlar serbest\r\n",
+  "lint_tail": "��\r\u0000\n\u0000>\u0000 \u0000s\u0000p\u0000a\u0000r\u0000k\u0000-\u0000m\u0000o\u0000n\u0000o\u0000r\u0000e\u0000p\u0000o\u0000@\u00000\u0000.\u00003\u0000.\u00003\u0000 \u0000l\u0000i\u0000n\u0000t\u0000 \u0000C\u0000:\u0000\\\u0000d\u0000e\u0000v\u0000\\\u0000C\u0000u\u0000r\u0000s\u0000o\u0000r\u0000G\u0000P\u0000T\u0000_\u0000I\u0000D\u0000E\u0000\r\u0000\n\u0000>\u0000 \u0000e\u0000s\u0000l\u0000i\u0000n\u0000t\u0000 \u0000.\u0000 \u0000-\u0000-\u0000e\u0000x\u0000t\u0000 \u0000.\u0000t\u0000s\u0000,\u0000.\u0000t\u0000s\u0000x\u0000 \u0000-\u0000-\u0000m\u0000a\u0000x\u0000-\u0000w\u0000a\u0000r\u0000n\u0000i\u0000n\u0000g\u0000s\u0000=\u00000\u0000\r\u0000\n\u0000\r\u0000\n\u0000",
+  "next_steps": [
+    "TERMINAL A: services/executor  pnpm run dev (PORT=4001)",
+    "TERMINAL B: apps/web-next  pnpm run dev -p 3003",
+    "Yeni üçüncü terminal: health iwr testleri (4001/3003)"
+  ]
+}

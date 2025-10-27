@@ -1,0 +1,38 @@
+{
+  "integration_name": "receipts-gate-to-canary",
+  "created": "2025-01-08",
+  "status": "ready_for_deployment",
+  "workflow_integration": {
+    "trigger": "schedule_only",
+    "condition": "github.event_name == 'schedule'",
+    "endpoint": "/canary/run",
+    "payload": {
+      "name": "btcturk-ui-canary",
+      "mode": "dry-run"
+    },
+    "artifacts": ["canary_resp.json"],
+    "secrets_required": ["SPARK_API_URL", "SPARK_API_TOKEN"]
+  },
+  "canary_targets": {
+    "btcturk-ui-canary": {
+      "purpose": "smoke_test_latency_proof",
+      "metrics": {
+        "placed_to_ack_p95": "<1000ms",
+        "event_to_db_p95": "<300ms"
+      },
+      "evidence_collection": "daily_latency_summary"
+    }
+  },
+  "mini_sprint_goals": {
+    "nightly_canary_integration": "receipts-gate output + canary_resp.json + daily P95 summary",
+    "btcturk_ws_migration": "polling 2s → WebSocket, UI stores with connection states",
+    "canary_evidence_report": "PASS/FAIL badge based on latency targets"
+  },
+  "connection_states": ["OPEN", "CLOSED", "DEGRADED"],
+  "next_actions": [
+    "Deploy canary integration to receipts-gate workflow",
+    "Setup BTCTurk WebSocket connection states",
+    "Implement latency evidence collection",
+    "Create PASS/FAIL badge system"
+  ]
+}

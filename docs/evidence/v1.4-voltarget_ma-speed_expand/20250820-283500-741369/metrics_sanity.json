@@ -1,0 +1,32 @@
+{
+  "voltarget_ma": {
+    "original_metrics": {
+      "sharpe": 5.94,
+      "cagr_pct": -100
+    },
+    "alternative_metrics": {
+      "sharpe": 0.05,
+      "cagr_pct": -100
+    },
+    "sanity_checks": {
+      "equity_zero": false,
+      "sharpe_cagr_consistent": false,
+      "annualization_consistent": false,
+      "net_of_fee_consistent": false,
+      "all_passed": false
+    }
+  },
+  "analysis": {
+    "total_bars": 12000,
+    "total_minutes": 12000,
+    "total_years": 0.0228310502283105,
+    "annualization_factor": 724.9827584156743,
+    "alternative_factor": 6.618156843109719
+  },
+  "flags": {
+    "equity_zero": "OK",
+    "sharpe_cagr_inconsistency": "WARNING",
+    "annualization_mismatch": "WARNING",
+    "net_of_fee_inconsistency": "WARNING"
+  }
+}

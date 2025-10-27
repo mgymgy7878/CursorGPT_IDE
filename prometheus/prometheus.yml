@@ -1,0 +1,72 @@
+# Spark Trading Platform - Prometheus Configuration
+# chatgpt + cursor collaboration
+
+global:
+  scrape_interval: 10s
+  scrape_timeout: 5s
+  evaluation_interval: 30s
+  external_labels:
+    cluster: 'spark-local'
+    environment: 'development'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Rule files
+rule_files:
+  - '/etc/prometheus/alerts/*.yml'
+  - '/etc/prometheus/records/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Spark Executor Service
+  - job_name: 'spark-executor'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ['host.docker.internal:4001']
+        labels:
+          service: 'executor'
+          environment: 'development'
+          component: 'portfolio'
+
+  # Spark Analytics Service (future)
+  - job_name: 'spark-analytics'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:4002']
+        labels:
+          service: 'analytics'
+          environment: 'development'
+          component: 'backtest'
+
+  # Spark Market Data Service (future)
+  - job_name: 'spark-marketdata'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:4003']
+        labels:
+          service: 'marketdata'
+          environment: 'development'
+          component: 'history'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          environment: 'development'
+
+  # Grafana monitoring (optional)
+  - job_name: 'grafana'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+          environment: 'development'

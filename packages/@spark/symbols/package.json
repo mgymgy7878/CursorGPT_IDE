@@ -1,0 +1,15 @@
+{
+  "name": "@spark/symbols",
+  "version": "0.1.0",
+  "description": "Symbol Normalization for Trading Pairs",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

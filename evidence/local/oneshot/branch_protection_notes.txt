@@ -1,0 +1,10 @@
+﻿1) main branch  Require status checks to pass before merging:
+   - CI / Type-Check & Lint
+   - CI / Build Monorepo (executor + web-next)
+2) Require PRs before merge (en az 1 review)
+3) Require conversation resolution
+4) Dismiss stale approvals on new commits
+5) (Opsiyonel) Require signed commits
+
+GitHub Settings Path:
+Repo  Settings  Branches  Branch protection rules  Add rule

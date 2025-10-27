@@ -1,0 +1,25 @@
+{
+  "nonce": "20250820-270000-852147",
+  "started_utc": "2025-08-20T27:00:00Z",
+  "status_component": "OK",
+  "thresholds": {
+    "ingest_lag_p95_s_leq": 2,
+    "event_db_p95_ms_leq": 300,
+    "seq_gap_eq": 0
+  },
+  "ingest": {
+    "samples": 200,
+    "ingest_lag_ms_p95": 401,
+    "seq_gap_count": 0,
+    "local_url": "http://127.0.0.1:49243/stream?count=200&spread_ms=400"
+  },
+  "persist": {
+    "event_db_latency_ms_p95": 0,
+    "sink_path": "docs/evidence/v1.3-bist-local-pipe/20250820-270000-852147/sink.jsonl"
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-bist-local-pipe/20250820-270000-852147/index.json",
+    "metrics": "docs/evidence/v1.3-bist-local-pipe/20250820-270000-852147/metrics.json",
+    "manifest": "docs/evidence/v1.3-bist-local-pipe/20250820-270000-852147/manifest.sha256"
+  }
+}

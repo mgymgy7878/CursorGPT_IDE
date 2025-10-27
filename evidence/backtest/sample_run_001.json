@@ -1,0 +1,57 @@
+{
+  "runs": [
+    {
+      "id": "bt-sample-001",
+      "status": "done",
+      "startedAt": 1696761600000,
+      "finishedAt": 1696764323000,
+      "notes": "Sample backtest run - BTC mean reversion strategy",
+      "equity": [
+        [1696761600, 100000],
+        [1696761660, 100120],
+        [1696761720, 100085],
+        [1696761780, 100210],
+        [1696761840, 100185]
+      ],
+      "artifacts": [
+        {
+          "type": "csv",
+          "path": "evidence/backtest/artifacts/bt-sample-001_equity.csv"
+        },
+        {
+          "type": "csv",
+          "path": "evidence/backtest/artifacts/bt-sample-001_trades.csv"
+        },
+        {
+          "type": "pdf",
+          "path": "evidence/backtest/artifacts/bt-sample-001_report.pdf"
+        }
+      ],
+      "metrics": {
+        "auc": 0.65,
+        "sharpe": 1.18,
+        "maxDrawdown": -0.21,
+        "winRate": 0.58,
+        "pnl": 15340.50
+      }
+    },
+    {
+      "id": "bt-sample-002",
+      "status": "running",
+      "startedAt": 1696770000000,
+      "notes": "ETH momentum strategy - in progress",
+      "metrics": {
+        "auc": 0.62,
+        "sharpe": 0.95
+      }
+    },
+    {
+      "id": "bt-sample-003",
+      "status": "failed",
+      "startedAt": 1696768000000,
+      "finishedAt": 1696768120000,
+      "notes": "BIST strategy - data missing error"
+    }
+  ]
+}
+

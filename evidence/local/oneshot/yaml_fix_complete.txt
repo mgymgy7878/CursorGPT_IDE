@@ -1,0 +1,1 @@
+﻿YAML lint hataları düzeltildi - CI ve Release workflow'ları hazır

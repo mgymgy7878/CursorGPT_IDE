@@ -1,0 +1,17 @@
+﻿{
+    "ok":  true,
+    "data":  {
+                 "timestamp":  1757526003082,
+                 "health":  {
+                                "web":  200,
+                                "executor":  0,
+                                "overall":  false
+                            },
+                 "p95":  {
+                             "ack_p95_ms":  156,
+                             "success_rate":  0.99,
+                             "observed_at":  1757525790507
+                         }
+             },
+    "timestamp":  1757526003082
+}

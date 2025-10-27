@@ -1,0 +1,288 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Strategy DSL Schema",
+  "description": "Domain Specific Language for defining trading strategies",
+  "type": "object",
+  "required": ["name", "description", "symbol", "timeframe", "indicators", "rules", "risk"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Strategy name",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "description": {
+      "type": "string",
+      "description": "Strategy description",
+      "maxLength": 500
+    },
+    "symbol": {
+      "type": "string",
+      "description": "Trading symbol (e.g., BTCUSDT)",
+      "pattern": "^[A-Z0-9]+$"
+    },
+    "timeframe": {
+      "type": "string",
+      "enum": ["1m", "5m", "15m", "1h", "4h", "1d"],
+      "description": "Chart timeframe"
+    },
+    "indicators": {
+      "type": "object",
+      "description": "Technical indicators configuration",
+      "properties": {
+        "sma": {
+          "type": "object",
+          "properties": {
+            "period": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "source": {
+              "type": "string",
+              "enum": ["close", "open", "high", "low", "volume"],
+              "default": "close"
+            }
+          },
+          "required": ["period"]
+        },
+        "ema": {
+          "type": "object",
+          "properties": {
+            "period": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "source": {
+              "type": "string",
+              "enum": ["close", "open", "high", "low", "volume"],
+              "default": "close"
+            }
+          },
+          "required": ["period"]
+        },
+        "rsi": {
+          "type": "object",
+          "properties": {
+            "period": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "source": {
+              "type": "string",
+              "enum": ["close", "open", "high", "low"],
+              "default": "close"
+            }
+          },
+          "required": ["period"]
+        },
+        "atr": {
+          "type": "object",
+          "properties": {
+            "period": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": ["period"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "conditions": {
+      "type": "object",
+      "description": "Condition definitions for entry/exit rules",
+      "properties": {
+        "price_above_sma": {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "enum": [">", "<", ">=", "<=", "==", "!="]
+            },
+            "indicator": {
+              "type": "string"
+            },
+            "period": {
+              "type": "integer"
+            }
+          },
+          "required": ["operator", "indicator", "period"]
+        },
+        "rsi_oversold": {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "enum": ["<", "<="]
+            },
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": ["operator", "value"]
+        },
+        "rsi_overbought": {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "enum": [">", ">="]
+            },
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": ["operator", "value"]
+        },
+        "cross_up": {
+          "type": "object",
+          "properties": {
+            "indicator1": {
+              "type": "string"
+            },
+            "indicator2": {
+              "type": "string"
+            }
+          },
+          "required": ["indicator1", "indicator2"]
+        },
+        "cross_down": {
+          "type": "object",
+          "properties": {
+            "indicator1": {
+              "type": "string"
+            },
+            "indicator2": {
+              "type": "string"
+            }
+          },
+          "required": ["indicator1", "indicator2"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "rules": {
+      "type": "object",
+      "required": ["entry", "exit"],
+      "properties": {
+        "entry": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["condition", "action"],
+            "properties": {
+              "condition": {
+                "type": "string",
+                "description": "Reference to condition name"
+              },
+              "action": {
+                "type": "string",
+                "enum": ["BUY", "SELL"]
+              },
+              "quantity": {
+                "type": "number",
+                "minimum": 0.001
+              },
+              "price": {
+                "type": "string",
+                "enum": ["MARKET", "LIMIT"]
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "exit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["condition", "action"],
+            "properties": {
+              "condition": {
+                "type": "string",
+                "description": "Reference to condition name"
+              },
+              "action": {
+                "type": "string",
+                "enum": ["CLOSE_LONG", "CLOSE_SHORT"]
+              },
+              "quantity": {
+                "type": "number",
+                "minimum": 0.001
+              },
+              "price": {
+                "type": "string",
+                "enum": ["MARKET", "LIMIT"]
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["riskPct", "maxPos", "maxDailyLoss"],
+      "properties": {
+        "riskPct": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10,
+          "description": "Risk percentage per trade (0.1-10%)"
+        },
+        "maxPos": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Maximum open positions"
+        },
+        "maxDailyLoss": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Maximum daily loss in USD"
+        },
+        "stopLoss": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 50,
+          "description": "Stop loss percentage"
+        },
+        "takeProfit": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 100,
+          "description": "Take profit percentage"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+} 

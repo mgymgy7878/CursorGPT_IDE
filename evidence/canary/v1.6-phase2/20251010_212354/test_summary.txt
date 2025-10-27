@@ -1,0 +1,33 @@
+﻿# V1.6 Phase 2 - Walk-Forward Optimization Test
+
+Timestamp: 2025-10-10 21:24:06
+Mode: Hybrid (REAL_ROUTES=run,walkforward)
+
+## Health
+{
+    "ok":  true,
+    "service":  "executor",
+    "ts":  1760120646801,
+    "mode":  "hybrid (real: run,walkforward)",
+    "version":  "v1.6-hybrid"
+}
+
+## REAL Route: /backtest/run
+mock=False, realEngine=True
+
+## REAL Route: /backtest/walkforward
+mock=False, realEngine=True
+Overfitting Detection:
+  - detected: False
+  - ratio: 0.833 (test/train Sharpe)
+  - threshold: 0.6
+  - train Sharpe: 1.8
+  - test Sharpe: 1.5
+  - Status:  PASS (ratio > threshold, no overfitting)
+
+## MOCK Route: /backtest/portfolio
+mock=True (not enabled yet)
+
+## MOCK Route: /backtest/optimize
+mock=True (not enabled yet)
+

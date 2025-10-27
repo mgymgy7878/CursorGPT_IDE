@@ -1,0 +1,109 @@
+{
+  "sprint": "v1.9-p3-portfolio",
+  "actions": [
+    {
+      "id": "action_1",
+      "name": "Health Status Check",
+      "action": "/tools/get_status",
+      "params": {
+        "include": [
+          "health",
+          "p95",
+          "staleness",
+          "error_rate",
+          "open_orders"
+        ]
+      },
+      "dryRun": false,
+      "confirm_required": false,
+      "reason": "SMOKE öncesi ve sonrası sağlık kanıtı",
+      "timing": "Pre-SMOKE and Post-SMOKE",
+      "expected_output": {
+        "health": true,
+        "p95": "< 1500ms",
+        "staleness": "< 60s",
+        "error_rate": "< 0.01/s",
+        "open_orders": 0
+      }
+    },
+    {
+      "id": "action_2",
+      "name": "SMOKE PASS Degradation Alert",
+      "action": "/alerts/create",
+      "params": {
+        "name": "SmokePassDegradation",
+        "expr": "job:spark_portfolio_latency_p95:5m > 1800 or job:spark_portfolio_staleness > 180 or job:spark_exchange_api_error_rate:5m > 0.03",
+        "for": "5m",
+        "severity": "warning",
+        "labels": {
+          "service": "executor",
+          "env": "development",
+          "component": "portfolio",
+          "layer": "regression"
+        },
+        "annotations": {
+          "summary": "Performance degradation after SMOKE PASS",
+          "description": "System performance degraded from SMOKE PASS baseline",
+          "action": "Run quick-diagnostic.ps1, check logs, consider rollback"
+        }
+      },
+      "dryRun": false,
+      "confirm_required": false,
+      "reason": "SMOKE PASS sonrası regresyonu yakala",
+      "timing": "Post-SMOKE",
+      "implementation": "Add to prometheus/alerts/spark-portfolio-tuned.rules.yml"
+    },
+    {
+      "id": "action_3",
+      "name": "Daily Risk Report",
+      "action": "/fusion/risk.report.daily",
+      "params": {
+        "window": "24h",
+        "artifacts": [
+          "evidence/portfolio/*/REPORT_24H.md",
+          "monitoring/grafana/dashboards/spark-portfolio.dashboard.json",
+          "prometheus/alerts/spark-portfolio-tuned.rules.yml"
+        ]
+      },
+      "dryRun": false,
+      "confirm_required": false,
+      "reason": "Günlük risk & SLO rapor akışı",
+      "timing": "Daily at T+24h",
+      "implementation": "Run render-24h-report-v2.ps1 via scheduled task"
+    }
+  ],
+  "guardrails": {
+    "thresholds": {
+      "latency_p95": {
+        "warning": "1500ms",
+        "critical": "3000ms"
+      },
+      "staleness": {
+        "warning": "60s",
+        "critical": "300s"
+      },
+      "error_rate": {
+        "warning": "0.01/s",
+        "critical": "0.05/s"
+      }
+    },
+    "rollback_trigger": {
+      "condition": "≥2 critical thresholds violated for 15+ minutes",
+      "post_restart_check": "If violations persist after executor restart",
+      "procedure": ".\durdur.ps1 → restore .env backups → .\basla.ps1",
+      "time": "< 2 minutes"
+    }
+  },
+  "evidence_chain": {
+    "smoke_pass": "evidence/portfolio/canary_{timestamp}/",
+    "24h_report": "evidence/portfolio/{timestamp}/REPORT_24H.md",
+    "screenshots": "evidence/portfolio/{timestamp}/grafana_panels/*.png",
+    "tuned_alerts": "prometheus/alerts/spark-portfolio-tuned.rules.yml",
+    "dashboard": "monitoring/grafana/dashboards/spark-portfolio.dashboard.json"
+  },
+  "smoke_pass_format": {
+    "template": "SMOKE PASS ✅\nAccounts: {X} (binance, btcturk)\nTotal USD: ${Y}\nLatency p95: {Z}ms\nStaleness: {S}s\nError rate: {E}/s\nUptime: {M} dk stabil",
+    "example": "SMOKE PASS ✅\nAccounts: 2 (binance, btcturk)\nTotal USD: $48050.00\nLatency p95: 850ms\nStaleness: 15s\nError rate: 0.0020/s\nUptime: 30 dk stabil"
+  }
+}
+

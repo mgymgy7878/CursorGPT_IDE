@@ -1,0 +1,40 @@
+{
+  "nonce": "20250820-275500-741963",
+  "started_utc": "2025-08-20T27:55:00Z",
+  "status": "OK",
+  "reason": "",
+  "thresholds": {
+    "dataset_bars_gte": 10000,
+    "compute_total_ms_leq": 2000,
+    "seq_gap_eq": 0
+  },
+  "dataset": {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 12000,
+    "from_utc": "2025-08-11T06:22:00.000Z",
+    "to_utc": "2025-08-19T14:21:00.000Z",
+    "download_ms": 11061,
+    "seq_gap_count": 0,
+    "dup_count": 0
+  },
+  "strategy": {
+    "name": "ema_cross_12_26",
+    "trades": 400,
+    "win_rate_pct": 719.25,
+    "cagr_pct": -74.61,
+    "sharpe": -6.21,
+    "max_dd_pct": 4.09
+  },
+  "perf": {
+    "compute_total_ms": 9,
+    "p50_ms": 9,
+    "p95_ms": 9
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/index.json",
+    "metrics": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/metrics.json",
+    "manifest": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/manifest.sha256",
+    "data": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl"
+  }
+}

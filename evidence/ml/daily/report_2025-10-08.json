@@ -1,0 +1,39 @@
+{
+  "date": "2025-10-08",
+  "timestamp": "2025-10-08T11:39:24.320Z",
+  "lookback_days": 1,
+  "metrics": {
+    "total_predictions": 1000,
+    "model_errors": 0,
+    "error_rate": 0,
+    "shadow_matches": 0,
+    "shadow_mismatches": 0,
+    "shadow_errors": 0,
+    "shadow_match_rate": 0,
+    "shadow_error_rate": 0,
+    "psi_score": 1.2527
+  },
+  "slo_compliance": {
+    "error_rate_ok": true,
+    "match_rate_ok": false,
+    "psi_ok": false
+  },
+  "risks": [
+    {
+      "level": "CRITICAL",
+      "metric": "PSI",
+      "value": 1.2527,
+      "threshold": 0.3,
+      "action": "Immediate retraining"
+    },
+    {
+      "level": "CRITICAL",
+      "metric": "Match Rate",
+      "value": 0,
+      "threshold": 0.9,
+      "action": "Check shadow logic"
+    }
+  ],
+  "overall_status": "CRITICAL",
+  "promote_eligible": false
+}

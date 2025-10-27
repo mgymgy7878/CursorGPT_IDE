@@ -1,0 +1,130 @@
+{
+  "scenarios": {
+    "A": {
+      "name": "A",
+      "ack_decision_ms": [
+        74,
+        90,
+        81,
+        61,
+        53,
+        65,
+        94,
+        73,
+        72,
+        63,
+        83,
+        90,
+        54,
+        66,
+        96,
+        91,
+        93,
+        61,
+        87,
+        58
+      ],
+      "p50_ms": 74,
+      "p95_ms": 96,
+      "success": 20,
+      "retries": 0
+    },
+    "B": {
+      "name": "B",
+      "ack_decision_ms": [
+        105,
+        312,
+        91,
+        83,
+        329,
+        131,
+        452,
+        67,
+        126,
+        133,
+        64,
+        78,
+        71,
+        115,
+        433,
+        98,
+        79,
+        617,
+        127,
+        108
+      ],
+      "p50_ms": 115,
+      "p95_ms": 617,
+      "success": 20,
+      "retries": 5
+    },
+    "B_raw": [
+      105,
+      312,
+      91,
+      83,
+      329,
+      131,
+      452,
+      67,
+      126,
+      133,
+      64,
+      78,
+      71,
+      115,
+      433,
+      98,
+      79,
+      617,
+      127,
+      108
+    ],
+    "C": {
+      "name": "C",
+      "ack_decision_ms": [
+        91,
+        85
+      ],
+      "p50_ms": 91,
+      "p95_ms": 91,
+      "success": 2,
+      "errors": 2,
+      "skipped": 16,
+      "circuit_open": 1
+    },
+    "D": {
+      "name": "D",
+      "ack_decision_ms": [
+        82,
+        119,
+        86,
+        109,
+        80,
+        97,
+        64,
+        64,
+        72,
+        117
+      ],
+      "p50_ms": 86,
+      "p95_ms": 119,
+      "blocked": 10,
+      "kill_switch": 1
+    }
+  },
+  "summary": {
+    "scenA_p50_ms": 74,
+    "scenA_p95_ms": 96,
+    "scenB_p50_ms": 115,
+    "scenB_p95_ms": 617,
+    "scenB_retries": 5,
+    "scenC_p95_ms": 91,
+    "scenC_circuit_open": 1,
+    "scenC_skipped": 16,
+    "scenC_errors": 2,
+    "scenD_p95_ms": 119,
+    "scenD_blocked": 10,
+    "scenD_kill_switch": 1
+  }
+}

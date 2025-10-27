@@ -1,0 +1,12 @@
+﻿{
+    "counters":  {
+                     "spark_ws_btcturk_msgs_total":  251
+                 },
+    "gauges":  {
+                   "spark_ws_last_message_ts":  1760967219938,
+                   "spark_ws_staleness_seconds":  0.46162975025812014
+               },
+    "flags":  {
+                  "spark_ws_paused":  false
+              }
+}

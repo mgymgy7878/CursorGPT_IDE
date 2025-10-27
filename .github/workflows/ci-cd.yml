@@ -1,0 +1,38 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify-fusion-gate:
+    name: Verify Fusion Gate (route-200)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Curl prefixed status
+        run: |
+          set -euo pipefail
+          URL="${FUSION_BASE_URL:-http://127.0.0.1:4001}/api/public/fusion/risk.gate/status"
+          echo "Checking $URL"
+          STATUS=$(curl -sS -w "%{http_code}" -o resp.json "$URL")
+          cat resp.json | jq .
+          test "$STATUS" = "200"
+          jq -e '.ok==true' resp.json
+          
+      - name: Curl prefixed apply
+        run: |
+          set -euo pipefail
+          URL="${FUSION_BASE_URL:-http://127.0.0.1:4001}/api/public/fusion/risk.gate/apply"
+          echo "Testing $URL"
+          STATUS=$(curl -sS -w "%{http_code}" -o resp.json -X POST -H "Content-Type: application/json" -d '{"dry":true}' "$URL")
+          cat resp.json | jq .
+          test "$STATUS" = "200"
+          jq -e '.ok==true' resp.json
+          
+      - name: Emit build fact
+        run: |
+          echo "fusion_gate_status_ok=true" >> $GITHUB_OUTPUT

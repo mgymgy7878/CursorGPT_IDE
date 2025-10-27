@@ -1,0 +1,17 @@
+{
+  "action": "/canary/run",
+  "params": {
+    "name": "btcturk-ui-canary",
+    "mode": "dry-run"
+  },
+  "dryRun": true,
+  "confirm_required": false,
+  "reason": "BTCTurk akışında temel smoke + latency kanıtı toplama",
+  "metadata": {
+    "target": "btcturk-ui",
+    "purpose": "smoke_test_latency_proof",
+    "created": "2025-01-08",
+    "status": "template_ready",
+    "integration_ready": "receipts-gate-workflow"
+  }
+}

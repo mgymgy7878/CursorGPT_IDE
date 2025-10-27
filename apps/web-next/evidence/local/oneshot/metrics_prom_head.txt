@@ -1,9 +1,9 @@
 ﻿# TYPE spark_ws_last_message_ts gauge
-spark_ws_last_message_ts 1761281864544
+spark_ws_last_message_ts 0
 # TYPE spark_ws_staleness_seconds gauge
-spark_ws_staleness_seconds 0.566
+spark_ws_staleness_seconds 0
 # TYPE spark_ws_btcturk_msgs_total counter
-spark_ws_btcturk_msgs_total 42
+spark_ws_btcturk_msgs_total 0
 # TYPE spark_ws_trades_msgs_total counter
 spark_ws_trades_msgs_total 0
 # TYPE spark_ws_orderbook_msgs_total counter

@@ -1,0 +1,11 @@
+{
+  "strategy": "momentum",
+  "dataset": "small-btc",
+  "totalReturn": 15.67,
+  "sharpeRatio": 1.85,
+  "maxDrawdown": -5.2,
+  "totalTrades": 10,
+  "winRate": 0.7,
+  "runtime": 2920,
+  "timestamp": "2025-10-07T13:33:07.153Z"
+}

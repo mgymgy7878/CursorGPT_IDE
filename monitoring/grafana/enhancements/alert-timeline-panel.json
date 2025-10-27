@@ -1,0 +1,39 @@
+{
+  "title": "Alert Timeline",
+  "type": "state-timeline",
+  "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+  },
+  "targets": [
+    {
+      "expr": "max by (alertname, exchange, service) (ALERTS{alertstate=~\"firing|pending\"})",
+      "legendFormat": "{{alertname}} ({{exchange}})",
+      "refId": "A"
+    }
+  ],
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {"value": null, "color": "green"},
+          {"value": 0, "color": "orange"},
+          {"value": 1, "color": "red"}
+        ]
+      }
+    }
+  },
+  "options": {
+    "mergeValues": true,
+    "showValue": "never",
+    "alignValue": "left"
+  },
+  "description": "Compact alert history (pending → firing). Click an annotation dot above to open the runbook section for that alert.",
+  "usage": "Add to dashboard panels array"
+}
+

@@ -1,0 +1,7 @@
+﻿file=receipts-gate.yml
+status=PASS
+schedule_moved=yes
+cron_added=0 2 * * * (Daily at 2 AM UTC)
+schedule_removed_from_jobs=nightly job
+other_files_with_schedule_errors=none found
+yaml_syntax=valid

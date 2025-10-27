@@ -1,0 +1,203 @@
+{
+  "timestamp": "2025-10-08T11:18:57.710Z",
+  "config": {
+    "service": "ml-shadow",
+    "mode": "OBSERVE_ONLY",
+    "plan": [
+      {
+        "split": 0.05,
+        "duration_min": 30
+      },
+      {
+        "split": 0.1,
+        "duration_min": 30
+      },
+      {
+        "split": 0.25,
+        "duration_min": 30
+      },
+      {
+        "split": 0.5,
+        "duration_min": 30
+      },
+      {
+        "split": 1,
+        "duration_min": 30
+      }
+    ],
+    "slo": {
+      "p95_ms_max": 80,
+      "err_rate_max": 0.01,
+      "match_rate_min": 0.95
+    },
+    "abort_thresholds": {
+      "p95_ms_abort": 120,
+      "err_rate_abort": 0.02,
+      "match_rate_abort": 0.9
+    },
+    "psi_status": {
+      "overall": 1.25,
+      "note": "PSI > 0.2 (critical) → MONITORED but NOT BLOCKING",
+      "action": "Model retraining recommended before promote"
+    }
+  },
+  "results": [
+    {
+      "phase": "5%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.7047776902850096,
+        "p99_ms": 3.615850893450742,
+        "err_rate": 0.004009025268812565,
+        "match_rate": 0.9944851595623851,
+        "psi_overall": 1.2118844272509077,
+        "traffic_split": 0.05,
+        "requests_served": 50,
+        "shadow_errors": 0,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": false
+    },
+    {
+      "phase": "10%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 3.1318681734365947,
+        "p99_ms": 3.332731603887836,
+        "err_rate": 0.002288676997173371,
+        "match_rate": 0.9770951693299598,
+        "psi_overall": 1.202358642950345,
+        "traffic_split": 0.1,
+        "requests_served": 100,
+        "shadow_errors": 1,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": false
+    },
+    {
+      "phase": "25%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.9528483071992513,
+        "p99_ms": 3.6210033716055716,
+        "err_rate": 0.0022710330087922395,
+        "match_rate": 0.9940321904410615,
+        "psi_overall": 1.2889228028685142,
+        "traffic_split": 0.25,
+        "requests_served": 250,
+        "shadow_errors": 2,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": false
+    },
+    {
+      "phase": "50%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.736216010574821,
+        "p99_ms": 3.5095798533908145,
+        "err_rate": 0.0002364199715942117,
+        "match_rate": 0.9994431352458459,
+        "psi_overall": 1.28601993522956,
+        "traffic_split": 0.5,
+        "requests_served": 500,
+        "shadow_errors": 5,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": false
+    },
+    {
+      "phase": "100%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.802714851440315,
+        "p99_ms": 3.4700239339849013,
+        "err_rate": 0.0047279501069392065,
+        "match_rate": 0.9794417698623606,
+        "psi_overall": 1.2620025185974137,
+        "traffic_split": 1,
+        "requests_served": 1000,
+        "shadow_errors": 10,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": false
+    }
+  ],
+  "dry_run": true,
+  "confirmed": false,
+  "summary": {
+    "phases_completed": 5,
+    "phases_total": 5,
+    "aborted": false,
+    "all_slo_pass": true,
+    "final_status": "SUCCESS",
+    "psi_note": "PSI > 0.2 (critical) → MONITORED but NOT BLOCKING",
+    "promote_eligible": false,
+    "promote_reason": "PSI > 0.2 (model retraining required)"
+  }
+}

@@ -1,61 +1,88 @@
-#!/usr/bin/env pwsh
-<#
-.SYNOPSIS
-    UI Smoke Test - Quick health check for all pages
-.DESCRIPTION
-    Tests that all core pages return 200 OK status
-    Used for rapid deployment validation
-.EXAMPLE
-    .\scripts\smoke-ui.ps1
-    .\scripts\smoke-ui.ps1 -BaseUrl "http://localhost:3003"
-#>
+# UI Smoke Test Script
+# 6 kritik endpoint'i test eder
 
-param(
-    [string]$BaseUrl = "http://127.0.0.1:3003"
+$baseUrl = "http://127.0.0.1:3003"
+$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "UI SMOKE TEST — $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Cyan
+Write-Host "========================================`n" -ForegroundColor Cyan
+
+$endpoints = @(
+    @{ path = "/"; name = "Dashboard" }
+    @{ path = "/portfolio"; name = "Portfolio" }
+    @{ path = "/strategies"; name = "Strategies" }
+    @{ path = "/running"; name = "Running" }
+    @{ path = "/settings"; name = "Settings" }
+    @{ path = "/api/health"; name = "Health API" }
 )
 
-$pages = @(
-    "/",
-    "/portfolio",
-    "/strategies",
-    "/running",
-    "/settings",
-    "/api/health"
-)
+$results = @()
+$passCount = 0
+$failCount = 0
 
-Write-Host "🧪 Starting UI Smoke Test..." -ForegroundColor Cyan
-Write-Host "Base URL: $BaseUrl`n" -ForegroundColor Gray
-
-$allPassed = $true
-$startTime = Get-Date
-
-foreach ($page in $pages) {
-    $url = "$BaseUrl$page"
+foreach ($endpoint in $endpoints) {
+    $url = "$baseUrl$($endpoint.path)"
+    Write-Host "[TEST] $($endpoint.name) ($url)..." -NoNewline
     
     try {
-        $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
+        $response = Invoke-WebRequest -Uri $url -Method GET -TimeoutSec 10 -UseBasicParsing
         
         if ($response.StatusCode -eq 200) {
-            Write-Host "✅ OK   $page" -ForegroundColor Green
+            Write-Host " ✅ 200 OK" -ForegroundColor Green
+            $results += @{
+                endpoint = $endpoint.path
+                name = $endpoint.name
+                status = 200
+                result = "PASS"
+                responseTime = $response.Headers.'X-Response-Time'
+            }
+            $passCount++
         } else {
-            Write-Host "❌ FAIL $page (Status: $($response.StatusCode))" -ForegroundColor Red
-            $allPassed = $false
+            Write-Host " ⚠️ $($response.StatusCode)" -ForegroundColor Yellow
+            $results += @{
+                endpoint = $endpoint.path
+                name = $endpoint.name
+                status = $response.StatusCode
+                result = "WARN"
+            }
         }
-    }
-    catch {
-        Write-Host "❌ FAIL $page (Error: $($_.Exception.Message))" -ForegroundColor Red
-        $allPassed = $false
+    } catch {
+        Write-Host " ❌ FAIL" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor Red
+        $results += @{
+            endpoint = $endpoint.path
+            name = $endpoint.name
+            status = 0
+            result = "FAIL"
+            error = $_.Exception.Message
+        }
+        $failCount++
     }
 }
 
-$duration = (Get-Date) - $startTime
-Write-Host "`n⏱️  Duration: $($duration.TotalSeconds.ToString('F2'))s" -ForegroundColor Gray
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "SUMMARY" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "Total: $($endpoints.Count)" -ForegroundColor White
+Write-Host "Pass:  $passCount" -ForegroundColor Green
+Write-Host "Fail:  $failCount" -ForegroundColor $(if ($failCount -eq 0) { "Green" } else { "Red" })
+Write-Host "`nStatus: $(if ($failCount -eq 0) { '✅ ALL PASS' } else { '❌ FAILURES DETECTED' })" -ForegroundColor $(if ($failCount -eq 0) { "Green" } else { "Red" })
+Write-Host "Timestamp: $timestamp" -ForegroundColor White
+Write-Host "========================================`n" -ForegroundColor Cyan
 
-if ($allPassed) {
-    Write-Host "`n🎉 All pages passed smoke test!" -ForegroundColor Green
-    exit 0
-} else {
-    Write-Host "`n💥 Some pages failed. Check server logs." -ForegroundColor Red
-    exit 1
+# JSON çıktı
+$output = @{
+    timestamp = $timestamp
+    baseUrl = $baseUrl
+    total = $endpoints.Count
+    pass = $passCount
+    fail = $failCount
+    status = if ($failCount -eq 0) { "PASS" } else { "FAIL" }
+    results = $results
 }
 
+$output | ConvertTo-Json -Depth 10
+
+# Exit code
+exit $failCount

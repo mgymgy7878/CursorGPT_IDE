@@ -1,0 +1,56 @@
+name: guardrails-db-smoke
+on: 
+  push: 
+    branches: ['**']
+  pull_request: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env: 
+          POSTGRES_USER: spark
+          POSTGRES_PASSWORD: spark
+          POSTGRES_DB: spark
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U spark"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      PRISMA_DATABASE_URL: postgresql://spark:spark@localhost:5432/spark
+      BASE_URL: http://127.0.0.1:4001
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: 
+          version: 9
+      - run: pnpm -w install
+      - run: pnpm -w prisma:generate:executor
+      - run: pnpm -w db:push:executor
+      - run: pnpm -w build
+      - run: node services/executor/dist/index.cjs &
+      - name: Wait for executor
+        run: |
+          for i in {1..40}; do
+            curl -sf "$BASE_URL/health" >/dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "executor not ready" >&2; exit 1
+      - name: Submit+Approve (DB mode)
+        run: |
+          curl -sf -H 'Content-Type: application/json' -X POST -d @- "$BASE_URL/params/submit" <<'JSON'
+          {"strategy":"meanrev","oldParams":{},"newParams":{"k":3}}
+          JSON
+          curl -sf -H 'Content-Type: application/json' -X POST -d '{"strategy":"meanrev"}' "$BASE_URL/params/approve"
+      - run: curl -sf "$BASE_URL/params/history"
+      - name: Metrics check
+        run: |
+          curl -sf "$BASE_URL/metrics" | tee metrics.txt
+          grep -E "guardrails_param_apply_total|guardrails_pending_age_seconds" metrics.txt

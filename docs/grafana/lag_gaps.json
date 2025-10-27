@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Lag & Gaps",
+    "tags": ["streams", "lag", "gaps"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Ingest Lag P95",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(streams_ingest_lag_seconds_bucket[5m]))",
+            "legendFormat": "P95 Ingest Lag"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 2},
+                {"color": "red", "value": 5}
+              ]
+            },
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Sequence Gaps Total",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "streams_seq_gap_total",
+            "legendFormat": "{{src}} - {{symbol}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Out of Order Messages",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(streams_out_of_order_total[1m])",
+            "legendFormat": "{{src}} - {{symbol}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Messages/min",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Duplicate Messages",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(streams_dup_total[1m])",
+            "legendFormat": "{{src}} - {{symbol}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Messages/min",
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s"
+  }
+} 

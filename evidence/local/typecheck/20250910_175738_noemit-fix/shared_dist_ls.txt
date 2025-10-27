@@ -1,0 +1,14 @@
+
+
+    Directory: C:\dev\CursorGPT_IDE\packages\@spark\shared\dist
+
+
+Mode                 LastWriteTime         Length Name                       
+----                 -------------         ------ ----                       
+d-----        10.09.2025     17:32                src                        
+-a----        10.09.2025     17:57           1291 index.d.ts                 
+-a----        10.09.2025     17:57           1371 index.d.ts.map             
+-a----        10.09.2025     17:57           2211 index.js                   
+-a----        10.09.2025     17:50          35958 tsconfig.tsbuildinfo       
+
+

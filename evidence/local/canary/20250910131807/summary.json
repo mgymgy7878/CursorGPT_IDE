@@ -1,0 +1,17 @@
+{
+  "N": 100,
+  "results": {
+    "http://127.0.0.1:3003/api/public/health": {
+      "count": 100,
+      "ok_samples": 0
+    },
+    "http://127.0.0.1:3003/api/public/metrics": {
+      "count": 100,
+      "ok_samples": 0
+    },
+    "http://127.0.0.1:4001/api/public/health": {
+      "count": 100,
+      "ok_samples": 0
+    }
+  }
+}

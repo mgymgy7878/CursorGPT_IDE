@@ -1,0 +1,49 @@
+{
+  "market_analysis": {
+    "crypto": {
+      "sharpe": 0.10126121849067429,
+      "cagr": -100,
+      "equity_zero": false,
+      "sharpe_cagr_consistent": false,
+      "annualization_consistent": false,
+      "net_of_fee_consistent": false,
+      "all_passed": false
+    },
+    "bist": {
+      "sharpe": 0.04378728769569865,
+      "cagr": -100,
+      "equity_zero": false,
+      "sharpe_cagr_consistent": false,
+      "annualization_consistent": false,
+      "net_of_fee_consistent": false,
+      "all_passed": false
+    }
+  },
+  "hard_gate_checks": {
+    "equity_zero": true,
+    "sharpe_cagr_consistent": false,
+    "annualization_consistent": false,
+    "net_of_fee_consistent": false,
+    "all_passed": false
+  },
+  "configuration": {
+    "interval_ms": 60000,
+    "total_bars": 12000,
+    "total_minutes": 12000,
+    "crypto_annualization": 724.9827584156743,
+    "bist_annualization": 313.4964114627152,
+    "fee_model": {
+      "fee_bps": 10,
+      "slip_bps": 5,
+      "total_cost_bps": 15
+    }
+  },
+  "recommendations": [
+    "WARNING: Sharpe-CAGR inconsistency in crypto test",
+    "WARNING: Sharpe-CAGR inconsistency in BIST test",
+    "WARNING: Annualization mismatch in crypto test",
+    "WARNING: Annualization mismatch in BIST test",
+    "WARNING: Net-of-fee inconsistency in crypto test",
+    "WARNING: Net-of-fee inconsistency in BIST test"
+  ]
+}

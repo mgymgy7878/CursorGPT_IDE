@@ -1,0 +1,16 @@
+groups:
+- name: spark-executor
+  rules:
+  - alert: StartStopSpike
+    expr: increase(exec_start_total[5m]) > 10 OR increase(exec_stop_total[5m]) > 10
+    for: 2m
+    labels: { severity: warning }
+    annotations: { summary: "Strategy start/stop spike" }
+
+  - alert: UnauthorizedOrRateLimited
+    expr: sum by (code) (increase(http_requests_total{code=~"401|429"}[5m])) > 5
+    for: 3m
+    labels: { severity: warning }
+    annotations: { summary: "RBAC/ratelimit anomalies" }
+
+

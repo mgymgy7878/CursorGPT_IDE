@@ -1,0 +1,50 @@
+{
+  "panel_links": [
+    {
+      "title": "Runbook • Portfolio",
+      "url": "/d/ops-runbook/spark-ops-runbook?var_env=$env&var_exchange=$exchange&var_service=$service",
+      "targetBlank": true,
+      "type": "link",
+      "tooltip": "Troubleshooting guide for this panel",
+      "icon": "doc"
+    },
+    {
+      "title": "PromQL (raw)",
+      "url": "http://localhost:9090/graph?g0.expr=${__data.fields.Query.labels.__name__}&g0.tab=1",
+      "targetBlank": true,
+      "type": "link",
+      "tooltip": "Open this query in Prometheus",
+      "icon": "external link"
+    },
+    {
+      "title": "Alert Rules",
+      "url": "http://localhost:9090/rules",
+      "targetBlank": true,
+      "type": "link",
+      "tooltip": "View all alert rules in Prometheus",
+      "icon": "bell"
+    }
+  ],
+  "usage": "Add 'links' array to each panel in dashboard JSON",
+  "example": {
+    "panel": {
+      "id": 1,
+      "title": "Portfolio Refresh Latency (p95)",
+      "links": [
+        {
+          "title": "Runbook • Portfolio",
+          "url": "/d/ops-runbook/spark-ops-runbook?var_env=$env&var_exchange=$exchange&var_service=$service",
+          "targetBlank": true,
+          "type": "link"
+        },
+        {
+          "title": "PromQL (raw)",
+          "url": "http://localhost:9090/graph?g0.expr=job:spark_portfolio_latency_p95:5m&g0.tab=1",
+          "targetBlank": true,
+          "type": "link"
+        }
+      ]
+    }
+  }
+}
+

@@ -1,0 +1,105 @@
+groups:
+  - name: btcturk_alerts
+    rules:
+      - alert: BTCTurkIngestLagHigh
+        expr: btcturk_ingest_lag_seconds > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BTCTurk ingest lag is high"
+          description: "BTCTurk ingest lag is {{ $value }}s (threshold 5s)"
+
+      - alert: BTCTurkIngestLagCritical
+        expr: btcturk_ingest_lag_seconds > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BTCTurk ingest lag is critical"
+          description: "BTCTurk ingest lag is {{ $value }}s (threshold 10s)"
+
+      - alert: BTCTurkOrderAckLatencyHigh
+        expr: histogram_quantile(0.95, btcturk_order_ack_ms_bucket) > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BTCTurk order ACK latency p95 is high"
+          description: "BTCTurk order ACK latency p95 is {{ $value }}ms (threshold 1000ms)"
+
+      - alert: BTCTurkSequenceGap
+        expr: btcturk_seq_gap_total > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BTCTurk sequence gap detected"
+          description: "BTCTurk sequence gap count is {{ $value }}"
+
+      - alert: BTCTurkWSReconnectsHigh
+        expr: btcturk_ws_reconnects_total > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BTCTurk WebSocket reconnections are high"
+          description: "BTCTurk WebSocket reconnections: {{ $value }}"
+
+  - name: bist_alerts
+    rules:
+      - alert: BISTIngestLagHigh
+        expr: bist_ingest_lag_seconds > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BIST ingest lag is high"
+          description: "BIST ingest lag is {{ $value }}s (threshold 3s)"
+
+      - alert: BISTIngestLagCritical
+        expr: bist_ingest_lag_seconds > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BIST ingest lag is critical"
+          description: "BIST ingest lag is {{ $value }}s (threshold 5s)"
+
+      - alert: BISTDropRatioHigh
+        expr: bist_drop_ratio > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BIST drop ratio is high"
+          description: "BIST drop ratio is {{ $value | humanizePercentage }} (threshold 10%)"
+
+      - alert: BISTSequenceGap
+        expr: bist_seq_gap_total > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BIST sequence gap detected"
+          description: "BIST sequence gap count is {{ $value }}"
+
+  - name: executor_alerts
+    rules:
+      - alert: ExecutorDown
+        expr: executor_status == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Executor service is down"
+          description: "Executor service has been down for more than 1 minute"
+
+      - alert: ExecutorSafeMode
+        expr: executor_status{is_safe_mode="true"} == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Executor is running in safe mode"
+          description: "Executor has been in safe mode for more than 5 minutes" 

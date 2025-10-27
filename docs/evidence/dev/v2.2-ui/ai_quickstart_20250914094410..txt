@@ -1,0 +1,104 @@
+# AI Quickstart Smoke Test Results
+Timestamp: 2025-09-14T09:44:10.487Z
+Symbol: BTCUSDT, Qty: 0.001, Leverage: 5, Risk: low
+
+## Summary
+Passed: 1/4
+Success: ❌ NO
+
+## Test Results
+### advisor_suggest
+- URL: http://127.0.0.1:3003/api/advisor/suggest
+- Status: 0
+- Latency: 46ms
+- OK: ❌
+- Error: fetch failed
+### dry_run_order
+- URL: http://127.0.0.1:4001/api/futures/order
+- Status: 404
+- Latency: 33ms
+- OK: ❌
+- Data: {
+  "error": {
+    "message": "Route POST:/api/futures/order not found",
+    "error": "Not Found",
+    "statusCode": 404
+  }
+}
+### metrics
+- URL: http://127.0.0.1:3003/api/public/metrics
+- Status: 0
+- Latency: 3ms
+- OK: ❌
+- Error: fetch failed
+### advisor_health
+- URL: http://127.0.0.1:4001/api/advisor/health
+- Status: 200
+- Latency: 5ms
+- OK: ✅
+- Data: {
+  "status": "ok",
+  "service": "advisor-suggest",
+  "timestamp": "2025-09-14T09:44:10.590Z",
+  "version": "1.0.0"
+}
+
+## Raw Results
+{
+  "timestamp": "2025-09-14T09:44:10.487Z",
+  "symbol": "BTCUSDT",
+  "qty": 0.001,
+  "leverage": 5,
+  "risk": "low",
+  "tests": [
+    {
+      "name": "advisor_suggest",
+      "url": "http://127.0.0.1:3003/api/advisor/suggest",
+      "status": 0,
+      "latency": 46,
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "name": "dry_run_order",
+      "url": "http://127.0.0.1:4001/api/futures/order",
+      "status": 404,
+      "latency": 33,
+      "ok": false,
+      "data": {
+        "error": {
+          "message": "Route POST:/api/futures/order not found",
+          "error": "Not Found",
+          "statusCode": 404
+        }
+      }
+    },
+    {
+      "name": "metrics",
+      "url": "http://127.0.0.1:3003/api/public/metrics",
+      "status": 0,
+      "latency": 3,
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "name": "advisor_health",
+      "url": "http://127.0.0.1:4001/api/advisor/health",
+      "status": 200,
+      "latency": 5,
+      "ok": true,
+      "data": {
+        "status": "ok",
+        "service": "advisor-suggest",
+        "timestamp": "2025-09-14T09:44:10.590Z",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "total": 4,
+    "success": false,
+    "timestamp": "2025-09-14T09:44:10.592Z"
+  }
+}

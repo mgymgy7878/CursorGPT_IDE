@@ -1,0 +1,142 @@
+groups:
+- name: spark.trading.alerts
+  rules:
+  # HTTP Latency Alerts
+  - alert: HighHTTPLatency
+    expr: histogram_quantile(0.95, rate(spark_http_latency_seconds_bucket[5m])) * 1000 > 1000
+    for: 5m
+    labels:
+      severity: warning
+      component: http
+      service: executor
+    annotations:
+      summary: "HTTP P95 latency is high"
+      description: "HTTP request P95 latency is {{ $value }}ms for 5 minutes"
+      runbook_url: "https://docs.spark-trading.com/runbooks/http-latency"
+      
+  - alert: CriticalHTTPLatency
+    expr: histogram_quantile(0.95, rate(spark_http_latency_seconds_bucket[5m])) * 1000 > 2500
+    for: 2m
+    labels:
+      severity: critical
+      component: http
+      service: executor
+    annotations:
+      summary: "HTTP P95 latency is critical"
+      description: "HTTP request P95 latency is {{ $value }}ms for 2 minutes"
+      runbook_url: "https://docs.spark-trading.com/runbooks/http-latency"
+
+  # Request Rate Alerts
+  - alert: HighRequestRate
+    expr: rate(spark_http_requests_total[1m]) > 100
+    for: 3m
+    labels:
+      severity: warning
+      component: http
+      service: executor
+    annotations:
+      summary: "High request rate detected"
+      description: "Request rate is {{ $value }} req/sec for 3 minutes"
+      
+  - alert: VeryHighRequestRate
+    expr: rate(spark_http_requests_total[1m]) > 500
+    for: 1m
+    labels:
+      severity: critical
+      component: http
+      service: executor
+    annotations:
+      summary: "Very high request rate detected"
+      description: "Request rate is {{ $value }} req/sec for 1 minute"
+
+  # Error Rate Alerts
+  - alert: HighErrorRate
+    expr: rate(spark_http_requests_total{status=~"4..|5.."}[5m]) / rate(spark_http_requests_total[5m]) > 0.05
+    for: 5m
+    labels:
+      severity: warning
+      component: http
+      service: executor
+    annotations:
+      summary: "High error rate detected"
+      description: "Error rate is {{ $value | humanizePercentage }} for 5 minutes"
+      
+  - alert: CriticalErrorRate
+    expr: rate(spark_http_requests_total{status=~"4..|5.."}[5m]) / rate(spark_http_requests_total[5m]) > 0.1
+    for: 2m
+    labels:
+      severity: critical
+      component: http
+      service: executor
+    annotations:
+      summary: "Critical error rate detected"
+      description: "Error rate is {{ $value | humanizePercentage }} for 2 minutes"
+
+  # AI Performance Alerts
+  - alert: HighAILatency
+    expr: histogram_quantile(0.95, rate(spark_ai_latency_ms_bucket[5m])) > 2000
+    for: 5m
+    labels:
+      severity: warning
+      component: ai
+      service: executor
+    annotations:
+      summary: "AI response latency is high"
+      description: "AI P95 latency is {{ $value }}ms for 5 minutes"
+      
+  - alert: CriticalAILatency
+    expr: histogram_quantile(0.95, rate(spark_ai_latency_ms_bucket[5m])) > 5000
+    for: 2m
+    labels:
+      severity: critical
+      component: ai
+      service: executor
+    annotations:
+      summary: "AI response latency is critical"
+      description: "AI P95 latency is {{ $value }}ms for 2 minutes"
+
+  # Rate Limiting Alerts
+  - alert: RateLimitHit
+    expr: rate(spark_rate_limit_hits_total[5m]) > 0.1
+    for: 2m
+    labels:
+      severity: warning
+      component: rate-limit
+      service: executor
+    annotations:
+      summary: "Rate limit hits detected"
+      description: "Rate limit hits: {{ $value }} per second for 2 minutes"
+      
+  - alert: HighRateLimitHit
+    expr: rate(spark_rate_limit_hits_total[5m]) > 1
+    for: 1m
+    labels:
+      severity: critical
+      component: rate-limit
+      service: executor
+    annotations:
+      summary: "High rate limit hits detected"
+      description: "Rate limit hits: {{ $value }} per second for 1 minute"
+
+  # System Health Alerts
+  - alert: ExecutorDown
+    expr: up{job="executor"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      component: system
+      service: executor
+    annotations:
+      summary: "Executor is down"
+      description: "Executor has been down for more than 1 minute"
+      
+  - alert: ExecutorHighMemory
+    expr: process_resident_memory_bytes{job="executor"} > 1000000000  # 1GB
+    for: 5m
+    labels:
+      severity: warning
+      component: system
+      service: executor
+    annotations:
+      summary: "Executor high memory usage"
+      description: "Executor memory usage is {{ $value | humanizeBytes }} for 5 minutes"

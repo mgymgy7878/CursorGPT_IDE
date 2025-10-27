@@ -1,0 +1,90 @@
+{
+  "nonce": "",
+  "started_utc": "",
+  "status": "WARNING",
+  "reason": "SENSITIVITY_UNSTABLE",
+  "thresholds": {
+    "oos_folds_gte": 5,
+    "oos_positive_ratio_ge": 0.6,
+    "compute_total_ms_leq": 3000,
+    "robust_count_sharpe_gt1_ge": 4,
+    "fee_bps": 10,
+    "slippage_bps": 5
+  },
+  "dataset": {
+    "source": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 12000,
+    "from_utc": "2025-08-11T06:22:00.000Z",
+    "to_utc": "2025-08-19T14:21:00.000Z"
+  },
+  "base_net": {
+    "sharpe": -0.23,
+    "cagr_pct": -99.91,
+    "max_dd_pct": 15.32,
+    "trades": 105,
+    "exposure_pct": 54.13,
+    "turnover_trades_per_day": 12.6
+  },
+  "oos": {
+    "folds": 5,
+    "positive_ratio": 0.6,
+    "median_sharpe": 3.47,
+    "min_sharpe": -10.88,
+    "metrics": [
+      {
+        "sharpe": 5.29,
+        "cagr_pct": -99.93,
+        "max_dd_pct": 4.14
+      },
+      {
+        "sharpe": -10.88,
+        "cagr_pct": -99.99,
+        "max_dd_pct": 4.83
+      },
+      {
+        "sharpe": 15.13,
+        "cagr_pct": -98.77,
+        "max_dd_pct": 2.84
+      },
+      {
+        "sharpe": 3.47,
+        "cagr_pct": -99.7,
+        "max_dd_pct": 2.96
+      },
+      {
+        "sharpe": -9.09,
+        "cagr_pct": -99.97,
+        "max_dd_pct": 4.19
+      }
+    ]
+  },
+  "sensitivity": {
+    "overs": [
+      20,
+      25,
+      30,
+      35
+    ],
+    "overb": [
+      65,
+      70,
+      75,
+      80
+    ],
+    "sharpe_max": 2.73,
+    "sharpe_min": -10.04,
+    "sharpe_delta": 12.77,
+    "robust_count_sharpe_gt1": 1
+  },
+  "perf": {
+    "compute_total_ms": 47
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.4-rsi14mr-validation/20250820-280500-963258/index.json",
+    "metrics": "docs/evidence/v1.4-rsi14mr-validation/20250820-280500-963258/metrics.json",
+    "summary_csv": "docs/evidence/v1.4-rsi14mr-validation/20250820-280500-963258/summary.csv",
+    "manifest": "docs/evidence/v1.4-rsi14mr-validation/20250820-280500-963258/manifest.sha256"
+  }
+}

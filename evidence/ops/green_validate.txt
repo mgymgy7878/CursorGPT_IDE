@@ -1,0 +1,53 @@
+﻿
+> spark-monorepo@0.3.3 green:validate C:\dev\CursorGPT_IDE\CursorGPT_IDE
+> powershell -ExecutionPolicy Bypass -File scripts/green-validation.ps1
+
+## 10 DakikalÄ±k GREEN DoÄYrulama - 10/06/2025 10:39:33
+Prometheus Host: http://127.0.0.1:9090
+Metrics Endpoint: http://127.0.0.1:4001
+Dry run: False
+
+1. Testing Prometheus Rules...
+âs ï¸?  promtool not found, skipping rules validation
+
+2. Testing Prometheus Reload...
+âs ï¸?  Prometheus reload failed: Uzak sunucuya bağlanılamıyor
+
+3. Testing Metrics Liveness...
+â?O Metrics endpoint test failed: Uzak sunucuya bağlanılamıyor
+
+4. Testing Predictive Alerting...
+Running predictive alerting test...
+âo Predictive alerting test passed
+
+5. Testing Self-Check Heartbeat...
+Running self-check heartbeat test...
+âo Self-check heartbeat test passed
+
+6. Testing Daily Report...
+Running daily report test...
+âo Daily report test passed
+
+## GREEN Validation Report
+**Timestamp:** 2025-10-06 10:39:52
+**Duration:** 10 minutes
+**Status:** YELLOW
+
+### Test Results
+- **Prometheus Rules:** True
+- **Prometheus Reload:** False
+- **Metrics Liveness:** False
+- **Predictive Alerting:** True
+- **Self-Check Heartbeat:** True
+- **Daily Report:** True
+
+### Summary
+- **Total Tests:** 6
+- **Passed:** 4
+- **Failed:** 2
+- **Warnings:** 0
+
+### Recommendations
+- Address failed tests before production deployment
+
+## GREEN validation completed

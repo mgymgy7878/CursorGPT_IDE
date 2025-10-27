@@ -1,0 +1,50 @@
+name: Metrics Contract Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'services/executor/src/**/metrics*.ts'
+      - 'services/executor/src/plugins/metrics.ts'
+      - 'services/executor/src/lib/metrics*.ts'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'services/executor/src/**/metrics*.ts'
+      - 'services/executor/src/plugins/metrics.ts'
+      - 'services/executor/src/lib/metrics*.ts'
+
+jobs:
+  metrics-contract:
+    name: Route Label Guardrail
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Run Metrics Contract Test
+      run: |
+        chmod +x scripts/test-metrics-contract.sh
+        ./scripts/test-metrics-contract.sh
+        
+    - name: Test Results
+      if: always()
+      run: |
+        echo "🔒 Metrics Contract Test: Route Label Hatası 'Bir Daha Asla' Guardrail"
+        echo "✅ Bu test, prom-client labelNames sözleşmesini doğrular"
+        echo "✅ Beklenmeyen label'ları yakalar ve CI'da fail eder"
+        echo "✅ Production'da metrik tutarlılığını garanti eder"

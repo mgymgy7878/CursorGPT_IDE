@@ -1,0 +1,14 @@
+﻿{
+    "ok":  true,
+    "message":  "Canary approved, live trading enabled",
+    "data":  {
+                 "scope":  "binance:futures",
+                 "targets":  [
+                                 "place_order",
+                                 "cancel_order",
+                                 "ack_latency"
+                             ]
+             },
+    "token_tail":  "fxkkv6",
+    "timestamp":  1757527787457
+}

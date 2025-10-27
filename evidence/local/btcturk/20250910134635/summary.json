@@ -1,0 +1,22 @@
+{
+  "rest": {
+    "ok": true,
+    "status": 200,
+    "ms": 534,
+    "data": {
+      "serverTime": 1757511996132,
+      "serverTime2": "2025-09-10T13:46:36.1322455+00:00"
+    }
+  },
+  "ws": {
+    "connected": false,
+    "durationMs": 0,
+    "messages": 0,
+    "errors": 0,
+    "note": "No WS URL configured"
+  },
+  "env": {
+    "BTCTURK_REST_BASE": "https://api.btcturk.com/api/v2",
+    "BTCTURK_WS_URL": null
+  }
+}

@@ -1,0 +1,178 @@
+# Spark Trading Platform - Run Hints
+
+## Quick Commands
+
+### Development
+```bash
+# Install dependencies
+pnpm -w install
+
+# Start executor (mock mode)
+cd services/executor
+set EXCHANGE_MODE=mock
+set TRADE_MODE=paper
+pnpm dev
+
+# Start panel (new terminal)
+cd apps/web-next
+set PORT=3003
+pnpm dev
+```
+
+### Production Bundle
+```bash
+# Build and start executor
+cd services/executor
+pnpm build
+pnpm start:bundle
+
+# Start panel (proxy mode)
+cd apps/web-next
+pnpm dev
+```
+
+## Regression Testing
+
+### V0.3.0 Full Regression (Mock)
+```bash
+cmd /d /c runtime\regression_v030.cmd
+```
+
+### Real Public Quick Test
+```bash
+cmd /d /c runtime\regression_real_public.cmd
+```
+
+### Individual Tests
+```bash
+# Order types
+cmd /d /c runtime\order_types_smoke.cmd
+
+# Backtest
+cmd /d /c runtime\backtest_smoke.cmd
+
+# Metrics
+cmd /d /c runtime\metrics_snapshot.cmd
+
+# UI probe
+cmd /d /c runtime\ui_probe_codes.cmd
+```
+
+## Health Check URLs
+
+### Executor (4001)
+- Health: http://127.0.0.1:4001/api/public/health
+- Metrics: http://127.0.0.1:4001/api/public/metrics/prom
+- Paper Account: http://127.0.0.1:4001/api/paper/account
+- Exchange Health: http://127.0.0.1:4001/api/exchange/health
+
+### Panel (3003)
+- Control: http://127.0.0.1:3003/control
+- Proxy Health: http://127.0.0.1:3003/api/public/health
+- Proxy Metrics: http://127.0.0.1:3003/api/public/metrics/prom
+
+## Environment Variables
+
+### Required
+```bash
+EXCHANGE_MODE=mock      # mock | binance
+TRADE_MODE=paper        # paper | live
+```
+
+### Optional
+```bash
+PORT=3003               # Panel port
+PAPER_MAX_POSITION_SIZE=1000
+PAPER_MAX_DAILY_LOSS=500
+PAPER_MAX_LEVERAGE=10
+PAPER_MAKER_FEE_BPS=10
+PAPER_TAKER_FEE_BPS=15
+```
+
+## Troubleshooting
+
+### Port Issues
+```bash
+# Kill ports
+pnpm dlx kill-port 3003 4001
+
+# Check port usage
+netstat -ano | findstr ":3003"
+netstat -ano | findstr ":4001"
+```
+
+### Module Issues
+```bash
+# Reinstall dependencies
+pnpm -w install
+
+# Clear cache
+pnpm store prune
+```
+
+### Build Issues
+```bash
+# Clean build
+cd services/executor
+pnpm clean
+pnpm build
+```
+
+## Expected Health Status
+
+### GREEN (All Good)
+- Executor health: 200
+- Panel health: 200
+- Proxy health: 200
+- Proxy metrics: 200
+- All smoke tests: PASS
+
+### YELLOW (Partial)
+- Rate limits (429)
+- Some tests failed
+- SSE issues
+
+### RED (Failed)
+- Services not starting
+- Critical endpoints down
+- Build failures
+
+## Log Files
+
+### Runtime Logs
+- `runtime/regression.summary.txt` - Main summary
+- `runtime/regression.index.json` - JSON results
+- `runtime/ui_codes.txt` - UI HTTP codes
+- `runtime/ui_bodies.log` - UI responses
+- `runtime/metrics_snapshot.prom` - Prometheus metrics
+
+### Test Logs
+- `runtime/order_types_smoke.log`
+- `runtime/backtest_smoke.log`
+- `runtime/metrics_snapshot.log`
+- `runtime/ui_probe.log`
+
+## CI Integration
+
+### GitHub Actions
+```yaml
+regression-mock:
+  name: "regression-mock @smoke"
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+    - run: pnpm install
+    - run: cmd /d /c runtime\regression_v030.cmd
+```
+
+### Required Checks
+- Existing checks must not be broken
+- Regression job is optional addition
+
+## Documentation
+
+- [Regression Suite](docs/regression/README.md)
+- [API Reference](docs/API.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Contributing](docs/CONTRIBUTING.md) 

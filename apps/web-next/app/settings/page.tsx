@@ -185,8 +185,5 @@ export default function SettingsPage() {
   );
 }
 
-export const metadata = {
-  title: 'Ayarlar | Spark Trading',
-  description: 'API anahtarları ve bağlantı ayarları',
-};
+// Metadata moved to layout.tsx to avoid client component conflict
 

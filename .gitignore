@@ -1,43 +1,31 @@
-# Dependencies
+# Spark Trading Platform - Git Ignore
+# Prevents sensitive and generated files from being committed
+
+# Environment variables (SENSITIVE!)
+.env
+.env.*
+!.env.example
+!.env.template
+*.env.local
+*.env.backup.*
+
+# Node modules
 node_modules/
-.pnp
-.pnp.js
+.pnpm-store/
 
-# Testing
-coverage/
-
-# Next.js
+# Build outputs
+dist/
 .next/
 out/
-
-# Production
 build/
-dist/
 
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Local env files
-.env
-.env*.local
-!.env.example
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-
-# PM2
-.pm2/
-logs/
+# Cache
+.turbo/
+.cache/
+*.log
+*.pid
+*.seed
+*.pid.lock
 
 # IDE
 .vscode/
@@ -45,28 +33,49 @@ logs/
 *.swp
 *.swo
 *~
+.DS_Store
 
-# Archive
-_archive/
-CursorGPT_IDE/
-*.zip
+# Evidence (keep structure, not files)
+evidence/**/metrics_*.txt
+evidence/**/portfolio_*.json
+evidence/**/*.zip
+!evidence/.gitkeep
 
-# Evidence (commit manually)
-# evidence/*.json
-# evidence/*.txt
+# Backup folders
+_backups/
+*.backup/
 
-# PNPM Store
-.pnpm-store/
-**/pnpm-lock.yaml
+# Temporary files
+tmp/
+temp/
+*.tmp
 
-# Build outputs
-**/.next/
-**/dist/
-**/out/
+# DuckDB databases
+*.duckdb
+*.duckdb.wal
 
-# Logs and artifacts
-*.log
-*.zip
-*.7z
-*.tgz
-evidence/
+# Prometheus data
+prometheus-data/
+
+# Grafana data
+grafana-data/
+
+# PM2
+.pm2/
+*.pm2.log
+
+# Coverage
+coverage/
+*.lcov
+
+# Secrets
+secrets/
+*.key
+*.pem
+*.cert
+*.crt
+
+# System files
+Thumbs.db
+desktop.ini
+

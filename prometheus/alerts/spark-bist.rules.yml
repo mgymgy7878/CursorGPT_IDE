@@ -1,0 +1,46 @@
+groups:
+  - name: spark-bist
+    interval: 30s
+    rules:
+      # BIST data staleness alert
+      - alert: BISTDataStale
+        expr: |
+          spark_bist_staleness_seconds > 30
+        for: 2m
+        labels:
+          severity: warning
+          component: bist
+          layer: data
+        annotations:
+          summary: "BIST data stale (>30 seconds)"
+          description: "BIST verisi {{ $value }} saniyedir güncellenmedi (threshold: 30s)"
+          runbook: "Check vendor connection and reader service"
+          
+      # BIST WebSocket disconnected
+      - alert: BISTWsDisconnected
+        expr: |
+          time() - spark_bist_last_update_timestamp > 60
+        for: 1m
+        labels:
+          severity: critical
+          component: bist
+          layer: connectivity
+        annotations:
+          summary: "BIST WebSocket bağlantı kesildi"
+          description: "Son güncelleme: {{ $value }} saniye önce"
+          runbook: "Restart BIST reader or check vendor API status"
+          
+      # High BIST WS errors
+      - alert: BISTWsErrorsHigh
+        expr: |
+          rate(spark_bist_ws_errors_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          component: bist
+          layer: connectivity
+        annotations:
+          summary: "BIST WebSocket hata oranı yüksek"
+          description: "Error rate: {{ $value }}/s (threshold: 0.1/s)"
+          runbook: "Check vendor API stability and credentials"
+

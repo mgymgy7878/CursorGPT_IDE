@@ -1,0 +1,8 @@
+﻿? DOCTOR
+{
+    "ts":  "2025-09-30T13:14:48",
+    "ui_health":  false,
+    "ui_detail":  "Uzak sunucuya bağlanılamıyor",
+    "exec_metrics":  false,
+    "p95_signal":  "missing"
+}

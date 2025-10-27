@@ -1,5 +1,6 @@
 packages:
-  - 'apps/*'
-  - 'services/*'
-  - 'packages/*'
+  - "apps/*"
+  - "services/*"
+  - "packages/*"
+  - "packages/@spark/*"
 

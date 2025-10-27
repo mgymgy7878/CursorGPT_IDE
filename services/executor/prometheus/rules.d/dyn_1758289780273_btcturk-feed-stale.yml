@@ -1,0 +1,12 @@
+groups:
+- name: spark-dynamic
+  rules:
+  - alert: btcturk-feed-stale
+    expr: "btcturk_last_msg_age_seconds > 15 > 0"
+    for: 1m
+    labels:
+      severity: "warning"
+      source: "spark"
+    annotations:
+      summary: "BTCTurk mesaj akisi gecikti"
+      description: "Auto-generated alert: btcturk_last_msg_age_seconds > 15 > 0"

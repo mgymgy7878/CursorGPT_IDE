@@ -1,0 +1,50 @@
+groups:
+- name: backtest.rules
+  rules:
+  - alert: BacktestRuntimeP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(backtest_runtime_ms_bucket[10m]))) > 4000
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Backtest runtime P95 > 4s (10m)"}
+    
+  - alert: BacktestRuntimeP95Critical
+    expr: histogram_quantile(0.95, sum by (le) (rate(backtest_runtime_ms_bucket[10m]))) > 6000
+    for: 5m
+    labels: {severity: critical}
+    annotations: {summary: "Backtest runtime P95 > 6s (5m)"}
+
+  - alert: BacktestQueueWaitHigh
+    expr: histogram_quantile(0.95, sum by (le) (rate(backtest_queue_wait_ms_bucket[10m]))) > 800
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Queue wait P95 > 800ms (10m)"}
+    
+  - alert: BacktestQueueWaitCritical
+    expr: histogram_quantile(0.95, sum by (le) (rate(backtest_queue_wait_ms_bucket[10m]))) > 1500
+    for: 5m
+    labels: {severity: critical}
+    annotations: {summary: "Queue wait P95 > 1.5s (5m)"}
+
+  - alert: BacktestThroughputLow
+    expr: sum(rate(backtest_jobs_total{status="succeeded"}[1m])) < 0.05
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Backtest throughput < 0.05 jobs/sec (10m)"}
+
+  - alert: BacktestDeterminismBroken
+    expr: increase(backtest_golden_diff_fail_total[30m]) > 0
+    for: 0m
+    labels: {severity: critical}
+    annotations: {summary: "Golden diff failure detected"}
+
+  - alert: BacktestWorkersLow
+    expr: sum(backtest_workers_running) < 2
+    for: 5m
+    labels: {severity: warning}
+    annotations: {summary: "Backtest workers < 2 (5m)"}
+
+  - alert: BacktestMemoryHigh
+    expr: sum(backtest_memory_bytes) > 100000000
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Backtest memory > 100MB (10m)"}

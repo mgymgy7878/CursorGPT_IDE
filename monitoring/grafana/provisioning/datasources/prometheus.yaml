@@ -6,13 +6,7 @@ datasources:
     access: proxy
     url: http://prometheus:9090
     isDefault: true
-    editable: true
+    editable: false
     jsonData:
-      timeInterval: '15s'
-      httpMethod: 'POST'
-
-# KULLANIM:
-# Bu dosya Grafana'ya Prometheus datasource'u otomatik ekler.
-# Docker Compose ile kullanırken prometheus:9090 hostname çözülür.
-# Standalone kullanımda url'i http://localhost:9090 yapın.
+      timeInterval: "5s"
 

@@ -1,0 +1,57 @@
+{
+  "base_net": {
+    "sharpe": -0.23,
+    "cagr_pct": -99.91,
+    "max_dd_pct": 15.32,
+    "trades": 105,
+    "exposure_pct": 54.13,
+    "turnover_trades_per_day": 12.6
+  },
+  "oos": [
+    {
+      "sharpe": 5.29,
+      "cagr_pct": -99.93,
+      "max_dd_pct": 4.14
+    },
+    {
+      "sharpe": -10.88,
+      "cagr_pct": -99.99,
+      "max_dd_pct": 4.83
+    },
+    {
+      "sharpe": 15.13,
+      "cagr_pct": -98.77,
+      "max_dd_pct": 2.84
+    },
+    {
+      "sharpe": 3.47,
+      "cagr_pct": -99.7,
+      "max_dd_pct": 2.96
+    },
+    {
+      "sharpe": -9.09,
+      "cagr_pct": -99.97,
+      "max_dd_pct": 4.19
+    }
+  ],
+  "sensitivity_grid": {
+    "overs": [
+      20,
+      25,
+      30,
+      35
+    ],
+    "overb": [
+      65,
+      70,
+      75,
+      80
+    ],
+    "sharpe_max": 2.73,
+    "sharpe_min": -10.04,
+    "sharpe_delta": 12.77,
+    "robust_count_sharpe_gt1": 1
+  },
+  "fee_bps": 10,
+  "slippage_bps": 5
+}

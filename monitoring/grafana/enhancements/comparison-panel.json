@@ -1,0 +1,43 @@
+{
+  "title": "Latency p95 — Today vs Yesterday",
+  "type": "timeseries",
+  "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+  },
+  "targets": [
+    {
+      "expr": "job:spark_portfolio_latency_p95:5m{environment=~\"$env\",service=~\"$service\",exchange=~\"$exchange\"}",
+      "legendFormat": "{{exchange}} today",
+      "refId": "A"
+    },
+    {
+      "expr": "job:spark_portfolio_latency_p95:5m{environment=~\"$env\",service=~\"$service\",exchange=~\"$exchange\"} offset 1d",
+      "legendFormat": "{{exchange}} yesterday",
+      "refId": "B"
+    }
+  ],
+  "fieldConfig": {
+    "defaults": {
+      "unit": "ms",
+      "color": {
+        "mode": "palette-classic"
+      },
+      "custom": {
+        "lineWidth": 2,
+        "fillOpacity": 10
+      },
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {"value": null, "color": "green"},
+          {"value": 1500, "color": "yellow"},
+          {"value": 3000, "color": "red"}
+        ]
+      }
+    }
+  },
+  "description": "Shows 95th percentile refresh latency. Yesterday is plotted using Prometheus `offset 1d` for quick day-over-day visual comparison. Targets: p95 < 1500ms (warn above 1500ms, crit above 3000ms).",
+  "usage": "Add to dashboard panels array"
+}
+

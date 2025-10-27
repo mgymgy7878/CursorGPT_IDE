@@ -1,0 +1,103 @@
+# Promtool Test Cases for ML Alert Rules (v1.8)
+# Usage: promtool test rules rules/ml.test.yml
+
+rule_files:
+  - ml.yml
+  - ml-canary.yml
+
+evaluation_interval: 1m
+
+tests:
+  # Test 1: PSI Critical Alert
+  - interval: 1m
+    input_series:
+      - series: 'ml_psi_score'
+        values: '0.1 0.15 0.25 0.35 0.40'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ML_PSI_Critical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              team: ml
+              action_required: "true"
+            exp_annotations:
+              summary: "PSI critical - promote blocked"
+              
+  # Test 2: Shadow Match Rate Low
+  - interval: 1m
+    input_series:
+      - series: 'ml_shadow_match_rate'
+        values: '0.98 0.96 0.94 0.92 0.91'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: ML_Shadow_MatchRate_Low
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              team: ml
+              
+  # Test 3: ML Predict P95 High
+  - interval: 1m
+    input_series:
+      - series: 'ml_predict_latency_ms_bucket{le="50",model_version="v1.8-b0"}'
+        values: '100 200 300 400 500'
+      - series: 'ml_predict_latency_ms_bucket{le="100",model_version="v1.8-b0"}'
+        values: '100 200 300 400 500'
+      - series: 'ml_predict_latency_ms_bucket{le="+Inf",model_version="v1.8-b0"}'
+        values: '100 200 300 400 500'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ML_Predict_P95_High
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              team: ml
+              slo_breach: "true"
+              
+  # Test 4: PSI Warning (early signal)
+  - interval: 1m
+    input_series:
+      - series: 'ml_psi_score'
+        values: '0.10 0.12 0.16 0.18 0.19'
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: ML_PSI_Warning
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              team: ml
+              
+  # Test 5: Shadow Match Rate Critical
+  - interval: 1m
+    input_series:
+      - series: 'ml_shadow_match_rate'
+        values: '0.95 0.92 0.88 0.85 0.82'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: ML_Shadow_MatchRate_Critical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              team: ml
+              
+  # Test 6: No PSI alert when stable
+  - interval: 1m
+    input_series:
+      - series: 'ml_psi_score'
+        values: '0.05 0.06 0.08 0.09 0.10'
+    alert_rule_test:
+      - eval_time: 2h
+        alertname: ML_PSI_Critical
+        exp_alerts: []
+        
+  # Test 7: No match alert when healthy
+  - interval: 1m
+    input_series:
+      - series: 'ml_shadow_match_rate'
+        values: '0.98 0.97 0.96 0.97 0.98'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: ML_Shadow_MatchRate_Low
+        exp_alerts: []
+

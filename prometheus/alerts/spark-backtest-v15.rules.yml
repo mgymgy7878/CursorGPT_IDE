@@ -1,0 +1,119 @@
+groups:
+  - name: spark-backtest-v15
+    interval: 30s
+    rules:
+      # ========== LATENCY ALERTS ==========
+      
+      - alert: BacktestLatencyHighP95
+        expr: histogram_quantile(0.95, sum by (le)(rate(spark_backtest_latency_ms_bucket[5m]))) > 8000
+        for: 15m
+        labels:
+          severity: warning
+          component: backtest
+        annotations:
+          summary: "Backtest P95 latency yüksek"
+          description: "P95 latency > 8s for 15 minutes (current: {{ $value | humanizeDuration }})"
+          
+      - alert: OptimizerLatencyHigh
+        expr: |
+          histogram_quantile(0.95, 
+            sum by (le,combinations)(rate(spark_backtest_opt_latency_ms_bucket{combinations=~"1[5-9].*|2.*"}[5m]))
+          ) > 30000
+        for: 10m
+        labels:
+          severity: warning
+          component: optimizer
+        annotations:
+          summary: "Optimizer P95 latency > 30s"
+          description: "Grid search yavaş (~200 combos), cache veya concurrency kontrol et"
+          
+      - alert: PortfolioLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le,symbols_count)(rate(spark_backtest_portfolio_latency_ms_bucket{symbols_count="3"}[5m]))
+          ) > 5000
+        for: 10m
+        labels:
+          severity: warning
+          component: portfolio
+        annotations:
+          summary: "Portfolio backtest P95 > 5s (3 assets)"
+          description: "Portfolio latency yüksek (symbols: {{ $labels.symbols_count }})"
+      
+      # ========== CACHE HEALTH ==========
+      
+      - alert: CacheMissRateHigh
+        expr: |
+          rate(spark_backtest_cache_miss_total[5m])
+            /
+          (rate(spark_backtest_cache_hit_total[5m]) + rate(spark_backtest_cache_miss_total[5m]))
+          > 0.5
+        for: 15m
+        labels:
+          severity: info
+          component: cache
+        annotations:
+          summary: "Cache miss rate yüksek (>50%)"
+          description: "Cache warm-up devam ediyor veya yeni semboller test ediliyor"
+          
+      - alert: CacheSizeHigh
+        expr: spark_backtest_cache_size_bytes > 1073741824
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Cache boyutu büyük (>1GB)"
+          description: "Cleanup job çalıştır: POST /backtest/cache/cleanup"
+      
+      # ========== QUALITY GUARDRAILS ==========
+      
+      - alert: OverfittingRateHigh
+        expr: rate(spark_backtest_overfitting_detected_total[1h]) > 3
+        for: 5m
+        labels:
+          severity: warning
+          component: validation
+        annotations:
+          summary: "Overfitting detection oranı yüksek"
+          description: "Saatte 3'ten fazla overfitting tespit edildi ({{ $value | printf \"%.2f\" }}/hr)"
+          
+      - alert: DiversificationBenefitNegative
+        expr: spark_backtest_portfolio_diversification_benefit < -0.1
+        for: 10m
+        labels:
+          severity: info
+          component: portfolio
+        annotations:
+          summary: "Diversification benefit negatif"
+          description: "Portfolio avg individual'dan kötü performans gösteriyor ({{ $value | printf \"%.3f\" }})"
+      
+      # ========== THROUGHPUT ==========
+      
+      - alert: BacktestThroughputLow
+        expr: |
+          rate(spark_backtest_jobs_total[1h]) * 3600 < 100
+        for: 30m
+        labels:
+          severity: info
+          component: backtest
+        annotations:
+          summary: "Backtest throughput düşük (<100/hour)"
+          description: "Throughput: {{ $value | printf \"%.0f\" }} backtest/hour"
+      
+      # ========== ERROR RATES ==========
+      
+      - alert: BacktestErrorRateHigh
+        expr: |
+          rate(spark_backtest_errors_total[5m])
+            /
+          rate(spark_backtest_jobs_total[5m])
+          > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          component: backtest
+        annotations:
+          summary: "Backtest error rate yüksek (>5%)"
+          description: "Error rate: {{ $value | printf \"%.2f\" }}%"
+

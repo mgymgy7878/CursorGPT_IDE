@@ -1,0 +1,117 @@
+{
+  "closeout_info": {
+    "nonce": "20250820-284500-147963",
+    "closeout_date": "2025-08-20T28:45:00Z",
+    "version": "v1.4",
+    "decision": "RED",
+    "reason": "All V1.4 strategies failed triage - fragility, OOS stability, and metrics sanity thresholds not met"
+  },
+  "strategy_assessment": {
+    "total_strategies": 6,
+    "deprecated": [
+      {
+        "name": "RSI14_MR",
+        "reason": "Fragility top 0.55 < 0.60, OOS positive ratio 0.40 < 0.60",
+        "nonce": "20250820-281000-147258"
+      },
+      {
+        "name": "MACD_RSI_fusion",
+        "reason": "Fragility top 0.50 < 0.60, OOS positive ratio 0.20 < 0.60",
+        "nonce": "20250820-282000-369147"
+      },
+      {
+        "name": "donchian_rsi_pullback",
+        "reason": "Robust base 0 < 4, OOS positive ratio 0 < 0.60, compute time 5560ms > 3000ms",
+        "nonce": "20250820-282500-147963"
+      },
+      {
+        "name": "voltarget_ma",
+        "reason": "Robust base 0 < 4, fragility top 0.45 < 0.60, compute time 2900ms > 2500ms, metrics sanity FAIL",
+        "nonce": "20250820-283500-741369"
+      },
+      {
+        "name": "zscore_ma",
+        "reason": "Robust base 0 < 4, fragility top 0.50 < 0.60, OOS positive ratio 0 < 0.60",
+        "nonce": "20250820-284000-369147"
+      }
+    ],
+    "hold": [
+      {
+        "name": "EMA50_200",
+        "reason": "Robust base 3 < 4, Sharpe-CAGR inconsistency anomaly",
+        "nonce": "20250820-281500-258369"
+      }
+    ],
+    "promoted": []
+  },
+  "system_status": {
+    "kill_switch": "ENABLED",
+    "denylist_count": 6,
+    "allowlist_count": 0,
+    "guardrails_active": true,
+    "circuit_breaker_tested": true
+  },
+  "audit_results": {
+    "data_quality": {
+      "report_path": "docs/evidence/receipts-smoke/20250820-284500-147963/dq_report.json",
+      "overall_pass": true,
+      "quality_score": 0.99
+    },
+    "metrics_sanity": {
+      "report_path": "docs/evidence/receipts-smoke/20250820-284500-147963/metrics_sanity.json",
+      "overall_pass": false,
+      "issues": [
+        "sharpe_cagr_inconsistent",
+        "annualization_mismatch",
+        "net_of_fee_inconsistency"
+      ]
+    }
+  },
+  "evidence_artifacts": {
+    "archive_path": "evidence/closeout-20250820-284500-147963.zip",
+    "sha256_path": "evidence/closeout-20250820-284500-147963.zip.sha256.txt",
+    "index_path": "docs/evidence/receipts-smoke/20250820-284500-147963/INDEX.txt",
+    "manifest_path": "docs/evidence/receipts-smoke/20250820-284500-147963/manifest.sha256"
+  },
+  "next_steps": {
+    "immediate": [
+      "Kill switch remains enabled until new strategies pass triage",
+      "Data quality audit completed - dataset is acceptable",
+      "Metrics sanity issues identified - hard-gate implementation required"
+    ],
+    "next_sprint": [
+      "Alpha re-discovery with regime segmentation",
+      "Walk-forward analysis framework",
+      "ML Optimization Lab for hypothesis generation",
+      "Metrics sanity hard-gate implementation"
+    ],
+    "re_enable_conditions": [
+      "New strategy passes all triage thresholds",
+      "Metrics sanity hard-gate implemented and passing",
+      "Data quality audit passes",
+      "OOS positive ratio ≥ 0.60",
+      "Fragility top ≥ 0.60",
+      "Robust base ≥ 4"
+    ]
+  },
+  "lessons_learned": {
+    "technical": [
+      "Metrics sanity issues were critical - Sharpe/CAGR inconsistencies",
+      "Annualization factors need proper implementation",
+      "Net-of-fee calculations require validation",
+      "Compute time optimization is important but not sufficient"
+    ],
+    "process": [
+      "Hard-gate metrics sanity checks are essential",
+      "Data quality audits should be mandatory",
+      "Kill switch and guardrails provide operational safety",
+      "Evidence collection and archiving is crucial for audit trail"
+    ],
+    "strategy": [
+      "All tested strategies showed overfitting tendencies",
+      "OOS performance was consistently poor",
+      "Fragility under stress testing was inadequate",
+      "Regime dependency may be too high for current market conditions"
+    ]
+  }
+} 

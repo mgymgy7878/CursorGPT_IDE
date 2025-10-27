@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "auc_check": true,
+  "precision_check": true,
+  "message": "All SLO thresholds met"
+}

@@ -1,0 +1,52 @@
+{
+  "version": "v1.3",
+  "env": "dev/local",
+  "status": "YELLOW",
+  "reason": "",
+  "thresholds": {
+    "place_ack_p95_ms_leq": 1000,
+    "event_db_p95_ms_leq": 300,
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0,
+    "scenB_p95_ms_leq": 2000,
+    "scenC_circuit_open_expected": 1,
+    "scenD_blocked_expected": 10
+  },
+  "components": {
+    "ingest_local": {
+      "status_component": "OK",
+      "ingest_p95_ms": 401,
+      "event_db_p95_ms": 0,
+      "seq_gap": 0,
+      "evidence_path": "docs/evidence/v1.3-bist-local-pipe/20250820-270000-852147"
+    },
+    "guardrails_sim": {
+      "status": "OK",
+      "A_p95_ms": 96,
+      "B_p95_ms": 617,
+      "circuit_open": 1,
+      "blocks": 10,
+      "evidence_path": "docs/evidence/v1.3-guardrails-sim/20250820-271500-963852"
+    },
+    "orderflow_real": {
+      "status": "PARTIAL",
+      "place_p95_ms": null,
+      "evidence_path": null
+    }
+  },
+  "sources": {
+    "bist_local_row": ["2025-08-20T26:45:00Z", "v1.3-bist-local", "OK", "392", "0", "docs/evidence/v1.3-bist-local/20250820-264500-147258"],
+    "pipe_row": ["2025-08-20T27:00:00Z", "v1.3-bist-local-pipe", "OK", "401", "0", "0", "docs/evidence/v1.3-bist-local-pipe/20250820-270000-852147"],
+    "guardrails_row": ["2025-08-20T27:15:00Z", "v1.3-guardrails-sim", "OK", "96", "617", "1", "10", "docs/evidence/v1.3-guardrails-sim/20250820-271500-963852"],
+    "orderflow_row": null
+  },
+  "decisions": {
+    "next": "orderflow-guardrails-real|supply-secrets"
+  },
+  "started_utc": "2025-08-20T27:20:00Z",
+  "nonce": "20250820-272000-147369",
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-closeout-simlocal/20250820-272000-147369/index.json",
+    "manifest": "docs/evidence/v1.3-closeout-simlocal/20250820-272000-147369/manifest.sha256"
+  }
+} 

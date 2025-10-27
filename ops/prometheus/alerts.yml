@@ -1,0 +1,72 @@
+groups:
+  - name: spark-proxy-alerts
+    rules:
+      # High error rate alert
+      - alert: SparkProxyHighErrorRate
+        expr: rate(spark_proxy_errors_total[5m]) > 0.02
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spark Proxy high error rate"
+          description: "Error rate is {{ $value }} errors per second over the last 5 minutes"
+
+      # Circuit breaker open alert
+      - alert: SparkProxyCircuitBreakerOpen
+        expr: increase(spark_proxy_circuit_open_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Spark Proxy circuit breaker opened"
+          description: "Circuit breaker has opened {{ $value }} times in the last 5 minutes"
+
+      # High rate limiting alert
+      - alert: SparkProxyHighRateLimit
+        expr: rate(spark_proxy_rate_limited_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spark Proxy high rate limiting"
+          description: "Rate limiting is {{ $value }} requests per second over the last 5 minutes"
+
+      # High latency alert (P99 > 1s)
+      - alert: SparkProxyHighLatency
+        expr: histogram_quantile(0.99, rate(spark_proxy_duration_seconds_bucket[5m])) > 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spark Proxy high latency"
+          description: "P99 latency is {{ $value }}s over the last 5 minutes"
+
+      # Body rejection alert
+      - alert: SparkProxyBodyRejection
+        expr: increase(spark_proxy_body_rejected_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spark Proxy body rejections"
+          description: "{{ $value }} request bodies were rejected due to size in the last 5 minutes"
+
+      # No requests alert (proxy might be down)
+      - alert: SparkProxyNoRequests
+        expr: rate(spark_proxy_requests_total[5m]) == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Spark Proxy no requests"
+          description: "No requests received in the last 5 minutes - proxy might be down"
+
+      # High 5xx error rate
+      - alert: SparkProxyHigh5xxRate
+        expr: rate(spark_proxy_requests_total{code=~"5.."}[5m]) / rate(spark_proxy_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Spark Proxy high 5xx rate"
+          description: "5xx error rate is {{ $value | humanizePercentage }} over the last 5 minutes" 

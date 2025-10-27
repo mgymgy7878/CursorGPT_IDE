@@ -1,0 +1,23 @@
+{
+  "action": "/alerts/create",
+  "params": {
+    "metric": "canary_status",
+    "labels": {"suite": "btcturk-ui"},
+    "op": "eq",
+    "value": 0,
+    "for": "5m",
+    "message": "BTCTurk Canary FAILED (02:00 UTC)",
+    "routes": ["slack:#spark-ops", "pagerduty:ops"]
+  },
+  "dryRun": true,
+  "confirm_required": false,
+  "reason": "Fail durumunda otomatik bildirim - mini-sprint 48h tamamlandı",
+  "metadata": {
+    "mini_sprint_completed": true,
+    "integration_ready": "receipts-gate-workflow",
+    "canary_parser_ready": true,
+    "artifact_collection_ready": true,
+    "alert_trigger": "canary_status == 0 for 5m",
+    "notification_channels": ["slack", "pagerduty"]
+  }
+}

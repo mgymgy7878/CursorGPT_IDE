@@ -1,0 +1,238 @@
+{
+  "dashboard": {
+    "title": "ML Pipeline (v1.8)",
+    "tags": ["ml", "shadow", "drift", "v1.8"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "ML Prediction Latency (P50/P95/P99)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(ml_predict_latency_ms_bucket[5m])) by (le))",
+            "legendFormat": "P50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ml_predict_latency_ms_bucket[5m])) by (le))",
+            "legendFormat": "P95 (SLO: <80ms)"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(ml_predict_latency_ms_bucket[5m])) by (le))",
+            "legendFormat": "P99"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+      },
+      {
+        "id": 2,
+        "title": "Shadow Match Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "ml_shadow_match_rate",
+            "legendFormat": "Match Rate"
+          },
+          {
+            "expr": "0.95",
+            "legendFormat": "SLO Threshold (95%)"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "yaxes": [
+          { "format": "percentunit", "min": 0, "max": 1 }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Shadow Prediction Delta Distribution",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(ml_shadow_abs_delta_bucket[5m])) by (le)",
+            "legendFormat": "Delta {{ le }}"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+      },
+      {
+        "id": 4,
+        "title": "PSI Score (Feature Drift)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "ml_psi_score",
+            "legendFormat": "Overall PSI"
+          },
+          {
+            "expr": "0.1",
+            "legendFormat": "Stable Threshold"
+          },
+          {
+            "expr": "0.2",
+            "legendFormat": "Warning Threshold"
+          },
+          {
+            "expr": "0.3",
+            "legendFormat": "Critical Threshold"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+      },
+      {
+        "id": 5,
+        "title": "Shadow vs Baseline Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ml_baseline_latency_ms_bucket[5m])) by (le))",
+            "legendFormat": "Baseline P95"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ml_shadow_latency_ms_bucket[5m])) by (le))",
+            "legendFormat": "Shadow P95"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+      },
+      {
+        "id": 6,
+        "title": "Prediction Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ml_predict_requests_total{status=\"success\"}[5m])",
+            "legendFormat": "Success"
+          },
+          {
+            "expr": "rate(ml_predict_requests_total{status=\"error\"}[5m])",
+            "legendFormat": "Error"
+          },
+          {
+            "expr": "rate(ml_shadow_success_total[5m])",
+            "legendFormat": "Shadow Success"
+          },
+          {
+            "expr": "rate(ml_shadow_error_total[5m])",
+            "legendFormat": "Shadow Error"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 }
+      },
+      {
+        "id": 7,
+        "title": "Match/Mismatch Counts",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "ml_shadow_match_total",
+            "legendFormat": "Matches"
+          },
+          {
+            "expr": "ml_shadow_mismatch_total",
+            "legendFormat": "Mismatches"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 24, "w": 8, "h": 4 }
+      },
+      {
+        "id": 8,
+        "title": "Current Match Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "ml_shadow_match_rate"
+          }
+        ],
+        "gridPos": { "x": 8, "y": 24, "w": 8, "h": 4 },
+        "options": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 0.9, "color": "yellow" },
+              { "value": 0.95, "color": "green" }
+            ]
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Model Version",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "ml_model_version",
+            "legendFormat": "{{ version }}"
+          }
+        ],
+        "gridPos": { "x": 16, "y": 24, "w": 8, "h": 4 }
+      },
+      {
+        "id": 10,
+        "title": "Promote Gate Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "(ml_psi_score < 0.2) * (histogram_quantile(0.95, sum(rate(ml_predict_latency_ms_bucket[24h])) by (le)) < 80) * (avg_over_time(ml_shadow_match_rate[24h]) >= 0.95)",
+            "legendFormat": "Gate PASS/FAIL"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName" },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "value": 1, "text": "READY ✅", "color": "green" },
+                    { "value": 0, "text": "BLOCKED ❌", "color": "red" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": { "x": 0, "y": 28, "w": 12, "h": 4 }
+      },
+      {
+        "id": 11,
+        "title": "PSI Trend (7-day)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "ml_psi_score",
+            "legendFormat": "Overall PSI"
+          },
+          {
+            "expr": "0.1",
+            "legendFormat": "Stable (<0.1)"
+          },
+          {
+            "expr": "0.2",
+            "legendFormat": "Warning (0.2)"
+          },
+          {
+            "expr": "0.3",
+            "legendFormat": "Critical (0.3)"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+        "yaxes": [
+          { "format": "short", "min": 0, "max": 2 }
+        ]
+      }
+    ],
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}

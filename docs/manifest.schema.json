@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["nonce", "timestamp", "artifacts", "total_files", "total_size", "manifest_sha256"],
+  "properties": {
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9]{14}-[0-9a-f]{6}$",
+      "description": "Unique NONCE identifier with timestamp and random hex"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of manifest creation"
+    },
+    "prev_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of previous manifest for chain integrity"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path", "size", "full_sha256", "mtime"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^evidence/",
+            "description": "File path relative to repository root, must start with evidence/"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "File size in bytes"
+          },
+          "full_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "Full SHA-256 hash of file content"
+          },
+          "mtime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "File modification time in ISO 8601 format"
+          }
+        }
+      },
+      "description": "Map of artifact identifiers to file metadata"
+    },
+    "total_files": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Total number of files in manifest"
+    },
+    "total_size": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Total size of all files in bytes"
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Self-hash of manifest content (excluding this field)"
+    }
+  },
+  "additionalProperties": false
+} 

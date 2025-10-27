@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/types/tsconfig.build.json" },
+    { "path": "packages/shared/tsconfig.build.json" },
+    { "path": "packages/guardrails/tsconfig.build.json" },
+    { "path": "services/executor/tsconfig.build.json" },
+    { "path": "services/ml-engine/tsconfig.build.json" }
+  ]
+} 

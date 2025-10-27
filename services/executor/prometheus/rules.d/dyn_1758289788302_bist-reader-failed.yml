@@ -1,0 +1,12 @@
+groups:
+- name: spark-dynamic
+  rules:
+  - alert: bist-reader-failed
+    expr: "increase(bist_reader_fail_total[10m]) > 0 > 0"
+    for: 0m
+    labels:
+      severity: "warning"
+      source: "spark"
+    annotations:
+      summary: "BIST Reader job hatasi"
+      description: "Auto-generated alert: increase(bist_reader_fail_total[10m]) > 0 > 0"

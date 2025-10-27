@@ -1,0 +1,67 @@
+name: Export@Scale CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['packages/exporter-core/**', 'services/executor/plugins/export.ts', 'rules/export*']
+  pull_request:
+    branches: [main, develop]
+    paths: ['packages/exporter-core/**', 'services/executor/plugins/export.ts', 'rules/export*']
+
+jobs:
+  export-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build exporter-core
+        run: pnpm -F packages/exporter-core build
+
+      - name: Build executor
+        run: pnpm -F services/executor build
+
+      - name: Start executor with export plugin
+        run: |
+          pnpm -F services/executor start &
+          sleep 5
+
+      - name: Test export endpoints
+        run: |
+          curl -fsS http://127.0.0.1:4001/export/status
+          curl -fsS http://127.0.0.1:4001/export/metrics | grep -q "export_requests_total"
+
+      - name: Seed export data (10k records)
+        run: node scripts/seed-export.js --records=10000 --format=csv
+
+      - name: Seed export data (50k records)
+        run: node scripts/seed-export.js --records=50000 --format=pdf
+
+      - name: Assert export metrics
+        run: node scripts/assert-export.js --latency_p95=30000 --success_rate=0.95
+
+      - name: Test promtool
+        run: |
+          wget -q https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.45.0.linux-amd64.tar.gz
+          tar -xzf prometheus-2.45.0.linux-amd64.tar.gz
+          ./prometheus-2.45.0.linux-amd64/promtool test rules rules/export.test.yml
+
+      - name: Validate golden files
+        run: node scripts/validate-export-golden.js --format=csv --records=10000
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-evidence
+          path: |
+            evidence/export/
+            golden/export/

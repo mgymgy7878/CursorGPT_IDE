@@ -1,0 +1,70 @@
+{
+  "title": "Spark — Core & Trading",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 2,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "WS Uptime Ratio",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [{ "expr": "ws_uptime_ratio" }]
+    },
+    {
+      "type": "graph",
+      "title": "Delay EMA (1m) ms",
+      "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 },
+      "lines": true,
+      "targets": [{ "expr": "last_message_delay_ms_ema_1m" }]
+    },
+    {
+      "type": "graph",
+      "title": "Publish vs Skip (rate/5m)",
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 },
+      "lines": true,
+      "legend": { "show": true },
+      "targets": [
+        { "expr": "rate(events_published_total[5m])", "legendFormat": "published" },
+        { "expr": "rate(events_skipped_total[5m])", "legendFormat": "skipped" }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Broker Latency (p50/p95)",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "targets": [{ "expr": "broker_latency_ms{quantile=~\"0.5|0.95\"}" }]
+    },
+    {
+      "type": "graph",
+      "title": "Precision Registry",
+      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 8 },
+      "lines": true,
+      "legend": { "show": true },
+      "targets": [
+        { "expr": "rate(spark_precision_registry_hits_total[5m])", "legendFormat": "hits/5m" },
+        { "expr": "rate(spark_precision_registry_misses_total[5m])", "legendFormat": "misses/5m" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Order Hygiene",
+      "gridPos": { "x": 0, "y": 32, "w": 24, "h": 8 },
+      "lines": true,
+      "legend": { "show": true },
+      "targets": [
+        { "expr": "rate(spark_qty_rounding_corrections_total[5m])", "legendFormat": "rounding corrections/5m" },
+        { "expr": "rate(spark_order_rejects_total[5m])", "legendFormat": "rejects/5m" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Precision Miss Rate (5m)",
+      "gridPos": { "x": 0, "y": 40, "w": 24, "h": 8 },
+      "lines": true,
+      "legend": { "show": true },
+      "targets": [
+        { "expr": "rate(spark_precision_registry_misses_total[5m]) / clamp_min(rate(spark_precision_registry_hits_total[5m]) + rate(spark_precision_registry_misses_total[5m]), 1)", "legendFormat": "miss rate" }
+      ]
+    }
+  ]
+} 

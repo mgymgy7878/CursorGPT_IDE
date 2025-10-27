@@ -1,0 +1,14 @@
+groups:
+- name: spark-dynamic
+  rules:
+  - alert: ui-5xx-error-rate
+    expr: "rate(http_requests_total{app=\"web-next\",status=~\"5..\"}[5m]) > 0.02"
+    for: 3m
+    labels:
+      severity: "warning"
+      source: "spark"
+      app: "web-next"
+    annotations:
+      summary: "ui-5xx-error-rate"
+      description: "Auto-generated alert: rate(http_requests_total{app=\"web-next\",status=~\"5..\"}[5m]) > 0.02"
+      run: "post-reboot"

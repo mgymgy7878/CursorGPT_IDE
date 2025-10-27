@@ -1,0 +1,53 @@
+name: Drift Gates Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  drift_gates_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 10.14.0 }
+      - run: pnpm -w install
+      
+      - name: Build executor service
+        run: |
+          pnpm -F services/executor build
+          
+      - name: Start executor service
+        run: |
+          node services/executor/dist/server.js &
+          sleep 5
+          
+      - name: Seed drift scenarios
+        run: |
+          node scripts/seed-drift-gates.ts --scenarios=pnl,slippage,share --duration=180s
+          
+      - name: Assert drift gates
+        run: |
+          node scripts/assert-drift-gates.ts
+          
+      - name: Gate status validation
+        run: |
+          curl -fsS http://localhost:4001/gates/status
+          curl -fsS http://localhost:4001/metrics | grep "gate_state|gate_close_total|paper_trade_share_pct"
+          
+      - name: Prometheus rules test
+        run: |
+          # Install promtool if not available
+          if ! command -v promtool &> /dev/null; then
+            wget https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.45.0.linux-amd64.tar.gz
+            tar xzf prometheus-2.45.0.linux-amd64.tar.gz
+            export PATH=$PATH:$(pwd)/prometheus-2.45.0.linux-amd64
+          fi
+          promtool test rules rules/drift-gates.test.yml
+          
+      - name: Cleanup
+        run: |
+          pkill -f "node services/executor"

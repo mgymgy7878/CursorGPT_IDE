@@ -1,0 +1,43 @@
+{
+  "nonce": "20250820-271500-963852",
+  "started_utc": "2025-08-20T27:15:00Z",
+  "status": "OK",
+  "reason": "",
+  "thresholds": {
+    "scenB_p95_ms_leq": 2000,
+    "scenC_circuit_open_expected": 1,
+    "scenD_blocked_expected": 10
+  },
+  "scenarios": {
+    "A": {
+      "p50_ms": 74,
+      "p95_ms": 96,
+      "success": 20,
+      "retries": 0
+    },
+    "B": {
+      "p50_ms": 115,
+      "p95_ms": 617,
+      "success": 20,
+      "retries": 5
+    },
+    "C": {
+      "p50_ms": 91,
+      "p95_ms": 91,
+      "circuit_open": 1,
+      "skipped": 16,
+      "errors": 2
+    },
+    "D": {
+      "p50_ms": 86,
+      "p95_ms": 119,
+      "blocked": 10,
+      "kill_switch": 1
+    }
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-guardrails-sim/20250820-271500-963852/index.json",
+    "metrics": "docs/evidence/v1.3-guardrails-sim/20250820-271500-963852/metrics.json",
+    "manifest": "docs/evidence/v1.3-guardrails-sim/20250820-271500-963852/manifest.sha256"
+  }
+} 

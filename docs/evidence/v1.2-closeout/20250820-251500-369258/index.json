@@ -1,0 +1,43 @@
+{
+  "version": "v1.2",
+  "env": "prod",
+  "status": "YELLOW",
+  "decisions": {
+    "next": "v1.3-ready"
+  },
+  "thresholds": {
+    "ui_p95_ms_leq": 250,
+    "auth_p95_ms_leq": 300,
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0
+  },
+  "components": {
+    "proxy": {
+      "status": "OK",
+      "direct_p95_ms": 397.97,
+      "proxy_p95_ms": 151.16,
+      "improvement_pct": 62.02,
+      "evidence_path": "docs/evidence/v1.2-btcturk-proxy/20250820-243000-987654"
+    },
+    "private": {
+      "status": "PARTIAL",
+      "mode_ok": "NONE",
+      "evidence_path": "docs/evidence/v1.2-btcturk-private/20250820-250000-246813"
+    },
+    "bist": {
+      "status_component": "SKIPPED",
+      "evidence_path": "docs/evidence/v1.2-bist-contract/20250820-250000-246813"
+    }
+  },
+  "sources": {
+    "proxy_row": "2025-08-20T24:30:00Z,v1.2-btcturk-proxy,OK,,,397.97,151.16,62.02,docs/evidence/v1.2-btcturk-proxy/20250820-243000-987654",
+    "private_row": "2025-08-20T25:00:00Z,v1.2-private+contract,PARTIAL,,,NONE,,,SKIPPED,docs/evidence/v1.2-btcturk-private/20250820-250000-246813;docs/evidence/v1.2-bist-contract/20250820-250000-246813",
+    "bist_row": "2025-08-20T25:00:00Z,v1.2-private+contract,PARTIAL,,,NONE,,,SKIPPED,docs/evidence/v1.2-btcturk-private/20250820-250000-246813;docs/evidence/v1.2-bist-contract/20250820-250000-246813"
+  },
+  "started_utc": "2025-08-20T25:15:00Z",
+  "nonce": "20250820-251500-369258",
+  "evidence_paths": {
+    "index": "docs/evidence/v1.2-closeout/20250820-251500-369258/index.json",
+    "manifest": "docs/evidence/v1.2-closeout/20250820-251500-369258/manifest.sha256"
+  }
+} 

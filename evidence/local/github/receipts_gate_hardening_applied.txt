@@ -1,0 +1,26 @@
+file=receipts-gate.yml
+hardening_date=2025-01-08
+status=APPLIED
+
+HARDENING_ADDITIONS:
+✓ timeout-minutes: 15 (prevents stuck runs)
+✓ env: TZ: UTC (consistent timezone)
+✓ defaults.run.shell: bash (predictable shell)
+
+SECURITY_MAINTAINED:
+✓ permissions: contents: read (minimal)
+✓ concurrency: group:receipts-gate, cancel-in-progress:true
+✓ workflow_dispatch: manual testing enabled
+
+CRON_VERIFIED:
+✓ schedule: "0 2 * * *" (UTC 02:00 daily)
+✓ 5-field format compliant
+
+LIVELINESS_PROTECTION:
+✓ weekly-doctor.yml present (60-day rule protection)
+✓ daily schedule keeps workflow active
+
+NEXT_AUTOMATION_READY:
+- Alert creation template prepared
+- Canary run template prepared
+- Manual test workflow ready

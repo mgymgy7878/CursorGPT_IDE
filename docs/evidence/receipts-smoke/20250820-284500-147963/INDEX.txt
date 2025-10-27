@@ -1,0 +1,74 @@
+V1.4 GLOBAL HALT & CLOSEOUT INDEX
+================================
+
+NONCE: 20250820-284500-147963
+Date: 2025-08-20T28:45:00Z
+Decision: RED
+Status: HALT
+
+STRATEGY ASSESSMENT:
+-------------------
+Total Strategies: 6
+Deprecated: 5 (RSI14_MR, MACD_RSI_fusion, donchian_rsi_pullback, voltarget_ma, zscore_ma)
+Hold: 1 (EMA50_200)
+Promoted: 0
+
+SYSTEM STATUS:
+-------------
+Kill Switch: ENABLED
+Denylist Count: 6
+Allowlist Count: 0
+Guardrails: ACTIVE
+Circuit Breaker: TESTED
+
+AUDIT RESULTS:
+-------------
+Data Quality: PASS (score: 0.99)
+Metrics Sanity: FAIL (Sharpe/CAGR inconsistencies, annualization mismatch, net-of-fee issues)
+
+EVIDENCE ARTIFACTS:
+------------------
+- closeout.json: V1.4 closeout decision and assessment
+- dq_report.json: Data quality audit results
+- metrics_sanity.json: Metrics sanity check results
+- manifest.sha256: File integrity manifest
+- INDEX.txt: This index file
+
+NEXT STEPS:
+-----------
+Immediate:
+- Kill switch remains enabled
+- Data quality audit completed
+- Metrics sanity hard-gate required
+
+Next Sprint:
+- Alpha re-discovery with regime segmentation
+- Walk-forward analysis framework
+- ML Optimization Lab
+- Metrics sanity hard-gate implementation
+
+RE-ENABLE CONDITIONS:
+--------------------
+- New strategy passes all triage thresholds
+- Metrics sanity hard-gate implemented and passing
+- Data quality audit passes
+- OOS positive ratio ≥ 0.60
+- Fragility top ≥ 0.60
+- Robust base ≥ 4
+
+LESSONS LEARNED:
+---------------
+Technical:
+- Metrics sanity issues were critical
+- Annualization factors need proper implementation
+- Net-of-fee calculations require validation
+
+Process:
+- Hard-gate metrics sanity checks are essential
+- Data quality audits should be mandatory
+- Kill switch and guardrails provide operational safety
+
+Strategy:
+- All tested strategies showed overfitting tendencies
+- OOS performance was consistently poor
+- Fragility under stress testing was inadequate 

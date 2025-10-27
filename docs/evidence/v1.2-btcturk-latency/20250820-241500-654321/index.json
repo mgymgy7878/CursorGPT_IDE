@@ -1,0 +1,33 @@
+{
+  "nonce": "20250820-241500-654321",
+  "started_utc": "2025-08-20T24:15:00Z",
+  "status": "WARNING",
+  "reason": "DEGRADED",
+  "btcturk": {
+    "url": "https://api.btcturk.com/api/v2/ticker",
+    "n": 20,
+    "scenarios": {
+      "cold_seq": {
+        "p95_total_ms": 466.02
+      },
+      "ka_seq": {
+        "p95_total_ms": 397.57
+      },
+      "ka_conc": {
+        "p95_total_ms": 382.98
+      }
+    }
+  },
+  "thresholds": {
+    "ok_ms": 250,
+    "warn_ms": 500
+  },
+  "bist": {
+    "status_component": "SKIPPED"
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.2-btcturk-latency/20250820-241500-654321/index.json",
+    "diag": "docs/evidence/v1.2-btcturk-latency/20250820-241500-654321/btcturk.diag.json",
+    "manifest": "docs/evidence/v1.2-btcturk-latency/20250820-241500-654321/manifest.sha256"
+  }
+} 

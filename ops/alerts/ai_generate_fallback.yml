@@ -1,0 +1,12 @@
+groups:
+- name: ai-generate-fallback
+  rules:
+  - alert: ai_generate_fallback_gt_3pct_with_p95_2800
+    expr: (sum(rate(ai_generate_total{fallback="yes"}[5m])) / sum(rate(ai_generate_total[5m])) > 0.03) and (histogram_quantile(0.95, sum by (le) (rate(ai_latency_ms_bucket[5m]))) > 2800)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: AI generate fallback > 3% (5m) with p95 > 2.8s
+      description: Fallback ratio exceeded 3% and p95 latency above 2.8s over the last 5 minutes.
+

@@ -1,0 +1,26 @@
+﻿{
+    "futures":  {
+                    "timeOk":  true,
+                    "klinesOk":  true
+                },
+    "canaryDryRunOk":  true,
+    "webHealth":  {
+                      "status":  "GREEN",
+                      "ts":  "2025-09-13T18:01:33.084Z",
+                      "details":  {
+                                      "executor":  {
+                                                       "ok":  true,
+                                                       "ts":  1757786493087,
+                                                       "host":  "LENOVO",
+                                                       "mode":  "NORMAL"
+                                                   },
+                                      "code":  200
+                                  }
+                  },
+    "execHealth":  {
+                       "status":  "ok",
+                       "service":  "executor",
+                       "now":  1757786493148,
+                       "uptime":  133.312211
+                   }
+}

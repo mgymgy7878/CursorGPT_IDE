@@ -1,0 +1,90 @@
+{
+  "action": "canary_dry_run",
+  "version": "v1.1",
+  "timestamp": "2025-01-21T10:35:00Z",
+  "environment": {
+    "NODE_ENV": "production",
+    "BTCTURK_ENABLE_LIVE": "true",
+    "EXECUTOR_ORIGIN": "http://127.0.0.1:4001",
+    "CANARY_ENABLED": "true"
+  },
+  "test_config": {
+    "duration_seconds": 300,
+    "max_errors": 5,
+    "health_check_interval": 30,
+    "metrics_collection": true,
+    "evidence_export": true
+  },
+  "endpoints_to_test": [
+    {
+      "name": "executor_health",
+      "url": "http://127.0.0.1:4001/health",
+      "expected_status": 200,
+      "timeout_ms": 5000
+    },
+    {
+      "name": "web_next_ops",
+      "url": "http://localhost:3003/ops",
+      "expected_status": 200,
+      "timeout_ms": 5000
+    },
+    {
+      "name": "runtime_info",
+      "url": "http://localhost:3003/api/public/runtime",
+      "expected_status": 200,
+      "timeout_ms": 5000
+    },
+    {
+      "name": "canary_status",
+      "url": "http://127.0.0.1:4001/api/canary/status",
+      "expected_status": 200,
+      "timeout_ms": 5000
+    }
+  ],
+  "canary_actions": [
+    {
+      "name": "start_canary_monitoring",
+      "method": "POST",
+      "url": "http://127.0.0.1:4001/api/canary/start",
+      "payload": {
+        "mode": "dry_run",
+        "duration_seconds": 300,
+        "collect_metrics": true,
+        "export_evidence": true
+      }
+    },
+    {
+      "name": "check_canary_health",
+      "method": "GET",
+      "url": "http://127.0.0.1:4001/api/canary/health",
+      "interval_seconds": 30
+    },
+    {
+      "name": "collect_evidence",
+      "method": "GET",
+      "url": "http://127.0.0.1:4001/api/canary/evidence",
+      "trigger": "on_completion"
+    }
+  ],
+  "success_criteria": {
+    "all_endpoints_healthy": true,
+    "canary_monitoring_active": true,
+    "no_critical_errors": true,
+    "evidence_collected": true,
+    "pm2_stable": true
+  },
+  "evidence_output": {
+    "directory": "evidence/canary/v1.1-dry-run",
+    "files": [
+      "canary_metrics.json",
+      "endpoint_health_log.json",
+      "pm2_status.json",
+      "system_metrics.json"
+    ]
+  },
+  "rollback_plan": {
+    "stop_canary": "POST http://127.0.0.1:4001/api/canary/stop",
+    "restart_services": "pm2 restart all",
+    "revert_config": "BTCTURK_ENABLE_LIVE=false"
+  }
+}

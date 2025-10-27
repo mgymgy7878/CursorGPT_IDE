@@ -1,0 +1,11 @@
+{
+  "nonce": "20250820-250000-246813",
+  "started_utc": "2025-08-20T25:00:00Z",
+  "status_component": "SKIPPED",
+  "contract_path": "docs/contracts/BIST_READER_CONTRACT.md",
+  "samples_path": "samples/bist_mock.jsonl",
+  "evidence_paths": {
+    "index": "docs/evidence/v1.2-bist-contract/20250820-250000-246813/index.json",
+    "manifest": "docs/evidence/v1.2-bist-contract/20250820-250000-246813/manifest.sha256"
+  }
+} 

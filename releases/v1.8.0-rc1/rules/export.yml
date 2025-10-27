@@ -1,0 +1,56 @@
+groups:
+- name: export.rules
+  rules:
+  - alert: ExportLatencyP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(export_latency_ms_bucket[10m]))) > 10000
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Export latency P95 > 10s (10m)"}
+    
+  - alert: ExportLatencyP95Critical
+    expr: histogram_quantile(0.95, sum by (le) (rate(export_latency_ms_bucket[10m]))) > 30000
+    for: 5m
+    labels: {severity: critical}
+    annotations: {summary: "Export latency P95 > 30s (5m)"}
+
+  - alert: ExportFailSpike
+    expr: increase(export_fail_total[10m]) > 5
+    for: 5m
+    labels: {severity: warning}
+    annotations: {summary: "Export failures > 5 in 10m"}
+    
+  - alert: ExportFailCritical
+    expr: increase(export_fail_total[5m]) > 10
+    for: 0m
+    labels: {severity: critical}
+    annotations: {summary: "Export failures > 10 in 5m"}
+
+  - alert: ExportBytesAnomaly
+    expr: increase(export_bytes_total[1h]) > 1000000000
+    for: 0m
+    labels: {severity: warning}
+    annotations: {summary: "Export bytes > 1GB in 1h"}
+
+  - alert: ExportConcurrentHigh
+    expr: export_concurrent_running > 10
+    for: 5m
+    labels: {severity: warning}
+    annotations: {summary: "Concurrent exports > 10 (5m)"}
+
+  - alert: ExportQueueDepthHigh
+    expr: export_queue_depth > 50
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Export queue depth > 50 (10m)"}
+
+  - alert: ExportMemoryHigh
+    expr: export_memory_bytes > 500000000
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Export memory > 500MB (10m)"}
+
+  - alert: ExportSuccessRateLow
+    expr: export_success_rate < 0.95
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Export success rate < 95% (10m)"}

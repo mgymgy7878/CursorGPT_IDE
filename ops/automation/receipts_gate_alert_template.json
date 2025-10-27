@@ -1,0 +1,22 @@
+{
+  "action": "/alerts/create",
+  "params": {
+    "metric": "ci_workflow_status",
+    "labels": {"workflow": "receipts-gate"},
+    "op": "lt",
+    "value": 1,
+    "for": "5m",
+    "message": "Receipts Gate FAILED (cron 02:00 UTC)",
+    "routes": ["slack:#spark-ops", "pagerduty:ops"]
+  },
+  "dryRun": true,
+  "confirm_required": false,
+  "reason": "Gece koşusu fail ederse anında uyarı",
+  "metadata": {
+    "workflow": "receipts-gate",
+    "schedule": "0 2 * * *",
+    "timezone": "UTC",
+    "created": "2025-01-08",
+    "status": "template_ready"
+  }
+}

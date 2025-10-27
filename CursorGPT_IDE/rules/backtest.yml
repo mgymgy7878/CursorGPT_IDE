@@ -1,0 +1,44 @@
+groups:
+- name: backtest.rules
+  rules:
+  - record: bt_runtime_ms_p95_5m
+    expr: histogram_quantile(0.95, sum by (le) (rate(bt_runtime_ms_bucket[5m])))
+  - record: bt_runs_10m
+    expr: sum(increase(bt_runs_total[10m]))
+  - record: bt_max_dd_1h
+    expr: max_over_time(bt_max_dd[1h])
+  - alert: BacktestSlowRunner
+    expr: histogram_quantile(0.95, sum by (le) (rate(bt_runtime_ms_bucket[10m]))) > 30000
+    for: 10m
+    labels: {severity: warning, component: backtest}
+    annotations:
+      summary: "Backtest runner is slow"
+      description: "P95 runtime is {{ $value }}ms, threshold is 30000ms"
+  - alert: StrategyLabErrorRate
+    expr: rate(strategy_lab_errors_total[5m]) > 0
+    for: 5m
+    labels: {severity: critical, component: web}
+    annotations:
+      summary: "Strategy Lab error rate is high"
+      description: "Error rate is {{ $value }} errors/sec"
+  - alert: RiskGateHighBandBurst
+    expr: increase(gate_apply_total{band="HIGH"}[15m]) > 0
+    for: 0m
+    labels: {severity: warning, component: guardrails}
+    annotations:
+      summary: "High risk band triggered"
+      description: "{{ $value }} HIGH risk events in last 15m"
+  - alert: MarketDataGapDetected
+    expr: increase(marketdata_gaps_total[30m]) > 0
+    for: 0m
+    labels: {severity: warning, component: marketdata}
+    annotations:
+      summary: "Market data gap detected"
+      description: "{{ $value }} gaps in last 30m"
+  - alert: WebNext5xxRate
+    expr: sum(rate(http_requests_total{app="web-next",code=~"5.."}[5m])) > 0
+    for: 5m
+    labels: {severity: critical, component: web}
+    annotations:
+      summary: "Web-next 5xx error rate is high"
+      description: "5xx rate is {{ $value }} errors/sec"

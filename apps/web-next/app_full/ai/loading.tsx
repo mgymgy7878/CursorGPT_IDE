@@ -1,0 +1,1 @@
+export default function Loading(){ return <div className="p-4 text-sm text-zinc-500">Loading AI…</div> } 

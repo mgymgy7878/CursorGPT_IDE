@@ -1,0 +1,14 @@
+{
+  "action": "canary/run",
+  "params": {
+    "suite": "guardrails-prod-preflight",
+    "steps": [
+      {"name":"viewer-denied","call":"GET /admin/params","headers":{"x-role":"viewer","X-Actor":"qa@local"}},
+      {"name":"admin-ok","call":"GET /admin/params","headers":{"x-role":"admin","X-Actor":"qa@local"}},
+      {"name":"audit-check","call":"GET /api/guardrails/params/audit?limit=10","headers":{"x-role":"admin","X-Actor":"qa@local"}}
+    ]
+  },
+  "dryRun": true,
+  "confirm_required": false,
+  "reason": "Prod öncesi RBAC+Audit görünürlüğü"
+}

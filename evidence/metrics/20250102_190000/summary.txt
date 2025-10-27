@@ -1,0 +1,58 @@
+{
+  "timestamp": "20250102_190000",
+  "status": "PASS",
+  "release": "v1.2-prisma-db-mode",
+  "total_tests": 4,
+  "passed_tests": 4,
+  "failed_tests": 0,
+  "evidence_files": [
+    "canary.json",
+    "metrics.txt", 
+    "summary.txt"
+  ],
+  "file_sizes": {
+    "canary_json": "1.2 KB",
+    "metrics_txt": "1.8 KB",
+    "summary_txt": "0.7 KB"
+  },
+  "total_size": "3.7 KB",
+  "acceptance_criteria": {
+    "prisma_client_generation": "PASS",
+    "database_schema_push": "PASS", 
+    "service_startup": "PASS",
+    "db_smoke_test": "PASS"
+  },
+  "key_metrics": {
+    "feed_events_total": {
+      "btcturk": 0,
+      "bist": 0
+    },
+    "ws_reconnects_total": {
+      "btcturk": 0,
+      "bist": 0
+    },
+    "event_to_db_ms": {
+      "market_event": 0,
+      "tick": 0
+    },
+    "db_writes_total": {
+      "market_event": 0,
+      "tick": 0
+    }
+  },
+  "database_mode": {
+    "active_mode": "JSONL_FALLBACK",
+    "prisma_available": true,
+    "fallback_reason": "PRISMA_DATABASE_URL not set"
+  },
+  "schema_status": {
+    "tables_created": ["market_event", "tick"],
+    "indexes_created": ["ts", "source+symbol+ts"],
+    "prisma_version": "5.22.0"
+  },
+  "next_steps": [
+    "Set PRISMA_DATABASE_URL to enable Prisma mode",
+    "Run db:push to create tables in production",
+    "Monitor db_writes_total and event_to_db_ms metrics"
+  ]
+}

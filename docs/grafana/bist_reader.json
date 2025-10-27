@@ -1,0 +1,99 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "BIST Reader",
+    "tags": ["bist", "reader", "market-data"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Ingest Lag",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "bist_ingest_lag_seconds",
+            "legendFormat": "Lag (seconds)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Drop Ratio",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bist_drop_ratio",
+            "legendFormat": "Drop Ratio"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.05},
+                {"color": "red", "value": 0.1}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Sequence Gaps",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bist_seq_gap_total",
+            "legendFormat": "Gaps"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Messages Total",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bist_messages_total",
+            "legendFormat": "Messages"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+} 

@@ -1,0 +1,37 @@
+name: db-smoke
+on:
+  push: 
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  db-smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: spark
+          POSTGRES_PASSWORD: spark
+          POSTGRES_DB: spark
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U spark"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      PRISMA_DATABASE_URL: postgresql://spark:spark@localhost:5432/spark
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: 
+          version: 9
+      - run: pnpm -w install
+      - run: pnpm -w --filter services/marketdata prisma:generate
+      - run: pnpm -w --filter services/marketdata db:push
+      - run: pnpm -w build
+      - run: node services/marketdata/dist/index.cjs &
+      - run: sleep 5
+      - run: curl -sf http://127.0.0.1:4005/feeds/canary?dry=true
+      - run: curl -sf http://127.0.0.1:4005/metrics | grep -E "event_to_db_ms|db_writes_total"

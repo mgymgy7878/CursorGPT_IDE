@@ -1,0 +1,46 @@
+# v1.7 Export@Scale - Standalone Sidecar
+# Purpose: Run export service independently without executor bootstrap cycles
+
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml* ./
+COPY packages/exporter-core/package.json packages/exporter-core/
+COPY services/executor/package.json services/executor/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile || pnpm install
+
+# Copy source code
+COPY packages/exporter-core packages/exporter-core
+COPY services/executor services/executor
+COPY scripts scripts
+COPY tsconfig.base.json ./
+
+# Build exporter-core package
+RUN cd packages/exporter-core && pnpm build
+
+# Create exports directory
+RUN mkdir -p /app/exports
+
+# Environment variables
+ENV PORT=4001
+ENV HOST=0.0.0.0
+ENV TS_NODE_TRANSPILE_ONLY=1
+ENV NODE_ENV=production
+
+# Expose port
+EXPOSE 4001
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:4001/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
+
+# Run standalone export server
+CMD ["node", "--loader", "ts-node/esm", "services/executor/src/standalone-export.ts"]
+

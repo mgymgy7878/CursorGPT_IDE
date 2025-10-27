@@ -1,0 +1,82 @@
+{
+  "timeouts": {
+    "idle_ms": 12000,
+    "hard_ms": 45000,
+    "grace_ms": 4000
+  },
+  "environments": {
+    "development": {
+      "idle_ms": 15000,
+      "hard_ms": 60000
+    },
+    "production": {
+      "idle_ms": 10000,
+      "hard_ms": 30000
+    },
+    "ci": {
+      "idle_ms": 8000,
+      "hard_ms": 25000
+    }
+  },
+  "command_types": {
+    "build": {
+      "idle_ms": 30000,
+      "hard_ms": 300000,
+      "retry_count": 2
+    },
+    "test": {
+      "idle_ms": 20000,
+      "hard_ms": 180000,
+      "retry_count": 3
+    },
+    "deploy": {
+      "idle_ms": 60000,
+      "hard_ms": 600000,
+      "retry_count": 1
+    },
+    "canary": {
+      "idle_ms": 15000,
+      "hard_ms": 120000,
+      "retry_count": 1
+    },
+    "smoke": {
+      "idle_ms": 10000,
+      "hard_ms": 60000,
+      "retry_count": 2
+    }
+  },
+  "metrics": {
+    "endpoint": "http://127.0.0.1:4001",
+    "enabled": true,
+    "timeout_ms": 5000
+  },
+  "logging": {
+    "level": "info",
+    "evidence_dir": "evidence/runner",
+    "retention_days": 30
+  },
+  "security": {
+    "allowed_commands": [
+      "node",
+      "pnpm",
+      "npm",
+      "powershell",
+      "cmd",
+      "Write-Host"
+    ],
+    "blocked_patterns": [
+      "rm -rf",
+      "Remove-Item.*-Recurse.*-Force",
+      "Format-Volume",
+      "del /f /s /q"
+    ],
+    "threshold_freeze": {
+      "enabled": true,
+      "pr_required": true,
+      "auto_approve": false,
+      "freeze_duration_hours": 24,
+      "required_labels": ["threshold-change"],
+      "freeze_comment": "Threshold changes require PR with 'threshold-change' label"
+    }
+  }
+}

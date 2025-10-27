@@ -1,61 +1,94 @@
 {
-	"name": "web-next",
-	"version": "1.0.0",
-	"private": true,
-	"scripts": {
-		"dev": "next dev -p 3003",
-		"ws:dev": "tsx scripts/dev-ws.ts",
-		"dev:auto": "node scripts/dev-auto.mjs",
-		"dev:unix": "sh ./scripts/predev.sh && rm -rf .next && WATCHPACK_POLLING=true WATCHPACK_POLLING_INTERVAL=2000 NEXT_WEBPACK_USEPERSISTENTCACHE=false next dev -p 3003 -H 0.0.0.0",
-		"dev:win": "node scripts/dev-win.mjs",
-		"build": "cross-env NEXT_DISABLE_ESLINT=1 next build",
-    "postbuild": "node ../../tools/copy-standalone-assets.cjs",
+  "name": "@spark/web-next",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev -p 3003",
+    "build": "next build",
     "start": "next start -p 3003",
-    "start:prod:standalone": "node .next/standalone/server.js",
-		"clean": "node -e \"require('fs').rmSync('./.next',{recursive:true,force:true});\"",
-		"lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings=0",
-		"lint:fix": "eslint . --ext .ts,.tsx --fix",
-		"lint:advisory": "eslint . --ext .ts,.tsx || true",
-		"lint:next": "next lint",
-		"typecheck": "tsc --noEmit",
-		"test": "jest --passWithNoTests",
-		"test:e2e": "playwright test --reporter=list",
-		"i18n:check": "node ../../scripts/i18n-check.mjs"
-	},
-	"dependencies": {
-		"@monaco-editor/react": "^4.7.0",
-		"@types/ws": "^8.18.1",
-		"lightweight-charts": "^5.0.9",
-		"next": "14.2.13",
-		"react": "18.3.1",
-		"react-dom": "18.3.1",
-		"react-hook-form": "^7.65.0",
-		"recharts": "^3.2.1",
-		"swr": "^2.3.6",
-		"ws": "^8.18.3",
-		"zod": "^3.23.8",
-		"zustand": "^5.0.8"
-	},
-	"devDependencies": {
-		"@eslint/eslintrc": "^3.3.1",
-		"@eslint/js": "^9.38.0",
-		"@playwright/test": "^1.56.1",
-		"@tailwindcss/postcss": "^4.1.14",
-		"@types/jest": "^30.0.0",
-		"@types/node": "^20.0.0",
-		"@types/react": "^18.0.0",
-		"@types/react-dom": "^18.0.0",
-		"@typescript-eslint/eslint-plugin": "^8.46.1",
-		"@typescript-eslint/parser": "^8.46.1",
-		"autoprefixer": "^10",
-		"eslint": "^9.37.0",
-		"eslint-config-next": "^15.5.5",
-		"eslint-plugin-regex": "^1.10.0",
-		"jest": "^30.2.0",
-		"postcss": "^8",
-		"tailwindcss": "^3.4.18",
-		"ts-jest": "^29.4.5",
-		"typescript": "^5.0.0"
-	},
-	"packageManager": "pnpm@10.18.3+sha512.bbd16e6d7286fd7e01f6b3c0b3c932cda2965c06a908328f74663f10a9aea51f1129eea615134bf992831b009eabe167ecb7008b597f40ff9bc75946aadfb08d"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "desktop:dev": "cross-env PORT=3015 electron ./desktop/main.js",
+    "desktop:pack": "pnpm build && electron-builder -w",
+    "desktop:dist": "pnpm build && electron-builder --publish=never",
+    "fix:build:start:smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File ../../scripts/fix_build_start_smoke.ps1"
+  },
+  "dependencies": {
+    "@tremor/react": "^3.18.7",
+    "client-only": "^0.0.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.545.0",
+    "next": "14.2.13",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-hook-form": "^7.65.0",
+    "recharts": "^3.2.1",
+    "styled-jsx": "5.1.1",
+    "swr": "^2.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.7.0",
+    "@types/react": "19.2.2",
+    "autoprefixer": "^10.4.21",
+    "cross-env": "^10.1.0",
+    "electron": "^38.2.2",
+    "electron-builder": "^26.0.12",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
+    "tree-kill": "^1.2.2",
+    "typescript": "5.9.3"
+  },
+  "build": {
+    "appId": "com.spark.platform",
+    "productName": "Spark Platform",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "desktop/**/*",
+      "public/**/*",
+      ".next/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone"
+      },
+      {
+        "from": ".next/static",
+        "to": ".next/static"
+      },
+      {
+        "from": "public",
+        "to": "public"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "public/favicon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "public/favicon.ico"
+    }
+  }
 }

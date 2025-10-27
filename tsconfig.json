@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/@spark/symbols" },
+    { "path": "packages/@spark/exchange-btcturk" },
+    { "path": "services/executor" },
+    { "path": "services/marketdata" }
+  ]
+}

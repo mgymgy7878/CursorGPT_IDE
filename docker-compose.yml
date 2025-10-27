@@ -1,72 +1,92 @@
-services:
-  web:
-    build:
-      context: .
-      dockerfile: apps/web-next/Dockerfile
-    environment:
-      - PORT=3003
-      - HOST=0.0.0.0
-      - NEXT_TELEMETRY_DISABLED=1
-      - NODE_OPTIONS=--dns-result-order=ipv4first
-      - CI=true
-      - COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-      # HMR drift protection (Windows bind-mount)
-      - CHOKIDAR_USEPOLLING=1
-      - WATCHPACK_POLLING=true
-      - WATCHPACK_POLLING_INTERVAL=2000
-      - NEXT_WEBPACK_USEPOLLING=1
-      - NEXT_WEBPACK_USEPERSISTENTCACHE=false
-    ports:
-      - "3003:3003"
-    volumes:
-      # Named volume for .next cache (prevents Windows drift)
-      - web_next_cache:/app/apps/web-next/.next
-      # Anonymous volume for node_modules (keep in container)
-      - /app/node_modules
+# Spark Trading Platform - Docker Compose
+# Monitoring Stack: Prometheus + Grafana
 
+version: '3.8'
+
+services:
+  # Prometheus - Metrics collection and alerting
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.48.0
     container_name: spark-prometheus
+    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
-      - ./ops/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts:/etc/prometheus/alerts:ro
+      - ./prometheus/records:/etc/prometheus/records:ro
+      - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-    restart: unless-stopped
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
     networks:
       - spark-network
 
+  # Grafana - Visualization and dashboards
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.2.2
     container_name: spark-grafana
-    ports:
-      - "3009:3000"
-    volumes:
-      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
-      - grafana_data:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
-    networks:
-      - spark-network
+    ports:
+      - "3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_ROOT_URL=http://localhost:3005
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/panels:/etc/grafana/provisioning/dashboards/spark:ro
+      - grafana-data:/var/lib/grafana
     depends_on:
       - prometheus
+    networks:
+      - spark-network
+
+  # Executor Service (for reference - should be started separately via basla.ps1)
+  # executor:
+  #   build:
+  #     context: ./services/executor
+  #     dockerfile: Dockerfile
+  #   container_name: spark-executor
+  #   restart: unless-stopped
+  #   ports:
+  #     - "4001:4001"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - PORT=4001
+  #     - HOST=0.0.0.0
+  #   env_file:
+  #     - ./services/executor/.env
+  #   networks:
+  #     - spark-network
+
+  # Web-Next Service (for reference - should be started separately via basla.ps1)
+  # web-next:
+  #   build:
+  #     context: ./apps/web-next
+  #     dockerfile: Dockerfile
+  #   container_name: spark-web-next
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3003:3003"
+  #   environment:
+  #     - EXECUTOR_BASE_URL=http://executor:4001
+  #   depends_on:
+  #     - executor
+  #   networks:
+  #     - spark-network
 
 networks:
   spark-network:
     driver: bridge
 
 volumes:
-  # Persistent cache for Next.js build artifacts
-  web_next_cache:
-    driver: local
-  prometheus_data:
-    driver: local
-  grafana_data:
-    driver: local
+  prometheus-data:
+  grafana-data:
+

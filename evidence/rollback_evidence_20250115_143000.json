@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-01-15T14:30:00Z",
+  "action": "NO-GO Rollback Uygulandı",
+  "rollback_flags": {
+    "AI_CHUNK_UPLOAD_ENABLED": false,
+    "SSE_RETRY_ENABLED": false
+  },
+  "reason": "Canary geri alma: flag kapatma - Servisler offline",
+  "impact": {
+    "chunked_upload": "DISABLED",
+    "sse_retry": "DISABLED", 
+    "guardrail_system": "BASIC_MODE_ONLY"
+  },
+  "status": "ROLLBACK_COMPLETED",
+  "next_actions": [
+    "Servisleri manuel başlatma",
+    "Port çakışmalarını çözme",
+    "Build hatalarını düzeltme",
+    "Tekrar canary değerlendirmesi"
+  ]
+}

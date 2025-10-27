@@ -1,0 +1,60 @@
+name: Route-200 Health Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  route-200:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Build executor
+        run: pnpm --filter @spark/executor run build
+        
+      - name: Start executor
+        run: |
+          $env:HOST="0.0.0.0"
+          $env:PORT="4001"
+          $env:METRICS_ENABLED="true"
+          $env:FUSION_GATE_ENABLE="1"
+          $env:FUSION_GATE_MODE="shadow"
+          Start-Process -FilePath "node" -ArgumentList "services/executor/dist/server.js" -WindowStyle Hidden
+          Start-Sleep -Seconds 5
+          
+      - name: Test prefixed routes
+        run: |
+          $status = Invoke-WebRequest -Uri "http://127.0.0.1:4001/api/public/fusion/risk.gate/status" -UseBasicParsing
+          if ($status.StatusCode -ne 200) { exit 1 }
+          
+          $apply = Invoke-WebRequest -Uri "http://127.0.0.1:4001/api/public/fusion/risk.gate/apply" -Method POST -ContentType "application/json" -Body '{"dry":true}' -UseBasicParsing
+          if ($apply.StatusCode -ne 200) { exit 1 }
+          
+      - name: Test root routes (compat)
+        run: |
+          $status = Invoke-WebRequest -Uri "http://127.0.0.1:4001/risk.gate/status" -UseBasicParsing
+          if ($status.StatusCode -ne 200) { exit 1 }
+          
+          $apply = Invoke-WebRequest -Uri "http://127.0.0.1:4001/risk.gate/apply" -Method POST -ContentType "application/json" -Body '{"dry":true}' -UseBasicParsing
+          if ($apply.StatusCode -ne 200) { exit 1 }
+          
+      - name: Cleanup
+        if: always()
+        run: |
+          Get-Process | Where-Object {$_.ProcessName -eq "node"} | Stop-Process -Force

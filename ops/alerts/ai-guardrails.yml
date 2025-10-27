@@ -1,0 +1,57 @@
+# AI Payload Guardrail Prometheus Alert Rules
+# Monitors Chat/Agent serialization errors and payload size issues
+
+groups:
+- name: ai-guardrails
+  rules:
+  # Alert when payload trimming is detected
+  - alert: AIPayloadTrimSpike
+    expr: rate(ai_payload_truncated_total[5m]) > 0
+    for: 5m
+    labels: 
+      severity: warning
+      service: ai-guardrail
+      component: payload
+    annotations:
+      summary: "AI payload trimming detected"
+      description: "Guardrail trimmed payloads in the last 5m. This indicates large payloads or problematic data types (BigInt, NaN, circular refs)."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-payload-guardrail"
+      
+  # Alert when payload size P95 is high
+  - alert: AIPayloadSizeHigh
+    expr: histogram_quantile(0.95, sum(rate(ai_payload_bytes_bucket[5m])) by (le)) > 250000
+    for: 10m
+    labels: 
+      severity: info
+      service: ai-guardrail
+      component: payload
+    annotations:
+      summary: "AI payload bytes p95 high"
+      description: "P95 payload size exceeded 250 KB. Consider reviewing payload structure or increasing limits."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-payload-guardrail"
+      
+  # Alert when payload size P99 is very high
+  - alert: AIPayloadSizeCritical
+    expr: histogram_quantile(0.99, sum(rate(ai_payload_bytes_bucket[5m])) by (le)) > 500000
+    for: 5m
+    labels: 
+      severity: critical
+      service: ai-guardrail
+      component: payload
+    annotations:
+      summary: "AI payload bytes p99 critical"
+      description: "P99 payload size exceeded 500 KB. This may cause serialization timeouts."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-payload-guardrail"
+      
+  # Alert when trimming rate is high (indicates systematic issues)
+  - alert: AIPayloadTrimRateHigh
+    expr: rate(ai_payload_truncated_total[10m]) > 0.1
+    for: 5m
+    labels: 
+      severity: warning
+      service: ai-guardrail
+      component: payload
+    annotations:
+      summary: "AI payload trimming rate high"
+      description: "More than 10% of payloads are being trimmed. Review payload structure and consider chunked upload."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-payload-guardrail"

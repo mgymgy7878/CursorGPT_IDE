@@ -1,0 +1,147 @@
+{
+  "results": [
+    {
+      "name": "ZScore_Bands_Regime",
+      "params": {
+        "period": 20,
+        "entryZ": 1.5,
+        "exitZ": 0.5
+      },
+      "sharpe": 0,
+      "cagr_pct": -100,
+      "max_dd_pct": 30.27,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.4,
+      "trades": 240,
+      "exposure_pct": 9.94
+    },
+    {
+      "name": "ZScore_Bands_Regime",
+      "params": {
+        "period": 100,
+        "entryZ": 2.5,
+        "exitZ": 1
+      },
+      "sharpe": -0.01,
+      "cagr_pct": -35.08,
+      "max_dd_pct": 1.15,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0,
+      "trades": 6,
+      "exposure_pct": 1.01
+    },
+    {
+      "name": "MA_Cross_Regime",
+      "params": {
+        "short": 10,
+        "long": 50
+      },
+      "sharpe": -0.04,
+      "cagr_pct": -100,
+      "max_dd_pct": 24.03,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.6,
+      "trades": 172,
+      "exposure_pct": 23.34
+    },
+    {
+      "name": "MA_Cross_Regime",
+      "params": {
+        "short": 20,
+        "long": 100
+      },
+      "sharpe": -0.04,
+      "cagr_pct": -99.93,
+      "max_dd_pct": 15.36,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.2,
+      "trades": 102,
+      "exposure_pct": 21.16
+    },
+    {
+      "name": "Breakout_RollingHL",
+      "params": {
+        "lookback": 20,
+        "threshold": 0.2
+      },
+      "sharpe": -0.05,
+      "cagr_pct": -100,
+      "max_dd_pct": 98.28,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.4,
+      "trades": 2685,
+      "exposure_pct": 52.09
+    },
+    {
+      "name": "Breakout_RollingHL",
+      "params": {
+        "lookback": 50,
+        "threshold": 0.2
+      },
+      "sharpe": -0.06,
+      "cagr_pct": -100,
+      "max_dd_pct": 93.34,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.2,
+      "trades": 1779,
+      "exposure_pct": 48.88
+    },
+    {
+      "name": "Breakout_RollingHL",
+      "params": {
+        "lookback": 20,
+        "threshold": 0.1
+      },
+      "sharpe": -0.07,
+      "cagr_pct": -100,
+      "max_dd_pct": 98.23,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.4,
+      "trades": 2661,
+      "exposure_pct": 35.18
+    },
+    {
+      "name": "ZScore_Bands_Regime",
+      "params": {
+        "period": 50,
+        "entryZ": 2,
+        "exitZ": 0.5
+      },
+      "sharpe": -0.07,
+      "cagr_pct": -98.9,
+      "max_dd_pct": 9.78,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.2,
+      "trades": 62,
+      "exposure_pct": 3.6
+    },
+    {
+      "name": "MA_Cross_Regime",
+      "params": {
+        "short": 50,
+        "long": 200
+      },
+      "sharpe": -0.08,
+      "cagr_pct": -99.55,
+      "max_dd_pct": 11.63,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0.4,
+      "trades": 66,
+      "exposure_pct": 19
+    },
+    {
+      "name": "Breakout_RollingHL",
+      "params": {
+        "lookback": 50,
+        "threshold": 0.1
+      },
+      "sharpe": -0.12,
+      "cagr_pct": -100,
+      "max_dd_pct": 93.73,
+      "fragility_top": 0,
+      "oos_positive_ratio": 0,
+      "trades": 1803,
+      "exposure_pct": 29.13
+    }
+  ]
+}

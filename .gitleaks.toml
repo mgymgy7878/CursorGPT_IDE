@@ -1,0 +1,19 @@
+# Redaction notu: CI ve lokal komutlarda --redact bayrağı kullanılır.
+title = "Spark Secrets Guard"
+
+[allowlist]
+# Ortak false-positive şablonları
+regexes = [
+  '''(?i)^(?:N?EXT|REACT|VITE|PUBLIC)_[A-Z0-9_]+=.+$''', # public env'ler
+  '''(?i)loremapikey|examplekey|test_secret|changeme''', # örnek/metin
+]
+paths = [
+  "runtime/",          # kanıt/log artefaktları
+  "docs/screenshots/", # LFS görseller
+  "apps/web-next/.next/",
+  "apps/web-next/.turbo/",
+  "services/executor/dist/"
+]
+
+# Varsayılan kurallar (gitleaks built-in) kullanılacak.
+# İleride özel provider imzaları eklenebilir (AWS/GCP/Binance, vb). 

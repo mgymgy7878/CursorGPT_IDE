@@ -1,0 +1,12 @@
+groups:
+- name: spark-dynamic
+  rules:
+  - alert: btcturk-ws-disconnected
+    expr: "avg(btcturk_ws_connected) < 1 > 0"
+    for: 2m
+    labels:
+      severity: "warning"
+      source: "spark"
+    annotations:
+      summary: "BTCTurk WS disconnect"
+      description: "Auto-generated alert: avg(btcturk_ws_connected) < 1 > 0"

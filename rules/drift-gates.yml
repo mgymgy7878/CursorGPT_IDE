@@ -1,0 +1,52 @@
+groups:
+- name: drift-gates
+  rules:
+  - alert: PaperLivePNLDriftHigh
+    expr: avg_over_time(paper_live_delta[30m]) < -0.01
+    for: 30m
+    labels:
+      severity: warning
+      service: drift-gates
+    annotations:
+      summary: "Paper vs Live PnL drift < -1% (30m)"
+      description: "Paper vs Live PnL drift is {{ $value }}% for 30 minutes"
+      
+  - alert: DriftSlippageSpike
+    expr: avg_over_time(drift_slippage_bp[15m]) > 15
+    for: 15m
+    labels:
+      severity: warning
+      service: drift-gates
+    annotations:
+      summary: "Drift slippage spike detected"
+      description: "Slippage is {{ $value }} basis points for 15 minutes"
+      
+  - alert: GateToggledFrequently
+    expr: increase(gate_close_total[1h]) + increase(gate_open_total[1h]) > 10
+    for: 0m
+    labels:
+      severity: info
+      service: drift-gates
+    annotations:
+      summary: "Gate toggled frequently"
+      description: "Gate has been toggled {{ $value }} times in the last hour"
+      
+  - alert: DriftDetectionLatencyHigh
+    expr: histogram_quantile(0.95, sum by (le) (rate(drift_detection_latency_ms_bucket[5m]))) > 5000
+    for: 10m
+    labels:
+      severity: warning
+      service: drift-gates
+    annotations:
+      summary: "Drift detection latency high"
+      description: "P95 detection latency is {{ $value }}ms"
+      
+  - alert: GateRecoveryTimeHigh
+    expr: histogram_quantile(0.95, sum by (le) (rate(recovery_time_ms_bucket[5m]))) > 30000
+    for: 5m
+    labels:
+      severity: warning
+      service: drift-gates
+    annotations:
+      summary: "Gate recovery time high"
+      description: "P95 recovery time is {{ $value }}ms"

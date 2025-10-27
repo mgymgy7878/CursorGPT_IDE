@@ -1,0 +1,124 @@
+# Spark Portfolio Alert Rules - Fine-Tuned
+# chatgpt + cursor collaboration
+# Sprint: v1.9-p3 Portfolio Real Data Integration
+
+groups:
+  - name: spark-portfolio-tuned
+    interval: 30s
+    rules:
+      # 1. Portfolio Refresh Latency (p95)
+      - alert: PortfolioRefreshLatencyHighP95
+        expr: |
+          histogram_quantile(0.95, 
+            sum by (le, exchange) (
+              rate(spark_portfolio_refresh_latency_ms_bucket[5m])
+            )
+          ) > 1500
+        for: 5m
+        labels:
+          severity: warning
+          service: executor
+          component: portfolio
+          layer: performance
+        annotations:
+          summary: "p95 refresh latency yüksek ({{ $labels.exchange }})"
+          description: "Exchange {{ $labels.exchange }} için p95 latency {{ $value | humanizeDuration }} (eşik: 1500ms)"
+          action: "Exchange API durumunu ve ağ gecikmesini kontrol et."
+          runbook: "https://docs.spark.local/runbooks/portfolio-latency"
+          dashboard: "http://localhost:3005/d/spark-portfolio"
+
+      # 2. Exchange API Error Rate
+      - alert: ExchangeApiErrorRateHigh
+        expr: |
+          sum by (exchange) (
+            rate(spark_exchange_api_error_total[5m])
+          ) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+          service: executor
+          component: portfolio
+          layer: integration
+        annotations:
+          summary: "API error rate yüksek ({{ $labels.exchange }})"
+          description: "Exchange {{ $labels.exchange }} error rate: {{ $value | humanize }}/s (eşik: 0.05/s)"
+          action: "Key izinlerini ve rate limit durumunu doğrula."
+          runbook: "https://docs.spark.local/runbooks/api-errors"
+          
+      # 3. Portfolio Data Staleness
+      - alert: PortfolioDataStale
+        expr: |
+          (time() - spark_portfolio_last_update_timestamp) > 300
+        for: 2m
+        labels:
+          severity: warning
+          service: executor
+          component: portfolio
+          layer: data
+        annotations:
+          summary: "Veri bayat ({{ $labels.exchange }})"
+          description: "Exchange {{ $labels.exchange }} son güncelleme: {{ $value | humanizeDuration }} önce (eşik: 300s)"
+          action: "Executor /health ve connector loglarını kontrol et."
+          query: "spark_portfolio_last_update_timestamp{exchange=\"{{ $labels.exchange }}\"}"
+
+      # 4. Portfolio Value Drop Anomaly
+      - alert: PortfolioValueDropAnomaly
+        expr: |
+          (
+            sum(spark_portfolio_total_value_usd) 
+            - sum(spark_portfolio_total_value_usd offset 5m)
+          ) / clamp_min(sum(spark_portfolio_total_value_usd offset 5m), 1) < -0.10
+        for: 1m
+        labels:
+          severity: warning
+          service: executor
+          component: portfolio
+          layer: data
+        annotations:
+          summary: "5 dk'da >%10 değer düşüşü"
+          description: "Toplam portföy değeri 5 dakikada {{ $value | humanizePercentage }} düştü"
+          action: "Fiyat akışını ve dönüştürme oranlarını doğrula."
+          impact: "Potansiyel veri kalitesi veya market crash"
+
+      # 5. Portfolio No Assets
+      - alert: PortfolioNoAssets
+        expr: |
+          sum(spark_portfolio_asset_count) < 1
+        for: 5m
+        labels:
+          severity: warning
+          service: executor
+          component: portfolio
+          layer: config
+        annotations:
+          summary: "Portföyde varlık yok"
+          description: "Exchange {{ $labels.exchange }} için asset count: {{ $value }} (beklenen: > 0)"
+          action: "API key izinlerini (read-only) ve bağlantıyı kontrol et."
+          checklist: "1. API key valid mi? 2. Read permission var mı? 3. Network erişimi OK?"
+
+      # BONUS: High Error Rate by Type (chatgpt suggestion)
+      - alert: ExchangeApiErrorByType
+        expr: |
+          sum by (exchange, error_type) (
+            rate(spark_exchange_api_error_total[5m])
+          ) > 0.01
+        for: 3m
+        labels:
+          severity: info
+          service: executor
+          component: portfolio
+          layer: integration
+        annotations:
+          summary: "API error spike: {{ $labels.error_type }} ({{ $labels.exchange }})"
+          description: "Error type {{ $labels.error_type }} rate: {{ $value | humanize }}/s"
+          action: |
+            {{- if eq .Labels.error_type "auth" -}}
+            API key'i kontrol et ve yeniden oluştur.
+            {{- else if eq .Labels.error_type "ratelimit" -}}
+            Request rate'i azalt veya exponential backoff ekle.
+            {{- else if eq .Labels.error_type "timeout" -}}
+            Network latency'sini kontrol et, timeout değerini artır.
+            {{- else -}}
+            Connector loglarını incele ve error detaylarını topla.
+            {{- end -}}
+

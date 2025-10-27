@@ -1,0 +1,52 @@
+name: Backtest CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  backtest_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 10.14.0 }
+      - run: pnpm -w install
+      
+      - name: Build backtest packages
+        run: |
+          pnpm -F packages/backtest-core build
+          pnpm -F packages/data-pipeline build
+          
+      - name: Build executor service
+        run: |
+          pnpm -F services/executor build
+          
+      - name: Start executor service
+        run: |
+          node services/executor/dist/server.js &
+          sleep 5
+          
+      - name: Run deterministic backtest scenarios
+        run: |
+          node scripts/run-backtest-scenarios.js --seed=12345
+          
+      - name: Assert backtest metrics
+        run: |
+          node scripts/assert-backtest-metrics.js
+          
+      - name: Golden file validation
+        run: |
+          node scripts/validate-golden-files.js
+          
+      - name: Backtest status validation
+        run: |
+          curl -fsS http://localhost:4001/backtest/status
+          curl -fsS http://localhost:4001/backtest/metrics | grep "backtest_runtime_ms_bucket"
+          
+      - name: Cleanup
+        run: |
+          pkill -f "node services/executor"

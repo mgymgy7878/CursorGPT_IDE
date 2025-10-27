@@ -1,0 +1,59 @@
+appId: com.spark.trading
+productName: Spark Trading
+directories:
+  output: dist
+asar: true
+npmRebuild: false
+files:
+  - dist/**
+  - resources/**
+  - package.json
+  - node_modules/**
+win:
+  target:
+    - nsis
+    - portable
+  icon: build/icon.ico
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+artifactName: "Spark Trading Setup ${version}.exe"
+publish:
+  - provider: generic
+    url: https://downloads.sparktrading.example.com/desktop/${channel}
+asarUnpack:
+  - "**/*.node"
+extraResources:
+  # Prod bağımlılıklarının garanti kopyası (pnpm symlink sorunlarını aşmak için)
+  - from: node_modules/fs-extra
+    to: app/node_modules/fs-extra
+  - from: node_modules/universalify
+    to: app/node_modules/universalify
+  - from: node_modules/graceful-fs
+    to: app/node_modules/graceful-fs
+  - from: node_modules/jsonfile
+    to: app/node_modules/jsonfile
+  - from: node_modules/builder-util-runtime
+    to: app/node_modules/builder-util-runtime
+  - from: node_modules/debug
+    to: app/node_modules/debug
+  - from: node_modules/ms
+    to: app/node_modules/ms
+  - from: node_modules/sax
+    to: app/node_modules/sax
+  - from: node_modules/xml2js
+    to: app/node_modules/xml2js
+  - from: node_modules/js-yaml
+    to: app/node_modules/js-yaml
+  # Gerekirse web-next standalone'ı içeri al (opsiyonel)
+  # - from: ../../apps/web-next/.next/standalone
+  #   to: app/standalone
+
+  # Offline fallback: web-next statik build (opsiyonel, varsa dahil et)
+  - from: ../../apps/web-next/out
+    to: app/web
+
+

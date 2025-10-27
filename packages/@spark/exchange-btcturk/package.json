@@ -1,0 +1,20 @@
+{
+  "name": "@spark/exchange-btcturk",
+  "version": "0.1.0",
+  "description": "BTCTurk Spot Exchange Integration",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "ws": "^8.18.3",
+    "axios": "^1.12.2"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.9.2"
+  }
+}

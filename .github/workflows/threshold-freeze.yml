@@ -1,0 +1,27 @@
+name: threshold-freeze
+on:
+  pull_request:
+    paths:
+      - 'config/prometheus/**/*.yml'
+      - 'config/runner.json'
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect threshold changes
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          git diff --unified=0 origin/${{ github.base_ref }} -- config/runner.json config/prometheus/**/*.yml > freeze.diff || true
+          lines=$(wc -l < freeze.diff || echo 0)
+          echo "Changed lines: $lines"
+          if [ "$lines" -gt 0 ]; then
+            echo "CHANGES_FOUND=1" >> $GITHUB_ENV
+          fi
+      - name: Enforce PR label and freeze window
+        if: env.CHANGES_FOUND == '1'
+        run: |
+          # Require label
+          labels="$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")"
+          echo "$labels" | grep -q '^threshold-change$' || { echo "::error::Missing required label 'threshold-change'"; exit 1; }
+          # Optional: 24h freeze window via commit timestamp check can be added here

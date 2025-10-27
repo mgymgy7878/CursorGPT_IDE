@@ -1,0 +1,88 @@
+{
+  "timestamp": "2025-10-08T11:05:45.984Z",
+  "overall_psi": 1.2527,
+  "overall_status": "critical",
+  "features": {
+    "mid": {
+      "psi": 4.869501026794275,
+      "status": "critical",
+      "current_dist": [
+        0,
+        0,
+        22.58,
+        44.62,
+        32.8
+      ],
+      "reference_dist": [
+        0,
+        24.43,
+        49.46,
+        26.11,
+        0
+      ]
+    },
+    "spreadBp": {
+      "psi": 0.05306716779054521,
+      "status": "stable",
+      "current_dist": [
+        0.79,
+        30.2,
+        29.99,
+        39.02,
+        0
+      ],
+      "reference_dist": [
+        0,
+        33.19,
+        34.06,
+        32.75,
+        0
+      ]
+    },
+    "vol1m": {
+      "psi": 0.012398546944701959,
+      "status": "stable",
+      "current_dist": [
+        0,
+        45.2,
+        54.8,
+        0,
+        0
+      ],
+      "reference_dist": [
+        0,
+        50.76,
+        49.24,
+        0,
+        0
+      ]
+    },
+    "rsi14": {
+      "psi": 0.07588281816187337,
+      "status": "stable",
+      "current_dist": [
+        0,
+        11.6,
+        61.24,
+        27.16,
+        0
+      ],
+      "reference_dist": [
+        0,
+        16.51,
+        67.01,
+        16.48,
+        0
+      ]
+    }
+  },
+  "thresholds": {
+    "stable": "< 0.1",
+    "warning": "0.1 - 0.2",
+    "critical": "> 0.2"
+  },
+  "slo_check": {
+    "psi_under_0_2": false,
+    "pass": false
+  }
+}

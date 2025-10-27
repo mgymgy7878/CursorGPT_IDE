@@ -1,0 +1,44 @@
+# Prometheus Configuration for Spark Trading Platform
+# AI Payload Guardrail monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "ops/alerts/ai-guardrails.yml"
+  - "ops/alerts/*.yml"
+
+scrape_configs:
+  # Executor service metrics
+  - job_name: 'spark-executor'
+    static_configs:
+      - targets: ['localhost:4001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    
+  # Web application metrics (if available)
+  - job_name: 'spark-web'
+    static_configs:
+      - targets: ['localhost:3003']
+    metrics_path: '/api/public/metrics'
+    scrape_interval: 30s
+
+  # Node exporter (system metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+    scrape_interval: 30s
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 10GB

@@ -1,0 +1,47 @@
+{
+  "system_health": {
+    "action": "/tools/get_status",
+    "params": { "detail": true },
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "Executor/analytics/marketdata servislerinin anlık sağlığı"
+  },
+  "data_ingest_alert": {
+    "action": "/alerts/create",
+    "params": {
+      "name": "HistoricalGapDetected",
+      "expr": "increase(marketdata_gap_count_total[10m]) > 0",
+      "for": "5m",
+      "labels": { "severity": "warning", "component": "marketdata" }
+    },
+    "dryRun": true,
+    "confirm_required": false,
+    "reason": "GAP tespit edilince uyarı"
+  },
+  "backtest_run_record": {
+    "action": "/advisor/suggest",
+    "params": {
+      "topic": "backtest.run",
+      "payload": {
+        "strategy": "sma_cross",
+        "symbol": "BTCUSDT",
+        "tf": "1m",
+        "from": "2025-06-01",
+        "to": "2025-09-30",
+        "initial": 10000,
+        "fee_bps": 10,
+        "slippage_bps": 5
+      }
+    },
+    "dryRun": true,
+    "confirm_required": false,
+    "reason": "Örnek koşu — CI/E2E pipeline tetik"
+  },
+  "daily_ops_report": {
+    "action": "/fusion/risk.report.daily",
+    "params": { "include": ["backtest_summary", "fusion_gate_shadow_evidence"] },
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "Günlük rapora backtest özeti"
+  }
+}

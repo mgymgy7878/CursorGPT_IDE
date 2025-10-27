@@ -1,0 +1,24 @@
+# Build & output
+.next/
+dist/
+build/
+out/
+coverage/
+
+# Deps
+node_modules/
+
+# Logs & evidence
+logs/
+evidence/
+**/*.log
+**/*.tmp
+
+# Caches & OS noise
+.cache/
+.DS_Store
+
+# Large data
+datasets/
+snapshots/
+screenshots/

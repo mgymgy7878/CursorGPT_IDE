@@ -1,0 +1,30 @@
+name: Fusion Gate (Policy Check + Shadow DryRun)
+on:
+  push:
+    paths: [ 'policies/risk-gate.policy.json', 'prometheus/rules/**', 'services/executor/**' ]
+  workflow_dispatch:
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate policy JSON
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          file: policies/risk-gate.policy.json
+          schema: https://json.schemastore.org/json
+      - name: Dry-run apply (shadow)
+        run: |
+          echo "::group::dry-run"
+          curl -fsS -X POST http://127.0.0.1:4001/api/public/fusion/risk.gate/apply \
+            -H 'content-type: application/json' \
+            -d '{"score":55,"dryRun":true,"canary":true}'
+          echo "::endgroup::"
+
+  enforce_gate:
+    needs: policy
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[ENFORCE]')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Enforce deploy gate OK (commit flagged with [ENFORCE])"

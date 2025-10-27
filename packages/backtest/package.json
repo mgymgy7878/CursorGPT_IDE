@@ -1,0 +1,17 @@
+{
+  "name": "@spark/backtest",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "exec": "node dist/cli.js"
+  },
+  "dependencies": {
+    "yargs": "^17"
+  },
+  "devDependencies": {
+    "typescript": "^5.5",
+    "@types/node": "^20"
+  }
+}

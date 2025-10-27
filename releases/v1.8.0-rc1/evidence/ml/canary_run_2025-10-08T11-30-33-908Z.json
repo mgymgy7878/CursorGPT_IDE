@@ -1,0 +1,203 @@
+{
+  "timestamp": "2025-10-08T11:30:33.907Z",
+  "config": {
+    "service": "ml-shadow",
+    "mode": "OBSERVE_ONLY",
+    "plan": [
+      {
+        "split": 0.05,
+        "duration_min": 30
+      },
+      {
+        "split": 0.1,
+        "duration_min": 30
+      },
+      {
+        "split": 0.25,
+        "duration_min": 30
+      },
+      {
+        "split": 0.5,
+        "duration_min": 30
+      },
+      {
+        "split": 1,
+        "duration_min": 30
+      }
+    ],
+    "slo": {
+      "p95_ms_max": 80,
+      "err_rate_max": 0.01,
+      "match_rate_min": 0.95
+    },
+    "abort_thresholds": {
+      "p95_ms_abort": 120,
+      "err_rate_abort": 0.02,
+      "match_rate_abort": 0.9
+    },
+    "psi_status": {
+      "overall": 1.25,
+      "note": "PSI > 0.2 (critical) → MONITORED but NOT BLOCKING",
+      "action": "Model retraining recommended before promote"
+    }
+  },
+  "results": [
+    {
+      "phase": "5%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.743302725306406,
+        "p99_ms": 3.3581828019686326,
+        "err_rate": 0.00345513973299733,
+        "match_rate": 0.9915487723090525,
+        "psi_overall": 1.272193178526812,
+        "traffic_split": 0.05,
+        "requests_served": 50,
+        "shadow_errors": 0,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": true
+    },
+    {
+      "phase": "10%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.655974316171946,
+        "p99_ms": 3.0396175882150747,
+        "err_rate": 0.004134974439965689,
+        "match_rate": 0.9727520458081793,
+        "psi_overall": 1.2660177281968592,
+        "traffic_split": 0.1,
+        "requests_served": 100,
+        "shadow_errors": 1,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": true
+    },
+    {
+      "phase": "25%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.570559659947952,
+        "p99_ms": 3.175314095448603,
+        "err_rate": 0.004843231945893885,
+        "match_rate": 0.9949481455285915,
+        "psi_overall": 1.277735363138629,
+        "traffic_split": 0.25,
+        "requests_served": 250,
+        "shadow_errors": 2,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": true
+    },
+    {
+      "phase": "50%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 3.091507786018993,
+        "p99_ms": 3.1061260565141375,
+        "err_rate": 0.0023989444375794177,
+        "match_rate": 0.9805879307002328,
+        "psi_overall": 1.209217467488284,
+        "traffic_split": 0.5,
+        "requests_served": 500,
+        "shadow_errors": 5,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": true
+    },
+    {
+      "phase": "100%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.9953648400567383,
+        "p99_ms": 3.702014962481733,
+        "err_rate": 0.0037373213504244465,
+        "match_rate": 0.9762669506649415,
+        "psi_overall": 1.2809956821370383,
+        "traffic_split": 1,
+        "requests_served": 1000,
+        "shadow_errors": 10,
+        "baseline_always_used": true
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false
+      },
+      "should_abort": false,
+      "slo_pass": true,
+      "decision": "CONTINUE",
+      "confirmed": true
+    }
+  ],
+  "dry_run": false,
+  "confirmed": true,
+  "summary": {
+    "phases_completed": 5,
+    "phases_total": 5,
+    "aborted": false,
+    "all_slo_pass": true,
+    "final_status": "SUCCESS",
+    "psi_note": "PSI > 0.2 (critical) → MONITORED but NOT BLOCKING",
+    "promote_eligible": false,
+    "promote_reason": "PSI > 0.2 (model retraining required)"
+  }
+}

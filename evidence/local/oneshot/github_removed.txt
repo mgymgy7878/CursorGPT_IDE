@@ -1,0 +1,1 @@
+﻿GitHub bağlantısı kaldırıldı - CI ve Release workflow'ları silindi

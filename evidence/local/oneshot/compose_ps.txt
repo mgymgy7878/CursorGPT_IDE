@@ -1,0 +1,1 @@
+﻿Docker not available - using direct service testing

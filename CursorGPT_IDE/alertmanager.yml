@@ -1,0 +1,111 @@
+global:
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+route:
+  group_by: ['alertname', 'component']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default'
+  routes:
+    - matchers: ['severity="critical"']
+      receiver: 'slack-critical'
+      group_wait: 5s
+      repeat_interval: 30m
+    - matchers: ['severity="warning"']
+      receiver: 'slack-warning'
+      group_wait: 30s
+      repeat_interval: 2h
+    - matchers: ['component="backtest"']
+      receiver: 'slack-backtest'
+    - matchers: ['component="web"']
+      receiver: 'slack-web'
+    - matchers: ['component="guardrails"']
+      receiver: 'slack-guardrails'
+    - matchers: ['component="marketdata"']
+      receiver: 'slack-marketdata'
+
+receivers:
+  - name: 'default'
+    slack_configs:
+      - channel: '#spark-alerts'
+        title: '[INFO] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          • **{{ .Annotations.summary }}**
+          {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+          {{ end }}
+
+  - name: 'slack-critical'
+    slack_configs:
+      - channel: '#spark-alerts'
+        title: '[🚨 CRITICAL] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          • **{{ .Annotations.summary }}**
+          {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+          **Component**: {{ .Labels.component }}
+          **Severity**: {{ .Labels.severity }}
+          {{ end }}
+        color: 'danger'
+
+  - name: 'slack-warning'
+    slack_configs:
+      - channel: '#spark-alerts'
+        title: '[⚠️ WARNING] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          • **{{ .Annotations.summary }}**
+          {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+          **Component**: {{ .Labels.component }}
+          {{ end }}
+        color: 'warning'
+
+  - name: 'slack-backtest'
+    slack_configs:
+      - channel: '#spark-backtest'
+        title: '[📊 BACKTEST] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          • **{{ .Annotations.summary }}**
+          {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+          {{ end }}
+        color: 'good'
+
+  - name: 'slack-web'
+    slack_configs:
+      - channel: '#spark-web'
+        title: '[🌐 WEB] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          • **{{ .Annotations.summary }}**
+          {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+          {{ end }}
+        color: 'good'
+
+  - name: 'slack-guardrails'
+    slack_configs:
+      - channel: '#spark-guardrails'
+        title: '[🛡️ GUARDRAILS] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          • **{{ .Annotations.summary }}**
+          {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+          {{ end }}
+        color: 'good'
+
+  - name: 'slack-marketdata'
+    slack_configs:
+      - channel: '#spark-marketdata'
+        title: '[📈 MARKETDATA] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          • **{{ .Annotations.summary }}**
+          {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+          {{ end }}
+        color: 'good'
+
+inhibit_rules:
+  - source_matchers: ['severity="critical"']
+    target_matchers: ['severity="warning"']
+    equal: ['alertname', 'component']

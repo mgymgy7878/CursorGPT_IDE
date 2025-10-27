@@ -1,0 +1,53 @@
+{
+  "ema_50_200": {
+    "original_metrics": {
+      "sharpe": 7.9,
+      "cagr_pct": -100
+    },
+    "alternative_metrics": {
+      "sharpe": 0.07,
+      "cagr_pct": -100
+    },
+    "sanity_checks": {
+      "equity_zero": false,
+      "sharpe_cagr_consistent": false,
+      "scale_consistent": false,
+      "net_of_fee_consistent": false,
+      "all_passed": false
+    }
+  },
+  "macd_rsi_fusion": {
+    "original_metrics": {
+      "sharpe": 10.13,
+      "cagr_pct": -10.36
+    },
+    "alternative_metrics": {
+      "sharpe": 0.09,
+      "cagr_pct": -10.36
+    },
+    "sanity_checks": {
+      "equity_zero": false,
+      "sharpe_cagr_consistent": false,
+      "scale_consistent": false,
+      "net_of_fee_consistent": true,
+      "all_passed": false
+    }
+  },
+  "analysis": {
+    "total_bars": 12000,
+    "total_minutes": 12000,
+    "total_years": 0.0228310502283105,
+    "annualization_factor": 724.9827584156743,
+    "alternative_factor": 6.618156843109719
+  },
+  "flags": {
+    "ema_equity_zero": "OK",
+    "ema_sharpe_cagr_inconsistency": "WARNING",
+    "ema_scale_mismatch": "WARNING",
+    "ema_net_of_fee_inconsistency": "WARNING",
+    "macd_equity_zero": "OK",
+    "macd_sharpe_cagr_inconsistency": "WARNING",
+    "macd_scale_mismatch": "WARNING",
+    "macd_net_of_fee_inconsistency": "OK"
+  }
+}

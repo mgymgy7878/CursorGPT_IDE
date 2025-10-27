@@ -1,0 +1,65 @@
+# Prometheus Configuration for Staging
+# Faz 6: Chunked Upload + SSE Retry Monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "ops/alerts/ai-guardrails.yml"
+  - "ops/alerts/ai-chunk-sse.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+
+scrape_configs:
+  # Executor service metrics
+  - job_name: 'executor'
+    static_configs:
+      - targets: ['localhost:4001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Node exporter (if available)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']
+    scrape_interval: 30s
+
+  # Process exporter (if available)
+  - job_name: 'process'
+    static_configs:
+      - targets: ['localhost:9256']
+    scrape_interval: 30s
+
+# Recording rules for SLO monitoring
+recording_rules:
+  - name: ai_slo_rules
+    rules:
+      # P95 latency for normal requests
+      - record: ai_p95_latency_normal
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/api/ai/strategies/generate"}[5m])) by (le))
+      
+      # P95 latency for chunked requests
+      - record: ai_p95_latency_chunked
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/api/ai/strategies/generate"}[5m])) by (le))
+      
+      # SSE retry failure rate
+      - record: sse_retry_failure_rate
+        expr: rate(sse_retry_total{result="giveup"}[5m])
+      
+      # Chunk backlog
+      - record: chunk_backlog_total
+        expr: sum(ai_chunk_upload_total{event="store"}) - sum(ai_chunk_upload_total{event="complete"})
+      
+      # Chunk storage size
+      - record: chunk_storage_size_bytes
+        expr: sum(ai_chunk_bytes)
+      
+      # Chunk age P95
+      - record: chunk_age_p95_seconds
+        expr: histogram_quantile(0.95, ai_chunk_age_seconds)

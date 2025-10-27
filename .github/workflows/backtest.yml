@@ -1,0 +1,24 @@
+name: backtest-guard
+on: [push, workflow_dispatch]
+
+jobs:
+  route_guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 10.14.0 }
+      - run: pnpm -w install
+      - name: Build marketdata + backtest
+        run: |
+          pnpm -F @spark/marketdata build
+          SYMBOL=BTCUSDT TF=1m DAYS=2 pnpm md:fetch
+          pnpm md:csv
+          pnpm -F @spark/backtest build
+          pnpm bt:run | tee result.json
+      - name: JSON guard
+        run: jq -e '.ok==true and .cash>=0 and .sameBarFills==0' result.json
+      - name: Equity history check
+        run: jq -e '.equityHistory | length > 0' result.json
+      - name: SameBarFills validation
+        run: jq -e '.sameBarFills == 0' result.json

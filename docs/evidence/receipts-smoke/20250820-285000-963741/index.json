@@ -1,0 +1,12 @@
+{
+  "nonce": "20250820-285000-963741",
+  "started_utc": "2025-08-20T28:50:00Z",
+  "status": "FAIL",
+  "decision": "FAIL→HALT",
+  "green_candidates": [],
+  "regime_coverage": "docs/evidence/receipts-smoke/20250820-285000-963741/regime_report.json",
+  "wf_oos": "docs/evidence/receipts-smoke/20250820-285000-963741/oos_folds.json",
+  "sanity": "docs/evidence/receipts-smoke/20250820-285000-963741/metrics_sanity.json",
+  "manifest": "docs/evidence/receipts-smoke/20250820-285000-963741/manifest.sha256",
+  "index": "docs/evidence/receipts-smoke/20250820-285000-963741/INDEX.txt"
+}

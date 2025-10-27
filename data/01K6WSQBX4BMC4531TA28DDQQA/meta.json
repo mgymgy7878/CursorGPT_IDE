@@ -1,0 +1,17 @@
+{
+	"ulid": "01K6WSQBX4BMC4531TA28DDQQA",
+	"minTime": 1759744802442,
+	"maxTime": 1759752000000,
+	"stats": {
+		"numSamples": 47516,
+		"numSeries": 270,
+		"numChunks": 532
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01K6WSQBX4BMC4531TA28DDQQA"
+		]
+	},
+	"version": 1
+}

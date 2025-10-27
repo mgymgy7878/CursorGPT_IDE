@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Streams Fabric",
+    "tags": ["streams", "fabric"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Messages per Second",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(streams_messages_total[1m])",
+            "legendFormat": "{{src}} - {{symbol}} - {{type}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Messages/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Ingest Lag",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "streams_ingest_lag_seconds",
+            "legendFormat": "{{src}} - {{symbol}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Sequence Gaps",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "increase(streams_seq_gap_total[1m])",
+            "legendFormat": "{{src}} - {{symbol}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Gaps/min",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Event to DB Latency",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "rate(streams_event_to_db_ms_bucket[1m])",
+            "legendFormat": "{{le}}"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s"
+  }
+} 

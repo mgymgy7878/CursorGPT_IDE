@@ -1,0 +1,14 @@
+
+
+    Directory: C:\dev\CursorGPT_IDE\packages\@spark\db-lite\dist
+
+
+Mode                 LastWriteTime         Length Name                       
+----                 -------------         ------ ----                       
+d-----        10.09.2025     17:32                src                        
+-a----        10.09.2025     17:57            396 index.d.ts                 
+-a----        10.09.2025     17:57            530 index.d.ts.map             
+-a----        10.09.2025     17:57            257 index.js                   
+-a----        10.09.2025     17:50          35944 tsconfig.tsbuildinfo       
+
+

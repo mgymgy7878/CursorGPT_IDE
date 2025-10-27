@@ -1,0 +1,129 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Receipts Gate",
+    "tags": ["receipts", "gate", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "executor_status",
+            "legendFormat": "Executor"
+          },
+          {
+            "expr": "bist_reader_status",
+            "legendFormat": "BIST Reader"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Critical Metrics Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "btcturk_seq_gap_total",
+            "legendFormat": "BTCTurk Seq Gaps"
+          },
+          {
+            "expr": "bist_seq_gap_total",
+            "legendFormat": "BIST Seq Gaps"
+          },
+          {
+            "expr": "btcturk_ws_reconnects_total",
+            "legendFormat": "BTCTurk Reconnects"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Latency Overview",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, btcturk_order_ack_ms_bucket)",
+            "legendFormat": "Order ACK p95"
+          },
+          {
+            "expr": "bist_ingest_lag_seconds",
+            "legendFormat": "BIST Ingest Lag"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Data Quality",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bist_drop_ratio",
+            "legendFormat": "BIST Drop Ratio"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.05},
+                {"color": "red", "value": 0.1}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+} 

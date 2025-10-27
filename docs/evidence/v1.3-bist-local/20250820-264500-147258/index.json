@@ -1,0 +1,20 @@
+{
+  "nonce": "20250820-264500-147258",
+  "started_utc": "2025-08-20T26:45:00Z",
+  "status_component": "OK",
+  "thresholds": {
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0
+  },
+  "ingest": {
+    "samples": 200,
+    "ingest_lag_ms_p95": 392,
+    "seq_gap_count": 0,
+    "local_url": "http://127.0.0.1:65458/stream?count=200&spread_ms=400"
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-bist-local/20250820-264500-147258/index.json",
+    "metrics": "docs/evidence/v1.3-bist-local/20250820-264500-147258/metrics.json",
+    "manifest": "docs/evidence/v1.3-bist-local/20250820-264500-147258/manifest.sha256"
+  }
+}

@@ -1,50 +1,20 @@
-import './globals.css'
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import ThemeToggle from "@/components/theme/ThemeToggle";
-import Toaster from "@/components/toast/Toaster";
-import ErrorSink from "@/components/core/ErrorSink";
-import CommandPalette from "@/components/ui/CommandPalette";
-import FloatingActions from "@/components/layout/FloatingActions";
-import ChunkGuard from "@/components/ChunkGuard";
-import MarketProvider from "@/providers/MarketProvider";
-import StatusBar from "@/components/status-bar";
-import LeftNav from "@/components/left-nav";
-import "@/styles/theme.css";
+import "./globals.css";
+import Sidebar from "@/components/layout/Sidebar";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-export const metadata = {
-  title: 'Spark Trading',
-  description: 'Trading platform UI',
-}
+export const metadata = { title: "Spark Platform", description: "Trading & Analytics" };
 
-export const dynamic = 'force-dynamic';
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className="h-full">
-      <body className="h-full bg-surface text-neutral-100 overflow-hidden">
-        <ThemeProvider>
-          <MarketProvider>
-            <div className="h-full flex flex-col">
-              <StatusBar />
-              <div className="flex flex-1 overflow-hidden">
-                <LeftNav />
-                <main className="flex-1 overflow-auto">
-                  {children}
-                </main>
-              </div>
-            </div>
-            <ChunkGuard />
-            <Toaster />
-            <ErrorSink />
-            <CommandPalette />
-            <FloatingActions />
-          </MarketProvider>
-        </ThemeProvider>
+    <html lang="tr" suppressHydrationWarning>
+      <body className="min-h-screen bg-gray-50 text-gray-900">
+        <ErrorBoundary>
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-auto">{children}</main>
+          </div>
+        </ErrorBoundary>
       </body>
     </html>
-  )
+  );
 }

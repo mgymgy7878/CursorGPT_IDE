@@ -1,0 +1,178 @@
+# AI Quickstart Smoke Test Results
+Timestamp: 2025-09-14T10:08:10.917Z
+Symbol: BTCUSDT, Qty: 0.001, Leverage: 5, Risk: low
+
+## Summary
+Passed: 3/5
+Success: ❌ NO
+
+## Test Results
+### advisor_suggest
+- URL: http://127.0.0.1:3005/api/advisor/suggest
+- Status: 200
+- Latency: 91ms
+- OK: ✅
+- Data: {
+  "id": "sg_1757844490994_rgvn",
+  "symbol": "BTCUSDT",
+  "side": "BUY",
+  "leverage": 5,
+  "entry": "market",
+  "stop": "-0.8%",
+  "takeProfits": [
+    {
+      "tp": "0.6%"
+    },
+    {
+      "tp": "1.2%"
+    }
+  ],
+  "confidence": 0.75,
+  "rationale": "AI analizi: BTCUSDT BUY pozisyonu için low risk seviyesi. Teknik göstergeler ve piyasa momentumu değerlendirildi. Stop loss 0.8%, take profit seviyeleri 0.6% ve 1.2% olarak öneriliyor. Kaldıraç 5x, notional 50.00 USDT.",
+  "tokens": 1100,
+  "model": "gpt-4o-mini",
+  "timestamp": "2025-09-14T10:08:10.994Z",
+  "riskLevel": "low",
+  "notional": 50
+}
+### canary_plan
+- URL: http://127.0.0.1:3005/api/canary/live-trade.plan
+- Status: 404
+- Latency: 40ms
+- OK: ❌
+- Data: {
+  "error": {
+    "message": "Route POST:/api/canary/live-trade.plan not found",
+    "error": "Not Found",
+    "statusCode": 404
+  }
+}
+### dry_run_order
+- URL: http://127.0.0.1:4001/api/futures/order
+- Status: 404
+- Latency: 9ms
+- OK: ❌
+- Data: {
+  "error": {
+    "message": "Route POST:/api/futures/order not found",
+    "error": "Not Found",
+    "statusCode": 404
+  }
+}
+### metrics
+- URL: http://127.0.0.1:3005/api/public/metrics
+- Status: 200
+- Latency: 44ms
+- OK: ✅
+- Data: {
+  "raw": "# HELP process_cpu_user_seconds_total Total user CPU time spent in seconds.\n# TYPE process_cpu_user_seconds_total counter\nprocess_cpu_user_seconds_total 1.297\n\n# HELP process_cpu_system_seconds_total Total system CPU time spent in seconds.\n# TYPE process_cpu_system_seconds_total counter\nprocess_cpu_system_seconds_total 0.593\n\n# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.\n# TYPE process_cpu_seconds_total counter\nprocess_cpu_seconds_total 1.8900000000000001\n\n# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n# TYPE process_start_time_seconds gauge\nprocess_start_time_seconds 1757844104\n\n# HELP process_resident_memory_bytes Resident memory size in bytes.\n# TYPE process_resident_memory_bytes gauge\nprocess_resident_memory_bytes 60817408\n\n# HELP nodejs_eventloop_lag_seconds Lag of event loop in seconds.\n# TYPE nodejs_eventloop_lag_seconds gauge\nnodejs_eventloop_lag_seconds 0.0143905\n\n# HELP nodejs_eventloop_lag_min_seconds The minimum recorded event loop delay.\n# TYPE nodejs_eventloop_lag_min_seconds gauge\nnodejs_eventloop_lag_min_seconds 0.009510912\n\n# HELP nodejs_eventloop_lag_max_seconds The maximum recorded event loop delay.\n# TYPE nodejs_eventloop_lag_max_seconds gauge\nnodejs_eventloop_lag_max_seconds 0.103874559\n\n# HELP nodejs_eventloop_lag_mean_seconds The mean of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_mean_seconds gauge\nnodejs_eventloop_lag_mean_seconds 0.017282400327312295\n\n# HELP nodejs_eventloop_lag_stddev_seconds The standard deviation of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_stddev_seconds gauge\nnodejs_eventloop_lag_stddev_seconds 0.006337584505340481\n\n# HELP nodejs_eventloop_lag_p50_seconds The 50th percentile of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_p50_seconds gauge\nnodejs_eventloop_lag_p50_seconds 0.016072703\n\n# HELP nodejs_eventloop_lag_p90_seconds The 90th percentile of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_p90_seconds gauge\nnodejs_eventloop_lag_p90_seconds 0.020234239\n\n# HELP nodejs_eventloop_lag_p99_seconds The 99th percentile of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_p99_seconds gauge\nnodejs_eventloop_lag_p99_seconds 0.048332799\n\n# HELP nodejs_active_resources Number of active resources that are currently keeping the event loop alive, grouped by async resource type.\n# TYPE nodejs_active_resources gauge\nnodejs_active_resources{type=\"FSReqCallback\"} 1\nnodejs_active_resources{type=\"PipeWrap\"} 3\nnodejs_active_resources{type=\"TCPServerWrap\"} 1\nnodejs_active_resources{type=\"TCPSocketWrap\"} 2\nnodejs_active_resources{type=\"Immediate\"} 1\n\n# HELP nodejs_active_resources_total Total number of active resources.\n# TYPE nodejs_active_resources_total gauge\nnodejs_active_resources_total 8\n\n# HELP nodejs_active_handles Number of active libuv handles grouped by handle type. Every handle type is C++ class name.\n# TYPE nodejs_active_handles gauge\nnodejs_active_handles{type=\"Socket\"} 5\nnodejs_active_handles{type=\"Server\"} 1\n\n# HELP nodejs_active_handles_total Total number of active handles.\n# TYPE nodejs_active_handles_total gauge\nnodejs_active_handles_total 6\n\n# HELP nodejs_active_requests Number of active libuv requests grouped by request type. Every request type is C++ class name.\n# TYPE nodejs_active_requests gauge\nnodejs_active_requests{type=\"FSReqCallback\"} 1\n\n# HELP nodejs_active_requests_total Total number of active requests.\n# TYPE nodejs_active_requests_total gauge\nnodejs_active_requests_total 1\n\n# HELP nodejs_heap_size_total_bytes Process heap size from Node.js in bytes.\n# TYPE nodejs_heap_size_total_bytes gauge\nnodejs_heap_size_total_bytes 18927616\n\n# HELP nodejs_heap_size_used_bytes Process heap size used from Node.js in bytes.\n# TYPE nodejs_heap_size_used_bytes gauge\nnodejs_heap_size_used_bytes 16826512\n\n# HELP nodejs_external_memory_bytes Node.js external memory size in bytes.\n# TYPE nodejs_external_memory_bytes gauge\nnodejs_external_memory_bytes 2416148\n\n# HELP nodejs_heap_space_size_total_bytes Process heap space size total from Node.js in bytes.\n# TYPE nodejs_heap_space_size_total_bytes gauge\nnodejs_heap_space_size_total_bytes{space=\"read_only\"} 0\nnodejs_heap_space_size_total_bytes{space=\"old\"} 14127104\nnodejs_heap_space_size_total_bytes{space=\"code\"} 1781760\nnodejs_heap_space_size_total_bytes{space=\"map\"} 1318912\nnodejs_heap_space_size_total_bytes{space=\"large_object\"} 651264\nnodejs_heap_space_size_total_bytes{space=\"code_large_object\"} 0\nnodejs_heap_space_size_total_bytes{space=\"new_large_object\"} 0\nnodejs_heap_space_size_total_bytes{space=\"new\"} 1048576\n\n# HELP nodejs_heap_space_size_used_bytes Process heap space size used from Node.js in bytes.\n# TYPE nodejs_heap_space_size_used_bytes gauge\nnodejs_heap_space_size_used_bytes{space=\"read_only\"} 0\nnodejs_heap_space_size_used_bytes{space=\"old\"} 13587104\nnodejs_heap_space_size_used_bytes{space=\"code\"} 1649152\nnodejs_heap_space_size_used_bytes{space=\"map\"} 833184\nnodejs_heap_space_size_used_bytes{space=\"large_object\"} 635048\nnodejs_heap_space_size_used_bytes{space=\"code_large_object\"} 0\nnodejs_heap_space_size_used_bytes{space=\"new_large_object\"} 0\nnodejs_heap_space_size_used_bytes{space=\"new\"} 127072\n\n# HELP nodejs_heap_space_size_available_bytes Process heap space size available from Node.js in bytes.\n# TYPE nodejs_heap_space_size_available_bytes gauge\nnodejs_heap_space_size_available_bytes{space=\"read_only\"} 0\nnodejs_heap_space_size_available_bytes{space=\"old\"} 281808\nnodejs_heap_space_size_available_bytes{space=\"code\"} 17920\nnodejs_heap_space_size_available_bytes{space=\"map\"} 459328\nnodejs_heap_space_size_available_bytes{space=\"large_object\"} 0\nnodejs_heap_space_size_available_bytes{space=\"code_large_object\"} 0\nnodejs_heap_space_size_available_bytes{space=\"new_large_object\"} 1030976\nnodejs_heap_space_size_available_bytes{space=\"new\"} 903904\n\n# HELP nodejs_version_info Node.js version info.\n# TYPE nodejs_version_info gauge\nnodejs_version_info{version=\"v18.18.2\",major=\"18\",minor=\"18\",patch=\"2\"} 1\n\n# HELP nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.\n# TYPE nodejs_gc_duration_seconds histogram\nnodejs_gc_duration_seconds_bucket{le=\"0.001\",kind=\"minor\"} 2\nnodejs_gc_duration_seconds_bucket{le=\"0.01\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"0.1\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"1\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"2\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"5\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"+Inf\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_sum{kind=\"minor\"} 0.0037552000023424624\nnodejs_gc_duration_seconds_count{kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"0.001\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"0.01\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"0.1\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"1\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"2\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"5\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"+Inf\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_sum{kind=\"incremental\"} 0.0008834000006318093\nnodejs_gc_duration_seconds_count{kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"0.001\",kind=\"major\"} 0\nnodejs_gc_duration_seconds_bucket{le=\"0.01\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"0.1\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"1\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"2\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"5\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"+Inf\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_sum{kind=\"major\"} 0.011852800000458956\nnodejs_gc_duration_seconds_count{kind=\"major\"} 3\n\n# HELP exec_start_total Number of strategy start requests\n# TYPE exec_start_total counter\nexec_start_total 0\n\n# HELP exec_stop_total Number of strategy stop requests\n# TYPE exec_stop_total counter\nexec_stop_total 0\n\n# HELP active_strategies Current active strategy count\n# TYPE active_strategies gauge\nactive_strategies 0\n\n# HELP http_requests_total HTTP requests labeled with method, route and code\n# TYPE http_requests_total counter\n\n# HELP rate_limit_hits_total Total requests blocked by rate limit, labeled by route\n# TYPE rate_limit_hits_total counter\n\n# HELP futures_orders_blocked_total Futures orders blocked by guard, labeled by reason\n# TYPE futures_orders_blocked_total counter\n\n# HELP futures_uds_lifecycle_total UserDataStream lifecycle ops total, labeled by action and status\n# TYPE futures_uds_lifecycle_total counter\n\n# HELP futures_uds_last_keepalive_ts Last keepalive timestamp (epoch ms)\n# TYPE futures_uds_last_keepalive_ts gauge\nfutures_uds_last_keepalive_ts 0\n\n# HELP optimize_runs_total Optimize runs\n# TYPE optimize_runs_total counter\noptimize_runs_total 0\n\n# HELP optimize_errors_total Optimize errors\n# TYPE optimize_errors_total counter\noptimize_errors_total 0\n\n# HELP optimize_latency_ms_total Cumulative optimize latency ms (use with rate for avg)\n# TYPE optimize_latency_ms_total counter\noptimize_latency_ms_total 0\n"
+}
+### advisor_health
+- URL: http://127.0.0.1:4001/api/advisor/health
+- Status: 200
+- Latency: 5ms
+- OK: ✅
+- Data: {
+  "status": "ok",
+  "service": "advisor-suggest",
+  "timestamp": "2025-09-14T10:08:11.117Z",
+  "version": "1.0.0"
+}
+
+## Raw Results
+{
+  "timestamp": "2025-09-14T10:08:10.917Z",
+  "symbol": "BTCUSDT",
+  "qty": 0.001,
+  "leverage": 5,
+  "risk": "low",
+  "tests": [
+    {
+      "name": "advisor_suggest",
+      "url": "http://127.0.0.1:3005/api/advisor/suggest",
+      "status": 200,
+      "latency": 91,
+      "ok": true,
+      "data": {
+        "id": "sg_1757844490994_rgvn",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "leverage": 5,
+        "entry": "market",
+        "stop": "-0.8%",
+        "takeProfits": [
+          {
+            "tp": "0.6%"
+          },
+          {
+            "tp": "1.2%"
+          }
+        ],
+        "confidence": 0.75,
+        "rationale": "AI analizi: BTCUSDT BUY pozisyonu için low risk seviyesi. Teknik göstergeler ve piyasa momentumu değerlendirildi. Stop loss 0.8%, take profit seviyeleri 0.6% ve 1.2% olarak öneriliyor. Kaldıraç 5x, notional 50.00 USDT.",
+        "tokens": 1100,
+        "model": "gpt-4o-mini",
+        "timestamp": "2025-09-14T10:08:10.994Z",
+        "riskLevel": "low",
+        "notional": 50
+      }
+    },
+    {
+      "name": "canary_plan",
+      "url": "http://127.0.0.1:3005/api/canary/live-trade.plan",
+      "status": 404,
+      "latency": 40,
+      "ok": false,
+      "data": {
+        "error": {
+          "message": "Route POST:/api/canary/live-trade.plan not found",
+          "error": "Not Found",
+          "statusCode": 404
+        }
+      }
+    },
+    {
+      "name": "dry_run_order",
+      "url": "http://127.0.0.1:4001/api/futures/order",
+      "status": 404,
+      "latency": 9,
+      "ok": false,
+      "data": {
+        "error": {
+          "message": "Route POST:/api/futures/order not found",
+          "error": "Not Found",
+          "statusCode": 404
+        }
+      }
+    },
+    {
+      "name": "metrics",
+      "url": "http://127.0.0.1:3005/api/public/metrics",
+      "status": 200,
+      "latency": 44,
+      "ok": true,
+      "data": {
+        "raw": "# HELP process_cpu_user_seconds_total Total user CPU time spent in seconds.\n# TYPE process_cpu_user_seconds_total counter\nprocess_cpu_user_seconds_total 1.297\n\n# HELP process_cpu_system_seconds_total Total system CPU time spent in seconds.\n# TYPE process_cpu_system_seconds_total counter\nprocess_cpu_system_seconds_total 0.593\n\n# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.\n# TYPE process_cpu_seconds_total counter\nprocess_cpu_seconds_total 1.8900000000000001\n\n# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n# TYPE process_start_time_seconds gauge\nprocess_start_time_seconds 1757844104\n\n# HELP process_resident_memory_bytes Resident memory size in bytes.\n# TYPE process_resident_memory_bytes gauge\nprocess_resident_memory_bytes 60817408\n\n# HELP nodejs_eventloop_lag_seconds Lag of event loop in seconds.\n# TYPE nodejs_eventloop_lag_seconds gauge\nnodejs_eventloop_lag_seconds 0.0143905\n\n# HELP nodejs_eventloop_lag_min_seconds The minimum recorded event loop delay.\n# TYPE nodejs_eventloop_lag_min_seconds gauge\nnodejs_eventloop_lag_min_seconds 0.009510912\n\n# HELP nodejs_eventloop_lag_max_seconds The maximum recorded event loop delay.\n# TYPE nodejs_eventloop_lag_max_seconds gauge\nnodejs_eventloop_lag_max_seconds 0.103874559\n\n# HELP nodejs_eventloop_lag_mean_seconds The mean of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_mean_seconds gauge\nnodejs_eventloop_lag_mean_seconds 0.017282400327312295\n\n# HELP nodejs_eventloop_lag_stddev_seconds The standard deviation of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_stddev_seconds gauge\nnodejs_eventloop_lag_stddev_seconds 0.006337584505340481\n\n# HELP nodejs_eventloop_lag_p50_seconds The 50th percentile of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_p50_seconds gauge\nnodejs_eventloop_lag_p50_seconds 0.016072703\n\n# HELP nodejs_eventloop_lag_p90_seconds The 90th percentile of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_p90_seconds gauge\nnodejs_eventloop_lag_p90_seconds 0.020234239\n\n# HELP nodejs_eventloop_lag_p99_seconds The 99th percentile of the recorded event loop delays.\n# TYPE nodejs_eventloop_lag_p99_seconds gauge\nnodejs_eventloop_lag_p99_seconds 0.048332799\n\n# HELP nodejs_active_resources Number of active resources that are currently keeping the event loop alive, grouped by async resource type.\n# TYPE nodejs_active_resources gauge\nnodejs_active_resources{type=\"FSReqCallback\"} 1\nnodejs_active_resources{type=\"PipeWrap\"} 3\nnodejs_active_resources{type=\"TCPServerWrap\"} 1\nnodejs_active_resources{type=\"TCPSocketWrap\"} 2\nnodejs_active_resources{type=\"Immediate\"} 1\n\n# HELP nodejs_active_resources_total Total number of active resources.\n# TYPE nodejs_active_resources_total gauge\nnodejs_active_resources_total 8\n\n# HELP nodejs_active_handles Number of active libuv handles grouped by handle type. Every handle type is C++ class name.\n# TYPE nodejs_active_handles gauge\nnodejs_active_handles{type=\"Socket\"} 5\nnodejs_active_handles{type=\"Server\"} 1\n\n# HELP nodejs_active_handles_total Total number of active handles.\n# TYPE nodejs_active_handles_total gauge\nnodejs_active_handles_total 6\n\n# HELP nodejs_active_requests Number of active libuv requests grouped by request type. Every request type is C++ class name.\n# TYPE nodejs_active_requests gauge\nnodejs_active_requests{type=\"FSReqCallback\"} 1\n\n# HELP nodejs_active_requests_total Total number of active requests.\n# TYPE nodejs_active_requests_total gauge\nnodejs_active_requests_total 1\n\n# HELP nodejs_heap_size_total_bytes Process heap size from Node.js in bytes.\n# TYPE nodejs_heap_size_total_bytes gauge\nnodejs_heap_size_total_bytes 18927616\n\n# HELP nodejs_heap_size_used_bytes Process heap size used from Node.js in bytes.\n# TYPE nodejs_heap_size_used_bytes gauge\nnodejs_heap_size_used_bytes 16826512\n\n# HELP nodejs_external_memory_bytes Node.js external memory size in bytes.\n# TYPE nodejs_external_memory_bytes gauge\nnodejs_external_memory_bytes 2416148\n\n# HELP nodejs_heap_space_size_total_bytes Process heap space size total from Node.js in bytes.\n# TYPE nodejs_heap_space_size_total_bytes gauge\nnodejs_heap_space_size_total_bytes{space=\"read_only\"} 0\nnodejs_heap_space_size_total_bytes{space=\"old\"} 14127104\nnodejs_heap_space_size_total_bytes{space=\"code\"} 1781760\nnodejs_heap_space_size_total_bytes{space=\"map\"} 1318912\nnodejs_heap_space_size_total_bytes{space=\"large_object\"} 651264\nnodejs_heap_space_size_total_bytes{space=\"code_large_object\"} 0\nnodejs_heap_space_size_total_bytes{space=\"new_large_object\"} 0\nnodejs_heap_space_size_total_bytes{space=\"new\"} 1048576\n\n# HELP nodejs_heap_space_size_used_bytes Process heap space size used from Node.js in bytes.\n# TYPE nodejs_heap_space_size_used_bytes gauge\nnodejs_heap_space_size_used_bytes{space=\"read_only\"} 0\nnodejs_heap_space_size_used_bytes{space=\"old\"} 13587104\nnodejs_heap_space_size_used_bytes{space=\"code\"} 1649152\nnodejs_heap_space_size_used_bytes{space=\"map\"} 833184\nnodejs_heap_space_size_used_bytes{space=\"large_object\"} 635048\nnodejs_heap_space_size_used_bytes{space=\"code_large_object\"} 0\nnodejs_heap_space_size_used_bytes{space=\"new_large_object\"} 0\nnodejs_heap_space_size_used_bytes{space=\"new\"} 127072\n\n# HELP nodejs_heap_space_size_available_bytes Process heap space size available from Node.js in bytes.\n# TYPE nodejs_heap_space_size_available_bytes gauge\nnodejs_heap_space_size_available_bytes{space=\"read_only\"} 0\nnodejs_heap_space_size_available_bytes{space=\"old\"} 281808\nnodejs_heap_space_size_available_bytes{space=\"code\"} 17920\nnodejs_heap_space_size_available_bytes{space=\"map\"} 459328\nnodejs_heap_space_size_available_bytes{space=\"large_object\"} 0\nnodejs_heap_space_size_available_bytes{space=\"code_large_object\"} 0\nnodejs_heap_space_size_available_bytes{space=\"new_large_object\"} 1030976\nnodejs_heap_space_size_available_bytes{space=\"new\"} 903904\n\n# HELP nodejs_version_info Node.js version info.\n# TYPE nodejs_version_info gauge\nnodejs_version_info{version=\"v18.18.2\",major=\"18\",minor=\"18\",patch=\"2\"} 1\n\n# HELP nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.\n# TYPE nodejs_gc_duration_seconds histogram\nnodejs_gc_duration_seconds_bucket{le=\"0.001\",kind=\"minor\"} 2\nnodejs_gc_duration_seconds_bucket{le=\"0.01\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"0.1\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"1\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"2\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"5\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"+Inf\",kind=\"minor\"} 4\nnodejs_gc_duration_seconds_sum{kind=\"minor\"} 0.0037552000023424624\nnodejs_gc_duration_seconds_count{kind=\"minor\"} 4\nnodejs_gc_duration_seconds_bucket{le=\"0.001\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"0.01\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"0.1\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"1\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"2\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"5\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"+Inf\",kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_sum{kind=\"incremental\"} 0.0008834000006318093\nnodejs_gc_duration_seconds_count{kind=\"incremental\"} 5\nnodejs_gc_duration_seconds_bucket{le=\"0.001\",kind=\"major\"} 0\nnodejs_gc_duration_seconds_bucket{le=\"0.01\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"0.1\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"1\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"2\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"5\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_bucket{le=\"+Inf\",kind=\"major\"} 3\nnodejs_gc_duration_seconds_sum{kind=\"major\"} 0.011852800000458956\nnodejs_gc_duration_seconds_count{kind=\"major\"} 3\n\n# HELP exec_start_total Number of strategy start requests\n# TYPE exec_start_total counter\nexec_start_total 0\n\n# HELP exec_stop_total Number of strategy stop requests\n# TYPE exec_stop_total counter\nexec_stop_total 0\n\n# HELP active_strategies Current active strategy count\n# TYPE active_strategies gauge\nactive_strategies 0\n\n# HELP http_requests_total HTTP requests labeled with method, route and code\n# TYPE http_requests_total counter\n\n# HELP rate_limit_hits_total Total requests blocked by rate limit, labeled by route\n# TYPE rate_limit_hits_total counter\n\n# HELP futures_orders_blocked_total Futures orders blocked by guard, labeled by reason\n# TYPE futures_orders_blocked_total counter\n\n# HELP futures_uds_lifecycle_total UserDataStream lifecycle ops total, labeled by action and status\n# TYPE futures_uds_lifecycle_total counter\n\n# HELP futures_uds_last_keepalive_ts Last keepalive timestamp (epoch ms)\n# TYPE futures_uds_last_keepalive_ts gauge\nfutures_uds_last_keepalive_ts 0\n\n# HELP optimize_runs_total Optimize runs\n# TYPE optimize_runs_total counter\noptimize_runs_total 0\n\n# HELP optimize_errors_total Optimize errors\n# TYPE optimize_errors_total counter\noptimize_errors_total 0\n\n# HELP optimize_latency_ms_total Cumulative optimize latency ms (use with rate for avg)\n# TYPE optimize_latency_ms_total counter\noptimize_latency_ms_total 0\n"
+      }
+    },
+    {
+      "name": "advisor_health",
+      "url": "http://127.0.0.1:4001/api/advisor/health",
+      "status": 200,
+      "latency": 5,
+      "ok": true,
+      "data": {
+        "status": "ok",
+        "service": "advisor-suggest",
+        "timestamp": "2025-09-14T10:08:11.117Z",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "total": 5,
+    "success": false,
+    "timestamp": "2025-09-14T10:08:11.131Z"
+  }
+}

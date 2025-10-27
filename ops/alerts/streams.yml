@@ -1,0 +1,89 @@
+groups:
+  - name: streams
+    rules:
+      # Ingest Lag Alerts
+      - alert: StreamsIngestLagHigh
+        expr: histogram_quantile(0.95, rate(streams_ingest_lag_seconds_bucket[5m])) > 2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High ingest lag detected"
+          description: "P95 ingest lag is {{ $value }}s for streams"
+
+      - alert: StreamsIngestLagCritical
+        expr: histogram_quantile(0.95, rate(streams_ingest_lag_seconds_bucket[5m])) > 5
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical ingest lag detected"
+          description: "P95 ingest lag is {{ $value }}s for streams"
+
+      # Sequence Gap Alerts
+      - alert: StreamsSeqGapDetected
+        expr: increase(streams_seq_gap_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Sequence gap detected"
+          description: "Sequence gap detected in streams: {{ $labels.src }} - {{ $labels.symbol }}"
+
+      # Event to DB Latency Alerts
+      - alert: StreamsEventToDbLatencyHigh
+        expr: histogram_quantile(0.95, rate(streams_event_to_db_ms_bucket[5m])) > 300
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High event to DB latency"
+          description: "P95 event to DB latency is {{ $value }}ms"
+
+      - alert: StreamsEventToDbLatencyCritical
+        expr: histogram_quantile(0.95, rate(streams_event_to_db_ms_bucket[5m])) > 1000
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical event to DB latency"
+          description: "P95 event to DB latency is {{ $value }}ms"
+
+      # Heartbeat Alerts
+      - alert: StreamsHeartbeatMissing
+        expr: absent(streams_heartbeat{src=~".+"}[1m])
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Stream heartbeat missing"
+          description: "No heartbeat received from {{ $labels.src }} for more than 1 minute"
+
+      - alert: StreamsHeartbeatStale
+        expr: time() - streams_heartbeat > 15
+        for: 0s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stream heartbeat stale"
+          description: "Heartbeat from {{ $labels.src }} is {{ $value }}s old"
+
+      # Message Rate Alerts
+      - alert: StreamsMessageRateLow
+        expr: rate(streams_messages_total[5m]) < 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low message rate detected"
+          description: "Message rate is {{ $value }} msg/sec for {{ $labels.src }} - {{ $labels.symbol }}"
+
+      # Duplicate Message Alerts
+      - alert: StreamsDuplicateRateHigh
+        expr: rate(streams_dup_total[5m]) > 0.1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High duplicate message rate"
+          description: "Duplicate rate is {{ $value }} msg/sec for {{ $labels.src }} - {{ $labels.symbol }}" 

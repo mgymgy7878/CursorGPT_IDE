@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'executor_lite'
+    static_configs: [{ targets: ['127.0.0.1:4010'] }]
+    metrics_path: /metrics
+    scrape_interval: 5s
+  - job_name: 'executor'
+    static_configs: [{ targets: ['127.0.0.1:4001'] }]
+    metrics_path: /metrics
+    scrape_interval: 5s
+  - job_name: 'web-next'
+    static_configs: [{ targets: ['127.0.0.1:3003'] }]
+    metrics_path: /api/public/metrics/prom
+    scrape_interval: 5s
+
+rule_files:
+  - "rules/*.yml"
+
+groups:
+- name: backtest.rules
+  rules:
+  - record: bt_runtime_ms_p95_5m
+    expr: histogram_quantile(0.95, sum by (le) (rate(bt_runtime_ms_bucket[5m])))
+  - alert: BacktestSlowRunner
+    expr: histogram_quantile(0.95, sum by (le) (rate(bt_runtime_ms_bucket[10m]))) > 30000
+    for: 10m
+    labels: { severity: warning, component: backtest }
+    annotations:
+      summary: "Backtest runner is slow"
+      description: "P95 runtime is {{ $value }}ms, threshold is 30000ms"

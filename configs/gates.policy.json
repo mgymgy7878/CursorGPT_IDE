@@ -1,0 +1,42 @@
+{
+  "driftThresholds": {
+    "pnlDriftPercent": 0.01,
+    "slippageBasisPoints": 15,
+    "paperSharePercent": 0.80,
+    "latencyMs": 100
+  },
+  "cooldownSec": 30,
+  "minOpenSec": 120,
+  "gateStates": {
+    "open": 0,
+    "closed": 1,
+    "recovery": 2,
+    "emergency": 3
+  },
+  "decisionLatency": {
+    "maxMs": 5000,
+    "warningMs": 2000
+  },
+  "recovery": {
+    "autoRecovery": true,
+    "maxRecoveryTimeMs": 30000,
+    "gradualReEnable": true
+  },
+  "alerts": {
+    "pnlDriftHigh": {
+      "threshold": 1.0,
+      "duration": "30m",
+      "severity": "warning"
+    },
+    "slippageSpike": {
+      "threshold": 15,
+      "duration": "15m", 
+      "severity": "warning"
+    },
+    "gateToggledFrequently": {
+      "threshold": 10,
+      "duration": "1h",
+      "severity": "info"
+    }
+  }
+}

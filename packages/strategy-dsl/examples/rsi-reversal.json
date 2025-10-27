@@ -1,0 +1,77 @@
+{
+  "name": "RSI Reversal Strategy",
+  "description": "RSI-based mean reversion strategy for oversold/overbought conditions",
+  "symbol": "ETHUSDT",
+  "timeframe": "4h",
+  "indicators": {
+    "rsi": {
+      "period": 14,
+      "source": "close"
+    },
+    "sma": {
+      "period": 200,
+      "source": "close"
+    }
+  },
+  "conditions": {
+    "rsi_oversold": {
+      "type": "rsi_oversold",
+      "operator": "<",
+      "value": 30
+    },
+    "rsi_overbought": {
+      "type": "rsi_overbought",
+      "operator": ">",
+      "value": 70
+    },
+    "price_above_sma": {
+      "type": "price_above_sma",
+      "operator": ">",
+      "indicator": "sma",
+      "period": 200
+    }
+  },
+  "rules": {
+    "entry": [
+      {
+        "condition": "rsi_oversold",
+        "action": "BUY",
+        "quantity": 0.02,
+        "price": "MARKET"
+      },
+      {
+        "condition": "rsi_overbought",
+        "action": "SELL",
+        "quantity": 0.02,
+        "price": "MARKET"
+      }
+    ],
+    "exit": [
+      {
+        "condition": "rsi_overbought",
+        "action": "CLOSE_LONG",
+        "quantity": 0.02,
+        "price": "MARKET"
+      },
+      {
+        "condition": "rsi_oversold",
+        "action": "CLOSE_SHORT",
+        "quantity": 0.02,
+        "price": "MARKET"
+      }
+    ]
+  },
+  "risk": {
+    "riskPct": 1.5,
+    "maxPos": 3,
+    "maxDailyLoss": 75,
+    "stopLoss": 3.0,
+    "takeProfit": 8.0
+  },
+  "metadata": {
+    "author": "Spark Trading",
+    "version": "1.0.0",
+    "tags": ["mean-reversion", "rsi", "oscillator"],
+    "created": "2024-08-18T12:00:00Z"
+  }
+} 

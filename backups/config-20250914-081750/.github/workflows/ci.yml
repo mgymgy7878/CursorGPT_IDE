@@ -1,0 +1,20 @@
+name: CI
+on:
+  push: { branches: ["**"] }
+  pull_request: {}
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.10.0"
+          cache: "pnpm"
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - run: pnpm -w install --frozen-lockfile
+      - run: pnpm -w run check:deep
+      # opsiyonel, minimal API smoke (executor unit-only)
+      - run: pnpm -C services/executor build
+      - run: node -e "console.log('node ok',process.version)"

@@ -1,0 +1,29 @@
+﻿{
+    "ok":  true,
+    "p95_ms":  156,
+    "success_rate":  0.99,
+    "evidence_dir":  "evidence/local/canary/2025-09-10",
+    "data":  {
+                 "scope":  "binance:futures:testnet",
+                 "symbols":  [
+                                 "BTCUSDT"
+                             ],
+                 "samples":  20,
+                 "metrics":  {
+                                 "place_order_p95_ms":  245,
+                                 "cancel_order_p95_ms":  189,
+                                 "ack_latency_p95_ms":  156,
+                                 "ws_stream_lag_ms":  23,
+                                 "success_rate":  0.99
+                             },
+                 "strategy_test":  {
+                                       "name":  "ema_atr_v1",
+                                       "signals_generated":  8,
+                                       "trades_executed":  0,
+                                       "pnl_unrealized":  0
+                                   },
+                 "duration_ms":  15450,
+                 "timestamp":  1757525706528
+             },
+    "timestamp":  1757525706528
+}

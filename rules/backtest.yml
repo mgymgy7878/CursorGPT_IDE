@@ -1,0 +1,56 @@
+groups:
+  - name: backtest.rules
+    interval: 30s
+    rules:
+      - alert: BacktestHighFailureRate
+        expr: |
+          sum(increase(backtest_runs_total{status="failed"}[15m])) 
+          / 
+          sum(increase(backtest_runs_total[15m])) 
+          > 0.2
+        for: 10m
+        labels:
+          severity: warning
+          component: backtest
+          team: spark
+        annotations:
+          summary: "Backtest failure rate yüksek"
+          description: |
+            Son 15 dakikada backtest failure oranı %20'nin üzerinde.
+            Mevcut oran: {{ $value | humanizePercentage }}
+            Veri kalitesi veya strateji hataları kontrol edilmeli.
+          dashboard: "https://grafana/d/spark-backtest-v141"
+
+      - alert: BacktestRunStuck
+        expr: |
+          histogram_quantile(0.95, sum(rate(backtest_duration_seconds_bucket[5m])) by (le)) > 1800
+          and 
+          backtest_active_runs > 0
+        for: 15m
+        labels:
+          severity: critical
+          component: backtest
+          team: spark
+        annotations:
+          summary: "Backtest stuck - uzun süre koşuyor"
+          description: |
+            P95 backtest süresi 30 dakikayı aşmış ve aktif koşular var.
+            Mevcut P95: {{ $value | humanizeDuration }}
+            Aktif runs: {{ query "backtest_active_runs" | first | value }}
+            Sistem kaynaklarını ve executor loglarını kontrol edin.
+          runbook: "docs/runbooks/backtest-stuck.md"
+
+      - alert: BacktestNoData
+        expr: absent(backtest_active_runs)
+        for: 10m
+        labels:
+          severity: warning
+          component: backtest
+          team: spark
+        annotations:
+          summary: "Backtest metriği yok"
+          description: |
+            backtest_active_runs metriği 10 dakikadır görülmüyor.
+            Executor servisi down olabilir veya /metrics endpoint'i yanıt vermiyor.
+            Prometheus scrape hedeflerini ve executor health'i kontrol edin.
+          action: "kubectl logs -f spark-executor | grep backtest"

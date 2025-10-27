@@ -1,0 +1,93 @@
+# Prometheus Alert Rules for ML Canary (v1.8 Faz 4)
+# Temporary alerts for canary deployment (auto-expire after 2 hours)
+groups:
+  - name: ml_canary_latency
+    interval: 30s
+    rules:
+      - alert: MLCanaryPredictLatencyP95High
+        expr: histogram_quantile(0.95, sum by (le) (rate(ml_predict_latency_ms_bucket[5m]))) > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: ml-engine
+          scope: canary
+        annotations:
+          summary: "ML prediction latency P95 above 80ms during canary"
+          description: "ML prediction P95 latency at {{ $value | humanize }}ms (SLO: <80ms) over last 10 minutes - canary phase"
+          
+      - alert: MLCanaryShadowLatencyP95High
+        expr: histogram_quantile(0.95, sum by (le) (rate(ml_shadow_latency_ms_bucket[5m]))) > 60
+        for: 10m
+        labels:
+          severity: warning
+          component: ml-shadow
+          scope: canary
+        annotations:
+          summary: "Shadow call latency P95 above 60ms during canary"
+          description: "Shadow prediction P95 latency at {{ $value | humanize }}ms (threshold: <60ms) - canary phase"
+
+  - name: ml_canary_quality
+    interval: 30s
+    rules:
+      - alert: MLCanaryShadowMatchLow
+        expr: avg_over_time(ml_shadow_match_rate[10m]) < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          component: ml-shadow
+          scope: canary
+        annotations:
+          summary: "Shadow match rate below 95% during canary"
+          description: "Shadow predictions matching baseline at {{ $value | humanizePercentage }} (threshold: 95%) over last 10 minutes - canary phase"
+          
+      - alert: MLCanaryShadowErrorRateHigh
+        expr: rate(ml_shadow_error_total[5m]) > 0.02
+        for: 5m
+        labels:
+          severity: critical
+          component: ml-shadow
+          scope: canary
+        annotations:
+          summary: "Shadow error rate above 2% during canary (ABORT)"
+          description: "Shadow prediction errors at {{ $value | humanizePercentage }} over last 5 minutes - ABORT CANARY"
+
+  - name: ml_canary_reliability
+    interval: 30s
+    rules:
+      - alert: MLCanaryModelErrorsHigh
+        expr: rate(ml_model_errors_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          component: ml-engine
+          scope: canary
+        annotations:
+          summary: "ML model error rate above 1% during canary"
+          description: "ML model errors at {{ $value | humanizePercentage }} over last 5 minutes - canary phase"
+
+  - name: ml_canary_drift
+    interval: 1h
+    rules:
+      # NOTE: PSI alerts kept for monitoring, but NOT blocking canary (observe-only mode)
+      - alert: MLCanaryPSIWarning
+        expr: avg_over_time(ml_psi_score[1h]) > 0.2
+        for: 1h
+        labels:
+          severity: warning
+          component: ml-drift
+          scope: canary-monitor
+        annotations:
+          summary: "Feature drift detected during canary (PSI > 0.2)"
+          description: "Population Stability Index at {{ $value }} (warning threshold: 0.2) - MONITOR ONLY, not blocking canary"
+          
+      - alert: MLCanaryPSICritical
+        expr: avg_over_time(ml_psi_score[1h]) > 0.3
+        for: 1h
+        labels:
+          severity: info
+          component: ml-drift
+          scope: canary-monitor
+        annotations:
+          summary: "Severe feature drift during canary (PSI > 0.3)"
+          description: "Population Stability Index at {{ $value }} (critical threshold: 0.3) - MONITOR ONLY, observe-only mode active"
+

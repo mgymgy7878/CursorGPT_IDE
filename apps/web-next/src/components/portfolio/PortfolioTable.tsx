@@ -1,6 +1,5 @@
 "use client";
 import { AssetRow } from "@/types/portfolio";
-import { fmtCurrencyTR, fmtNumberTR } from "@/lib/ui/format";
 
 export default function PortfolioTable({ rows }: { rows: AssetRow[] }) {
   if (!rows?.length) {
@@ -28,13 +27,13 @@ export default function PortfolioTable({ rows }: { rows: AssetRow[] }) {
             <tr key={r.asset} className="border-t">
               <td className="px-4 py-3 font-medium">{r.asset}</td>
               <td className="px-4 py-3 text-right font-mono">
-                {fmtNumberTR(r.amount)}
+                {formatNum(r.amount)}
               </td>
               <td className="px-4 py-3 text-right font-mono">
-                {r.priceUsd != null ? fmtCurrencyTR(r.priceUsd) : "—"}
+                {r.priceUsd != null ? formatNum(r.priceUsd) : "—"}
               </td>
               <td className="px-4 py-3 text-right font-mono">
-                {r.valueUsd != null ? fmtCurrencyTR(r.valueUsd) : "—"}
+                {r.valueUsd != null ? formatNum(r.valueUsd) : "—"}
               </td>
             </tr>
           ))}
@@ -44,4 +43,6 @@ export default function PortfolioTable({ rows }: { rows: AssetRow[] }) {
   );
 }
 
-// formatNum fonksiyonu kaldırıldı, fmtCurrencyTR/fmtNumberTR kullanılıyor
+function formatNum(n: number) {
+  return n.toLocaleString(undefined, { maximumFractionDigits: 6 });
+}

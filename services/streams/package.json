@@ -1,0 +1,23 @@
+{
+  "name": "streams-service",
+  "version": "0.1.0",
+  "description": "WebSocket Streams Service with Metrics",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "fastify": "~5.0.0",
+    "@fastify/cors": "~11.1.0",
+    "ws": "~8.18.0",
+    "prom-client": "~15.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.124",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.9.2"
+  }
+}

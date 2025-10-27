@@ -1,0 +1,82 @@
+{
+  "name": "Breakout Strategy",
+  "description": "Breakout strategy using ATR for volatility-based entries",
+  "symbol": "ADAUSDT",
+  "timeframe": "1h",
+  "indicators": {
+    "atr": {
+      "period": 14
+    },
+    "sma": {
+      "period": 20,
+      "source": "close"
+    },
+    "ema": {
+      "period": 50,
+      "source": "close"
+    }
+  },
+  "conditions": {
+    "breakout_up": {
+      "type": "price_above_sma",
+      "operator": ">",
+      "indicator": "sma",
+      "period": 20
+    },
+    "breakout_down": {
+      "type": "price_above_sma",
+      "operator": "<",
+      "indicator": "sma",
+      "period": 20
+    },
+    "trend_up": {
+      "type": "price_above_sma",
+      "operator": ">",
+      "indicator": "ema",
+      "period": 50
+    }
+  },
+  "rules": {
+    "entry": [
+      {
+        "condition": "breakout_up",
+        "action": "BUY",
+        "quantity": 0.05,
+        "price": "MARKET"
+      },
+      {
+        "condition": "breakout_down",
+        "action": "SELL",
+        "quantity": 0.05,
+        "price": "MARKET"
+      }
+    ],
+    "exit": [
+      {
+        "condition": "breakout_down",
+        "action": "CLOSE_LONG",
+        "quantity": 0.05,
+        "price": "MARKET"
+      },
+      {
+        "condition": "breakout_up",
+        "action": "CLOSE_SHORT",
+        "quantity": 0.05,
+        "price": "MARKET"
+      }
+    ]
+  },
+  "risk": {
+    "riskPct": 3.0,
+    "maxPos": 1,
+    "maxDailyLoss": 150,
+    "stopLoss": 7.0,
+    "takeProfit": 15.0
+  },
+  "metadata": {
+    "author": "Spark Trading",
+    "version": "1.0.0",
+    "tags": ["breakout", "volatility", "atr"],
+    "created": "2024-08-18T12:00:00Z"
+  }
+} 

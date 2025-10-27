@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Execution {
+  id              String   @id @default(cuid())
+  strategyId      String?
+  mode            String   // "testnet" | "live" | "paper"
+  symbol          String
+  side            String   // "BUY" | "SELL"
+  qty             Float
+  status          String   // "arm" | "confirm" | "live" | "filled" | "cancelled" | "error"
+  exchangeOrderId String?  // Binance order ID
+  clientOrderId   String?  // Our client order ID
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
+  lastState       String   // Last known state
+  // relations
+  trades          Trade[]
+}
+
+model Trade {
+  id           String   @id @default(cuid())
+  symbol       String
+  side         String    // BUY | SELL
+  qty          Float
+  price        Float?
+  fee          Float?
+  feeAsset     String?
+  maker        Boolean?  // true if maker order
+  ts           DateTime  @default(now())
+  clientId     String?
+  executionId  String?   // Link to execution
+  // relations
+  execution    Execution? @relation(fields: [executionId], references: [id])
+}
+
+model Order {
+  id           String   @id @default(cuid())
+  symbol       String
+  side         String    // BUY | SELL
+  qty          Float
+  price        Float?
+  status       String    // NEW | FILLED | CANCELLED | REJECTED
+  orderId      String    @unique
+  exchangeId   String?
+  clientId     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Position {
+  id           String   @id @default(cuid())
+  symbol       String   @unique
+  qty          Float
+  avgPrice     Float
+  unrealized   Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actor     String   // email or system
+  role      String   // user role at time of action
+  action    String   // settings.set / settings.delete / login / logout / executor.sync
+  details   String   // JSON string
+  createdAt DateTime @default(now())
+}
+
+model MetricsThreshold {
+  id        String   @id @default(cuid())
+  metric    String   @unique
+  threshold Float
+  operator  String   // "gt" | "lt" | "eq"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FusionShadowLog {
+  id         String   @id @default(cuid())
+  ts         BigInt
+  modelProdId String
+  modelCandId String?
+  probProd   Float
+  probCand   Float?
+  symbol     String?
+  windowMin  Int?
+  @@index([ts])
+}
+
+model RiskReportManifest {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  modelProdId   String?
+  modelCandId   String?
+  runHash       String?
+  path          String?
+  fileSizeBytes Int?
+  @@index([createdAt])
+} 

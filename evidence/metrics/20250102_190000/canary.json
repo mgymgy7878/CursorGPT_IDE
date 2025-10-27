@@ -1,0 +1,31 @@
+{
+  "timestamp": "20250102_190000",
+  "status": "PASS",
+  "tests": [
+    {
+      "name": "prisma-client-generation",
+      "status": "PASS",
+      "version": "5.22.0",
+      "output": "Generated Prisma Client (v5.22.0) to .\\node_modules\\@prisma\\client in 78ms"
+    },
+    {
+      "name": "database-schema-push",
+      "status": "PASS",
+      "tables": ["market_event", "tick"],
+      "indexes": ["ts", "source+symbol+ts"]
+    },
+    {
+      "name": "service-startup",
+      "status": "PASS",
+      "port": 4005,
+      "mode": "JSONL_FALLBACK"
+    },
+    {
+      "name": "db-smoke-test",
+      "status": "PASS",
+      "fallback_mode": true,
+      "reason": "PRISMA_DATABASE_URL not set; using JSONL fallback"
+    }
+  ],
+  "summary": "Prisma DB Mode Activation completed successfully with JSONL fallback"
+}

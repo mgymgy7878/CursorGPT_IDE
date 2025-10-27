@@ -1,0 +1,98 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "BTCTurk Ingest",
+    "tags": ["btcturk", "ingest", "market-data"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "WebSocket Reconnections",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "btcturk_ws_reconnects_total",
+            "legendFormat": "Reconnections"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 3},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Ingest Lag",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "btcturk_ingest_lag_seconds",
+            "legendFormat": "Lag (seconds)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Messages Total",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "btcturk_messages_total",
+            "legendFormat": "Messages"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Sequence Gaps",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "btcturk_seq_gap_total",
+            "legendFormat": "Gaps"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+} 

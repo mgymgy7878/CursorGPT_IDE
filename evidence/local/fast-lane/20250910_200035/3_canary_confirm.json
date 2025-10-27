@@ -1,0 +1,1 @@
+﻿{"pending":true,"message":"Canary confirm requires explicit approval for live trading","criteria":{"p95_ms_max":1000,"ts_errors_max":15,"success_rate_min":0.98,"auth":"token"},"warning":"This will enable live order execution","confirm_token":"canary_1757523635654_gi5w7b","timestamp":1757523635654}

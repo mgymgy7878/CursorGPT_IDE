@@ -1,0 +1,30 @@
+# Prometheus Configuration for Spark Runner Watchdog
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+rule_files:
+  - "config/prometheus/rules/spark-runner.rules.yml"
+
+scrape_configs:
+  - job_name: 'spark-executor'
+    static_configs:
+      - targets: ["127.0.0.1:4001"]
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'spark-runner-watchdog'
+    static_configs:
+      - targets: ["127.0.0.1:4001"]
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scheme: http
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+
+# Enable lifecycle API for reload

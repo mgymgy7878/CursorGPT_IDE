@@ -1,0 +1,53 @@
+groups:
+- name: streams.rules
+  rules:
+  - record: ws_gap_ms_p95_5m
+    expr: histogram_quantile(0.95, sum by (le,exchange) (rate(ws_gap_ms_bucket[5m])))
+  - record: ws_msgs_5m
+    expr: sum(increase(ws_msgs_total[5m]))
+  - record: ingest_latency_ms_p95_5m
+    expr: histogram_quantile(0.95, sum by (le,exchange,channel) (rate(ingest_latency_ms_bucket[5m])))
+  - record: ws_reconnects_5m
+    expr: sum(increase(ws_reconnects_total[5m]))
+  - record: ws_seq_gap_5m
+    expr: sum(increase(ws_seq_gap_total[5m]))
+  
+  - alert: StreamsLagHigh
+    expr: histogram_quantile(0.95, sum by (le,exchange) (rate(ws_gap_ms_bucket[5m]))) > 1500
+    for: 10m
+    labels:
+      severity: warning
+      component: streams
+    annotations:
+      summary: "WebSocket lag is high"
+      description: "P95 lag is {{ $value }}ms for {{ $labels.exchange }}"
+      
+  - alert: SeqGapBurst
+    expr: rate(ws_seq_gap_total[5m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+      component: streams
+    annotations:
+      summary: "Sequence gaps detected"
+      description: "{{ $value }} gaps per second for {{ $labels.exchange }}/{{ $labels.channel }}"
+      
+  - alert: IngestLatencyHigh
+    expr: histogram_quantile(0.95, sum by (le,exchange,channel) (rate(ingest_latency_ms_bucket[5m]))) > 300
+    for: 10m
+    labels:
+      severity: warning
+      component: streams
+    annotations:
+      summary: "Ingestion latency is high"
+      description: "P95 latency is {{ $value }}ms for {{ $labels.exchange }}/{{ $labels.channel }}"
+      
+  - alert: WSReconnectBurst
+    expr: rate(ws_reconnects_total[5m]) > 0.1
+    for: 5m
+    labels:
+      severity: warning
+      component: streams
+    annotations:
+      summary: "WebSocket reconnects are frequent"
+      description: "{{ $value }} reconnects per second for {{ $labels.exchange }}"

@@ -1,0 +1,59 @@
+name: Canary → Enforce
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'services/executor/**'
+      - 'policies/**'
+      - 'prometheus/**'
+
+jobs:
+  canary-check:
+    runs-on: windows-latest
+    if: contains(github.event.head_commit.message, '[ENFORCE]')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Build executor
+        run: pnpm --filter @spark/executor run build
+        
+      - name: Start executor
+        run: |
+          $env:HOST="0.0.0.0"
+          $env:PORT="4001"
+          $env:METRICS_ENABLED="true"
+          $env:FUSION_GATE_ENABLE="1"
+          $env:FUSION_GATE_MODE="enforce"
+          Start-Process -FilePath "node" -ArgumentList "services/executor/dist/server.js" -WindowStyle Hidden
+          Start-Sleep -Seconds 5
+          
+      - name: Test enforce mode
+        run: |
+          $status = Invoke-WebRequest -Uri "http://127.0.0.1:4001/api/public/fusion/risk.gate/status" -UseBasicParsing
+          $statusData = $status.Content | ConvertFrom-Json
+          if ($statusData.mode -ne "enforce") { exit 1 }
+          
+      - name: Test apply endpoint
+        run: |
+          $apply = Invoke-WebRequest -Uri "http://127.0.0.1:4001/api/public/fusion/risk.gate/apply" -Method POST -ContentType "application/json" -Body '{"dry":false}' -UseBasicParsing
+          $applyData = $apply.Content | ConvertFrom-Json
+          if ($applyData.dry -ne $false) { exit 1 }
+          
+      - name: Cleanup
+        if: always()
+        run: |
+          Get-Process | Where-Object {$_.ProcessName -eq "node"} | Stop-Process -Force

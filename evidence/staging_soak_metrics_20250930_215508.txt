@@ -1,0 +1,488 @@
+﻿
+# HELP process_cpu_user_seconds_total Total user CPU time spent in seconds.
+# TYPE process_cpu_user_seconds_total counter
+process_cpu_user_seconds_total{app="spark-executor"} 2.5000000000000004
+
+# HELP process_cpu_system_seconds_total Total system CPU time spent in seconds.
+# TYPE process_cpu_system_seconds_total counter
+process_cpu_system_seconds_total{app="spark-executor"} 0.484
+
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total{app="spark-executor"} 2.9840000000000004
+
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds{app="spark-executor"} 1759257740
+
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes{app="spark-executor"} 88805376
+
+# HELP nodejs_eventloop_lag_seconds Lag of event loop in seconds.
+# TYPE nodejs_eventloop_lag_seconds gauge
+nodejs_eventloop_lag_seconds{app="spark-executor"} 0.0036471
+
+# HELP nodejs_eventloop_lag_min_seconds The minimum recorded event loop delay.
+# TYPE nodejs_eventloop_lag_min_seconds gauge
+nodejs_eventloop_lag_min_seconds{app="spark-executor"} 0.009150464
+
+# HELP nodejs_eventloop_lag_max_seconds The maximum recorded event loop delay.
+# TYPE nodejs_eventloop_lag_max_seconds gauge
+nodejs_eventloop_lag_max_seconds{app="spark-executor"} 0.050135039
+
+# HELP nodejs_eventloop_lag_mean_seconds The mean of the recorded event loop delays.
+# TYPE nodejs_eventloop_lag_mean_seconds gauge
+nodejs_eventloop_lag_mean_seconds{app="spark-executor"} 0.016558650200028453
+
+# HELP nodejs_eventloop_lag_stddev_seconds The standard deviation of the recorded event loop delays.
+# TYPE nodejs_eventloop_lag_stddev_seconds gauge
+nodejs_eventloop_lag_stddev_seconds{app="spark-executor"} 0.0028101676648563173
+
+# HELP nodejs_eventloop_lag_p50_seconds The 50th percentile of the recorded event loop delays.
+# TYPE nodejs_eventloop_lag_p50_seconds gauge
+nodejs_eventloop_lag_p50_seconds{app="spark-executor"} 0.015941631
+
+# HELP nodejs_eventloop_lag_p90_seconds The 90th percentile of the recorded event loop delays.
+# TYPE nodejs_eventloop_lag_p90_seconds gauge
+nodejs_eventloop_lag_p90_seconds{app="spark-executor"} 0.019578879
+
+# HELP nodejs_eventloop_lag_p99_seconds The 99th percentile of the recorded event loop delays.
+# TYPE nodejs_eventloop_lag_p99_seconds gauge
+nodejs_eventloop_lag_p99_seconds{app="spark-executor"} 0.026722303
+
+# HELP nodejs_active_resources Number of active resources that are currently keeping the event loop alive, grouped by a
+sync resource type.
+# TYPE nodejs_active_resources gauge
+nodejs_active_resources{type="PipeWrap",app="spark-executor"} 2
+nodejs_active_resources{type="TCPServerWrap",app="spark-executor"} 1
+nodejs_active_resources{type="TCPSocketWrap",app="spark-executor"} 1
+nodejs_active_resources{type="Timeout",app="spark-executor"} 2
+nodejs_active_resources{type="Immediate",app="spark-executor"} 1
+
+# HELP nodejs_active_resources_total Total number of active resources.
+# TYPE nodejs_active_resources_total gauge
+nodejs_active_resources_total{app="spark-executor"} 7
+
+# HELP nodejs_active_handles Number of active libuv handles grouped by handle type. Every handle type is C++ class name
+.
+# TYPE nodejs_active_handles gauge
+nodejs_active_handles{type="Socket",app="spark-executor"} 3
+nodejs_active_handles{type="Server",app="spark-executor"} 1
+
+# HELP nodejs_active_handles_total Total number of active handles.
+# TYPE nodejs_active_handles_total gauge
+nodejs_active_handles_total{app="spark-executor"} 4
+
+# HELP nodejs_active_requests Number of active libuv requests grouped by request type. Every request type is C++ class 
+name.
+# TYPE nodejs_active_requests gauge
+
+# HELP nodejs_active_requests_total Total number of active requests.
+# TYPE nodejs_active_requests_total gauge
+nodejs_active_requests_total{app="spark-executor"} 0
+
+# HELP nodejs_heap_size_total_bytes Process heap size from Node.js in bytes.
+# TYPE nodejs_heap_size_total_bytes gauge
+nodejs_heap_size_total_bytes{app="spark-executor"} 26320896
+
+# HELP nodejs_heap_size_used_bytes Process heap size used from Node.js in bytes.
+# TYPE nodejs_heap_size_used_bytes gauge
+nodejs_heap_size_used_bytes{app="spark-executor"} 23967352
+
+# HELP nodejs_external_memory_bytes Node.js external memory size in bytes.
+# TYPE nodejs_external_memory_bytes gauge
+nodejs_external_memory_bytes{app="spark-executor"} 4274991
+
+# HELP nodejs_heap_space_size_total_bytes Process heap space size total from Node.js in bytes.
+# TYPE nodejs_heap_space_size_total_bytes gauge
+nodejs_heap_space_size_total_bytes{space="read_only",app="spark-executor"} 0
+nodejs_heap_space_size_total_bytes{space="new",app="spark-executor"} 1048576
+nodejs_heap_space_size_total_bytes{space="old",app="spark-executor"} 19451904
+nodejs_heap_space_size_total_bytes{space="code",app="spark-executor"} 2359296
+nodejs_heap_space_size_total_bytes{space="shared",app="spark-executor"} 0
+nodejs_heap_space_size_total_bytes{space="trusted",app="spark-executor"} 3190784
+nodejs_heap_space_size_total_bytes{space="new_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_total_bytes{space="large_object",app="spark-executor"} 270336
+nodejs_heap_space_size_total_bytes{space="code_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_total_bytes{space="shared_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_total_bytes{space="trusted_large_object",app="spark-executor"} 0
+
+# HELP nodejs_heap_space_size_used_bytes Process heap space size used from Node.js in bytes.
+# TYPE nodejs_heap_space_size_used_bytes gauge
+nodejs_heap_space_size_used_bytes{space="read_only",app="spark-executor"} 0
+nodejs_heap_space_size_used_bytes{space="new",app="spark-executor"} 129752
+nodejs_heap_space_size_used_bytes{space="old",app="spark-executor"} 18826712
+nodejs_heap_space_size_used_bytes{space="code",app="spark-executor"} 1934976
+nodejs_heap_space_size_used_bytes{space="shared",app="spark-executor"} 0
+nodejs_heap_space_size_used_bytes{space="trusted",app="spark-executor"} 2817912
+nodejs_heap_space_size_used_bytes{space="new_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_used_bytes{space="large_object",app="spark-executor"} 262160
+nodejs_heap_space_size_used_bytes{space="code_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_used_bytes{space="shared_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_used_bytes{space="trusted_large_object",app="spark-executor"} 0
+
+# HELP nodejs_heap_space_size_available_bytes Process heap space size available from Node.js in bytes.
+# TYPE nodejs_heap_space_size_available_bytes gauge
+nodejs_heap_space_size_available_bytes{space="read_only",app="spark-executor"} 0
+nodejs_heap_space_size_available_bytes{space="new",app="spark-executor"} 901160
+nodejs_heap_space_size_available_bytes{space="old",app="spark-executor"} 252968
+nodejs_heap_space_size_available_bytes{space="code",app="spark-executor"} 276576
+nodejs_heap_space_size_available_bytes{space="shared",app="spark-executor"} 0
+nodejs_heap_space_size_available_bytes{space="trusted",app="spark-executor"} 315240
+nodejs_heap_space_size_available_bytes{space="new_large_object",app="spark-executor"} 1048576
+nodejs_heap_space_size_available_bytes{space="large_object",app="spark-executor"} 0
+nodejs_heap_space_size_available_bytes{space="code_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_available_bytes{space="shared_large_object",app="spark-executor"} 0
+nodejs_heap_space_size_available_bytes{space="trusted_large_object",app="spark-executor"} 0
+
+# HELP nodejs_version_info Node.js version info.
+# TYPE nodejs_version_info gauge
+nodejs_version_info{version="v22.20.0",major="22",minor="20",patch="0",app="spark-executor"} 1
+
+# HELP nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.
+# TYPE nodejs_gc_duration_seconds histogram
+nodejs_gc_duration_seconds_bucket{le="0.001",kind="minor",app="spark-executor"} 8
+nodejs_gc_duration_seconds_bucket{le="0.01",kind="minor",app="spark-executor"} 10
+nodejs_gc_duration_seconds_bucket{le="0.1",kind="minor",app="spark-executor"} 10
+nodejs_gc_duration_seconds_bucket{le="1",kind="minor",app="spark-executor"} 10
+nodejs_gc_duration_seconds_bucket{le="2",kind="minor",app="spark-executor"} 10
+nodejs_gc_duration_seconds_bucket{le="5",kind="minor",app="spark-executor"} 10
+nodejs_gc_duration_seconds_bucket{le="+Inf",kind="minor",app="spark-executor"} 10
+nodejs_gc_duration_seconds_sum{kind="minor",app="spark-executor"} 0.008571799997240307
+nodejs_gc_duration_seconds_count{kind="minor",app="spark-executor"} 10
+nodejs_gc_duration_seconds_bucket{le="0.001",kind="incremental",app="spark-executor"} 2
+nodejs_gc_duration_seconds_bucket{le="0.01",kind="incremental",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="0.1",kind="incremental",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="1",kind="incremental",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="2",kind="incremental",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="5",kind="incremental",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="+Inf",kind="incremental",app="spark-executor"} 3
+nodejs_gc_duration_seconds_sum{kind="incremental",app="spark-executor"} 0.003293000005185604
+nodejs_gc_duration_seconds_count{kind="incremental",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="0.001",kind="major",app="spark-executor"} 0
+nodejs_gc_duration_seconds_bucket{le="0.01",kind="major",app="spark-executor"} 2
+nodejs_gc_duration_seconds_bucket{le="0.1",kind="major",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="1",kind="major",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="2",kind="major",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="5",kind="major",app="spark-executor"} 3
+nodejs_gc_duration_seconds_bucket{le="+Inf",kind="major",app="spark-executor"} 3
+nodejs_gc_duration_seconds_sum{kind="major",app="spark-executor"} 0.028126700002700095
+nodejs_gc_duration_seconds_count{kind="major",app="spark-executor"} 3
+
+# HELP executor_http_requests_total Toplam HTTP isteği
+# TYPE executor_http_requests_total counter
+executor_http_requests_total{route="/canary/run",method="GET",status="500"} 8
+executor_http_requests_total{route="/health",method="GET",status="200"} 4
+executor_http_requests_total{route="/metrics",method="GET",status="200"} 4
+executor_http_requests_total{route="/api/ai/strategies/generate",method="POST",status="500"} 10
+executor_http_requests_total{route="/api/canary/run",method="POST",status="200"} 3
+
+# HELP executor_http_request_duration_seconds HTTP istek süreleri (saniye)
+# TYPE executor_http_request_duration_seconds histogram
+executor_http_request_duration_seconds_bucket{le="0.01",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="0.025",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="0.05",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="0.1",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="0.25",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="0.5",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="1",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="2",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="5",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="10",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="+Inf",route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_sum{route="/canary/run",method="GET",status="200"} 0.0009981
+executor_http_request_duration_seconds_count{route="/canary/run",method="GET",status="200"} 8
+executor_http_request_duration_seconds_bucket{le="0.01",route="/canary/run",method="GET",status="500"} 0
+executor_http_request_duration_seconds_bucket{le="0.025",route="/canary/run",method="GET",status="500"} 1
+executor_http_request_duration_seconds_bucket{le="0.05",route="/canary/run",method="GET",status="500"} 1
+executor_http_request_duration_seconds_bucket{le="0.1",route="/canary/run",method="GET",status="500"} 1
+executor_http_request_duration_seconds_bucket{le="0.25",route="/canary/run",method="GET",status="500"} 1
+executor_http_request_duration_seconds_bucket{le="0.5",route="/canary/run",method="GET",status="500"} 1
+executor_http_request_duration_seconds_bucket{le="1",route="/canary/run",method="GET",status="500"} 1
+executor_http_request_duration_seconds_bucket{le="2",route="/canary/run",method="GET",status="500"} 1
+executor_http_request_duration_seconds_bucket{le="5",route="/canary/run",method="GET",status="500"} 4
+executor_http_request_duration_seconds_bucket{le="10",route="/canary/run",method="GET",status="500"} 8
+executor_http_request_duration_seconds_bucket{le="+Inf",route="/canary/run",method="GET",status="500"} 8
+executor_http_request_duration_seconds_sum{route="/canary/run",method="GET",status="500"} 35.1068961
+executor_http_request_duration_seconds_count{route="/canary/run",method="GET",status="500"} 8
+executor_http_request_duration_seconds_bucket{le="0.01",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="0.025",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="0.05",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="0.1",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="0.25",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="0.5",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="1",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="2",route="/health",method="GET",status="200"} 2
+executor_http_request_duration_seconds_bucket{le="5",route="/health",method="GET",status="200"} 3
+executor_http_request_duration_seconds_bucket{le="10",route="/health",method="GET",status="200"} 3
+executor_http_request_duration_seconds_bucket{le="+Inf",route="/health",method="GET",status="200"} 4
+executor_http_request_duration_seconds_sum{route="/health",method="GET",status="200"} 14.0167766
+executor_http_request_duration_seconds_count{route="/health",method="GET",status="200"} 4
+executor_http_request_duration_seconds_bucket{le="0.01",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.025",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.05",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.1",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.25",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.5",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="1",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="2",route="/metrics",method="GET",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="5",route="/metrics",method="GET",status="200"} 3
+executor_http_request_duration_seconds_bucket{le="10",route="/metrics",method="GET",status="200"} 4
+executor_http_request_duration_seconds_bucket{le="+Inf",route="/metrics",method="GET",status="200"} 4
+executor_http_request_duration_seconds_sum{route="/metrics",method="GET",status="200"} 14.0585649
+executor_http_request_duration_seconds_count{route="/metrics",method="GET",status="200"} 4
+executor_http_request_duration_seconds_bucket{le="0.01",route="/api/ai/strategies/generate",method="POST",status="500"}
+ 2
+executor_http_request_duration_seconds_bucket{le="0.025",route="/api/ai/strategies/generate",method="POST",status="500"
+} 2
+executor_http_request_duration_seconds_bucket{le="0.05",route="/api/ai/strategies/generate",method="POST",status="500"}
+ 2
+executor_http_request_duration_seconds_bucket{le="0.1",route="/api/ai/strategies/generate",method="POST",status="500"} 
+2
+executor_http_request_duration_seconds_bucket{le="0.25",route="/api/ai/strategies/generate",method="POST",status="500"}
+ 2
+executor_http_request_duration_seconds_bucket{le="0.5",route="/api/ai/strategies/generate",method="POST",status="500"} 
+2
+executor_http_request_duration_seconds_bucket{le="1",route="/api/ai/strategies/generate",method="POST",status="500"} 2
+executor_http_request_duration_seconds_bucket{le="2",route="/api/ai/strategies/generate",method="POST",status="500"} 2
+executor_http_request_duration_seconds_bucket{le="5",route="/api/ai/strategies/generate",method="POST",status="500"} 9
+executor_http_request_duration_seconds_bucket{le="10",route="/api/ai/strategies/generate",method="POST",status="500"} 1
+0
+executor_http_request_duration_seconds_bucket{le="+Inf",route="/api/ai/strategies/generate",method="POST",status="500"}
+ 10
+executor_http_request_duration_seconds_sum{route="/api/ai/strategies/generate",method="POST",status="500"} 26.087697400
+000003
+executor_http_request_duration_seconds_count{route="/api/ai/strategies/generate",method="POST",status="500"} 10
+executor_http_request_duration_seconds_bucket{le="0.01",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.025",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.05",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.1",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.25",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="0.5",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="1",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="2",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="5",route="/api/canary/run",method="POST",status="200"} 0
+executor_http_request_duration_seconds_bucket{le="10",route="/api/canary/run",method="POST",status="200"} 3
+executor_http_request_duration_seconds_bucket{le="+Inf",route="/api/canary/run",method="POST",status="200"} 3
+executor_http_request_duration_seconds_sum{route="/api/canary/run",method="POST",status="200"} 18.0356898
+executor_http_request_duration_seconds_count{route="/api/canary/run",method="POST",status="200"} 3
+
+# HELP ai_tokens_total AI token sayacı (in/out)
+# TYPE ai_tokens_total counter
+
+# HELP executor_http_in_flight Anlık aktif istek sayısı
+# TYPE executor_http_in_flight gauge
+executor_http_in_flight{route="/canary/run"} 0
+executor_http_in_flight{route="/health"} 0
+executor_http_in_flight{route="/metrics"} 1
+executor_http_in_flight{route="/api/ai/strategies/generate"} 6
+executor_http_in_flight{route="/api/canary/run"} 0
+
+# HELP executor_rate_limit_hits_total Rate limit isabet sayısı
+# TYPE executor_rate_limit_hits_total counter
+
+# HELP futures_orders_blocked_total Engellenen futures emirleri
+# TYPE futures_orders_blocked_total counter
+
+# HELP futures_uds_lifecycle_total UDS lifecycle olayları
+# TYPE futures_uds_lifecycle_total counter
+
+# HELP futures_uds_last_keepalive_timestamp Son UDS keepalive zamanı
+# TYPE futures_uds_last_keepalive_timestamp gauge
+futures_uds_last_keepalive_timestamp 0
+
+# HELP ai_generate_total AI generate istekleri
+# TYPE ai_generate_total counter
+
+# HELP ai_latency_milliseconds AI yanıt süreleri (ms)
+# TYPE ai_latency_milliseconds histogram
+
+# HELP canary_route_total Canary route toplam
+# TYPE canary_route_total counter
+
+# HELP canary_plan_build_seconds Canary plan build süresi
+# TYPE canary_plan_build_seconds histogram
+canary_plan_build_seconds_bucket{le="0.1"} 8
+canary_plan_build_seconds_bucket{le="0.5"} 8
+canary_plan_build_seconds_bucket{le="1"} 8
+canary_plan_build_seconds_bucket{le="2"} 8
+canary_plan_build_seconds_bucket{le="5"} 8
+canary_plan_build_seconds_bucket{le="10"} 8
+canary_plan_build_seconds_bucket{le="+Inf"} 8
+canary_plan_build_seconds_sum 0.10879999999542633
+canary_plan_build_seconds_count 8
+
+# HELP canary_ext_http_seconds Canary external HTTP süresi
+# TYPE canary_ext_http_seconds histogram
+canary_ext_http_seconds_bucket{le="0.1"} 0
+canary_ext_http_seconds_bucket{le="0.5"} 0
+canary_ext_http_seconds_bucket{le="1"} 0
+canary_ext_http_seconds_bucket{le="2"} 0
+canary_ext_http_seconds_bucket{le="5"} 0
+canary_ext_http_seconds_bucket{le="10"} 0
+canary_ext_http_seconds_bucket{le="+Inf"} 0
+canary_ext_http_seconds_sum 0
+canary_ext_http_seconds_count 0
+
+# HELP canary_json_parse_seconds Canary JSON parse süresi
+# TYPE canary_json_parse_seconds histogram
+canary_json_parse_seconds_bucket{le="0.001"} 0
+canary_json_parse_seconds_bucket{le="0.005"} 0
+canary_json_parse_seconds_bucket{le="0.01"} 0
+canary_json_parse_seconds_bucket{le="0.05"} 0
+canary_json_parse_seconds_bucket{le="0.1"} 0
+canary_json_parse_seconds_bucket{le="+Inf"} 0
+canary_json_parse_seconds_sum 0
+canary_json_parse_seconds_count 0
+
+# HELP canary_respond_seconds Canary respond süresi
+# TYPE canary_respond_seconds histogram
+canary_respond_seconds_bucket{le="0.1"} 0
+canary_respond_seconds_bucket{le="0.5"} 0
+canary_respond_seconds_bucket{le="1"} 0
+canary_respond_seconds_bucket{le="2"} 0
+canary_respond_seconds_bucket{le="5"} 0
+canary_respond_seconds_bucket{le="10"} 0
+canary_respond_seconds_bucket{le="+Inf"} 0
+canary_respond_seconds_sum 0
+canary_respond_seconds_count 0
+
+# HELP ai_payload_bytes AI tool payload size (bytes)
+# TYPE ai_payload_bytes histogram
+ai_payload_bytes_bucket{le="1000",stage="pre"} 8
+ai_payload_bytes_bucket{le="5000",stage="pre"} 8
+ai_payload_bytes_bucket{le="10000",stage="pre"} 8
+ai_payload_bytes_bucket{le="50000",stage="pre"} 8
+ai_payload_bytes_bucket{le="100000",stage="pre"} 8
+ai_payload_bytes_bucket{le="250000",stage="pre"} 8
+ai_payload_bytes_bucket{le="500000",stage="pre"} 8
+ai_payload_bytes_bucket{le="1000000",stage="pre"} 8
+ai_payload_bytes_bucket{le="+Inf",stage="pre"} 8
+ai_payload_bytes_sum{stage="pre"} 328
+ai_payload_bytes_count{stage="pre"} 8
+
+# HELP ai_payload_truncated_total Payload trimmed or limited
+# TYPE ai_payload_truncated_total counter
+
+# HELP ai_chunk_upload_total AI chunk upload events
+# TYPE ai_chunk_upload_total counter
+
+# HELP ai_chunk_bytes AI chunk size distribution
+# TYPE ai_chunk_bytes histogram
+ai_chunk_bytes_bucket{le="1000"} 0
+ai_chunk_bytes_bucket{le="5000"} 0
+ai_chunk_bytes_bucket{le="10000"} 0
+ai_chunk_bytes_bucket{le="50000"} 0
+ai_chunk_bytes_bucket{le="100000"} 0
+ai_chunk_bytes_bucket{le="250000"} 0
+ai_chunk_bytes_bucket{le="500000"} 0
+ai_chunk_bytes_bucket{le="1000000"} 0
+ai_chunk_bytes_bucket{le="+Inf"} 0
+ai_chunk_bytes_sum 0
+ai_chunk_bytes_count 0
+
+# HELP ai_chunk_age_seconds AI chunk age in storage
+# TYPE ai_chunk_age_seconds histogram
+ai_chunk_age_seconds_bucket{le="60"} 0
+ai_chunk_age_seconds_bucket{le="300"} 0
+ai_chunk_age_seconds_bucket{le="900"} 0
+ai_chunk_age_seconds_bucket{le="3600"} 0
+ai_chunk_age_seconds_bucket{le="14400"} 0
+ai_chunk_age_seconds_bucket{le="86400"} 0
+ai_chunk_age_seconds_bucket{le="+Inf"} 0
+ai_chunk_age_seconds_sum 0
+ai_chunk_age_seconds_count 0
+
+# HELP sse_retry_total SSE retry attempts
+# TYPE sse_retry_total counter
+
+# HELP sse_retry_attempts_histogram SSE retry attempts distribution
+# TYPE sse_retry_attempts_histogram histogram
+sse_retry_attempts_histogram_bucket{le="1"} 0
+sse_retry_attempts_histogram_bucket{le="2"} 0
+sse_retry_attempts_histogram_bucket{le="3"} 0
+sse_retry_attempts_histogram_bucket{le="4"} 0
+sse_retry_attempts_histogram_bucket{le="5"} 0
+sse_retry_attempts_histogram_bucket{le="+Inf"} 0
+sse_retry_attempts_histogram_sum 0
+sse_retry_attempts_histogram_count 0
+
+# HELP ai_chat_ms_summary AI chat end-to-end processing time (ms)
+# TYPE ai_chat_ms_summary summary
+ai_chat_ms_summary{quantile="0.5"} 0
+ai_chat_ms_summary{quantile="0.9"} 0
+ai_chat_ms_summary{quantile="0.95"} 0
+ai_chat_ms_summary{quantile="0.99"} 0
+ai_chat_ms_summary_sum 0
+ai_chat_ms_summary_count 0
+
+# HELP ai_tool_calls_total AI tool bridge calls
+# TYPE ai_tool_calls_total counter
+
+# HELP ai_guarded_actions_total Guarded (preview/confirmed) actions
+# TYPE ai_guarded_actions_total counter
+
+# HELP ai_sse_clients Current SSE client connections
+# TYPE ai_sse_clients gauge
+ai_sse_clients 0
+
+# HELP ai_confirm_errors_total Confirm/apply failures
+# TYPE ai_confirm_errors_total counter
+ai_confirm_errors_total 0
+
+# HELP ai_router_choice_total Router model selections
+# TYPE ai_router_choice_total counter
+
+# HELP ai_router_failover_total Router failovers
+# TYPE ai_router_failover_total counter
+
+# HELP ai_chars_out_total Approx streamed characters out
+# TYPE ai_chars_out_total counter
+
+# HELP ai_override_total User-scoped model override operations
+# TYPE ai_override_total counter
+
+# HELP ai_drift_explain_total Drift explain istek sayısı
+# TYPE ai_drift_explain_total counter
+ai_drift_explain_total 0
+
+# HELP ai_drift_compare_total Drift compare istek sayısı
+# TYPE ai_drift_compare_total counter
+ai_drift_compare_total 0
+
+# HELP ai_model_hint_total Model hint istek sayısı
+# TYPE ai_model_hint_total counter
+ai_model_hint_total 0
+
+# HELP ai_rate_limit_trips_total AI SSE rate-limit exceeded events
+# TYPE ai_rate_limit_trips_total counter
+ai_rate_limit_trips_total 0
+
+# HELP ai_rate_limit_trips_by_ip_total AI SSE rate-limit exceeded events by IP
+# TYPE ai_rate_limit_trips_by_ip_total counter
+
+# HELP ai_json_out_total JSON event payloads streamed (by tool)
+# TYPE ai_json_out_total counter
+
+# HELP ai_resume_tokens_total SSE resume via Last-Event-ID occurrences
+# TYPE ai_resume_tokens_total counter
+ai_resume_tokens_total 0
+
+# HELP ai_backtest_runs_total Backtest runs
+# TYPE ai_backtest_runs_total counter
+ai_backtest_runs_total 0
+
+# HELP ai_backtest_errors_total Backtest errors
+# TYPE ai_backtest_errors_total counter
+ai_backtest_errors_total 0
+
+# HELP ai_backtest_ms_summary Backtest latency ms
+# TYPE ai_backtest_ms_summary summary
+ai_backtest_ms_summary{quantile="0.5"} 0
+ai_backtest_ms_summary{quantile="0.95"} 0
+ai_backtest_ms_summary_sum 0
+ai_backtest_ms_summary_count 0
+
+
+

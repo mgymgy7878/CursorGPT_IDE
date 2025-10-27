@@ -1,0 +1,16 @@
+{
+  "total_bars": 12000,
+  "regime_distribution": {
+    "trend_up": 5768,
+    "trend_down": 6232,
+    "vol_low": 3961,
+    "vol_mid": 4079,
+    "vol_high": 3960
+  },
+  "trend_regime_ratio": 0.4806666666666667,
+  "vol_regime_distribution": {
+    "low": 0.33008333333333334,
+    "mid": 0.33991666666666664,
+    "high": 0.33
+  }
+}

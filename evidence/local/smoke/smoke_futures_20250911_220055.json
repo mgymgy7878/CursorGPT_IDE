@@ -1,0 +1,22 @@
+﻿{
+    "base":  "http://127.0.0.1:4001",
+    "timestamp":  "2025-09-11T22:00:55",
+    "results":  {
+                    "health":  {
+                                   "err":  "Uzak sunucuya bağlanılamıyor",
+                                   "ok":  false
+                               },
+                    "time":  {
+                                 "err":  "Uzak sunucuya bağlanılamıyor",
+                                 "ok":  false
+                             },
+                    "info":  {
+                                 "err":  "Uzak sunucuya bağlanılamıyor",
+                                 "ok":  false
+                             },
+                    "klines":  {
+                                   "err":  "Uzak sunucuya bağlanılamıyor",
+                                   "ok":  false
+                               }
+                }
+}

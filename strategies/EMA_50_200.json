@@ -1,0 +1,32 @@
+{
+  "name": "EMA_50_200",
+  "version": "1.0.0",
+  "status": "hold",
+  "hold_reason": "Robust base 3 < 4 threshold, Sharpe-CAGR inconsistency anomaly",
+  "hold_date": "2025-08-20T28:20:00Z",
+  "hold_nonce": "20250820-281500-258369",
+  "best_candidate": {
+    "short": 50,
+    "long": 250,
+    "sl": 0,
+    "tp": 0,
+    "sharpe": 7.9,
+    "cagr_pct": -100,
+    "max_dd_pct": 99.98,
+    "trades": 5774,
+    "exposure_pct": 24.06,
+    "fragility_score": 0.75
+  },
+  "metrics": {
+    "robust_base": 3,
+    "fragility_top": 0.75,
+    "oos_positive_ratio": 0.6,
+    "compute_ms": 683
+  },
+  "anomaly_flags": {
+    "sharpe_cagr_inconsistent": true,
+    "equity_zero": false,
+    "scale_mismatch": true
+  },
+  "description": "EMA_50_200 strategy - held due to low robust base and metric inconsistencies"
+} 
