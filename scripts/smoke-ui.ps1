@@ -19,7 +19,8 @@ $pages = @(
     "/portfolio",
     "/strategies",
     "/running",
-    "/settings"
+    "/settings",
+    "/api/health"
 )
 
 Write-Host "🧪 Starting UI Smoke Test..." -ForegroundColor Cyan
