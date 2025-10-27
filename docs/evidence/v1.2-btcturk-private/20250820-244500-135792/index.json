@@ -1,0 +1,31 @@
+{
+  "nonce": "20250820-244500-135792",
+  "started_utc": "2025-08-20T24:45:00Z",
+  "status": "PARTIAL",
+  "reason": "MISSING_KEYS",
+  "thresholds": {
+    "auth_ok_ms": 300
+  },
+  "btcturk": {
+    "endpoint": "/api/v1/users/balances",
+    "mode_ok": "NONE",
+    "codes": {
+      "A": null,
+      "B": null,
+      "C": null
+    },
+    "auth_p95_ms": null
+  },
+  "guardrails": {
+    "retries": 0,
+    "circuit_open": 0
+  },
+  "bist": {
+    "status_component": "SKIPPED"
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.2-btcturk-private/20250820-244500-135792/index.json",
+    "metrics": "docs/evidence/v1.2-btcturk-private/20250820-244500-135792/metrics.json",
+    "manifest": "docs/evidence/v1.2-btcturk-private/20250820-244500-135792/manifest.sha256"
+  }
+}

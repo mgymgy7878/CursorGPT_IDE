@@ -1,126 +1,57 @@
-'use client';
-
-import React, { useState } from 'react';
-import { useStrategies, Strategy } from '@/hooks/useStrategies';
-import { StrategyList } from '@/components/strategies/StrategyList';
-import { CreateStrategyModal } from '@/components/strategies/CreateStrategyModal';
-import { StrategyDetailPanel } from '@/components/strategies/StrategyDetailPanel';
-import { StrategyControls } from '@/components/strategies/StrategyControls';
-import { PageHeader } from '@/components/ui/PageHeader';
+"use client";
+import useSWR from "swr";
+import { useState, useMemo } from "react";
+import { Strategy } from "@/types/strategy";
+import StrategyTable from "@/components/strategies/StrategyTable";
+import EmptyState from "@/components/strategies/EmptyState";
+import { fetcher } from "@/lib/api";
 
 export default function StrategiesPage() {
-  const {
-    strategies,
-    loading,
-    error,
-    list,
-    create,
-    update,
-    remove,
-    setStatus,
-  } = useStrategies();
+  const { data, isLoading, mutate } = useSWR<Strategy[]>("/api/strategies", fetcher, { refreshInterval: 30000 });
+  const [q, setQ] = useState("");
 
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
-
-  const handleCreateStrategy = async (data: any) => {
-    setActionLoading(true);
-    try {
-      await create(data);
-      setShowCreateModal(false);
-    } catch (err) {
-      console.error('Failed to create strategy:', err);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleEditStrategy = (strategy: Strategy) => {
-    setSelectedStrategy(strategy);
-  };
-
-  const handleDeleteStrategy = async (id: string) => {
-    if (!confirm('Bu stratejiyi silmek istediğinizden emin misiniz?')) {
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      await remove(id);
-    } catch (err) {
-      console.error('Failed to delete strategy:', err);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (id: string, status: 'start' | 'stop' | 'pause') => {
-    setActionLoading(true);
-    try {
-      await setStatus(id, status);
-    } catch (err) {
-      console.error('Failed to update strategy status:', err);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    await list();
-  };
+  const filtered = useMemo(
+    () => (data || []).filter((s) => s.name.toLowerCase().includes(q.toLowerCase()) || s.symbol.toLowerCase().includes(q.toLowerCase())),
+    [data, q]
+  );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <PageHeader
-        title="Stratejiler"
-        desc="Trading stratejilerinizi yönetin ve performanslarını takip edin"
-      />
-
-      {error && (
-        <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                Hata
-              </h3>
-              <div className="mt-2 text-sm text-red-700 dark:text-red-300">
-                {error}
-              </div>
-            </div>
-          </div>
+    <div className="p-6 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Stratejilerim</h1>
+          <p className="text-sm opacity-70">Oluştur, başlat, durdur ve yönet.</p>
         </div>
-      )}
+        <button
+          className="px-3 py-2 rounded-xl bg-blue-600 text-white"
+          onClick={async () => {
+            const r = await fetch("/api/strategies", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: "Yeni Strateji", symbol: "BTCUSDT", code: "# write here" }),
+            });
+            if (r.ok) mutate();
+          }}
+        >
+          + Yeni Strateji
+        </button>
+      </div>
 
-      <div className="space-y-6">
-        <StrategyControls
-          onCreateNew={() => setShowCreateModal(true)}
-          onRefresh={handleRefresh}
-          loading={loading || actionLoading}
-        />
-
-        <StrategyList
-          strategies={strategies}
-          onEdit={handleEditStrategy}
-          onDelete={handleDeleteStrategy}
-          onStatusChange={handleStatusChange}
-          loading={loading}
+      <div className="flex gap-2">
+        <input
+          placeholder="Ara: ad veya sembol"
+          className="w-full rounded-xl border px-3 py-2"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
         />
       </div>
 
-      {showCreateModal && (
-        <CreateStrategyModal
-          onSubmit={handleCreateStrategy}
-          onCancel={() => setShowCreateModal(false)}
-          loading={actionLoading}
-        />
-      )}
-
-      {selectedStrategy && (
-        <StrategyDetailPanel
-          strategy={selectedStrategy}
-          onClose={() => setSelectedStrategy(null)}
-        />
+      {isLoading ? (
+        <div className="animate-pulse h-48 rounded-2xl border" />
+      ) : filtered.length === 0 ? (
+        <EmptyState onCreate={() => document.querySelector<HTMLButtonElement>("button")?.click()} />
+      ) : (
+        <StrategyTable rows={filtered} onChange={() => mutate()} />
       )}
     </div>
   );

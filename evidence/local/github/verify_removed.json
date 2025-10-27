@@ -1,0 +1,20 @@
+﻿{
+  "ci_yml_exists": false,
+  "release_yml_exists": false,
+  "workflows_count": 11,
+  "workflows": [
+    "ci-cd.yml",
+    "ci-cursor-guard.yml", 
+    "ci-smoke.yml",
+    "cursor-header-check.yml",
+    "param-diff-gate.yml",
+    "receipts-gate.yml",
+    "secret-guard.yml",
+    "security-scan.yml",
+    "security.yml",
+    "structure-guard.yml",
+    "weekly-doctor.yml"
+  ],
+  "ts": 1757366988,67088,
+  "status": "PASS"
+}

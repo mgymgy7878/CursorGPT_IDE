@@ -1,0 +1,44 @@
+groups:
+- name: spark-latency
+  rules:
+  - alert: SparkPlaceAckP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(spark_place_ack_duration_seconds_bucket[5m]))) > 1.2
+    for: 10m
+    labels:
+      severity: warning
+      team: spark
+    annotations:
+      summary: "P95 Place→ACK yüksek (>1200ms)"
+      description: "Son 10dk P95={{ $value | printf \"%.0f\" }}s"
+      
+  - alert: SparkPlaceAckP95Critical
+    expr: histogram_quantile(0.95, sum by (le) (rate(spark_place_ack_duration_seconds_bucket[5m]))) > 2.0
+    for: 5m
+    labels:
+      severity: critical
+      team: spark
+    annotations:
+      summary: "P95 Place→ACK kritik (>2000ms)"
+      description: "Son 5dk P95={{ $value | printf \"%.0f\" }}s"
+
+- name: spark-availability
+  rules:
+  - alert: SparkExecutorDown
+    expr: up{job="spark-executor"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: spark
+    annotations:
+      summary: "Spark Executor servisi çalışmıyor"
+      description: "Executor servisi {{ $labels.instance }} adresinde erişilemiyor"
+      
+  - alert: SparkUISlow
+    expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="spark-ui"}[5m]))) > 2.0
+    for: 5m
+    labels:
+      severity: warning
+      team: spark
+    annotations:
+      summary: "Spark UI yavaş yanıt veriyor"
+      description: "UI P95={{ $value | printf \"%.0f\" }}s"

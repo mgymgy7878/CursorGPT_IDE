@@ -1,0 +1,13 @@
+{
+  "name": "@spark/backtest-engine",
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@spark/shared": "workspace:*",
+    "@spark/types": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist"
+  }
+} 

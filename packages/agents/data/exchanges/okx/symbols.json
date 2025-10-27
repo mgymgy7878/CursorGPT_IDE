@@ -1,0 +1,7 @@
+[
+  { "symbol": "BTC-USDT", "stepSize": 0.0001, "tickSize": 0.1,  "minNotional": 5 },
+  { "symbol": "ETH-USDT", "stepSize": 0.001,  "tickSize": 0.01, "minNotional": 5 },
+  { "symbol": "SOL-USDT", "stepSize": 0.001,  "tickSize": 0.001, "minNotional": 5 },
+  { "symbol": "XRP-USDT", "stepSize": 1,      "tickSize": 0.0001, "minNotional": 5 },
+  { "symbol": "BNB-USDT", "stepSize": 0.001,  "tickSize": 0.01,  "minNotional": 5 }
+] 

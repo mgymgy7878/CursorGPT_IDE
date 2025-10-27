@@ -1,0 +1,95 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Payload Guardrail",
+    "tags": ["spark", "ai", "guardrail"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "AI Payload Size Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(ai_payload_bytes_bucket[5m]))",
+            "legendFormat": "P95 Payload Size"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Bytes",
+            "unit": "bytes"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Payload Truncation Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ai_payload_truncated_total[5m])",
+            "legendFormat": "Truncation Rate"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Rate",
+            "unit": "req/s"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Truncation Reasons",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(ai_payload_truncated_total) by (reason)",
+            "legendFormat": "{{reason}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "AI Payload Size Buckets",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "ai_payload_bytes_bucket",
+            "format": "table"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

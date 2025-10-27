@@ -1,0 +1,14 @@
+groups:
+- name: spark-dynamic
+  rules:
+  - alert: canary-latency-p95
+    expr: "histogram_quantile(0.95, sum by (le) (rate(canary_order_latency_seconds_bucket[5m]))) > 1"
+    for: 3m
+    labels:
+      severity: "warning"
+      source: "spark"
+      app: "executor"
+    annotations:
+      summary: "canary-latency-p95"
+      description: "Auto-generated alert: histogram_quantile(0.95, sum by (le) (rate(canary_order_latency_seconds_bucket[5m]))) > 1"
+      note: "auto"

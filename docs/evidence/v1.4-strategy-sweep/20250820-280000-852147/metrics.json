@@ -1,0 +1,68 @@
+{
+  "dataset": {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 12000,
+    "source": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl"
+  },
+  "perf": {
+    "compute_total_ms": 950,
+    "strategies_evaluated": 6
+  },
+  "strategies": [
+    {
+      "name": "BH",
+      "trades": 0,
+      "win_rate_pct": 47.7,
+      "cagr_pct": -93.71,
+      "sharpe": -7.98,
+      "max_dd_pct": 8.06,
+      "exposure_pct": 100
+    },
+    {
+      "name": "EMA_12_26",
+      "trades": 400,
+      "win_rate_pct": 23.98,
+      "cagr_pct": -74.61,
+      "sharpe": -6.21,
+      "max_dd_pct": 4.09,
+      "exposure_pct": 49.02
+    },
+    {
+      "name": "EMA_50_200",
+      "trades": 82,
+      "win_rate_pct": 22.5,
+      "cagr_pct": -43.17,
+      "sharpe": -2.62,
+      "max_dd_pct": 3.6,
+      "exposure_pct": 46.88
+    },
+    {
+      "name": "MACD_12_26_9",
+      "trades": 976,
+      "win_rate_pct": 23.76,
+      "cagr_pct": -90.15,
+      "sharpe": -9.92,
+      "max_dd_pct": 6.98,
+      "exposure_pct": 49.8
+    },
+    {
+      "name": "RSI14_MR",
+      "trades": 588,
+      "win_rate_pct": 3.24,
+      "cagr_pct": 433.7,
+      "sharpe": 13.17,
+      "max_dd_pct": 1.5,
+      "exposure_pct": 6.18
+    },
+    {
+      "name": "DONCHIAN20",
+      "trades": 324,
+      "win_rate_pct": 23.13,
+      "cagr_pct": -91.43,
+      "sharpe": -11.04,
+      "max_dd_pct": 6.34,
+      "exposure_pct": 48.2
+    }
+  ]
+}

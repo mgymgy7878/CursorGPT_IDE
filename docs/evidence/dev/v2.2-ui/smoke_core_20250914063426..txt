@@ -1,0 +1,10 @@
+# smoke_core @ 2025-09-14T06:36:42.667Z host=LENOVO
+
+=== http://127.0.0.1:4001/api/futures/time → status=0 ok=false ===
+TIMEOUT
+
+=== http://127.0.0.1:4001/api/futures/exchangeInfo?symbol=BTCUSDT → status=0 ok=false ===
+TIMEOUT
+
+=== http://127.0.0.1:3003/api/public/metrics → status=0 ok=false ===
+TIMEOUT

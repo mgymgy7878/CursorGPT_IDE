@@ -1,0 +1,103 @@
+[
+  {
+    "action": "/tools/get_status",
+    "params": {},
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "Runtime sağlık ve port doğrulama (sidecar 4001, ml-engine 4010)"
+  },
+  {
+    "action": "/tools/get_metrics",
+    "params": {},
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "Export ve ML metrik snapshot'ı (baseline çizgisi)"
+  },
+  {
+    "action": "/alerts/create",
+    "params": {
+      "name": "ExportLatencyP95High",
+      "expr": "histogram_quantile(0.95, sum by (le) (rate(export_latency_ms_bucket[10m]))) > 30000",
+      "for": "10m",
+      "labels": {
+        "severity": "warning",
+        "component": "export-sidecar"
+      },
+      "annotations": {
+        "summary": "Export P95 > 30s",
+        "description": "Export latency P95 is {{ $value }}ms (threshold: 30s)"
+      }
+    },
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "Export tarafı için operasyonel görünürlük"
+  },
+  {
+    "action": "/alerts/create",
+    "params": {
+      "name": "MLPredictLatencyP95High",
+      "expr": "histogram_quantile(0.95, sum by (le) (rate(ml_predict_latency_ms_bucket[5m]))) > 80",
+      "for": "10m",
+      "labels": {
+        "severity": "warning",
+        "component": "ml-engine"
+      },
+      "annotations": {
+        "summary": "ML predict p95 > 80ms",
+        "description": "ML prediction latency P95 is {{ $value }}ms (threshold: 80ms)"
+      }
+    },
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "v1.8 SLO'larına uygun latency guardrail"
+  },
+  {
+    "action": "/alerts/create",
+    "params": {
+      "name": "MLFeatureDriftCritical",
+      "expr": "ml_feature_drift_score > 0.3",
+      "for": "10m",
+      "labels": {
+        "severity": "critical",
+        "component": "ml-pipeline"
+      },
+      "annotations": {
+        "summary": "ML feature drift critical (PSI > 0.3)",
+        "description": "Feature {{ $labels.feature }} PSI is {{ $value }} (critical threshold: 0.3)"
+      }
+    },
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "Feature drift erken uyarı ve otomatik gate kontrolü"
+  },
+  {
+    "action": "/advisor/suggest",
+    "params": {
+      "topic": "ml-pipeline-kickoff"
+    },
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "ML pipeline için drift/latency/registry birleşik öneriler"
+  },
+  {
+    "action": "/fusion/retrain.suggest",
+    "params": {
+      "window_days": 14
+    },
+    "dryRun": false,
+    "confirm_required": false,
+    "reason": "Offline retrain fırsatlarının toplanması (2 haftalık pencere)"
+  },
+  {
+    "action": "/canary/run",
+    "params": {
+      "dry": true,
+      "duration_minutes": 30,
+      "rps_limit": 20
+    },
+    "dryRun": true,
+    "confirm_required": true,
+    "reason": "v1.8 canary dry-run (Faz 4) - Trade'leri etkilemez"
+  }
+]
+

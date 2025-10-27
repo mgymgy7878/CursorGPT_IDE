@@ -1,5 +1,4 @@
-import { SMA, EMA, RSI, ATR } from "../indicators/ta";
-
+// Analytics backtest engine
 export type Bar = { t:number; o:number; h:number; l:number; c:number; v:number };
 
 export type Config = {
@@ -23,6 +22,35 @@ export type Result = {
   timestamps:number[] 
 };
 
+// Inline TA functions (minimal)
+function SMA(src:number[], n:number){ 
+  const out:number[]=[]; let s=0; 
+  for(let i=0;i<src.length;i++){ 
+    s+=src[i]; 
+    if(i>=n) s-=src[i-n]; 
+    out.push(i>=n-1?s/n:NaN);
+  } 
+  return out; 
+}
+
+function EMA(src:number[], n:number){ 
+  const out:number[]=[]; const k=2/(n+1); let e=src[0]; 
+  for(let i=0;i<src.length;i++){ 
+    e = i===0?src[0]: (src[i]-e)*k+e; 
+    out.push(i<n-1?NaN:e);
+  } 
+  return out; 
+}
+
+function ATR(h:number[], l:number[], c:number[], n:number){ 
+  const tr:number[]=[]; 
+  for(let i=0;i<c.length;i++){ 
+    const prev=i>0?c[i-1]:c[i]; 
+    tr.push(Math.max(h[i]-l[i], Math.abs(h[i]-prev), Math.abs(l[i]-prev))); 
+  } 
+  return EMA(tr,n); 
+}
+
 export function runBacktest(bars:Bar[], cfg:Config):Result{
   const c = bars.map(b=>b.c), h=bars.map(b=>b.h), l=bars.map(b=>b.l);
   const fast = cfg.entry.fast==="EMA" ? EMA(c, cfg.indicators.emaFast||12) : SMA(c, cfg.indicators.emaFast||12);
@@ -38,7 +66,6 @@ export function runBacktest(bars:Bar[], cfg:Config):Result{
     const crossDown = fast[i-1]>=slow[i-1] && fast[i]<slow[i];
     const px = c[i]*(1+(pos!==0? (pos>0?-slip:slip):0));
     
-    // exit by ATR stop or TP RR
     if(pos!==0){
       const rr = cfg.exit.takeProfitRR||1.5;
       const atrStop = atr[i]*(cfg.exit.atrMult||2);
@@ -59,7 +86,6 @@ export function runBacktest(bars:Bar[], cfg:Config):Result{
       }
     }
     
-    // entry
     if(cfg.side!=="short" && crossUp && pos<=0){ pos=1; entryPx=c[i]*(1+slip); }
     if(cfg.side!=="long" && crossDown&& pos>=0){ pos=-1; entryPx=c[i]*(1-slip); }
 

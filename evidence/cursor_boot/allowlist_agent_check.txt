@@ -1,0 +1,10 @@
+﻿=== 2 GİRİŞ MOD DOĞRULAMA ===
+2025-09-10T13:01:45
+OVERALL=YELLOW
+
+TEST                     | EXPECTED      | OBSERVED      | RESULT
+=================================================================
+node -v                  | auto          | auto          |  PASS
+pnpm -v                  | auto          | auto          |  PASS
+git status               | prompt        | auto          |  FAIL - MOD ÇALIŞMIYOR
+Remove-Item -WhatIf      | prompt_or_block | blocked       |  PASS

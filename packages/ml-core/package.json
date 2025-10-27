@@ -1,0 +1,23 @@
+{
+  "name": "@spark/ml-core",
+  "version": "1.0.0",
+  "description": "ML Pipeline Core - Features, Models, Contracts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "prom-client": "~15.1.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.0",
+    "@types/node": "~20.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  }
+}
+

@@ -1,0 +1,33 @@
+{
+  "title": "Spark Runner — Autonomic NS (v1.5)",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "10s",
+  "tags": ["spark", "runner", "autonomic"],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Confidence Score (threshold)",
+      "targets": [{ "expr": "spark_runner_confidence_score{type=\"threshold\"}" }],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Threshold Drift",
+      "targets": [{ "expr": "spark_runner_threshold_drift" }],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Predictive Alerts (24h)",
+      "targets": [{ "expr": "increase(spark_runner_predictive_alerts_total[24h])" }],
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Exec Duration (p95)",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(spark_runner_execution_duration_seconds_bucket[5m])) by (le))" }],
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 8 }
+    }
+  ]
+}

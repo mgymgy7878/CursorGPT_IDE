@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { PortfolioResponse } from "@/types/portfolio";
 
-const B = process.env.EXECUTOR_URL ?? process.env.EXECUTOR_BASE_URL; // ör: http://127.0.0.1:4001
+const B = process.env.EXECUTOR_BASE_URL; // ör: http://127.0.0.1:4001
 
 export async function GET() {
   // PROD: backend varsa oraya proxy et

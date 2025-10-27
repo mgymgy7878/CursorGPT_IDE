@@ -1,0 +1,51 @@
+{
+  "defaultLimits": {
+    "maxConcurrentJobs": 10,
+    "maxQueueDepth": 200,
+    "cpuLimitPercent": 80,
+    "memoryLimitMB": 1024,
+    "stepLatencyLimitMs": 100,
+    "queueWaitLimitMs": 1000
+  },
+  "workerConfig": {
+    "minWorkers": 2,
+    "maxWorkers": 8,
+    "burstCapacity": 4,
+    "cpuLimit": 80,
+    "memoryLimit": 1024
+  },
+  "rbac": {
+    "roles": {
+      "admin": {
+        "maxConcurrentJobs": 20,
+        "maxQueueDepth": 500,
+        "cpuLimitPercent": 90,
+        "memoryLimitMB": 2048
+      },
+      "user": {
+        "maxConcurrentJobs": 5,
+        "maxQueueDepth": 100,
+        "cpuLimitPercent": 60,
+        "memoryLimitMB": 512
+      },
+      "guest": {
+        "maxConcurrentJobs": 2,
+        "maxQueueDepth": 50,
+        "cpuLimitPercent": 40,
+        "memoryLimitMB": 256
+      }
+    }
+  },
+  "fairness": {
+    "tokenBucket": {
+      "capacity": 10,
+      "refillRate": 1,
+      "burstLimit": 5
+    }
+  },
+  "monitoring": {
+    "metricsEnabled": true,
+    "alertingEnabled": true,
+    "dashboardEnabled": true
+  }
+}

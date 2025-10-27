@@ -1,36 +1,24 @@
 {
-  "name": "spark-trading-platform",
-  "version": "1.3.2-SNAPSHOT",
-  "private": true,
-  "packageManager": "pnpm@10.18.3",
   "scripts": {
-    "dev": "pnpm --filter web-next dev",
-    "dev:all": "pnpm --parallel --filter ./services/* dev",
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck",
-    "clean": "pnpm -r exec rm -rf dist .next node_modules",
-    "dev:exec": "pnpm --filter @spark/executor dev",
-    "build:exec": "pnpm --filter @spark/executor build",
-    "ui:test": "pnpm --filter web-next exec playwright test",
-    "ui:test:update": "pnpm --filter web-next exec playwright test --update-snapshots",
-    "ui:hash": "tsx scripts/ux/contract-hash.ts",
-    "lint:tokens": "pnpm --filter web-next exec eslint --config eslint.tokens.config.js --ext .ts,.tsx src --max-warnings=0",
-    "verify": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/release/verify.ps1"
-  },
-  "devDependencies": {
-    "cross-env": "^10.1.0",
-    "eslint-plugin-regex": "^1.10.0",
-    "prettier": "^3.3.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.6.0"
+    "docs:lint": "markdownlint-cli2 \"**/*.md\" \"!**/node_modules/**\""
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.7.0",
-    "next": "14.2.13",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "recharts": "^3.2.1",
-    "zustand": "^5.0.8"
+    "client-only": "^0.0.1",
+    "globby": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "@types/adm-zip": "^0.5.7",
+    "@types/babel__core": "^7.20.5",
+    "fastify-plugin": "^5.1.0",
+    "madge": "^8.0.0",
+    "markdownlint-cli2": "^0.15.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "next": "14.2.13"
+    }
   }
 }

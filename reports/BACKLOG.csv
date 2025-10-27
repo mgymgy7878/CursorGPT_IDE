@@ -1,0 +1,33 @@
+priority,area,title,evidence,owner,estimate,confirm_required
+P0,executor,NodeNext/ESM Tamamlama,services/executor/src/express-min.js çalışıyor,backend,2d,false
+P0,api,Dashboard Summary API,apps/web-next/lib/dashboardSummary.ts 7 çağrı,backend,1d,false
+P0,ui,UI Konsolidasyon,SWR ayrımı tamamlandı,frontend,1d,false
+P0,monitoring,Health Endpoints,/_ping reachable/ok,backend,0.5d,false
+P1,exchange,BTCTurk REST API,packages/exchange-btcturk/ iskelet,backend,3d,false
+P1,exchange,BTCTurk WebSocket,BTCTurk WS dokümantasyonu,backend,2d,false
+P1,exchange,BTCTurk Normalizer,Binance normalizer mevcut,backend,1d,false
+P1,ai,Copilot Risk Skor,packages/copilot/ mevcut,frontend,2d,true
+P1,ai,Confirm Required Modal,Canary thresholds mevcut,frontend,2d,true
+P1,ai,Guardrails Integration,packages/guardrails/ mevcut,backend,3d,true
+P2,feeds,BIST Data Pipeline,packages/feeds-bist/ mevcut,backend,5d,false
+P2,feeds,BIST Normalizer,Exchange normalizer'lar mevcut,backend,2d,false
+P2,feeds,BIST Real-time Feed,SSE infrastructure mevcut,backend,3d,false
+P2,optimization,Param Sweep Engine,Backtest engine mevcut,backend,5d,true
+P2,optimization,Strategy Generation,AI Copilot mevcut,backend,4d,true
+P2,optimization,Results Analysis,Backtest report mevcut,frontend,3d,false
+P3,export,Large Data Export,CSV export mevcut,backend,4d,false
+P3,export,PDF Report Generation,Report templates mevcut,backend,5d,true
+P3,export,Export Pipeline,Data pipeline mevcut,backend,3d,false
+P3,security,RBAC Implementation,API key middleware mevcut,backend,6d,true
+P3,security,Policy Enforcement,Security packages mevcut,backend,4d,true
+P3,security,Audit Compliance,Audit logs mevcut,backend,3d,true
+P4,monitoring,Prometheus Metrics,event_to_db_latency_p95,backend,2d,false
+P4,monitoring,Grafana Panels,Prometheus exporter mevcut,devops,2d,false
+P4,ui,Canary Gates UI,_ping.reachable/ok,frontend,1d,false
+P4,api,Positions Schema Guard,zod validation,backend,1d,false
+P4,api,Orders Open Softening,positions-safe pattern,backend,1d,false
+P4,devops,Dev All Script,root package.json,devops,0.5d,false
+P4,docs,Platform Audit Report,reports/PLATFORM_AUDIT.md,tech-writer,1d,false
+P4,docs,Roadmap Update,reports/ROADMAP_UPDATED.md,tech-writer,1d,false
+P4,docs,Backlog CSV,reports/BACKLOG.csv,tech-writer,0.5d,false
+P4,docs,Checklist MD,reports/CHECKLIST.md,tech-writer,1d,false 

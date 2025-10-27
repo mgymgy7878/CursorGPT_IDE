@@ -1,0 +1,32 @@
+groups:
+- name: day7
+  rules:
+  - alert: TwapSliceErrorsHigh
+    expr: rate(spark_twap_errors_total[10m]) > 0
+    for: 10m
+    labels: { severity: warning }
+    annotations: { summary: "TWAP slice errors > 0 in 10m" }
+    
+  - alert: WebsocketDisconnects
+    expr: increase(spark_ws_disconnects_total[15m]) > 0
+    for: 5m
+    labels: { severity: warning }
+    annotations: { summary: "WS disconnect observed in last 15m" }
+    
+  - alert: TwapExecutionRateLow
+    expr: rate(spark_twap_slice_sent_total[5m]) < 0.1
+    for: 5m
+    labels: { severity: info }
+    annotations: { summary: "TWAP execution rate is low" }
+    
+  - alert: IcebergOrderRateHigh
+    expr: rate(spark_iceberg_orders_total[5m]) > 10
+    for: 2m
+    labels: { severity: warning }
+    annotations: { summary: "High iceberg order rate detected" }
+    
+  - alert: RiskBreachDetected
+    expr: increase(spark_risk_breach_total[1m]) > 0
+    for: 1m
+    labels: { severity: critical }
+    annotations: { summary: "Risk breach detected - immediate action required" } 

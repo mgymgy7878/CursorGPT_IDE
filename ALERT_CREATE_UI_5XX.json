@@ -1,0 +1,15 @@
+{
+  "action": "/alerts/create",
+  "params": {
+    "name": "ui-5xx-error-rate",
+    "type": "promql",
+    "query": "rate(http_requests_total{app=\"web-next\",status=~\"5..\"}[5m])",
+    "threshold": 0.02,
+    "comparison": ">",
+    "for": "3m",
+    "notify": ["ops"]
+  },
+  "dryRun": false,
+  "confirm_required": false,
+  "reason": "UI 5xx artışını erken yakala"
+}

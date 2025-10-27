@@ -1,0 +1,89 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Uptime & Heartbeats",
+    "tags": ["streams", "uptime", "heartbeat"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Stream Connectors Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "streams_heartbeat",
+            "legendFormat": "{{src}} - Last Heartbeat"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "0": {"text": "DOWN", "color": "red"},
+                  "1": {"text": "UP", "color": "green"}
+                },
+                "type": "value"
+              }
+            ],
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Heartbeat Age",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "time() - streams_heartbeat",
+            "legendFormat": "{{src}} - Age"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "WebSocket Roundtrip Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(streams_ws_roundtrip_ms_bucket[5m]))",
+            "legendFormat": "P95 Roundtrip"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(streams_ws_roundtrip_ms_bucket[5m]))",
+            "legendFormat": "P50 Roundtrip"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Milliseconds",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Connection Status Timeline",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"streams\"} |= \"connected\" |= \"disconnected\"",
+            "legendFormat": "Connection Events"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s"
+  }
+} 

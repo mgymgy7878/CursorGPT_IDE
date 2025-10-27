@@ -1,0 +1,25 @@
+{
+  "name": "@spark/exchange-core",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format esm --sourcemap --clean",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.5"
+  }
+}
+
+

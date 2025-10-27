@@ -1,0 +1,84 @@
+# Prometheus Recording Rules - Portfolio Performance
+# Pre-aggregated metrics for faster Grafana queries
+# chatgpt + cursor collaboration
+
+groups:
+  - name: portfolio_records
+    interval: 30s
+    rules:
+      # Portfolio Refresh Latency (p95) - Pre-aggregated
+      - record: job:spark_portfolio_latency_p95:5m
+        expr: |
+          histogram_quantile(0.95, 
+            sum by (le, exchange, environment, service) (
+              rate(spark_portfolio_refresh_latency_ms_bucket[5m])
+            )
+          )
+        labels:
+          aggregation: "p95"
+          window: "5m"
+      
+      # Portfolio Refresh Latency (p50) - Pre-aggregated
+      - record: job:spark_portfolio_latency_p50:5m
+        expr: |
+          histogram_quantile(0.50, 
+            sum by (le, exchange, environment, service) (
+              rate(spark_portfolio_refresh_latency_ms_bucket[5m])
+            )
+          )
+        labels:
+          aggregation: "p50"
+          window: "5m"
+      
+      # Exchange API Error Rate (by type) - Pre-aggregated
+      - record: job:spark_exchange_api_error_rate:5m
+        expr: |
+          sum by (exchange, error_type, environment, service) (
+            rate(spark_exchange_api_error_total[5m])
+          )
+        labels:
+          window: "5m"
+      
+      # Portfolio Data Staleness - Real-time
+      - record: job:spark_portfolio_staleness
+        expr: time() - spark_portfolio_last_update_timestamp
+        labels:
+          aggregation: "current"
+      
+      # Total Portfolio Value (by exchange) - Current
+      - record: job:spark_portfolio_total_value:current
+        expr: |
+          sum by (exchange, environment, service) (
+            spark_portfolio_total_value_usd
+          )
+        labels:
+          aggregation: "current"
+      
+      # Asset Count (by exchange) - Current
+      - record: job:spark_portfolio_asset_count:current
+        expr: |
+          sum by (exchange, environment, service) (
+            spark_portfolio_asset_count
+          )
+        labels:
+          aggregation: "current"
+      
+      # Total Error Rate (all exchanges combined)
+      - record: job:spark_portfolio_error_rate_total:5m
+        expr: |
+          sum(
+            rate(spark_exchange_api_error_total[5m])
+          )
+        labels:
+          window: "5m"
+          aggregation: "sum"
+      
+      # Cache Hit Rate (if implemented)
+      - record: job:spark_portfolio_cache_hit_rate:5m
+        expr: |
+          sum(rate(spark_portfolio_price_cache_hits_total[5m])) /
+          sum(rate(spark_portfolio_price_cache_requests_total[5m]))
+        labels:
+          window: "5m"
+          aggregation: "ratio"
+

@@ -1,0 +1,34 @@
+groups:
+- name: spark_slo
+  rules:
+  - alert: UI5xxErrorRateHigh
+    expr: rate(http_requests_total{app="web-next",status=~"5.."}[5m]) > 0.02
+    for: 3m
+    labels: {severity: warning}
+    annotations:
+      summary: "UI 5xx oranı yüksek"
+      description: "5xx oranı son 5 dk > 2%"
+
+  - alert: CanaryLatencyP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(canary_order_latency_seconds_bucket[5m]))) > 1
+    for: 3m
+    labels: {severity: warning}
+    annotations:
+      summary: "Canary place→ACK p95 yüksek"
+      description: "p95 > 1s (5dk)"
+
+  - alert: ExecutorRatelimit429
+    expr: rate(http_requests_total{app="executor",status="429"}[5m]) > 0
+    for: 1m
+    labels: {severity: warning}
+    annotations:
+      summary: "Executor 429"
+      description: "Ratelimit tetikleniyor"
+
+  - alert: UIMetricsStale
+    expr: absent(rate(http_requests_total{app="web-next"}[5m])) == 1
+    for: 2m
+    labels: {severity: critical}
+    annotations:
+      summary: "UI metrikleri kesildi"
+      description: "Son 5 dk UI metrik yok"

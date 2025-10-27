@@ -1,0 +1,19 @@
+{
+  "timestamp": "20250102_173500",
+  "status": "PASS",
+  "total_tests": 3,
+  "passed_tests": 3,
+  "failed_tests": 0,
+  "evidence_files": [
+    "canary.json",
+    "metrics.txt",
+    "summary.txt"
+  ],
+  "file_sizes": {
+    "canary_json": "1.2 KB",
+    "metrics_txt": "0.8 KB",
+    "summary_txt": "0.5 KB"
+  },
+  "total_size": "2.5 KB",
+  "release_tag": "v1.1.1-metrics-contract"
+}

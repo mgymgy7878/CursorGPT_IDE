@@ -1,0 +1,120 @@
+﻿ÔÇëWARNÔÇë Unsupported engine: wanted: {"node":">=20.10.0 <21"} (current: {"node":"v18.18.2","pnpm":"10.14.0"})
+services/executor/src/audit.ts(215,43): error TS18046: 'e' is of type 'unknown'.
+services/executor/src/metrics.ts(16,26): error TS7006: Parameter 'app' implicitly has an 'any' type.
+services/executor/src/metrics.ts(17,30): error TS7006: Parameter '_req' implicitly has an 'any' type.
+services/executor/src/metrics.ts(17,36): error TS7006: Parameter 'reply' implicitly has an 'any' type.
+services/executor/src/metrics.ts(19,40): error TS2339: Property 'contentType' does not exist on type 'Registry'.
+services/executor/src/metrics.ts(24,39): error TS7006: Parameter 'req' implicitly has an 'any' type.
+services/executor/src/metrics.ts(24,44): error TS7006: Parameter 'reply' implicitly has an 'any' type.
+services/executor/src/metrics.ts(32,18): error TS2339: Property 'labels' does not exist on type 'Histogram<string>'.
+services/executor/src/plugins/type-provider.ts(6,7): error TS2339: Property 'withTypeProvider' does not exist on type 'FastifyInstance'.
+services/executor/src/metrics/placeAck.ts(14,28): error TS2339: Property 'startTimer' does not exist on type 'Histogram<string>'.
+services/executor/src/routes/place.ts(24,19): error TS2339: Property 'warn' does not exist on type '{ info: (...a: any[]) => void; error: (...a: any[]) => void; }'.
+services/executor/src/routes/place.ts(34,22): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/place.ts(50,22): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/place.ts(115,13): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/place.ts(160,13): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/place.ts(206,13): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/place.ts(228,13): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/place.ts(235,11): error TS2339: Property 'delete' does not exist on type 'FastifyInstance'.
+services/executor/src/routes/place.ts(235,44): error TS7006: Parameter 'req' implicitly has an 'any' type.
+services/executor/src/routes/place.ts(235,49): error TS7006: Parameter 'reply' implicitly has an 'any' type.
+services/executor/src/metrics/feed.ts(14,24): error TS2339: Property 'startTimer' does not exist on type 'Histogram<string>'.
+services/executor/src/routes/feed.ts(34,22): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/feed.ts(68,13): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/feed.ts(91,13): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/feed.ts(144,13): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/btcturk.ts(29,11): error TS2558: Expected 0 type arguments, but got 1.
+services/executor/src/routes/btcturk.ts(38,12): error TS7006: Parameter 'req' implicitly has an 'any' type.
+services/executor/src/routes/btcturk.ts(38,17): error TS7006: Parameter 'reply' implicitly has an 'any' type.
+services/executor/src/index.ts(21,13): error TS2339: Property 'register' does not exist on type 'FastifyInstance'.
+services/executor/src/index.ts(22,13): error TS2339: Property 'register' does not exist on type 'FastifyInstance'.
+services/executor/src/index.ts(25,13): error TS2339: Property 'register' does not exist on type 'FastifyInstance'.
+services/executor/src/index.ts(26,13): error TS2339: Property 'register' does not exist on type 'FastifyInstance'.
+services/executor/src/index.ts(27,13): error TS2339: Property 'register' does not exist on type 'FastifyInstance'.
+services/executor/src/db.ts(1,10): error TS2305: Module '"@spark/db-lite"' has no exported member 'dbLite'.
+services/executor/src/db.ts(1,24): error TS6059: File 'C:/dev/CursorGPT_IDE/packages/db-lite/src/index.ts' is not under 'rootDir' 'C:/dev/CursorGPT_IDE/services/executor/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Imported via "@spark/db-lite" from file 'C:/dev/CursorGPT_IDE/services/executor/src/db.ts' with packageId '@spark/db-lite/src/index.ts@0.1.0'
+    Imported via "@spark/db-lite" from file 'C:/dev/CursorGPT_IDE/services/executor/src/plugins/db.ts' with packageId '@spark/db-lite/src/index.ts@0.1.0'
+services/executor/src/db.ts(1,24): error TS6307: File 'C:/dev/CursorGPT_IDE/packages/db-lite/src/index.ts' is not listed within the file list of project 'C:/dev/CursorGPT_IDE/services/executor/tsconfig.build.json'. Projects must list all files or use an 'include' pattern.
+  The file is in the program because:
+    Imported via "@spark/db-lite" from file 'C:/dev/CursorGPT_IDE/services/executor/src/db.ts' with packageId '@spark/db-lite/src/index.ts@0.1.0'
+    Imported via "@spark/db-lite" from file 'C:/dev/CursorGPT_IDE/services/executor/src/plugins/db.ts' with packageId '@spark/db-lite/src/index.ts@0.1.0'
+services/executor/src/validation.ts(171,48): error TS18046: 'e' is of type 'unknown'.
+services/executor/src/validation.ts(178,46): error TS18046: 'e' is of type 'unknown'.
+services/executor/src/validation.ts(186,48): error TS18046: 'e' is of type 'unknown'.
+services/executor/src/lib/canary.ts(1,64): error TS2724: '"@spark/types"' has no exported member named 'CanaryRunResponseInput'. Did you mean 'CanaryRunResponse'?
+services/executor/src/plugins/metrics.ts(18,25): error TS2339: Property 'labels' does not exist on type 'Counter<string>'.
+services/executor/src/mw/rbac.ts(4,37): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/plugins/db.ts(2,10): error TS2305: Module '"@spark/db-lite"' has no exported member 'dbLite'.
+services/executor/src/plugins/db.ts(6,26): error TS7006: Parameter 'app' implicitly has an 'any' type.
+services/executor/src/plugins/fills-metrics.ts(39,34): error TS2339: Property 'binanceFillMsSummary' does not exist on type 'typeof import("C:/dev/CursorGPT_IDE/services/executor/src/plugins/metrics")'.
+services/executor/src/plugins/fills-metrics.ts(40,39): error TS2339: Property 'btcturkFillMsSummary' does not exist on type 'typeof import("C:/dev/CursorGPT_IDE/services/executor/src/plugins/metrics")'.
+services/executor/src/plugins/prisma.ts(2,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+services/executor/src/plugins/prisma.ts(4,26): error TS7006: Parameter 'app' implicitly has an 'any' type.
+services/executor/src/routes/ai.ts(11,22): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/ai.ts(21,20): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/ai.ts(34,22): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/ai.ts(44,20): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/aiChat.ts(14,11): error TS2339: Property 'raw' does not exist on type 'FastifyReply'.
+services/executor/src/routes/aiChat.ts(15,11): error TS2339: Property 'raw' does not exist on type 'FastifyReply'.
+services/executor/src/routes/aiChat.ts(16,11): error TS2339: Property 'raw' does not exist on type 'FastifyReply'.
+services/executor/src/routes/aiChat.ts(20,13): error TS2339: Property 'raw' does not exist on type 'FastifyReply'.
+services/executor/src/routes/aiChat.ts(24,11): error TS2339: Property 'raw' does not exist on type 'FastifyReply'.
+services/executor/src/routes/aiChat.ts(26,27): error TS2339: Property 'url' does not exist on type 'FastifyRequest<any>'.
+services/executor/src/routes/aiChat.ts(38,24): error TS2339: Property 'labels' does not exist on type 'Counter<string>'.
+services/executor/src/routes/allowWrite.ts(7,65): error TS2554: Expected 2 arguments, but got 3.
+services/executor/src/routes/allowWrite.ts(7,72): error TS7006: Parameter 'req' implicitly has an 'any' type.
+services/executor/src/routes/allowWrite.ts(7,77): error TS7006: Parameter 'rep' implicitly has an 'any' type.
+services/executor/src/routes/audit.ts(30,14): error TS18046: 'error' is of type 'unknown'.
+services/executor/src/routes/audit.ts(51,14): error TS18046: 'error' is of type 'unknown'.
+services/executor/src/routes/audit.ts(74,14): error TS18046: 'error' is of type 'unknown'.
+services/executor/src/routes/audit.ts(97,14): error TS18046: 'error' is of type 'unknown'.
+services/executor/src/routes/audit.ts(121,14): error TS18046: 'error' is of type 'unknown'.
+services/executor/src/routes/btcturk.order.ts(4,10): error TS2614: Module '"../plugins/metrics"' has no exported member 'btcturkAckSummary'. Did you mean to use 'import btcturkAckSummary from "../plugins/metrics"' instead?
+services/executor/src/routes/btcturk.order.ts(4,29): error TS2614: Module '"../plugins/metrics"' has no exported member 'btcturkConfirmTotal'. Did you mean to use 'import btcturkConfirmTotal from "../plugins/metrics"' instead?
+services/executor/src/routes/btcturk.order.ts(4,50): error TS2614: Module '"../plugins/metrics"' has no exported member 'btcturkFailTotal'. Did you mean to use 'import btcturkFailTotal from "../plugins/metrics"' instead?
+services/executor/src/routes/btcturk.order.ts(4,68): error TS2614: Module '"../plugins/metrics"' has no exported member 'btcturkClockDriftMs'. Did you mean to use 'import btcturkClockDriftMs from "../plugins/metrics"' instead?
+services/executor/src/routes/btcturk.order.ts(4,89): error TS2614: Module '"../plugins/metrics"' has no exported member 'btcturkEventToDbSummary'. Did you mean to use 'import btcturkEventToDbSummary from "../plugins/metrics"' instead?
+services/executor/src/routes/btcturk.order.ts(4,114): error TS2614: Module '"../plugins/metrics"' has no exported member 'btcturkFillMsSummary'. Did you mean to use 'import btcturkFillMsSummary from "../plugins/metrics"' instead?
+services/executor/src/routes/canary-advise.ts(28,31): error TS2339: Property 'getMetricsAsJSON' does not exist on type 'Registry'.
+services/executor/src/routes/canary-confirm.ts(8,10): error TS2305: Module '"@spark/shared"' has no exported member 'headerStr'.
+services/executor/src/routes/canary-confirm.ts(8,21): error TS2305: Module '"@spark/shared"' has no exported member 'envStr'.
+services/executor/src/routes/canary-confirm.ts(8,29): error TS2305: Module '"@spark/shared"' has no exported member 'readJSONFile'.
+services/executor/src/routes/canary-confirm.ts(38,23): error TS2339: Property 'mode' does not exist on type 'CanaryConfirmRequest'.
+services/executor/src/routes/canary-confirm.ts(39,30): error TS2339: Property 'allowLive' does not exist on type 'CanaryConfirmRequest'.
+services/executor/src/routes/canary-confirm.ts(40,25): error TS2339: Property 'dryRun' does not exist on type 'CanaryConfirmRequest'.
+services/executor/src/routes/canary-confirm.ts(52,27): error TS2339: Property 'ack_p95_ms' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(52,40): error TS2339: Property 'event_to_db_p95_ms' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(52,61): error TS2339: Property 'ingest_lag_p95_s' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(52,80): error TS2339: Property 'seq_gap_total' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(55,16): error TS2339: Property 'ack_p95_ms' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(55,45): error TS2339: Property 'ack_p95_ms' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(55,62): error TS2339: Property 'ack_p95_ms' does not exist on type 'Required<CanaryThresholds>'.
+services/executor/src/routes/canary-confirm.ts(56,16): error TS2339: Property 'event_to_db_p95_ms' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(56,53): error TS2339: Property 'event_to_db_p95_ms' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(56,78): error TS2339: Property 'event_to_db_p95_ms' does not exist on type 'Required<CanaryThresholds>'.
+services/executor/src/routes/canary-confirm.ts(57,16): error TS2339: Property 'ingest_lag_p95_s' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(57,51): error TS2339: Property 'ingest_lag_p95_s' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(57,75): error TS2339: Property 'ingest_lag_p95_s' does not exist on type 'Required<CanaryThresholds>'.
+services/executor/src/routes/canary-confirm.ts(58,16): error TS2339: Property 'seq_gap_total' does not exist on type 'CanaryGates'.
+services/executor/src/routes/canary-confirm.ts(58,46): error TS2339: Property 'seq_gap_total' does not exist on type 'Required<CanaryThresholds>'.
+services/executor/src/routes/canary-confirm.ts(69,7): error TS2353: Object literal may only specify known properties, and 'nonce' does not exist in type 'CanaryConfirmResponse'.
+services/executor/src/routes/canary-evidence.ts(7,4): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+services/executor/src/routes/canary-evidence.ts(8,4): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+services/executor/src/routes/canary-evidence.ts(11,17): error TS2339: Property 'status' does not exist on type 'FastifyReply'.
+services/executor/src/routes/canary-live-apply.ts(10,10): error TS2305: Module '"@spark/shared"' has no exported member 'envStr'.
+services/executor/src/routes/canary-live-apply.ts(10,18): error TS2305: Module '"@spark/shared"' has no exported member 'envBool'.
+services/executor/src/routes/canary-live-apply.ts(10,27): error TS2305: Module '"@spark/shared"' has no exported member 'envNum'.
+services/executor/src/routes/canary-live-apply.ts(10,35): error TS2305: Module '"@spark/shared"' has no exported member 'readJSONFile'.
+services/executor/src/routes/canary-live-apply.ts(10,49): error TS2305: Module '"@spark/shared"' has no exported member 'writeJSONFile'.
+services/executor/src/routes/canary-live-apply.ts(11,10): error TS2305: Module '"@spark/shared"' has no exported member 'assertFiniteNumber'.
+services/executor/src/routes/canary-live-apply.ts(39,35): error TS2307: Cannot find module '@spark/exchange/binance' or its corresponding type declarations.
+services/executor/src/routes/canary-live-apply.ts(85,25): error TS2339: Property 'symbol' does not exist on type 'LiveTradeApplyRequest'.
+services/executor/src/routes/canary-live-apply.ts(86,22): error TS2339: Property 'qty' does not exist on type 'LiveTradeApplyRequest'.
+services/executor/src/routes/canary-live-apply.ts(87,23): error TS2339: Property 'side' does not exist on type 'LiveTradeApplyRequest'.
+services/executor/src/routes/canary-live-apply.ts(88,28): error TS2339: Property 'allowLive' does not exist on type 'LiveTradeApplyRequest'.
+services/executor/src/routes/canary-live-apply.ts(120,7): error TS2353: Object literal may only specify known properties, and 'nonce' does not exist in type 'LiveTradeApplyResponse'.
+services/executor/src/routes/canary-live-plan.ts(9,10): error TS2305: Module '"@spark/shared"' has no exported member 'headerStr'.
+services/executor/src/routes/canary-live-plan.ts(9,21): error TS2305: Module '"@spark/shared"' has no exported member 'envStr'.

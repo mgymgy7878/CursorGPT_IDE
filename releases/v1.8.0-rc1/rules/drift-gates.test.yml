@@ -1,0 +1,23 @@
+rule_files:
+  - drift-gates.yml
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'paper_live_delta_pnl'
+        values: [0.005 0.005 0.005 0.005 0.005 0.005 0.005 0.005 0.005 0.005]
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: PaperLivePNLDriftHigh
+        exp_alerts: []   # under -1%, should NOT fire
+  - interval: 1m
+    input_series:
+      - series: 'paper_live_delta_pnl'
+        values: [-0.015 -0.015 -0.015 -0.015 -0.015 -0.015 -0.015 -0.015 -0.015 -0.015]
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: PaperLivePNLDriftHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service: drift-gates

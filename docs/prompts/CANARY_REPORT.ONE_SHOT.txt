@@ -1,0 +1,27 @@
+SPARK — CANARY LIVE RUN — ONE-SHOT COPY-READY REPORT MAKER — APPLY
+
+GOAL: Tek blok düz metin çıktısı; docs/TALIMATLAR.md'deki REPORT_SCHEMA başlıklarını kullan; sırlar maskeli; preflight/health/ARM/CONFIRM/snapshot/metrics/rollback akışı; erişim yoksa BLOCKED/NOT_EXECUTED gibi bayraklar; en sonda HEALTH çıktısı.
+
+TASKS:
+1. Preflight: http://127.0.0.1:4001/api/public/live/health ve http://127.0.0.1:4001/api/public/live/snapshot kontrol et
+2. Environment: API keys, token, whitelist, trade window, limits kontrol et
+3. ARM Test: LIVE_TRADING=1, SHADOW_MODE=1 ile deploy-live → 403 arm_only beklenir
+4. CONFIRM Test: LIVE_TRADING=2, SHADOW_MODE=0 ile deploy-live → 200 + orderId beklenir
+5. Snapshot: Post-trade durum, tradesLastMin, openOrders, positions
+6. Metrics: Prometheus dump'tan spark_live_* metrikleri
+7. Rollback: TRADING_KILL_SWITCH=1 ve cancelAll test
+
+OUTPUT FORMAT (tek blok düz metin):
+CANARY LIVE RUN — RESULT
+DATE-TIME (Europe/Istanbul): 2025-08-18 21:30:00
+SYSTEM: UI_PORT: 3003 | EXECUTOR_PORT: 4001 | ESM_TSX: OK
+ENV READY: hasKeys: true/false | hasToken: true/false | whitelistOk: true/false | windowNow: true/false | limits: { maxNotional: 20, tradeWindow: "07:00-23:30" }
+HEALTH: exchange: up/down/N-A | ws: up/down/N-A | drift: 0/N-A | killSwitch: 0/1/N-A | circuit: closed/open/N-A
+ARM TEST: status: PASSED/FAILED/NOT_EXECUTED | detail: 403 arm_only expected; metrics arm_only Δ=1/N-A
+CONFIRM TEST (BTCUSDT qty=0.0002 MARKET): status: PASSED/FAILED/SKIPPED | orderId: 12345/N-A | clientId: abc123/N-A | wsFill: yes/no/N-A
+SNAPSHOT (POST-TRADE): tradesLastMin: 1/N-A | openOrders: 0/N-A | positions[0]: { symbol: BTCUSDT, qty: 0.0002, avgPrice: 45000, unrealized: 0 } | N-A
+METRICS SUMMARY: live_orders_filled_total: 1/N-A | live_trades_total: 1/N-A | live_blocked_total: { arm_only:1, rule_violation:0, notional_limit:0, window_closed:0, whitelist_violation:0 }
+ROLLBACK: status: PASSED/NOT_EXECUTED | note: kill-switch and cancelAll procedure (see RUNBOOK)
+RUNBOOK (COPY-READY): PowerShell: $env:EXECUTOR_TOKEN="***" | $env:TRADE_WHITELIST="BTCUSDT" | $env:LIVE_MAX_NOTIONAL="20" | $env:TRADE_WINDOW="07:00-23:30" | $env:TRADING_KILL_SWITCH="0" | pnpm -w run db:generate | pnpm -w run db:migrate | pnpm --filter services/executor dev | pnpm --filter apps/web-next dev | Invoke-RestMethod http://127.0.0.1:4001/api/public/live/health | $env:LIVE_TRADING="1" | $env:SHADOW_MODE="1" | Invoke-RestMethod -Method POST http://127.0.0.1:4001/api/public/strategy/deploy-live -Headers @{Authorization="Bearer $env:EXECUTOR_TOKEN";"Content-Type"="application/json"} -Body '{"symbol":"BTCUSDT","side":"BUY","type":"MARKET","qty":0.0002}' | $env:BINANCE_MAINNET_API_KEY="***" | $env:BINANCE_MAINNET_API_SECRET="***" | $env:LIVE_TRADING="2" | $env:SHADOW_MODE="0" | Invoke-RestMethod -Method POST http://127.0.0.1:4001/api/public/strategy/deploy-live -Headers @{Authorization="Bearer $env:EXECUTOR_TOKEN";"Content-Type"="application/json"} -Body '{"symbol":"BTCUSDT","side":"BUY","type":"MARKET","qty":0.0002,"confirmPhrase":"CONFIRM LIVE TRADE"}' | Invoke-RestMethod http://127.0.0.1:4001/api/public/live/snapshot | (Invoke-WebRequest http://127.0.0.1:3003/api/public/metrics/prom).Content.Substring(0,4000) | $env:TRADING_KILL_SWITCH="1" | scripts/kill-all.cmd | Bash: export EXECUTOR_TOKEN="***" | export TRADE_WHITELIST="BTCUSDT" LIVE_MAX_NOTIONAL=20 TRADE_WINDOW="07:00-23:30" TRADING_KILL_SWITCH=0 | pnpm -w run db:generate && pnpm -w run db:migrate | pnpm --filter services/executor dev | pnpm --filter apps/web-next dev | curl -s http://127.0.0.1:4001/api/public/live/health | jq . | export LIVE_TRADING=1 SHADOW_MODE=1 | curl -s -X POST http://127.0.0.1:4001/api/public/strategy/deploy-live -H "Authorization: Bearer $EXECUTOR_TOKEN" -H "Content-Type: application/json" -d '{"symbol":"BTCUSDT","side":"BUY","type":"MARKET","qty":0.0002}' | jq . | export BINANCE_MAINNET_API_KEY="***" BINANCE_MAINNET_API_SECRET="***" | export LIVE_TRADING=2 SHADOW_MODE=0 | curl -s -X POST http://127.0.0.1:4001/api/public/strategy/deploy-live -H "Authorization: Bearer $EXECUTOR_TOKEN" -H "Content-Type: application/json" -d '{"symbol":"BTCUSDT","side":"BUY","type":"MARKET","qty":0.0002,"confirmPhrase":"CONFIRM LIVE TRADE"}' | jq . | curl -s http://127.0.0.1:4001/api/public/live/snapshot | jq . | curl -s http://127.0.0.1:3003/api/public/metrics/prom | head -n 100
+
+NOTES: Erişim sorunları varsa BLOCKED (reason) yaz ve RUNBOOK komutlarını öner. Sırlar maskeli kalır. Tek blok düz metin çıktı. 

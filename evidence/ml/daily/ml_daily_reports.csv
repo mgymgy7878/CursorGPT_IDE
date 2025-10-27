@@ -1,0 +1,2 @@
+date,total_predictions,error_rate,match_rate,psi_score,status,promote_eligible
+2025-10-08,1000,0,0,1.2527,CRITICAL,false

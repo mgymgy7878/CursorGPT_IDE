@@ -1,0 +1,25 @@
+{
+  "file": "receipts-gate.yml",
+  "verification_date": "2025-01-08",
+  "status": "PASS",
+  "checks": {
+    "cron_5_field": true,
+    "cron_exact_match": true,
+    "timeout_minutes_15": true,
+    "tz_utc": true,
+    "shell_bash": true,
+    "permissions_contents_read": true,
+    "concurrency_group_receipts_gate": true,
+    "concurrency_cancel_in_progress": true
+  },
+  "line_verification": {
+    "cron_line": 5,
+    "timeout_line": 18,
+    "tz_line": 20,
+    "shell_line": 23,
+    "permissions_line": 9,
+    "concurrency_group_line": 12,
+    "concurrency_cancel_line": 13
+  },
+  "all_checks_passed": true
+}

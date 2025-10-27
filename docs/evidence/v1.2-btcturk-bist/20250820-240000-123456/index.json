@@ -1,0 +1,31 @@
+{
+  "nonce": "20250820-240000-123456",
+  "started_utc": "2025-08-20T24:00:00Z",
+  "status": "PARTIAL",
+  "reason": "BTCTURK_HIGH_LATENCY",
+  "btcturk": {
+    "n": 5,
+    "api_latency_ms": [738.69, 353.80, 651.94, 666.36, 378.34],
+    "api_latency_p95_ms": 738.69,
+    "http_status": 200,
+    "schema_ok": 1,
+    "auth": "SKIPPED"
+  },
+  "bist": {
+    "feed_url": null,
+    "ingest_lag_ms_p95": null,
+    "seq_gap_count": null,
+    "status_component": "SKIPPED",
+    "samples": 0
+  },
+  "slo_targets": {
+    "btcturk_api_p95_ms_leq": 250,
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.2-btcturk-bist/20250820-240000-123456/index.json",
+    "metrics": "docs/evidence/v1.2-btcturk-bist/20250820-240000-123456/metrics.json",
+    "manifest": "docs/evidence/v1.2-btcturk-bist/20250820-240000-123456/manifest.sha256"
+  }
+} 

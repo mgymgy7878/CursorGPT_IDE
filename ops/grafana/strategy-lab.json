@@ -1,0 +1,88 @@
+{
+  "dashboard": {
+    "id": 1002,
+    "title": "Strategy Lab",
+    "tags": ["spark", "strategy", "lab"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Count",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{app=\"web-next\",path=\"/api/backtest/run\"}[5m]))",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Error Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{app=\"web-next\",code=~\"5..\"}[5m]))",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.01},
+                {"color": "red", "value": 0.1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Average Runtime",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(bt_runtime_ms)",
+            "legendFormat": "Avg Runtime"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Last 20 Runs",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "bt_runs_total",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "table"
+            }
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

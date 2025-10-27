@@ -1,0 +1,71 @@
+name: Receipts Gate
+
+on:
+  schedule:
+    - cron: "0 2 * * *"  # Daily at 2 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: receipts-gate
+  cancel-in-progress: true
+
+jobs:
+  receipts-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: UTC
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm -w install
+        
+      - name: Run receipts check
+        run: pnpm run check:receipts
+        
+      - name: Trigger Spark Canary (dry-run)
+        if: ${{ github.event_name == 'schedule' }}
+        env:
+          SPARK_API_URL: ${{ secrets.SPARK_API_URL }}
+          SPARK_API_TOKEN: ${{ secrets.SPARK_API_TOKEN }}
+        run: |
+          curl -sS -X POST "$SPARK_API_URL/canary/run" \
+            -H "Authorization: Bearer $SPARK_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"btcturk-ui-canary","mode":"dry-run"}' | tee canary_resp.json
+          echo "UTC 02:00 cron active"
+        
+      - name: Parse Canary PASS/FAIL
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          PASS=$(jq -r '.ok // .status // "unknown"' canary_resp.json)
+          echo "canary_status=$PASS" >> $GITHUB_OUTPUT
+          if [ "$PASS" != "true" ] && [ "$PASS" != "PASS" ]; then
+            echo "Canary FAIL or UNKNOWN"; exit 1
+          fi
+          echo "Canary PASS - latency evidence collected"
+        
+      - name: Upload Canary Artifact
+        if: ${{ github.event_name == 'schedule' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: canary-${{ github.run_id }}
+          path: |
+            canary_resp.json
+        
+      - name: Log UTC 02:00 cron active
+        run: echo "UTC 02:00 cron active - receipts gate executed successfully"

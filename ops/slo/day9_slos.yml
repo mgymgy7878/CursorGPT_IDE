@@ -1,0 +1,57 @@
+slos:
+  - name: api-error-rate
+    objective: 0.99
+    window: 7d
+    indicator: "1 - (rate(spark_private_errors_total[5m]) / clamp_min(rate(spark_private_calls_total[5m]),1e-9))"
+    burn_rate_alerts:
+      - window: 1h
+        threshold: 14
+      - window: 6h
+        threshold: 7
+
+  - name: ws-availability
+    objective: 0.999
+    window: 7d
+    indicator: "1 - (increase(spark_ws_disconnects_total[15m]) > 0)"
+
+  - name: snapshot-success
+    objective: 0.99
+    window: 7d
+    indicator: "rate(spark_report_runs_total[30m]) > 0"
+
+  - name: signal-latency-p95
+    target_ms: 1000
+    indicator: "histogram_quantile(0.95, rate(spark_signal_latency_ms_bucket[5m]))"
+
+  - name: queue-lag
+    objective: 0.95
+    window: 7d
+    indicator: "spark_queue_processed_total / clamp_min(spark_queue_enqueued_total, 1)"
+
+  - name: chaos-recovery
+    objective: 0.99
+    window: 7d
+    indicator: "rate(spark_chaos_recovery_total[5m]) > 0"
+
+  - name: shadow-live-latency
+    target_ms: 500
+    indicator: "histogram_quantile(0.95, rate(spark_shadow_latency_ms_bucket[5m]))"
+
+  - name: emergency-stop-response
+    target_ms: 100
+    indicator: "histogram_quantile(0.99, rate(spark_emergency_stop_response_ms_bucket[1m]))"
+
+  - name: feature-store-availability
+    objective: 0.999
+    window: 7d
+    indicator: "up{job=\"spark-feature-store\"}"
+
+  - name: risk-guard-uptime
+    objective: 0.9995
+    window: 7d
+    indicator: "up{job=\"spark-risk-guard\"}"
+
+  - name: report-pipeline-success
+    objective: 0.99
+    window: 7d
+    indicator: "rate(spark_report_success_total[1h]) / clamp_min(rate(spark_report_runs_total[1h]), 1e-9)" 

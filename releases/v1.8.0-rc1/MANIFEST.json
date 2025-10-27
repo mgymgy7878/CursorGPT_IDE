@@ -1,0 +1,21 @@
+﻿{
+    "documentation_files":  11,
+    "scripts":  45,
+    "promote_blocker":  "PSI drift (1.25 \u003e 0.2)",
+    "platform":  "Spark Trading Platform",
+    "version":  "v1.8.0-rc1",
+    "promote_blocked":  true,
+    "created":  "2025-10-08T15:12:38.3819675+03:00",
+    "component":  "ML Pipeline",
+    "evidence_files":  12,
+    "gates":  {
+                  "failed":  1,
+                  "blocking":  [
+                                   "PSI"
+                               ],
+                  "total":  6,
+                  "passed":  5
+              },
+    "status":  "observe-only",
+    "git_commit":  "unknown"
+}

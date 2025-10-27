@@ -1,0 +1,56 @@
+{
+  "killSwitch": true,
+  "maxNotionalUSD": 10000,
+  "maxOpenPositions": 3,
+  "maxDailyLossUSD": 1000,
+  "canary": {
+    "enabled": true,
+    "maxNotionalPct": 0.05,
+    "maxDailyLossUSD": 200,
+    "maxOpenPositions": 1,
+    "step0_duration_minutes": 30,
+    "step0_min_signals": 100,
+    "step1_duration_hours": 2,
+    "step1_min_fills": 40,
+    "step2_duration_hours": 8,
+    "step3_duration_hours": 24
+  },
+  "circuitBreaker": {
+    "enabled": true,
+    "tripOnAckP95Ms": 1000,
+    "tripOnRejectRatePct": 2.0,
+    "tripOnSeqGap": 0,
+    "tripOnDailyLossUSD": 300,
+    "tripOnSlippagePct": 2.0,
+    "tripOnBreakerCount": 1,
+    "resetAfterMinutes": 30
+  },
+  "monitoring": {
+    "metrics_endpoints": {
+      "ui": "http://127.0.0.1:3003/api/metrics",
+      "executor_canary": "http://127.0.0.1:4001/api/metrics",
+      "executor_shadow": "http://127.0.0.1:4002/api/metrics"
+    },
+    "dashboards": [
+      "Canary — MA_Cross_Regime",
+      "Shadow — ZScore_Bands_Regime",
+      "Guardrails — Circuit Breaker Status"
+    ],
+    "alerts": {
+      "ack_p95_threshold_ms": 1000,
+      "reject_rate_threshold_pct": 2.0,
+      "seq_gap_threshold": 0,
+      "daily_loss_threshold_usd": 300,
+      "slippage_threshold_pct": 2.0
+    }
+  },
+  "evidence": {
+    "collection_enabled": true,
+    "step_evidence": true,
+    "prometheus_metrics": true,
+    "order_logs": true,
+    "performance_profiling": true
+  },
+  "last_updated": "2025-08-20T28:55:00Z",
+  "version": "1.0.0"
+} 

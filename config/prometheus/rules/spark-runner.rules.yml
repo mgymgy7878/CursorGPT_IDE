@@ -1,0 +1,115 @@
+groups:
+  - name: spark-runner.rules
+    rules:
+      - alert: RunnerStallRateHigh
+        expr: rate(spark_runner_stalls_total[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: "platform"
+        annotations:
+          summary: "Runner stall oranı yüksek"
+          description: "Son 5 dakikada stall oranı >0.1. rate={{ $value }}"
+
+      - alert: RunnerStallSpike
+        expr: increase(spark_runner_stalls_total[15m]) > 3
+        for: 0m
+        labels:
+          severity: critical
+          team: "platform"
+        annotations:
+          summary: "Runner stall patlaması"
+          description: "15 dakikada >3 stall; olası kitlenme veya çevresel sorun."
+
+      - alert: RunnerExecTooSlowP95
+        expr: histogram_quantile(0.95, sum(rate(spark_runner_execution_duration_seconds_bucket[5m])) by (le)) > 60
+        for: 15m
+        labels:
+          severity: warning
+          team: "platform"
+        annotations:
+          summary: "Runner P95 süresi uzun"
+          description: "P95 > 60s (5m penceresi)."
+
+      - alert: CanaryAutoSkipHappening
+        expr: increase(spark_runner_executions_total{status="skipped"}[30m]) > 0
+        for: 0m
+        labels:
+          severity: info
+          team: "platform"
+        annotations:
+          summary: "Canary auto-skip tetiklendi"
+          description: "Son 30 dakikada en az bir auto-skip."
+
+      - alert: RunnerStallFastBurn
+        expr: rate(spark_runner_stalls_total[5m]) > 0.2
+        for: 10m
+        labels:
+          severity: critical
+          team: "platform"
+          service: "runner"
+          burn_type: "fast"
+        annotations:
+          summary: "Runner stall fast-burn"
+          description: "5dk pencerede yüksek oran. rate={{ $value }}"
+          runbook_url: "https://spark-platform/docs/runbooks/runner-fast-burn"
+
+      - alert: RunnerStallSlowBurn
+        expr: rate(spark_runner_stalls_total[1h]) > 0.05
+        for: 2h
+        labels:
+          severity: warning
+          team: "platform"
+          service: "runner"
+          burn_type: "slow"
+        annotations:
+          summary: "Runner stall slow-burn"
+          description: "1 saatlik pencerede kalıcı artış. rate={{ $value }}"
+          runbook_url: "https://spark-platform/docs/runbooks/runner-slow-burn"
+
+      # Kritik liveness bekçisi
+      - alert: RunnerMetricsDown
+        expr: up{job="spark-executor"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: "platform"
+          service: "runner"
+        annotations:
+          summary: "Executor metrics down"
+          description: "spark-executor hedefi 5 dakikadır DOWN."
+          runbook_url: "https://spark-platform/docs/runbooks/executor-down"
+          incident_response: "https://spark-platform/docs/incidents/runner-metrics-down"
+          escalation: "platform-team@spark.com"
+
+      # Predictive breach uyarısı
+      - alert: RunnerPredictiveBreachSoon
+        expr: increase(spark_runner_predictive_alerts_total[10m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: "platform"
+          service: "runner"
+          alert_type: "predictive"
+        annotations:
+          summary: "Predictive breach incoming"
+          description: "Self-learning modül yaklaşan ihlali öngördü; paneli kontrol edin."
+          runbook_url: "https://spark-platform/docs/runbooks/predictive-breach"
+          incident_response: "https://spark-platform/docs/incidents/predictive-breach"
+          escalation: "platform-team@spark.com"
+
+      # Confidence score düşüş uyarısı
+      - alert: RunnerConfidenceDrops
+        expr: spark_runner_confidence_score{type="threshold"} < 0.7
+        for: 30m
+        labels:
+          severity: warning
+          team: "platform"
+          service: "runner"
+          alert_type: "confidence"
+        annotations:
+          summary: "Confidence score düştü"
+          description: "Öğrenen eşik güveni 0.7 altına indi; drift veya veri kalitesi sorunu olabilir."
+          runbook_url: "https://spark-platform/docs/runbooks/confidence-drop"
+          incident_response: "https://spark-platform/docs/incidents/confidence-drop"
+          escalation: "platform-team@spark.com"

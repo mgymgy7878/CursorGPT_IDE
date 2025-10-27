@@ -1,0 +1,31 @@
+{
+  "name": "@spark/bist-reader",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist && tsc -b",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@spark/types": "workspace:*",
+    "@spark/trading-core": "workspace:*",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/ws": "^8.5.10",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.5.4",
+    "tsx": "^4.20.4",
+    "rimraf": "^5.0.5"
+  }
+} 

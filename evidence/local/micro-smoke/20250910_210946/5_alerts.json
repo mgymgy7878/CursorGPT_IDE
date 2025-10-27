@@ -1,0 +1,48 @@
+﻿{
+    "success":  true,
+    "data":  {
+                 "alerts":  [
+                                {
+                                    "id":  "alert_1757527787979_mi5wf8",
+                                    "kind":  "metric",
+                                    "metric_name":  "ack_p95_ms",
+                                    "operator":  "gt",
+                                    "threshold":  800,
+                                    "ttl":  "24h",
+                                    "active":  true,
+                                    "created_at":  1757527787979,
+                                    "created_by":  "dev-user"
+                                },
+                                {
+                                    "id":  "alert_1757527787979_gi7pr4",
+                                    "kind":  "metric",
+                                    "metric_name":  "rej_rate_pct",
+                                    "operator":  "gt",
+                                    "threshold":  1.5,
+                                    "ttl":  "24h",
+                                    "active":  true,
+                                    "created_at":  1757527787979,
+                                    "created_by":  "dev-user"
+                                },
+                                {
+                                    "id":  "alert_1757527787979_350uyn",
+                                    "kind":  "price",
+                                    "symbol":  "BTCUSDT",
+                                    "operator":  "lt",
+                                    "threshold":  58000,
+                                    "ttl":  "1d",
+                                    "active":  true,
+                                    "created_at":  1757527787979,
+                                    "created_by":  "dev-user"
+                                }
+                            ],
+                 "count":  3,
+                 "alert_ids":  [
+                                   "alert_1757527787979_mi5wf8",
+                                   "alert_1757527787979_gi7pr4",
+                                   "alert_1757527787979_350uyn"
+                               ]
+             },
+    "message":  "3 alert(s) created successfully",
+    "timestamp":  1757527787979
+}

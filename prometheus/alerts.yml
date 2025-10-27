@@ -1,0 +1,99 @@
+# Prometheus Alert Rules for Spark Trading Platform v1.1
+groups:
+- name: spark-executor
+  rules:
+  - alert: ExecutorDown
+    expr: up{job="spark-executor"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: executor
+    annotations:
+      summary: "Spark Executor is down"
+      description: "Spark Executor service has been down for more than 1 minute"
+      
+  - alert: ExecutorHighErrorRate
+    expr: rate(executor_http_requests_total{status=~"5.."}[5m]) > 0
+    for: 2m
+    labels:
+      severity: warning
+      service: executor
+    annotations:
+      summary: "High error rate detected in Executor"
+      description: "Executor is returning 5xx errors at rate {{ $value }}"
+      
+  - alert: ExecutorHighLatency
+    expr: histogram_quantile(0.95, sum(rate(executor_http_requests_total_bucket[5m])) by (le)) > 1000
+    for: 3m
+    labels:
+      severity: warning
+      service: executor
+    annotations:
+      summary: "P95 latency exceeds 1000ms"
+      description: "Executor P95 latency is {{ $value }}ms, exceeding 1000ms threshold"
+
+- name: spark-web
+  rules:
+  - alert: WebDown
+    expr: up{job="spark-web"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: web
+    annotations:
+      summary: "Spark Web is down"
+      description: "Spark Web service has been down for more than 1 minute"
+      
+  - alert: WebHighErrorRate
+    expr: rate(web_http_requests_total{status=~"5.."}[5m]) > 0
+    for: 2m
+    labels:
+      severity: warning
+      service: web
+    annotations:
+      summary: "High error rate detected in Web"
+      description: "Web service is returning 5xx errors at rate {{ $value }}"
+
+- name: canary-evidence
+  rules:
+  - alert: CanaryEndpointDown
+    expr: up{job="spark-executor"} == 0 or rate(executor_http_requests_total{route="/canary/run"}[5m]) == 0
+    for: 5m
+    labels:
+      severity: warning
+      service: canary
+    annotations:
+      summary: "Canary endpoint not responding"
+      description: "Canary dry-run endpoint has not received requests for 5 minutes"
+      
+  - alert: BTCTurkProxyDown
+    expr: rate(web_http_requests_total{route="/api/public/btcturk/*"}[5m]) == 0
+    for: 10m
+    labels:
+      severity: warning
+      service: btcturk
+    annotations:
+      summary: "BTCTurk proxy not responding"
+      description: "BTCTurk proxy endpoints have not received requests for 10 minutes"
+
+- name: slo-targets
+  rules:
+  - alert: SLOLatencyViolation
+    expr: histogram_quantile(0.95, sum(rate(executor_http_requests_total_bucket[5m])) by (le)) > 1000
+    for: 5m
+    labels:
+      severity: warning
+      slo: latency
+    annotations:
+      summary: "SLO Latency Violation"
+      description: "P95 latency {{ $value }}ms exceeds SLO target of 1000ms"
+      
+  - alert: SLOAvailabilityViolation
+    expr: (up{job="spark-executor"} + up{job="spark-web"}) / 2 < 0.999
+    for: 2m
+    labels:
+      severity: critical
+      slo: availability
+    annotations:
+      summary: "SLO Availability Violation"
+      description: "System availability {{ $value }}% below SLO target of 99.9%"

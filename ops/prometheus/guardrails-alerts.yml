@@ -1,0 +1,32 @@
+groups:
+- name: guardrails
+  rules:
+  - alert: GuardrailsParamPendingTooLong
+    expr: max_over_time(guardrails_pending_age_seconds[5m]) > 7200
+    for: 10m
+    labels: 
+      severity: warning
+    annotations: 
+      summary: "Param diff pending > 2h"
+      description: "Parameter change has been pending for more than 2 hours"
+      runbook: "docs/GUARDRAILS_RUNBOOK.md"
+      
+  - alert: GuardrailsParamQueueLarge
+    expr: sum(guardrails_param_diff_pending_total) > 10
+    for: 10m
+    labels: 
+      severity: warning
+    annotations: 
+      summary: "Param diff queue size high"
+      description: "Too many parameter changes pending approval"
+      runbook: "docs/GUARDRAILS_RUNBOOK.md"
+      
+  - alert: GuardrailsBlocksHigh
+    expr: rate(guardrails_blocks_total[5m]) > 0.1
+    for: 5m
+    labels: 
+      severity: critical
+    annotations: 
+      summary: "High rate of guardrails blocks"
+      description: "Risk gate is blocking orders at high rate"
+      runbook: "docs/GUARDRAILS_RUNBOOK.md"

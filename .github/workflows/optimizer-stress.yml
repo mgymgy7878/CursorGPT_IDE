@@ -1,0 +1,59 @@
+name: Optimizer Concurrency Stress Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  optimizer_stress:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 10.14.0 }
+      - run: pnpm -w install
+      
+      - name: Build executor service
+        run: |
+          pnpm -F services/executor build
+          
+      - name: Start executor service
+        run: |
+          node services/executor/dist/server.js &
+          sleep 5
+          
+      - name: Seed optimizer jobs
+        run: |
+          node scripts/seed-optimizer.js --parallel=6 --variants=8 --kind=optimize
+          
+      - name: Assert P95 thresholds
+        run: |
+          node scripts/assert-optimizer-metrics.js
+          
+      - name: Resource limit validation
+        run: |
+          # Check resource usage < 80%
+          curl -s http://localhost:4001/optimizer/metrics | grep optimizer_resource_cpu_pct
+          # Validate no resource limit violations
+          curl -s http://localhost:4001/optimizer/metrics | grep optimizer_preemptions_total
+          
+      - name: Performance validation
+        run: |
+          # Check P95 latency < 100ms
+          curl -s http://localhost:4001/optimizer/metrics | grep optimizer_step_latency_ms
+          # Check queue depth < 200
+          curl -s http://localhost:4001/optimizer/metrics | grep optimizer_queue_depth
+          
+      - name: Concurrency validation
+        run: |
+          # Check workers running >= 2
+          curl -s http://localhost:4001/optimizer/metrics | grep optimizer_workers_running
+          # Check CPU usage <= 80%
+          curl -s http://localhost:4001/optimizer/metrics | grep optimizer_resource_cpu_pct
+          
+      - name: Cleanup
+        run: |
+          pkill -f "node services/executor"

@@ -1,0 +1,52 @@
+groups:
+- name: optimizer.rules
+  rules:
+  - alert: OptimizerQueueBacklogHigh
+    expr: sum(optimizer_queue_depth) > 200
+    for: 5m
+    labels:
+      severity: warning
+      service: optimizer
+    annotations:
+      summary: "Optimizer queue backlog > 200 (5m)"
+      description: "Queue depth is {{ $value }} jobs"
+      
+  - alert: OptimizerQueueWaitP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(optimizer_queue_wait_ms_bucket[10m]))) > 1000
+    for: 10m
+    labels:
+      severity: warning
+      service: optimizer
+    annotations:
+      summary: "Queue wait P95 > 1s (10m)"
+      description: "P95 queue wait time is {{ $value }}ms"
+      
+  - alert: OptimizerStepLatencyP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(optimizer_step_latency_ms_bucket[10m]))) > 100
+    for: 10m
+    labels:
+      severity: critical
+      service: optimizer
+    annotations:
+      summary: "Step latency P95 > 100ms"
+      description: "P95 step latency is {{ $value }}ms"
+      
+  - alert: OptimizerCPUHigh
+    expr: avg(optimizer_resource_cpu_pct) > 85
+    for: 10m
+    labels:
+      severity: warning
+      service: optimizer
+    annotations:
+      summary: "CPU usage > 85%"
+      description: "Average CPU usage is {{ $value }}%"
+      
+  - alert: OptimizerPreemptionsSpike
+    expr: increase(optimizer_preemptions_total[10m]) > 50
+    for: 5m
+    labels:
+      severity: warning
+      service: optimizer
+    annotations:
+      summary: "Preemptions spike (>50/10m)"
+      description: "Preemptions rate is {{ $value }} per 10 minutes"

@@ -1,0 +1,31 @@
+﻿=== CURSOR IDE GENIŞLETILMIŞ ALLOWLIST TALİMATLARI ===
+
+1. Cursor Settings -> Auto-Run Mode: Use Allowlist seç
+2. Command Allowlist'e şu komutları tek tek ekle:
+
+TEMEL KOMUTLAR:
+node, pnpm, pnpm run, pnpm --filter, pnpm -w, tsc, npx, curl,
+Invoke-WebRequest, mkdir, Move-Item, rimraf, Get-ChildItem,
+Get-Content, type, Start-Sleep, netstat, findstr, taskkill, cd
+
+GÜVENLİ WRAPPER'LAR:
+git-safe, pm2-safe
+
+3. Protection ayarları:
+   - File-Deletion Protection: ON
+   - Dotfile Protection: ON  
+   - External-File Protection: ON
+   - MCP Tools Protection: ON
+
+4. Background Agents: KAPALI
+5. MCP Tools: Manuel ayar
+
+6. Hız optimizasyonları:
+   - Auto-Accept on Commit: ON
+   - Auto-Fix Lints: ON
+   - Preview Box for Terminal Ctrl+K: ON
+   - Hierarchical Cursor Ignore: ON
+
+PROFIL ADI: Düşük Sürtünmeli Otomasyon 
+GÜVENLİK SEVİYESİ: Kontrollü (kritik frenler aktif) 
+AKIŞ HİZİ: Yüksek (minimal onay istekleri) 

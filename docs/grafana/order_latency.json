@@ -1,0 +1,122 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Order Latency",
+    "tags": ["orders", "latency", "trading"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Order Acknowledgment Latency (p95)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, btcturk_order_ack_ms_bucket)",
+            "legendFormat": "p95 (ms)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Order Acknowledgment Latency (p99)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, btcturk_order_ack_ms_bucket)",
+            "legendFormat": "p99 (ms)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Orders Total",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "btcturk_orders_total{type=\"place\"}",
+            "legendFormat": "Place Orders"
+          },
+          {
+            "expr": "btcturk_orders_total{type=\"cancel\"}",
+            "legendFormat": "Cancel Orders"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Signature Latency",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, btcturk_sign_latency_ms_bucket)",
+            "legendFormat": "Sign Latency p95 (ms)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Clock Drift",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "btcturk_clock_drift_ms",
+            "legendFormat": "Drift (ms)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 100},
+                {"color": "red", "value": 500}
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+} 

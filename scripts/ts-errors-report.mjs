@@ -1,0 +1,16 @@
+import fs from "node:fs";
+import path from "node:path";
+const EVID = process.argv[2] ?? path.join("evidence","local","typecheck","latest");
+fs.mkdirSync(EVID, { recursive: true });
+const LOG = path.join(EVID, "tsc.log");
+const HIST = path.join(EVID, "tsc_histogram.txt");
+const MISS = path.join(EVID, "missing_modules.txt");
+if (!fs.existsSync(LOG)) process.exit(0);
+const txt = fs.readFileSync(LOG, "utf8");
+const lines = txt.split(/\r?\n/);
+const errs = lines.filter(l => l.includes("error TS")).map(l => l.match(/error (TS\d{4})/)?.[1]).filter(Boolean);
+const hist = Object.entries(errs.reduce((m, c) => (m[c]=(m[c]||0)+1, m), {})).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${v} ${k}`).join("\n");
+fs.writeFileSync(HIST, hist);
+const modMiss = lines.filter(l => l.includes("error TS2307")).map(l => l.replace(/^.*error TS2307:.*'?([^'"]+)'?.*$/,"$1"));
+const topMiss = Object.entries(modMiss.reduce((m,c)=>(m[c]=(m[c]||0)+1,m),{})).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([k,v])=>`${v} ${k}`).join("\n");
+fs.writeFileSync(MISS, topMiss);

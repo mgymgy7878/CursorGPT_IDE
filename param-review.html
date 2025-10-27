@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<title>Param Review (Mini UI)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial;padding:16px}
+  .card{border:1px solid #ddd;border-radius:10px;padding:12px;margin:8px 0}
+  button{padding:8px 12px;border-radius:8px;border:0;margin-right:8px;cursor:pointer}
+  .ok{background:#16a34a;color:#fff}.no{background:#dc2626;color:#fff}
+</style>
+</head>
+<body>
+  <h1>Param Review — Mini UI</h1>
+  <label>Actor: <input id="actor" value="local@user"></label>
+  <label style="margin-left:8px">Role:
+    <select id="role"><option>admin</option><option>viewer</option></select>
+  </label>
+  <button onclick="loadPending()">Yenile</button>
+  <div id="out"></div>
+
+<script>
+const BASE = 'http://127.0.0.1:4001';
+
+async function api(path, method='GET', body) {
+  const headers = {'x-role': document.getElementById('role').value, 'x-actor': document.getElementById('actor').value};
+  if (body) headers['content-type'] = 'application/json';
+  const res = await fetch(BASE + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error((data && data.error) || res.statusText);
+  return data;
+}
+
+async function loadPending() {
+  const out = document.getElementById('out'); out.innerHTML = 'Yükleniyor...';
+  try {
+    const j = await api('/guardrails/params/pending');
+    if (!j.items || !j.items.length) { out.textContent = 'Pending yok.'; return; }
+    out.innerHTML = '';
+    j.items.forEach(r => {
+      const d = document.createElement('div');
+      d.className = 'card';
+      d.innerHTML = `<div style="font-family:monospace">${r.id} — ${r.key}</div>
+        <div style="opacity:.7">old: ${JSON.stringify(r.oldVal)} → new: ${JSON.stringify(r.newVal)}</div>
+        <div style="margin-top:8px">
+          <button class="ok">Approve</button>
+          <button class="no">Deny</button>
+        </div>`;
+      d.querySelector('.ok').onclick  = async () => { await api('/guardrails/params/approve?id='+encodeURIComponent(r.id), 'GET'); await loadPending(); };
+      d.querySelector('.no').onclick  = async () => { await api('/guardrails/params/deny?id='+encodeURIComponent(r.id), 'GET'); await loadPending(); };
+      out.appendChild(d);
+    });
+  } catch (e) { out.textContent = 'Hata: ' + e.message; }
+}
+loadPending();
+</script>
+</body>
+</html>

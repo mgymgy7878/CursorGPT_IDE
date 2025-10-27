@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/web-next" },
+    { "path": "./services/executor" },
+    { "path": "./packages/types" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/guardrails" }
+  ]
+}

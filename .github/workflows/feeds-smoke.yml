@@ -1,0 +1,63 @@
+name: Feeds Smoke Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'packages/@spark/exchange-btcturk/**'
+      - 'packages/@spark/market-bist/**'
+      - 'services/marketdata/**'
+      - 'scripts/feeds-smoke.*'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'packages/@spark/exchange-btcturk/**'
+      - 'packages/@spark/market-bist/**'
+      - 'services/marketdata/**'
+      - 'scripts/feeds-smoke.*'
+
+jobs:
+  feeds-smoke:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install pnpm
+      run: npm install -g pnpm@10.14.0
+    
+    - name: Install dependencies
+      run: pnpm install
+    
+    - name: Build packages
+      run: pnpm build
+    
+    - name: Start marketdata service
+      run: |
+        cd services/marketdata
+        pnpm start &
+        sleep 10
+      env:
+        PORT: 4005
+        BIST_FILE_PATH: /tmp/bist-data.json
+    
+    - name: Wait for service
+      run: |
+        timeout 30 bash -c 'until curl -f http://127.0.0.1:4005/health; do sleep 1; done'
+    
+    - name: Run feeds smoke test
+      run: bash scripts/feeds-smoke.sh
+    
+    - name: Test metrics contract
+      run: |
+        curl -s http://127.0.0.1:4005/metrics | grep -E "(feed_events_total|ws_reconnects_total|feed_latency_ms|event_to_db_ms)"
+    
+    - name: Stop service
+      run: |
+        pkill -f "node.*marketdata" || true

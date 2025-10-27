@@ -1,0 +1,1 @@
+{"status":"ERROR","reason":"ReferenceError: invalid_bars is not defined","quality_assessment":{"overall_pass":false,"critical_issues":["Data quality audit failed"]}}

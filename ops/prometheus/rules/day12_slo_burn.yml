@@ -1,0 +1,84 @@
+groups:
+- name: slo_burn
+  rules:
+  - alert: APIErrorBudgetBurnFast
+    expr: (rate(spark_private_errors_total[5m]) / clamp_min(rate(spark_private_calls_total[5m]), 1e-9)) > 0.05
+    for: 1h
+    labels:
+      severity: critical
+      service: spark-executor
+    annotations:
+      summary: "API error-rate > 5% (fast burn)"
+      description: "API error rate is {{ $value | humanizePercentage }} over 5m window"
+      runbook: "docs/DAY12_OBSERVABILITY_SRE.md#alerts"
+
+  - alert: APIErrorBudgetBurnSlow
+    expr: (rate(spark_private_errors_total[30m]) / clamp_min(rate(spark_private_calls_total[30m]), 1e-9)) > 0.02
+    for: 6h
+    labels:
+      severity: warning
+      service: spark-executor
+    annotations:
+      summary: "API error-rate > 2% (slow burn)"
+      description: "API error rate is {{ $value | humanizePercentage }} over 30m window"
+
+  - alert: WSPongStale
+    expr: (time() * 1000 - spark_ws_last_pong_ms) > 15000
+    for: 5m
+    labels:
+      severity: warning
+      service: spark-executor
+    annotations:
+      summary: "WebSocket stale (>15s)"
+      description: "Last WebSocket pong was {{ $value | humanizeDuration }} ago"
+      hint: "Check watchdog reconnect mechanism"
+
+  - alert: SyntheticProbeFailing
+    expr: increase(spark_synth_fail_total[10m]) > 0
+    for: 10m
+    labels:
+      severity: critical
+      service: spark-executor
+    annotations:
+      summary: "Synthetic probes failing (10m window)"
+      description: "{{ $value }} synthetic probe failures in last 10m"
+
+  - alert: HighLatencyP95
+    expr: histogram_quantile(0.95, rate(spark_perf_http_duration_ms_bucket[5m])) > 100
+    for: 5m
+    labels:
+      severity: warning
+      service: spark-executor
+    annotations:
+      summary: "HTTP p95 latency > 100ms"
+      description: "P95 latency is {{ $value }}ms"
+
+  - alert: ReadyEndpointFailing
+    expr: rate(spark_ready_check_failures_total[5m]) > 0
+    for: 5m
+    labels:
+      severity: critical
+      service: spark-executor
+    annotations:
+      summary: "Ready endpoint failing"
+      description: "{{ $value }} ready check failures per second"
+
+  - alert: TenantRateLimitExceeded
+    expr: rate(spark_tenant_rejects_total{reason="rate"}[5m]) > 0.1
+    for: 10m
+    labels:
+      severity: warning
+      service: spark-executor
+    annotations:
+      summary: "High tenant rate limiting"
+      description: "{{ $value }} rate limit rejections per second"
+
+  - alert: OutboundConcurrencyHigh
+    expr: spark_outbound_concurrency_current > 50
+    for: 5m
+    labels:
+      severity: warning
+      service: spark-executor
+    annotations:
+      summary: "High outbound concurrency"
+      description: "Outbound concurrency is {{ $value }} (limit: 64)" 

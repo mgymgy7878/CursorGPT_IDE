@@ -1,0 +1,4 @@
+Port kontrolü sonucu:
+- Port 3003: BOŞ
+- Port 4001: BOŞ
+- PM2 temizlendi, portlar serbest

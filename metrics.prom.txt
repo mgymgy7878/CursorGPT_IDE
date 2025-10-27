@@ -1,0 +1,75 @@
+# HELP spark_proxy_requests_total Total number of proxy requests
+# TYPE spark_proxy_requests_total counter
+spark_proxy_requests_total 0
+
+# HELP spark_proxy_errors_total Total number of proxy errors
+# TYPE spark_proxy_errors_total counter
+spark_proxy_errors_total 0
+
+# HELP spark_proxy_duration_seconds Proxy request duration
+# TYPE spark_proxy_duration_seconds histogram
+spark_proxy_duration_seconds_bucket{le="0.1"} 0
+spark_proxy_duration_seconds_bucket{le="0.5"} 0
+spark_proxy_duration_seconds_bucket{le="1.0"} 0
+spark_proxy_duration_seconds_bucket{le="5.0"} 0
+spark_proxy_duration_seconds_bucket{le="+Inf"} 0
+
+# HELP spark_proxy_body_rejected_total Total number of rejected bodies due to size
+# TYPE spark_proxy_body_rejected_total counter
+spark_proxy_body_rejected_total 0
+
+# HELP spark_proxy_rate_limited_total Total number of rate limited requests
+# TYPE spark_proxy_rate_limited_total counter
+spark_proxy_rate_limited_total 0
+
+# HELP spark_proxy_circuit_open_total Total number of circuit breaker opens
+# TYPE spark_proxy_circuit_open_total counter
+spark_proxy_circuit_open_total 0
+
+# HELP spark_strategy_generate_total Total number of strategy generations
+# TYPE spark_strategy_generate_total counter
+spark_strategy_generate_total 0
+
+# HELP spark_strategy_build_total Total number of strategy builds
+# TYPE spark_strategy_build_total counter
+spark_strategy_build_total 0
+
+# HELP spark_strategy_backtest_total Total number of strategy backtests
+# TYPE spark_strategy_backtest_total counter
+spark_strategy_backtest_total 0
+
+# HELP spark_strategy_backtest_duration_seconds Strategy backtest duration
+# TYPE spark_strategy_backtest_duration_seconds histogram
+spark_strategy_backtest_duration_seconds_bucket{le="1.0"} 0
+spark_strategy_backtest_duration_seconds_bucket{le="5.0"} 0
+spark_strategy_backtest_duration_seconds_bucket{le="10.0"} 0
+spark_strategy_backtest_duration_seconds_bucket{le="+Inf"} 0
+
+# HELP spark_strategy_paper_deploy_total Total number of paper trading deployments
+# TYPE spark_strategy_paper_deploy_total counter
+spark_strategy_paper_deploy_total 0
+
+# HELP spark_strategy_failures_total Total number of strategy pipeline failures
+# TYPE spark_strategy_failures_total counter
+spark_strategy_failures_total 0
+
+# HELP spark_live_orders_total Total number of live orders
+# TYPE spark_live_orders_total counter
+spark_live_orders_total 0
+
+# HELP spark_live_trades_total Total number of live trades
+# TYPE spark_live_trades_total counter
+spark_live_trades_total 0
+
+# HELP spark_live_blocked_total Total number of blocked live orders
+# TYPE spark_live_blocked_total counter
+spark_live_blocked_total 0
+
+# HELP spark_live_reconciliation_total Total number of reconciliation events
+# TYPE spark_live_reconciliation_total counter
+spark_live_reconciliation_total 0
+
+# HELP spark_live_ws_reconnects_total Total number of WebSocket reconnections
+# TYPE spark_live_ws_reconnects_total counter
+spark_live_ws_reconnects_total 0
+

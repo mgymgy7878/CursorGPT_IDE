@@ -1,0 +1,20 @@
+﻿# V1.6 Hybrid Executor Test
+
+Timestamp: 2025-10-10 21:18:19
+Mode: Hybrid (REAL_ROUTES=run)
+
+## Health
+{
+    "ok":  true,
+    "service":  "executor",
+    "ts":  1760120299920,
+    "mode":  "hybrid (real: run)",
+    "version":  "v1.6-hybrid"
+}
+
+## REAL Route Test: /backtest/run
+mock=False, realEngine=True, bars=144, pnl=360, duration=~5ms
+
+## MOCK Route Test: /backtest/walkforward
+mock=True, overfitting.detected=False, ratio=0.85
+

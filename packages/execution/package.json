@@ -1,0 +1,28 @@
+{
+  "name": "@spark/execution",
+  "version": "0.3.3",
+  "description": "Spark Trading Execution Engine with Binance Integration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx scripts/canary.ts",
+    "test": "tsx scripts/canary.ts --mode testnet --symbol BTCUSDT --qty 0.00012",
+    "test:real": "tsx scripts/canary.ts --mode testnet --symbol BTCUSDT --qty 0.00012 --arm --confirm --execute",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "ws": "^8.14.0",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@spark/common": "workspace:*",
+    "@spark/shared": "workspace:*"
+  }
+} 

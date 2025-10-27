@@ -1,0 +1,83 @@
+# AI Chunk Upload & SSE Retry Alert Rules
+# Monitors chunked upload and SSE retry behavior
+
+groups:
+- name: ai-chunk-sse
+  rules:
+  # Alert when chunk backlog is high
+  - alert: ChunkBacklogHigh
+    expr: sum(ai_chunk_upload_total{event="store"} - ai_chunk_upload_total{event="complete"}) > 100
+    for: 5m
+    labels: 
+      severity: warning
+      service: ai-chunk
+      component: storage
+    annotations:
+      summary: "AI chunk backlog high"
+      description: "More than 100 chunks are pending completion. Check storage and processing."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-chunk-storage"
+      
+  # Alert when chunk errors spike
+  - alert: ChunkErrorSpike
+    expr: rate(ai_chunk_upload_total{event="error"}[5m]) > 0.1
+    for: 5m
+    labels: 
+      severity: warning
+      service: ai-chunk
+      component: storage
+    annotations:
+      summary: "AI chunk error spike detected"
+      description: "Chunk upload error rate exceeded 0.1/s in the last 5m."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-chunk-storage"
+      
+  # Alert when SSE retry rate is high
+  - alert: SSERetrySpike
+    expr: rate(sse_retry_total{result="retry"}[5m]) > 5
+    for: 5m
+    labels: 
+      severity: warning
+      service: ai-sse
+      component: retry
+    annotations:
+      summary: "SSE retry spike detected"
+      description: "SSE retry rate exceeded 5/s in the last 5m. Check network connectivity."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-sse-retry"
+      
+  # Alert when SSE retry failures are high
+  - alert: SSERetryFailureHigh
+    expr: rate(sse_retry_total{result="giveup"}[5m]) > 0.5
+    for: 5m
+    labels: 
+      severity: critical
+      service: ai-sse
+      component: retry
+    annotations:
+      summary: "SSE retry failure rate high"
+      description: "SSE retry failure rate exceeded 0.5/s in the last 5m. Check upstream connectivity."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-sse-retry"
+      
+  # Alert when chunk storage is full
+  - alert: ChunkStorageFull
+    expr: sum(ai_chunk_bytes) > 1000000000  # 1GB
+    for: 10m
+    labels: 
+      severity: warning
+      service: ai-chunk
+      component: storage
+    annotations:
+      summary: "AI chunk storage approaching limit"
+      description: "Total chunk storage exceeded 1GB. Consider cleanup or storage expansion."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-chunk-storage"
+      
+  # Alert when chunk age is too high
+  - alert: ChunkAgeHigh
+    expr: histogram_quantile(0.95, ai_chunk_age_seconds) > 86400  # 24 hours
+    for: 5m
+    labels: 
+      severity: info
+      service: ai-chunk
+      component: storage
+    annotations:
+      summary: "AI chunk age high"
+      description: "P95 chunk age exceeded 24 hours. Check cleanup process."
+      runbook_url: "https://docs.spark.trading/runbooks/ai-chunk-storage"

@@ -1,0 +1,3 @@
+/* placeholder to avoid Next global CSS boot errors */
+:root { --spark: 1; }
+body { margin: 0; }

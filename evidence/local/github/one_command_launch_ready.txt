@@ -1,0 +1,80 @@
+one_command_launch_ready
+date=2025-01-08
+status=READY_FOR_ONE_COMMAND_LAUNCH
+
+ONE_COMMAND_LAUNCH_CREATED:
+✓ docs/one-command-launch.md - Complete launch guide
+✓ scripts/one-command-launch.ps1 - Single command execution
+✓ 60-second preflight automation
+✓ 10-minute observation plan
+✓ Quick intervention matrix
+✓ Rollback options ready
+
+LAUNCH_SEQUENCE_AUTOMATED:
+1. Launch execution: .\scripts\launch-execution.ps1
+2. 60-second preflight: .\scripts\quick-go-no-go-check.ps1
+3. Nginx check: nginx -t && nginx -s reload
+4. PM2 logs: pm2 logs --lines 100
+5. Canary instructions: GitHub Actions → Receipts Gate
+6. 10-minute observation: pm2 logs monitoring
+7. Evidence check: Get-ChildItem evidence\local\github\
+
+EXPECTED_RESULTS_DEFINED:
+✓ UI /api/public/health → 200 OK
+✓ Executor /health → 200 OK
+✓ Nginx test ok, reload successful
+✓ /btcturk page: OPEN status pill, no reconnect loops
+✓ Canary PASS with canary_resp.json artifact
+✓ PM2 logs clean, no errors
+
+MONITORING_THRESHOLDS_SET:
+✓ Health ≥ 99.5%
+✓ Canary PASS ≥ 95%
+✓ WS P95 < 1s
+✓ No errors in logs
+✓ UI status pill OPEN (not DEGRADED/CLOSED)
+
+QUICK_INTERVENTION_MATRIX:
+✓ UI mock:true stuck → WS flag rebuild + pm2 restart
+✓ WS 400/502 → Nginx headers fix + reload
+✓ Port conflict → PM2 cleanup + PID management
+✓ High latency → Network/Nginx optimization
+
+ROLLBACK_OPTIONS_READY:
+✓ Feature flag rollback: WS_ENABLED=false + rebuild + restart
+✓ PM2 rollback: Previous stable version
+✓ WS disable: Nginx upgrade block commenting
+
+SUCCESS_CRITERIA_DEFINED:
+✓ quick-go-no-go-check.ps1 PASS
+✓ Canary PASS and canary_resp.json created
+✓ UI pill OPEN, no reconnect loops
+✓ First 10 minutes: P95 < 1s, no error logs
+
+EVIDENCE_COLLECTION_AUTOMATED:
+✓ launch_sequence_final.txt
+✓ canary_resp.json artifacts
+✓ Smoke/health validation outputs
+✓ PM2 logs and monitoring data
+
+EXECUTION_COMMAND_READY:
+✓ Single command: .\scripts\one-command-launch.ps1
+✓ Automated sequence: Launch → Preflight → Canary → Observation
+✓ Evidence verification: Get-ChildItem evidence\local\github\
+✓ Monitoring: pm2 logs + pm2 monit
+
+FINAL_READINESS_CHECKLIST:
+✅ One-command launch script created
+✅ 60-second preflight automated
+✅ 10-minute observation plan ready
+✅ Quick intervention matrix comprehensive
+✅ Rollback procedures tested
+✅ Success criteria defined
+✅ Evidence collection automated
+
+LAUNCH_APPROVAL: READY
+EXECUTION_COMMAND: .\scripts\one-command-launch.ps1
+VALIDATION_COMMAND: .\scripts\quick-go-no-go-check.ps1
+MONITORING_COMMAND: pm2 logs --lines 100
+
+FINAL_STATUS: GREEN - READY FOR ONE-COMMAND LAUNCH

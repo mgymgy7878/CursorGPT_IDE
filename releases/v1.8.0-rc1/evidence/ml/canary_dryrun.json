@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-10-08T11:17:42.017Z",
+  "config": {
+    "service": "ml-shadow",
+    "observe_only": true,
+    "plan": [
+      {
+        "split": 0.05,
+        "duration_min": 30
+      },
+      {
+        "split": 0.1,
+        "duration_min": 30
+      },
+      {
+        "split": 0.25,
+        "duration_min": 30
+      },
+      {
+        "split": 0.5,
+        "duration_min": 30
+      },
+      {
+        "split": 1,
+        "duration_min": 30
+      }
+    ],
+    "slo": {
+      "p95_ms_max": 80,
+      "err_rate_max": 0.01,
+      "match_rate_min": 0.95,
+      "psi_warn": 0.2,
+      "psi_crit": 0.3
+    },
+    "abort_thresholds": {
+      "p95_ms_abort": 120,
+      "err_rate_abort": 0.02,
+      "match_rate_abort": 0.9,
+      "psi_abort": 0.3
+    },
+    "note": "PSI currently 1.25 (critical) → observe-only mode, NO PROMOTE"
+  },
+  "results": [
+    {
+      "phase": "5%",
+      "duration_min": 30,
+      "metrics": {
+        "p95_ms": 2.9322381414544214,
+        "p99_ms": 3.3167163412270764,
+        "err_rate": 0.0006506671714910294,
+        "match_rate": 0.9967335661247496,
+        "psi_overall": 1.25,
+        "traffic_split": 0.05,
+        "requests_served": 50,
+        "shadow_errors": 0
+      },
+      "slo_checks": {
+        "p95_ok": true,
+        "err_ok": true,
+        "match_ok": true,
+        "psi_warn": true,
+        "psi_crit": true
+      },
+      "abort_checks": {
+        "p95_abort": false,
+        "err_abort": false,
+        "match_abort": false,
+        "psi_abort": true
+      },
+      "should_abort": true,
+      "slo_pass": true,
+      "decision": "ABORT",
+      "dry_run": true
+    }
+  ],
+  "dry_run": true,
+  "summary": {
+    "phases_completed": 1,
+    "aborted": true,
+    "all_slo_pass": true,
+    "psi_blocking_promote": "PSI currently 1.25 (critical) → observe-only mode, NO PROMOTE"
+  }
+}

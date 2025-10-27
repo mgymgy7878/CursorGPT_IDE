@@ -1,0 +1,12 @@
+{
+  "name": "@spark/strategy-codegen",
+  "version": "0.1.5",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types":"./dist/index.d.ts","import":"./dist/index.js","default":"./dist/index.js" }, "./*":"./dist/*" },
+  "files": ["dist"],
+  "sideEffects": false,
+  "dependencies": { "@spark/types": "workspace:*" },
+  "scripts": { "build": "pnpm exec tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.typecheck.json --noEmit" }
+} 

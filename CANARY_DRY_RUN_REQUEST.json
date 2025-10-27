@@ -1,0 +1,15 @@
+{
+  "action": "/canary/run",
+  "params": {
+    "exchange": "btcturk",
+    "symbols": ["BTCUSDT","ETHUSDT"],
+    "budgetNotional": 1000,
+    "maxOrders": 2,
+    "riskGuard": true,
+    "dryRun": true,
+    "evidence": true
+  },
+  "dryRun": true,
+  "confirm_required": false,
+  "reason": "Reboot sonrası sistem GREEN; executor 200. Canary kanıtı toplama."
+}

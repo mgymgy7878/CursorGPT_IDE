@@ -1,0 +1,12 @@
+groups:
+- name: spark-dynamic
+  rules:
+  - alert: rescue-open-too-long
+    expr: "web_next_rescue_enabled{app=\"web-next\"} == 1 > 0"
+    for: 10m
+    labels:
+      severity: "warning"
+      source: "spark"
+    annotations:
+      summary: "Rescue 10+ dk a�ik kaldi"
+      description: "Auto-generated alert: web_next_rescue_enabled{app=\"web-next\"} == 1 > 0"

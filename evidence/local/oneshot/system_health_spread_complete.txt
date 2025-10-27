@@ -1,0 +1,1 @@
+﻿System Health Pill + Spread Card eklendi - UI-only polling, ticker 2s, health 5s

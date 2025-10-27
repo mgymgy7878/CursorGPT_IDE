@@ -1,0 +1,208 @@
+{
+  "title": "Spark — Observability++",
+  "tags": ["spark", "observability", "sre"],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "API Error Rate (5m)",
+      "targets": [
+        {
+          "expr": "rate(spark_private_errors_total[5m]) / clamp_min(rate(spark_private_calls_total[5m]), 1e-9)",
+          "legendFormat": "Error Rate"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.01},
+              {"color": "red", "value": 0.05}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "graph",
+      "title": "HTTP p95 Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(spark_perf_http_duration_ms_bucket[5m]))",
+          "legendFormat": "P95 Latency"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "red", "value": 100}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "graph",
+      "title": "WebSocket Disconnects",
+      "targets": [
+        {
+          "expr": "increase(spark_ws_disconnects_total[15m])",
+          "legendFormat": "Disconnects"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 5}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "graph",
+      "title": "Synthetic Probe Failures",
+      "targets": [
+        {
+          "expr": "increase(spark_synth_fail_total[15m])",
+          "legendFormat": "Failures"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "red", "value": 1}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Report Runs (1h)",
+      "targets": [
+        {
+          "expr": "increase(spark_report_runs_total[1h])",
+          "legendFormat": "Reports"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "Top Paths by Errors",
+      "targets": [
+        {
+          "expr": "topk(10, sum by (route) (rate(spark_route_errors_total[5m])))",
+          "legendFormat": "{{route}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Ready Endpoint Status",
+      "targets": [
+        {
+          "expr": "spark_ready_check_success_total",
+          "legendFormat": "Success"
+        },
+        {
+          "expr": "spark_ready_check_failures_total",
+          "legendFormat": "Failures"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "graph",
+      "title": "Tenant Rate Limiting",
+      "targets": [
+        {
+          "expr": "rate(spark_tenant_rejects_total{reason=\"rate\"}[5m])",
+          "legendFormat": "Rate Limited"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "Outbound Concurrency",
+      "targets": [
+        {
+          "expr": "spark_outbound_concurrency_current",
+          "legendFormat": "Current"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 40},
+              {"color": "red", "value": 60}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "graph",
+      "title": "Request Volume by Tenant",
+      "targets": [
+        {
+          "expr": "rate(spark_tenant_requests_total[5m])",
+          "legendFormat": "{{org}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    }
+  ]
+} 

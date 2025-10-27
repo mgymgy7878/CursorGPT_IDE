@@ -1,0 +1,2 @@
+export type NewsEvent = { ts:number; symbol:string; source:string; type:'news'|'sentiment'; score:number; confidence:number; headline?:string; tags?:string[] }
+export async function fetchNews(_symbol:string): Promise<NewsEvent[]> { return [] } 

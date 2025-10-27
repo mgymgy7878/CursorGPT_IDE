@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["apps/web-next/*"],
+      "@spark/*": [
+        "packages/@spark/*/dist",
+        "packages/@spark/*/src",
+        "packages/@spark/*"
+      ]
+    },
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "typeRoots": ["./types", "./node_modules/@types"]
+  },
+  "include": ["types/**/*"]
+} 

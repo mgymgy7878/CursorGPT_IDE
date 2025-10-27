@@ -1,0 +1,38 @@
+﻿{
+    "ok":  true,
+    "mock":  false,
+    "result":  {
+                   "symbol":  "BTCUSDT",
+                   "timeframe":  "1h",
+                   "start":  "2024-01-01",
+                   "end":  "2024-01-07",
+                   "exchange":  "binance",
+                   "totalBars":  144,
+                   "folds":  1,
+                   "overfitting":  {
+                                       "detected":  false,
+                                       "ratio":  0.8333333333333333,
+                                       "threshold":  0.6
+                                   },
+                   "summary":  {
+                                   "train":  {
+                                                 "sharpe":  1.8,
+                                                 "winRate":  0.62,
+                                                 "ddMax":  8.5,
+                                                 "pnl":  189.20000000000002,
+                                                 "trades":  7,
+                                                 "bars":  86
+                                             },
+                                   "test":  {
+                                                "sharpe":  1.5,
+                                                "winRate":  0.58,
+                                                "ddMax":  10.2,
+                                                "pnl":  104.4,
+                                                "trades":  4,
+                                                "bars":  58
+                                            }
+                               },
+                   "duration":  1,
+                   "realEngine":  true
+               }
+}

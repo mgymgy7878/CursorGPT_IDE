@@ -1,0 +1,118 @@
+{
+  "nonce": "20250820-282000-369147",
+  "started_utc": "2025-08-20T28:20:00Z",
+  "status": "ERROR",
+  "reason": "ROBUST_OR_FRAGILITY_WEAK",
+  "thresholds": {
+    "robust_base_ge": 4,
+    "fragility_top_ge": 0.6,
+    "oos_positive_ratio_ge": 0.6,
+    "compute_total_ms_leq": 3000
+  },
+  "dataset": {
+    "source": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 12000,
+    "from_utc": "2025-08-11T06:22:00.000Z",
+    "to_utc": "2025-08-19T14:21:00.000Z"
+  },
+  "grid_base": {
+    "fastPeriods": [
+      8,
+      12
+    ],
+    "slowPeriods": [
+      26,
+      50
+    ],
+    "signalPeriod": 9,
+    "rsiPeriod": 14,
+    "oversoldLevels": [
+      25,
+      30
+    ],
+    "overboughtLevels": [
+      70,
+      75
+    ],
+    "regimeFilters": [
+      0,
+      1
+    ],
+    "slTpValues": [
+      0,
+      0.01
+    ],
+    "robust_count_sharpe_gt1": 32,
+    "robust_ratio": 0.25,
+    "sharpe_max": 10.13,
+    "sharpe_min": -15.35,
+    "sharpe_delta": 25.48
+  },
+  "stress": {
+    "cost_scenarios": 3,
+    "noise_replicas": 20,
+    "fragility_top": 0.5,
+    "robust_count_stress_gt1": null
+  },
+  "best_candidate": {
+    "fast": 8,
+    "slow": 50,
+    "signal": 9,
+    "rsi": 14,
+    "oversold": 30,
+    "overbought": 70,
+    "regime": 1,
+    "sl": 0,
+    "tp": 0.01,
+    "sharpe": 10.13,
+    "cagr_pct": -10.36,
+    "max_dd_pct": 0.25,
+    "trades": 2,
+    "exposure_pct": 0.03,
+    "fragility_score": 0.5
+  },
+  "oos_recheck": {
+    "folds": 5,
+    "positive_ratio": 0.2,
+    "median_sharpe": 0,
+    "min_sharpe": 0,
+    "metrics": [
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 22.67,
+        "cagr_pct": -42.13,
+        "max_dd_pct": 0.25
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      }
+    ]
+  },
+  "perf": {
+    "compute_total_ms": 1404
+  },
+  "evidence_paths": {
+    "index": "docs\\evidence\\v1.4-macd_rsi_fusion-triage\\20250820-282000-369147\\index.json",
+    "metrics": "docs\\evidence\\v1.4-macd_rsi_fusion-triage\\20250820-282000-369147\\metrics.json",
+    "summary_csv": "docs\\evidence\\v1.4-macd_rsi_fusion-triage\\20250820-282000-369147\\summary.csv",
+    "manifest": "docs\\evidence\\v1.4-macd_rsi_fusion-triage\\20250820-282000-369147\\manifest.sha256"
+  }
+}

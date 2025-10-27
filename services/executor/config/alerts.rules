@@ -1,0 +1,77 @@
+# AI Quickstart Alert Rules
+# Prometheus alerting rules for AI advisor and canary plan monitoring
+
+groups:
+  - name: ai_quickstart
+    rules:
+      - alert: AdvisorErrorRateHigh
+        expr: rate(advisor_suggest_total{status="error"}[5m]) > 3
+        for: 2m
+        labels:
+          severity: warning
+          service: advisor
+        annotations:
+          summary: "AI Advisor error rate is high"
+          description: "AI advisor suggestion error rate is {{ $value }} errors per second over the last 5 minutes"
+
+      - alert: CanaryPlanFailSurge
+        expr: rate(canary_plan_total{status="error"}[10m]) > 3
+        for: 3m
+        labels:
+          severity: critical
+          service: canary
+        annotations:
+          summary: "Canary plan failure surge detected"
+          description: "Canary plan error rate is {{ $value }} errors per second over the last 10 minutes"
+
+      - alert: AdvisorLatencyHigh
+        expr: histogram_quantile(0.95, rate(advisor_latency_ms_bucket[5m])) > 2000
+        for: 5m
+        labels:
+          severity: warning
+          service: advisor
+        annotations:
+          summary: "AI Advisor latency is high"
+          description: "95th percentile AI advisor latency is {{ $value }}ms"
+
+      - alert: AIQuickstartDown
+        expr: up{job="executor"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: executor
+        annotations:
+          summary: "AI Quickstart executor is down"
+          description: "Executor service is not responding"
+
+      - alert: AdvisorTokensQuotaExceeded
+        expr: rate(advisor_tokens_total[1h]) > 10000
+        for: 10m
+        labels:
+          severity: warning
+          service: advisor
+        annotations:
+          summary: "AI token usage quota exceeded"
+          description: "AI advisor token usage rate is {{ $value }} tokens per hour"
+
+  - name: futures_trading
+    rules:
+      - alert: FuturesOrderFailRate
+        expr: rate(futures_orders_total{status="error"}[5m]) > 1
+        for: 2m
+        labels:
+          severity: critical
+          service: futures
+        annotations:
+          summary: "Futures order failure rate is high"
+          description: "Futures order error rate is {{ $value }} errors per second"
+
+      - alert: FuturesLatencyHigh
+        expr: histogram_quantile(0.95, rate(futures_order_latency_ms_bucket[5m])) > 1000
+        for: 3m
+        labels:
+          severity: warning
+          service: futures
+        annotations:
+          summary: "Futures order latency is high"
+          description: "95th percentile futures order latency is {{ $value }}ms"

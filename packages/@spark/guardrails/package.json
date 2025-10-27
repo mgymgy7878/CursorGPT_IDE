@@ -1,0 +1,16 @@
+{
+  "name": "@spark/guardrails",
+  "version": "1.0.0",
+  "description": "Guardrails for risk management and parameter approval",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tsx": "^4.16.0",
+    "typescript": "^5.9.2"
+  }
+}

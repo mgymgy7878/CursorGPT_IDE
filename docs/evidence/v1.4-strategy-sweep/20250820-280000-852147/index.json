@@ -1,0 +1,89 @@
+{
+  "nonce": "20250820-280000-852147",
+  "started_utc": "2025-08-20T28:00:00Z",
+  "status": "OK",
+  "reason": "",
+  "thresholds": {
+    "dataset_bars_gte": 10000,
+    "strategies_gte": 5,
+    "compute_total_ms_leq": 3000
+  },
+  "dataset": {
+    "bars": 12000,
+    "source": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m"
+  },
+  "ranking": [
+    {
+      "name": "RSI14_MR",
+      "trades": 588,
+      "win_rate_pct": 3.24,
+      "cagr_pct": 433.7,
+      "sharpe": 13.17,
+      "max_dd_pct": 1.5,
+      "exposure_pct": 6.18,
+      "score": 8.731
+    },
+    {
+      "name": "EMA_50_200",
+      "trades": 82,
+      "win_rate_pct": 22.5,
+      "cagr_pct": -43.17,
+      "sharpe": -2.62,
+      "max_dd_pct": 3.6,
+      "exposure_pct": 46.88,
+      "score": -1.583
+    },
+    {
+      "name": "EMA_12_26",
+      "trades": 400,
+      "win_rate_pct": 23.98,
+      "cagr_pct": -74.61,
+      "sharpe": -6.21,
+      "max_dd_pct": 4.09,
+      "exposure_pct": 49.02,
+      "score": -3.808
+    },
+    {
+      "name": "BH",
+      "trades": 0,
+      "win_rate_pct": 47.7,
+      "cagr_pct": -93.71,
+      "sharpe": -7.98,
+      "max_dd_pct": 8.06,
+      "exposure_pct": 100,
+      "score": -5.078
+    },
+    {
+      "name": "MACD_12_26_9",
+      "trades": 976,
+      "win_rate_pct": 23.76,
+      "cagr_pct": -90.15,
+      "sharpe": -9.92,
+      "max_dd_pct": 6.98,
+      "exposure_pct": 49.8,
+      "score": -6.188
+    },
+    {
+      "name": "DONCHIAN20",
+      "trades": 324,
+      "win_rate_pct": 23.13,
+      "cagr_pct": -91.43,
+      "sharpe": -11.04,
+      "max_dd_pct": 6.34,
+      "exposure_pct": 48.2,
+      "score": -6.833
+    }
+  ],
+  "perf": {
+    "compute_total_ms": 950,
+    "strategies_evaluated": 6
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.4-strategy-sweep/20250820-280000-852147/index.json",
+    "metrics": "docs/evidence/v1.4-strategy-sweep/20250820-280000-852147/metrics.json",
+    "summary_csv": "docs/evidence/v1.4-strategy-sweep/20250820-280000-852147/summary.csv",
+    "manifest": "docs/evidence/v1.4-strategy-sweep/20250820-280000-852147/manifest.sha256"
+  }
+}

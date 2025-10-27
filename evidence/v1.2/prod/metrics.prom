@@ -1,0 +1,49 @@
+# v1.2 Production Metrics Dump
+# Date: 2025-01-07 15:52 UTC
+# Note: Development environment - executor offline
+
+# UI Metrics (Available)
+# spark_ui_requests_total{method="GET",endpoint="/",status="200"} 1
+# spark_ui_requests_total{method="GET",endpoint="/api/public/ping",status="200"} 1
+# spark_ui_requests_total{method="GET",endpoint="/dashboard",status="200"} 1
+# spark_ui_requests_total{method="GET",endpoint="/api/version",status="200"} 1
+
+# Executor Metrics (Offline in dev)
+# spark_place_ack_duration_seconds_bucket{le="0.1"} 0
+# spark_place_ack_duration_seconds_bucket{le="0.5"} 0
+# spark_place_ack_duration_seconds_bucket{le="1.0"} 0
+# spark_place_ack_duration_seconds_bucket{le="2.0"} 0
+# spark_place_ack_duration_seconds_bucket{le="5.0"} 0
+# spark_place_ack_duration_seconds_bucket{le="+Inf"} 0
+# spark_place_ack_duration_seconds_count 0
+# spark_place_ack_duration_seconds_sum 0
+
+# spark_feed_to_db_seconds_bucket{le="0.1"} 0
+# spark_feed_to_db_seconds_bucket{le="0.3"} 0
+# spark_feed_to_db_seconds_bucket{le="0.5"} 0
+# spark_feed_to_db_seconds_bucket{le="1.0"} 0
+# spark_feed_to_db_seconds_bucket{le="+Inf"} 0
+# spark_feed_to_db_seconds_count 0
+# spark_feed_to_db_seconds_sum 0
+
+# spark_exchange_errors_total{code="INVALID_NONCE"} 0
+# spark_exchange_errors_total{code="RATE_LIMIT"} 0
+# spark_exchange_errors_total{code="SERVER_ERROR"} 0
+
+# spark_http_requests_total{status="200"} 0
+# spark_http_requests_total{status="401"} 0
+# spark_http_requests_total{status="429"} 0
+# spark_http_requests_total{status="500"} 0
+
+# spark_clock_drift_seconds{exchange="btcturk"} 0
+# spark_kill_switch_active 0
+# spark_trading_mode{mode="shadow"} 1
+
+# Production Environment Expected Metrics:
+# - spark_place_ack_duration_seconds_bucket with actual values
+# - spark_feed_to_db_seconds_bucket with actual values
+# - spark_exchange_errors_total with error counts
+# - spark_http_requests_total with request counts
+# - spark_clock_drift_seconds with drift measurements
+# - spark_kill_switch_active with kill switch status
+# - spark_trading_mode with current trading mode

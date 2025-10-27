@@ -1,0 +1,25 @@
+{
+  "orderflow": {
+    "status": "SKIPPED",
+    "reason": "MISSING_KEYS",
+    "orderflow": {
+      "n": 0,
+      "symbol": "BTCUSDT",
+      "qty": 0.00015,
+      "price_usdt": null,
+      "place_ack_ms": [],
+      "place_ack_p95_ms": null,
+      "retries": 0,
+      "errors": 0
+    },
+    "guardrails": {
+      "max_notional_usdt": 20,
+      "blocked_count": 0,
+      "kill_switch": 0
+    }
+  },
+  "bist": {
+    "status_component": "SKIPPED",
+    "reason": "NO_FEED_URL"
+  }
+} 

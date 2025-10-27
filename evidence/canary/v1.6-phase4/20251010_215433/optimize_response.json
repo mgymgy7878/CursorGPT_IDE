@@ -1,0 +1,113 @@
+﻿{
+    "ok":  true,
+    "mock":  false,
+    "result":  {
+                   "symbol":  "BTCUSDT",
+                   "timeframe":  "1h",
+                   "start":  "2024-01-01",
+                   "end":  "2024-02-01",
+                   "exchange":  "binance",
+                   "grid":  {
+                                "emaFast":  [
+                                                10,
+                                                20,
+                                                30,
+                                                40,
+                                                50,
+                                                60
+                                            ],
+                                "emaSlow":  [
+                                                50,
+                                                100,
+                                                150,
+                                                200,
+                                                250
+                                            ],
+                                "atr":  [
+                                            7,
+                                            14,
+                                            21,
+                                            28,
+                                            35,
+                                            42
+                                        ]
+                            },
+                   "objective":  "sharpe",
+                   "totalCombinations":  180,
+                   "bestParams":  {
+                                      "emaFast":  60,
+                                      "emaSlow":  250,
+                                      "atr":  28
+                                  },
+                   "bestScore":  2.13,
+                   "leaderboard":  [
+                                       {
+                                           "rank":  1,
+                                           "params":  {
+                                                          "emaFast":  60,
+                                                          "emaSlow":  250,
+                                                          "atr":  28
+                                                      },
+                                           "sharpe":  2.13,
+                                           "winRate":  0.58,
+                                           "pnl":  1333,
+                                           "trades":  33
+                                       },
+                                       {
+                                           "rank":  2,
+                                           "params":  {
+                                                          "emaFast":  50,
+                                                          "emaSlow":  250,
+                                                          "atr":  28
+                                                      },
+                                           "sharpe":  2.12,
+                                           "winRate":  0.5700000000000001,
+                                           "pnl":  1332,
+                                           "trades":  32
+                                       },
+                                       {
+                                           "rank":  3,
+                                           "params":  {
+                                                          "emaFast":  60,
+                                                          "emaSlow":  150,
+                                                          "atr":  28
+                                                      },
+                                           "sharpe":  2.12,
+                                           "winRate":  0.5700000000000001,
+                                           "pnl":  1332,
+                                           "trades":  32
+                                       },
+                                       {
+                                           "rank":  4,
+                                           "params":  {
+                                                          "emaFast":  40,
+                                                          "emaSlow":  250,
+                                                          "atr":  28
+                                                      },
+                                           "sharpe":  2.1100000000000003,
+                                           "winRate":  0.56,
+                                           "pnl":  1331,
+                                           "trades":  31
+                                       },
+                                       {
+                                           "rank":  5,
+                                           "params":  {
+                                                          "emaFast":  50,
+                                                          "emaSlow":  150,
+                                                          "atr":  28
+                                                      },
+                                           "sharpe":  2.1100000000000003,
+                                           "winRate":  0.56,
+                                           "pnl":  1331,
+                                           "trades":  31
+                                       }
+                                   ],
+                   "timing":  {
+                                  "totalMs":  2,
+                                  "avgPerRun":  0,
+                                  "throughput":  null
+                              },
+                   "duration":  2,
+                   "realEngine":  true
+               }
+}

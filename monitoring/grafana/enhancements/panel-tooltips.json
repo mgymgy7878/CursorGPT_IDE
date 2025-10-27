@@ -1,0 +1,21 @@
+{
+  "panel_descriptions": {
+    "latency_p95": {
+      "description": "**What**: p95 portfolio refresh latency.\n**Why**: P95 protects tail users and API spikes.\n**Act**: If >1500ms for 5m → check exchange status, rate limits, and executor logs.\n\n**Runbook**: [Click here](/d/ops-runbook) for detailed troubleshooting."
+    },
+    "error_rate": {
+      "description": "**What**: Per-exchange error/s by error_type.\n**Why**: Early indication of auth/rate/timeout issues.\n**Act**: Spikes in auth → rotate keys; ratelimit → raise refresh interval; timeout → network/DNS checks.\n\n**Error Types**: auth (401/403), ratelimit (429), timeout (network), server (5xx), unknown\n\n**Runbook**: [Click here](/d/ops-runbook)"
+    },
+    "total_value": {
+      "description": "**What**: Sum of USD value across exchanges.\n**Why**: Drift check after connector changes.\n**Act**: Sudden >10% drop → verify price feed and symbol mapping.\n\n**Validation**: Compare with exchange UI manually if anomaly detected.\n\n**Runbook**: [Click here](/d/ops-runbook)"
+    },
+    "staleness": {
+      "description": "**What**: Seconds since last successful refresh.\n**Why**: Detects stuck fetchers.\n**Act**: >300s → restart executor or inspect connectors; see runbook §Staleness.\n\n**Target**: <60s steady-state, investigate if >120s\n\n**Runbook**: [Click here](/d/ops-runbook)"
+    },
+    "asset_count": {
+      "description": "**What**: Number of non-zero assets.\n**Why**: Sanity for permissions & parsing.\n**Act**: 0 for >5m → recheck API permissions (\"read only\" but enabled).\n\n**Expected**: Binance typically 3-10 assets, BTCTurk 2-5 assets\n\n**Runbook**: [Click here](/d/ops-runbook)"
+    }
+  },
+  "usage": "Copy 'description' field to corresponding panel in dashboard JSON"
+}
+

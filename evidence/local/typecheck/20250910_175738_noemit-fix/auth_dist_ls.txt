@@ -1,0 +1,20 @@
+
+
+    Directory: C:\dev\CursorGPT_IDE\packages\@spark\auth\dist
+
+
+Mode                 LastWriteTime         Length Name                       
+----                 -------------         ------ ----                       
+d-----        10.09.2025     17:32                src                        
+-a----        10.09.2025     17:57            467 auth-client.d.ts           
+-a----        10.09.2025     17:57            480 auth-client.d.ts.map       
+-a----        10.09.2025     17:57            675 auth-client.js             
+-a----        10.09.2025     17:57           1204 index.d.ts                 
+-a----        10.09.2025     17:57           1069 index.d.ts.map             
+-a----        10.09.2025     17:57            696 index.js                   
+-a----        10.09.2025     17:57            352 token-manager.d.ts         
+-a----        10.09.2025     17:57            423 token-manager.d.ts.map     
+-a----        10.09.2025     17:57            558 token-manager.js           
+-a----        10.09.2025     17:50          36625 tsconfig.tsbuildinfo       
+
+

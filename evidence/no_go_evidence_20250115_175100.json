@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-01-15T17:51:00Z",
+  "action": "T+30 GO/NO-GO Değerlendirmesi (2. Deneme)",
+  "result": "NO-GO",
+  "reason": "Servisler hala başlatılamıyor - Build başarılı ama runtime başlamıyor",
+  "details": {
+    "executor_status": {
+      "build_status": "SUCCESS",
+      "build_output": "CJS dist\\index.cjs 507.41 KB, ESM dist\\index.js 253.98 KB",
+      "runtime_status": "FAILED",
+      "port_4001": "NOT_LISTENING",
+      "health_check": "FAILED",
+      "error": "Failed to connect to 127.0.0.1 port 4001"
+    },
+    "web_next_status": {
+      "port_3003": "NOT_LISTENING", 
+      "health_check": "FAILED",
+      "error": "Failed to connect to 127.0.0.1 port 3003"
+    },
+    "system_info": {
+      "node_version": "v22.20.0",
+      "pnpm_version": "10.14.0",
+      "build_successful": true,
+      "runtime_failed": true
+    },
+    "attempts_made": [
+      "pnpm -C services/executor run dev (background)",
+      "pnpm -C apps/web-next run dev (background)", 
+      "pnpm build (successful)",
+      "node --trace-uncaught --trace-warnings dist/index.js (background)"
+    ],
+    "rollback_applied": {
+      "AI_CHUNK_UPLOAD_ENABLED": false,
+      "SSE_RETRY_ENABLED": false,
+      "reason": "Servisler runtime'da başlamıyor"
+    }
+  },
+  "next_steps": [
+    "Executor log dosyalarını incele",
+    "Web-next log dosyalarını incele",
+    "Port çakışmalarını detaylı kontrol et",
+    "Dependencies ve environment variables kontrol et",
+    "Manuel servis başlatma denemesi"
+  ],
+  "recommendations": [
+    "logs/executor-dev.log son 200 satırını incele",
+    "logs/web-next-dev.log son 200 satırını incele", 
+    "Port 4001 ve 3003'ün başka process tarafından kullanılıp kullanılmadığını kontrol et",
+    "Environment variables (.env) dosyalarını kontrol et",
+    "Node.js sürüm uyumluluğunu kontrol et"
+  ]
+}

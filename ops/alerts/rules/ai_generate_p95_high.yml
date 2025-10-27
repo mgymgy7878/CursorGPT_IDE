@@ -1,0 +1,14 @@
+groups:
+- name: ai-generate-latency-guard
+  rules:
+  - alert: ai_generate_p95_high_10m
+    expr: histogram_quantile(0.95, sum by (le) (rate(ai_latency_ms_bucket[5m]))) > 2800
+    for: 10m
+    labels:
+      severity: warning
+      service: executor
+    annotations:
+      summary: "AI generate p95 > 2.8s (10m)"
+      description: "p95 latency above 2.8s for 10 minutes."
+
+

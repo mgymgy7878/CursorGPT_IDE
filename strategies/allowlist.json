@@ -1,0 +1,57 @@
+{
+  "allowlist": [
+    {
+      "name": "MA_Cross_Regime",
+      "version": "1.0.0",
+      "status": "canary",
+      "mode": "canary",
+      "canary_pct": 0.05,
+      "params": {
+        "short": 20,
+        "long": 100,
+        "regime": true
+      },
+      "risk_score": 65,
+      "approved_date": "2025-08-20T28:55:00Z",
+      "approved_nonce": "20250820-285000-963741",
+      "canary_steps": [
+        {
+          "step": 0,
+          "description": "Precheck (30m/≥100 signals)",
+          "gates": ["sanity", "feed_quality", "ack_p95<1000ms", "reject<1%", "seq_gap=0"]
+        },
+        {
+          "step": 1,
+          "description": "5% notional, cap $500, ≥40 fill or 2h",
+          "gates": ["dailyLoss≤$200", "openPositions≤1", "risk_score<70"]
+        },
+        {
+          "step": 2,
+          "description": "20% notional, cap $2k, until end of day",
+          "gates": ["ack_p95<1000ms", "event→DB_p95<300ms", "drop_ratio<0.1%", "breaker=0"]
+        },
+        {
+          "step": 3,
+          "description": "50% notional, 1 business day",
+          "gates": ["realized_DD≤2×backtest_daily_vol", "rejects<1.5%", "breaker=0"]
+        },
+        {
+          "step": 4,
+          "description": "100% notional",
+          "gates": ["final_validation"]
+        }
+      ],
+      "rollback_conditions": [
+        "ack_p95>1000ms for 5min+",
+        "reject>2%",
+        "seq_gap>0",
+        "breaker_trip",
+        "dailyLoss>$300",
+        "slippage>2×budget"
+      ],
+      "description": "MA_Cross_Regime strategy - canary deployment with regime filtering"
+    }
+  ],
+  "last_updated": "2025-08-20T28:55:00Z",
+  "reason": "V1.4R Alpha Re-Discovery successful - 2 green candidates identified"
+} 

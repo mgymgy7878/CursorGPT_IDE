@@ -1,0 +1,83 @@
+groups:
+  - name: spark-portfolio
+    interval: 30s
+    rules:
+      # Portfolio refresh latency alert
+      - alert: PortfolioRefreshLatencyHighP95
+        expr: |
+          histogram_quantile(0.95, 
+            sum by (le, exchange) (
+              rate(spark_portfolio_refresh_latency_ms_bucket[5m])
+            )
+          ) > 1500
+        for: 5m
+        labels:
+          severity: warning
+          component: portfolio
+          layer: data
+        annotations:
+          summary: "Portfolio refresh latency is high (p95 > 1500ms)"
+          description: "Exchange {{ $labels.exchange }} portfolio refresh p95 latency is {{ $value | humanizeDuration }} (threshold: 1500ms)"
+          runbook: "Check exchange API status and network connectivity"
+          
+      # Exchange API error rate alert
+      - alert: ExchangeApiErrorRateHigh
+        expr: |
+          sum by (exchange, error_type) (
+            rate(spark_exchange_api_error_total[5m])
+          ) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+          component: portfolio
+          layer: integration
+        annotations:
+          summary: "High exchange API error rate detected"
+          description: "Exchange {{ $labels.exchange }} API error rate is {{ $value | humanize }}/s for error type {{ $labels.error_type }} (threshold: 0.05/s)"
+          runbook: "Check API credentials, rate limits, and exchange status page"
+          
+      # Portfolio data staleness alert
+      - alert: PortfolioDataStale
+        expr: |
+          time() - spark_portfolio_last_update_timestamp > 300
+        for: 2m
+        labels:
+          severity: warning
+          component: portfolio
+          layer: data
+        annotations:
+          summary: "Portfolio data is stale"
+          description: "Exchange {{ $labels.exchange }} portfolio has not updated for {{ $value | humanizeDuration }} (threshold: 5 minutes)"
+          runbook: "Check executor service health and API connectivity"
+          
+      # Portfolio value anomaly (sudden drop)
+      - alert: PortfolioValueDropAnomaly
+        expr: |
+          (
+            spark_portfolio_total_value_usd 
+            - spark_portfolio_total_value_usd offset 5m
+          ) / spark_portfolio_total_value_usd offset 5m < -0.10
+        for: 1m
+        labels:
+          severity: warning
+          component: portfolio
+          layer: data
+        annotations:
+          summary: "Portfolio value dropped significantly"
+          description: "Exchange {{ $labels.exchange }} portfolio value dropped by {{ $value | humanizePercentage }} in last 5 minutes"
+          runbook: "Verify price data accuracy and check for market events"
+          
+      # No assets detected (potential API key issue)
+      - alert: PortfolioNoAssets
+        expr: |
+          spark_portfolio_asset_count < 1
+        for: 5m
+        labels:
+          severity: warning
+          component: portfolio
+          layer: config
+        annotations:
+          summary: "No assets in portfolio"
+          description: "Exchange {{ $labels.exchange }} portfolio has {{ $value }} assets (expected > 0)"
+          runbook: "Check API key permissions and account status"
+

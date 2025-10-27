@@ -1,0 +1,20 @@
+{
+  "http_requests_total": {
+    "method": "GET",
+    "route": "/api/health",
+    "status": "200",
+    "count": 42
+  },
+  "ai_requests_total": {
+    "model": "gpt-4",
+    "status": "success",
+    "count": 15
+  },
+  "exchange_orders_total": {
+    "exchange": "binance",
+    "symbol": "BTCUSDT",
+    "side": "buy",
+    "count": 8
+  },
+  "executor_metrics_unexpected_labels_total": 0
+}

@@ -1,0 +1,24 @@
+# Global ownership
+* @spark-dev-team
+
+# Metrics Contract - Route Label Guardrail
+# Bu dosyalar değiştiğinde Metrics Contract ekibi review zorunlu
+services/executor/src/**/metrics*.ts @metrics-contract-team
+services/executor/src/plugins/metrics.ts @metrics-contract-team
+services/executor/src/lib/metrics*.ts @metrics-contract-team
+
+# CI ve test dosyaları
+.github/workflows/metrics-contract.yml @metrics-contract-team
+scripts/test-metrics-contract.* @metrics-contract-team
+
+# Dokümantasyon
+docs/METRICS_TROUBLESHOOTING.md @metrics-contract-team
+docs/DEPLOYMENT_GUIDE.md @metrics-contract-team
+
+# Prometheus ve Grafana konfigürasyonları
+ops/prometheus/ @devops-team
+ops/grafana/ @devops-team
+
+# Environment ve deployment
+.env.example @devops-team
+.env.* @devops-team

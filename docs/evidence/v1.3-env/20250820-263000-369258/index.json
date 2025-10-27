@@ -1,0 +1,27 @@
+{
+  "nonce": "20250820-263000-369258",
+  "started_utc": "2025-08-20T26:30:00Z",
+  "status": "BLOCKED",
+  "reason": "",
+  "readiness": {
+    "binance": {
+      "present": 0,
+      "key_hash8": null,
+      "secret_hash8": null
+    },
+    "btcturk": {
+      "present": 0,
+      "key_hash8": null,
+      "secret_hash8": null
+    },
+    "bist": {
+      "present": 0,
+      "url_set": 0
+    }
+  },
+  "next_suggest": "supply-secrets",
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-env/20250820-263000-369258/index.json",
+    "manifest": "docs/evidence/v1.3-env/20250820-263000-369258/manifest.sha256"
+  }
+} 

@@ -1,0 +1,186 @@
+{
+  "panels": [
+    {
+      "title": "Portfolio Refresh Latency (p95)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, exchange) (rate(spark_portfolio_refresh_latency_ms_bucket[5m])))",
+          "legendFormat": "{{exchange}} • p95",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "Latency"
+        }
+      ],
+      "thresholds": [
+        {
+          "value": 1500,
+          "colorMode": "critical",
+          "op": "gt",
+          "fill": true,
+          "line": true
+        },
+        {
+          "value": 3000,
+          "colorMode": "custom",
+          "fillColor": "rgba(255, 0, 0, 0.2)",
+          "lineColor": "rgb(255, 0, 0)"
+        }
+      ],
+      "alert": {
+        "name": "Portfolio Refresh Latency High",
+        "message": "P95 latency exceeded 1500ms",
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [1500],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": ["A", "5m", "now"]
+            },
+            "reducer": {
+              "params": [],
+              "type": "avg"
+            },
+            "type": "query"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Exchange API Error Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "sum by (exchange, error_type) (rate(spark_exchange_api_error_total[5m]))",
+          "legendFormat": "{{exchange}}/{{error_type}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        {
+          "format": "ops",
+          "label": "Errors/sec"
+        }
+      ],
+      "thresholds": [
+        {
+          "value": 0.05,
+          "colorMode": "critical"
+        },
+        {
+          "value": 0.1,
+          "colorMode": "custom",
+          "fillColor": "rgba(255, 0, 0, 0.3)"
+        }
+      ]
+    },
+    {
+      "title": "Total Portfolio Value (USD)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum by (exchange) (spark_portfolio_total_value_usd)",
+          "legendFormat": "{{exchange}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      }
+    },
+    {
+      "title": "Data Staleness (seconds)",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "(time() - spark_portfolio_last_update_timestamp)",
+          "legendFormat": "{{exchange}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 60,
+                "color": "yellow"
+              },
+              {
+                "value": 300,
+                "color": "red"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Asset Count by Exchange",
+      "type": "bargauge",
+      "targets": [
+        {
+          "expr": "spark_portfolio_asset_count",
+          "legendFormat": "{{exchange}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      }
+    }
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "tags": ["spark", "portfolio", "real-data"]
+}
+

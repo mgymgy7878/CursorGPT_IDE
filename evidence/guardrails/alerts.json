@@ -1,0 +1,32 @@
+{
+  "alerts": [
+    {
+      "action": "alerts/create",
+      "params": {
+        "name": "Guardrails 4xx rate high",
+        "expr": "sum(rate(guardrails_4xx_total[5m])) / sum(rate(http_requests_total{route=~\"/guardrails/params/.*\"}[5m])) > 0.02",
+        "for": "5m",
+        "severity": "warning",
+        "labels": {"team":"platform","service":"executor"},
+        "annotations": {"summary":"Guardrails 4xx > 2% for 5m","runbook":"check RBAC, allowlist, headers"}
+      },
+      "dryRun": false,
+      "confirm_required": false,
+      "reason": "Prod'da kötü kullanım/rol hatalarına erken uyarı"
+    },
+    {
+      "action": "alerts/create",
+      "params": {
+        "name": "Audit write errors",
+        "expr": "increase(audit_write_errors_total[5m]) > 0",
+        "for": "1m",
+        "severity": "critical",
+        "labels": {"team":"platform","service":"executor"},
+        "annotations": {"summary":"Audit JSONL yazım hatası","runbook":"disk izinleri, fsync, rotasyon"}
+      },
+      "dryRun": false,
+      "confirm_required": false,
+      "reason": "Audit izi güvence altına alınmalı"
+    }
+  ]
+}

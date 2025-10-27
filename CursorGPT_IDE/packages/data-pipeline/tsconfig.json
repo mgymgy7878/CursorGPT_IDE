@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "composite": true,
+    "declaration": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext"
+  },
+  "references": [
+    {
+      "path": "../types"
+    },
+    {
+      "path": "../shared"
+    }
+  ],
+  "include": [
+    "src",
+    "index.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

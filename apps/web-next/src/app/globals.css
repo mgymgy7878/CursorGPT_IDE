@@ -2,155 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Proje teması */
-:root { 
-  color-scheme: dark;
-  --surface: 222 20% 8%;
-  --card: 222 17% 12%;
-  --success: 142 70% 45%;
-  --warn: 38 92% 50%;
-  --danger: 0 90% 58%;
+/* Reset and Base Styles */
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-html, body { 
-  height: 100%; 
-  background-color: #000000; 
-  color: #ffffff; 
-  overflow: hidden; /* Prevent page-level scroll */
-  scrollbar-gutter: stable; /* Prevent layout shift */
+* {
+  box-sizing: border-box;
 }
 
-/* App Shell - tek scroll prensibi */
-#__next, body > div#root { 
-  min-height: 100%; 
-  height: 100%;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.app-content { 
-  overflow-y: auto; 
-  -webkit-overflow-scrolling: touch; 
-  height: 100%;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-/* Tabular numbers & monospace */
-.tabular { 
-  font-variant-numeric: tabular-nums; 
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
 }
 
-.mono { 
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace; 
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
-/* Compact numeric text (no letter-spacing, tabular) */
-.num-tight {
-  font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: 0;
-  white-space: nowrap;
-}
-
-/* Accessibility - Focus rings */
-:where(button, [role="button"], a, input, textarea, select):focus-visible {
-  outline: 2px solid hsl(var(--success));
+/* Global Focus Styles */
+:focus {
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
-/* Z-index hiyerarşisi */
-:root {
-  --z-overlay: 100;
-  --z-drawer: 90;
-  --z-header: 50;
-  --z-page: 10;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --radius-lg: 1rem;
-}
-
-.cmdk-overlay { z-index: var(--z-overlay) !important; }
-.ops-drawer { z-index: var(--z-drawer); }
-header { z-index: var(--z-header); }
-main > * { position: relative; z-index: var(--z-page); }
-
-.space-section { padding-block: var(--space-6); }
-
-body { 
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-}
-
-/* Layout fixes */
-* { 
-  min-width: 0; /* grid shrink fix */
-}
-
-.card-grid { 
-  @apply grid gap-6 xl:grid-cols-3 md:grid-cols-2 grid-cols-1; 
-}
-
-/* Custom utility classes */
-.btn {
-  @apply px-4 py-2 rounded-lg font-medium transition-colors;
-}
-
-.btn-sm {
-  @apply px-3 py-1.5 text-sm rounded-md;
-}
-
-.btn-primary {
-  @apply bg-blue-600 hover:bg-blue-700 text-white;
-}
-
-.btn-secondary {
-  @apply bg-neutral-700 hover:bg-neutral-600 text-white;
-}
-
-.btn-destructive {
-  @apply bg-red-600 hover:bg-red-700 text-white;
-}
-
-.inp {
-  @apply px-3 py-2 rounded-lg border border-neutral-700 bg-neutral-900 text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none;
-}
-
-/* Link styling */
-a { 
-  text-decoration: none; 
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* Animation safety */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
   }
-}
-
-/* Word break for long strings */
-.strategy-name, .trace-id, .long-text {
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Chart and table overflow protection */
-.chart-wrapper, .table-wrapper {
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-/* Focus visibility for keyboard navigation */
-*:focus-visible {
-  outline: 2px solid #1b7fff;
-  outline-offset: 2px;
-}
-
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid #1b7fff;
-  outline-offset: 2px;
+  body {
+    color: white;
+    background: #0a0a0a;
+  }
 }

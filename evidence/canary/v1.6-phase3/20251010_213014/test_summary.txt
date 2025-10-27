@@ -1,0 +1,46 @@
+﻿# V1.6 Phase 3 - Portfolio Backtest Test
+
+Timestamp: 2025-10-10 21:30:30
+Mode: Hybrid (REAL_ROUTES=run,walkforward,portfolio)
+
+## Health
+{
+    "ok":  true,
+    "service":  "executor",
+    "ts":  1760121030407,
+    "mode":  "hybrid (real: run,walkforward,portfolio)",
+    "version":  "v1.6-hybrid"
+}
+
+## REAL Route: /backtest/run
+mock=False, realEngine=True
+
+## REAL Route: /backtest/walkforward
+mock=False, realEngine=True
+Overfitting ratio: 0.833 (test/train)
+
+## REAL Route: /backtest/portfolio
+mock=False, realEngine=True
+Symbols: BTCUSDT, ETHUSDT, BNBUSDT
+
+Correlation Analysis:
+  - Matrix: 3x3 symmetric (diagonal=1.0)
+  - avgCorrelation: 0.713 
+  - diversificationBenefit: 0.076 
+  - Combined Sharpe: 1.850 (portfolio)
+  - Avg Individual Sharpe: 1.773
+  - Boost: +4.3% from diversification
+
+Individual Strategies:
+  - BTCUSDT: sharpe=1.77, weight=0.33, pnl=1337
+  - ETHUSDT: sharpe=1.85, weight=0.33, pnl=1345
+  - BNBUSDT: sharpe=1.70, weight=0.33, pnl=1330
+
+Timing:
+  - Duration: ~9ms
+  - Common timestamps: 720 (30 days  24h)
+  - Total candles: 2160 (720  3 symbols)
+
+## MOCK Route: /backtest/optimize
+mock=True (Phase 4 - not enabled yet)
+

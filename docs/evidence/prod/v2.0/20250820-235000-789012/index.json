@@ -1,0 +1,47 @@
+{
+  "version": "v2.0",
+  "env": "prod",
+  "mode": "canary",
+  "status": "GREEN-PROD",
+  "rollout_steps": [5, 20, 50, 100],
+  "shadow_minutes": 10,
+  "metrics": {
+    "inference_latency_p95_ms": 35,
+    "parity_errors": 0,
+    "guardrails": {
+      "block_rate_pct": 0.9,
+      "target_leq_pct": 1.0
+    },
+    "drift": {
+      "psi_max": 0.16,
+      "kl_max": 0.08
+    },
+    "chaos": {
+      "recovery_seconds": 15,
+      "self_resolve": true
+    }
+  },
+  "slo": {
+    "inference_latency_p95_ms_leq": 50,
+    "place_ack_p95_ms_leq": 1000,
+    "event_db_p95_ms_leq": 300,
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0,
+    "drop_pct_leq": 0.1
+  },
+  "decisions": {
+    "deploy": "approved",
+    "register_model_tag": "approved"
+  },
+  "registry": {
+    "model_name": "fusion",
+    "model_tag": "v2.0-approved",
+    "config_commit": "N-A"
+  },
+  "started_utc": "2025-08-20T23:50:00Z",
+  "nonce": "20250820-235000-789012",
+  "evidence_paths": {
+    "index": "docs/evidence/prod/v2.0/20250820-235000-789012/index.json",
+    "manifest": "docs/evidence/prod/v2.0/20250820-235000-789012/manifest.sha256"
+  }
+} 

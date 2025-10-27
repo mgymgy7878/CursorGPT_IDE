@@ -1,0 +1,23 @@
+{
+  "nonce": "20250820-243000-987654",
+  "started_utc": "2025-08-20T24:30:00Z",
+  "status": "OK",
+  "reason": "",
+  "thresholds": {
+    "ok_ms": 250,
+    "warn_ms": 500
+  },
+  "btcturk": {
+    "direct_p95_ms": 397.97,
+    "proxy_p95_ms": 151.16,
+    "improvement_pct": 62.02
+  },
+  "bist": {
+    "status_component": "SKIPPED"
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.2-btcturk-proxy/20250820-243000-987654/index.json",
+    "metrics": "docs/evidence/v1.2-btcturk-proxy/20250820-243000-987654/proxy.metrics.json",
+    "manifest": "docs/evidence/v1.2-btcturk-proxy/20250820-243000-987654/manifest.sha256"
+  }
+} 

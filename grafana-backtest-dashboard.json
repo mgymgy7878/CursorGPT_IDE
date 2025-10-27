@@ -1,0 +1,244 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "spark-backtest-v141",
+    "title": "SPARK Backtest (v1.4.1)",
+    "tags": ["spark", "backtest", "observability"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "h": 6, "w": 4, "x": 0, "y": 0 },
+        "type": "gauge",
+        "title": "Active Runs",
+        "targets": [
+          {
+            "expr": "backtest_active_runs",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 3, "color": "yellow" },
+                { "value": 5, "color": "red" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 2,
+        "gridPos": { "h": 6, "w": 8, "x": 4, "y": 0 },
+        "type": "bargauge",
+        "title": "Runs by Status (5m)",
+        "targets": [
+          {
+            "expr": "sum by (status) (increase(backtest_runs_total[5m]))",
+            "refId": "A",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "blue" }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "done" },
+              "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "failed" },
+              "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "running" },
+              "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } }]
+            }
+          ]
+        },
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 0 },
+        "type": "timeseries",
+        "title": "P95 Duration (seconds)",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(backtest_duration_seconds_bucket[5m])) by (le))",
+            "refId": "A",
+            "legendFormat": "P95"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "showPoints": "never"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 600, "color": "yellow" },
+                { "value": 1800, "color": "red" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 6 },
+        "type": "bargauge",
+        "title": "Artifacts Generated (1h)",
+        "targets": [
+          {
+            "expr": "sum by (type) (increase(backtest_artifacts_generated_total[1h]))",
+            "refId": "A",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "blue" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": { "h": 6, "w": 18, "x": 6, "y": 6 },
+        "type": "table",
+        "title": "Recent Runs (Last 20)",
+        "targets": [
+          {
+            "expr": "backtest_active_runs",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": []
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "Time": "Timestamp",
+                "Value": "Active"
+              }
+            }
+          }
+        ],
+        "pluginVersion": "10.0.0"
+      },
+      {
+        "id": 6,
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 12 },
+        "type": "stat",
+        "title": "Live Stream Clients",
+        "description": "Aktif SSE istemci sayısı (backtest_stream_clients)",
+        "targets": [
+          {
+            "expr": "backtest_stream_clients",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "blue" },
+                { "value": 10, "color": "yellow" },
+                { "value": 50, "color": "red" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "value_and_name",
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      }
+    ],
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["10s", "30s", "1m", "5m"]
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertname=~\"Backtest.*\"}",
+          "iconColor": "red",
+          "name": "Backtest Alerts",
+          "tagKeys": "severity"
+        }
+      ]
+    }
+  },
+  "overwrite": true
+}
+

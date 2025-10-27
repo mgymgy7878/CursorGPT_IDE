@@ -1,0 +1,110 @@
+{
+  "nonce": "20250820-282500-147963",
+  "started_utc": "2025-08-20T28:25:00Z",
+  "status": "ERROR",
+  "reason": "ROBUST_OR_FRAGILITY_WEAK",
+  "thresholds": {
+    "robust_base_ge": 4,
+    "fragility_top_ge": 0.6,
+    "oos_positive_ratio_ge": 0.6,
+    "compute_total_ms_leq": 3000
+  },
+  "dataset": {
+    "source": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 12000,
+    "from_utc": "2025-08-11T06:22:00.000Z",
+    "to_utc": "2025-08-19T14:21:00.000Z"
+  },
+  "grid_base": {
+    "channelPeriods": [
+      20,
+      40,
+      55,
+      80
+    ],
+    "rsiPeriod": 14,
+    "pullbackThresholds": [
+      30,
+      35,
+      40
+    ],
+    "regimeFilters": [
+      0,
+      1
+    ],
+    "slTpValues": [
+      0,
+      1,
+      2
+    ],
+    "robust_count_sharpe_gt1": 0,
+    "robust_ratio": 0,
+    "sharpe_max": 0,
+    "sharpe_min": 0,
+    "sharpe_delta": 0
+  },
+  "stress": {
+    "cost_scenarios": 3,
+    "noise_replicas": 20,
+    "fragility_top": 0.5,
+    "robust_count_stress_gt1": null
+  },
+  "best_candidate": {
+    "ch": 20,
+    "rsiWin": 14,
+    "pb": 30,
+    "regime": 0,
+    "sl": "0",
+    "tp": "0",
+    "sharpe": 0,
+    "cagr_pct": 0,
+    "max_dd_pct": 0,
+    "trades": 0,
+    "exposure_pct": 0,
+    "fragility_score": 0.5
+  },
+  "oos_recheck": {
+    "folds": 5,
+    "positive_ratio": 0,
+    "median_sharpe": 0,
+    "min_sharpe": 0,
+    "metrics": [
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      },
+      {
+        "sharpe": 0,
+        "cagr_pct": 0,
+        "max_dd_pct": 0
+      }
+    ]
+  },
+  "perf": {
+    "compute_total_ms": 5560
+  },
+  "evidence_paths": {
+    "index": "docs\\evidence\\v1.4-donchian_rsi_pullback-triage\\20250820-282500-147963\\index.json",
+    "metrics": "docs\\evidence\\v1.4-donchian_rsi_pullback-triage\\20250820-282500-147963\\metrics.json",
+    "summary_csv": "docs\\evidence\\v1.4-donchian_rsi_pullback-triage\\20250820-282500-147963\\summary.csv",
+    "manifest": "docs\\evidence\\v1.4-donchian_rsi_pullback-triage\\20250820-282500-147963\\manifest.sha256"
+  }
+}

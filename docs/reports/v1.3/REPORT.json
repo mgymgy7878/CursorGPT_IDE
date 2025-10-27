@@ -1,0 +1,57 @@
+{
+  "version": "v1.3",
+  "nonce": "20250820-273500-963147",
+  "started_utc": "2025-08-20T27:35:00Z",
+  "thresholds": {
+    "place_ack_p95_ms_leq": 1000,
+    "event_db_p95_ms_leq": 300,
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0,
+    "scenB_p95_ms_leq": 2000,
+    "scenC_circuit_open_expected": 1,
+    "scenD_blocked_expected": 10
+  },
+  "overall": {
+    "status": "YELLOW",
+    "reason": "ORDERFLOW_PARTIAL_OR_NONE"
+  },
+  "components": {
+    "ingest_local": {
+      "status": "OK",
+      "ingest_p95_ms": 401,
+      "event_db_p95_ms": 0,
+      "seq_gap": 0,
+      "evidence_path": "docs/evidence/v1.3-bist-local-pipe/20250820-270000-852147"
+    },
+    "guardrails_sim": {
+      "status": "OK",
+      "B_p95_ms": 617,
+      "circuit_open": 1,
+      "blocks": 10,
+      "evidence_path": "docs/evidence/v1.3-guardrails-sim/20250820-271500-963852"
+    },
+    "orderflow_real": {
+      "status": "PARTIAL",
+      "place_p95_ms": null,
+      "blocked": null,
+      "kill_switch": null,
+      "evidence_path": "docs/evidence/v1.3-orderflow-guardrails-real/20250820-272500-852963"
+    }
+  },
+  "env_blockers": {
+    "binance_keys_present": 0,
+    "bist_url_present": 0,
+    "missing": [
+      "BINANCE_API_KEY, BINANCE_API_SECRET",
+      "BIST_FEED_URL"
+    ]
+  },
+  "decisions": {
+    "next": "orderflow-guardrails-real|supply-secrets"
+  },
+  "evidence_paths": {
+    "report_md": "docs/reports/v1.3/REPORT.md",
+    "report_json": "docs/reports/v1.3/REPORT.json",
+    "manifest": "docs/reports/v1.3/manifest.sha256"
+  }
+} 

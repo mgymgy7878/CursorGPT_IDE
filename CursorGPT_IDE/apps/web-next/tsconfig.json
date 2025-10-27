@@ -1,0 +1,57 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@spark/*": [
+        "../../packages/@spark/*/dist",
+        "../../packages/@spark/*/src"
+      ]
+    },
+    "types": [
+      "node"
+    ],
+    "jsx": "preserve",
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "app",
+    "components",
+    "lib",
+    "types",
+    "env.d.ts",
+    "next-env.d.ts",
+    "next.config.ts",
+    "tailwind.config.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "_legacy",
+    "_legacy/**",
+    "**/__tests__/**"
+  ]
+}

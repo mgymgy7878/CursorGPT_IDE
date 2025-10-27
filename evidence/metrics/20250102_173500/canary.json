@@ -1,0 +1,22 @@
+{
+  "timestamp": "20250102_173500",
+  "status": "PASS",
+  "tests": [
+    {
+      "name": "prom-client-version",
+      "status": "PASS",
+      "version": "15.1.3"
+    },
+    {
+      "name": "metrics-contract",
+      "status": "PASS",
+      "labels": ["method", "route", "status"]
+    },
+    {
+      "name": "guard-counter",
+      "status": "PASS",
+      "value": 0
+    }
+  ],
+  "summary": "All canary tests passed successfully"
+}

@@ -1,0 +1,47 @@
+groups:
+- name: fusion-risk
+  interval: 30s
+  rules:
+  # p95 (10m) — histogramdan
+  - record: exec_p95_s_10m
+    expr: |
+      histogram_quantile(
+        0.95,
+        sum by (le) (rate(spark_runner_execution_duration_seconds_bucket[10m]))
+      )
+
+  # predictive (10m) — convenience recording
+  - record: predictive_10m
+    expr: increase(spark_runner_predictive_alerts_total[10m])
+
+  # risk_score (0-100) — policy ile tutarlı ağırlıklar
+  - record: fusion_risk_score_10m
+    expr: |
+      clamp_max(
+        100 *
+        (
+          0.60 * (1 - spark_runner_confidence_score)
+          + 0.15 * min(exec_p95_s_10m / 60, 1)
+          + 0.25 * min(predictive_10m / 2, 1)
+        ), 100)
+
+  # Sinyalli alert'ler (ops görünürlük)
+  - alert: RunnerHighRisk
+    expr: fusion_risk_score_10m > 70
+    for: 5m
+    labels:
+      severity: critical
+      team: platform
+    annotations:
+      summary: "Runner risk HIGH ({{ $value | printf \"%.0f\" }})"
+      description: "Risk-score>70, tetikleyici pause moduna geçmeli."
+
+  - alert: RunnerMediumRisk
+    expr: fusion_risk_score_10m >= 30 and fusion_risk_score_10m <= 70
+    for: 10m
+    labels:
+      severity: warning
+      team: platform
+    annotations:
+      summary: "Runner risk MEDIUM (limit uygula)"
+      description: "RPS/konkürensi %50 azalt."

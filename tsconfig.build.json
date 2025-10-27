@@ -1,0 +1,30 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/guardrails"
+    },
+    {
+      "path": "./packages/backtest-core"
+    },
+    {
+      "path": "./packages/backtest-engine"
+    },
+    {
+      "path": "./packages/data-pipeline"
+    },
+    {
+      "path": "./services/executor"
+    },
+    {
+      "path": "./services/ml-engine"
+    }
+  ],
+  "compilerOptions": {
+    "moduleResolution": "Bundler",
+    "module": "ESNext"
+  }
+}

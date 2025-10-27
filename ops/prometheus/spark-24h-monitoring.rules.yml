@@ -1,0 +1,159 @@
+groups:
+- name: spark.24h.monitoring
+  rules:
+    # Latency SLO - Histogram Tabanlı (Quantile yerine exceed oranı)
+    - alert: PlaceAckLatencySLOWarning
+      expr: |
+        1 - (
+          increase(spark_place_ack_duration_seconds_bucket{le="1"}[5m])
+          /
+          increase(spark_place_ack_duration_seconds_count[5m])
+        ) > 0.01
+      for: 10m
+      labels:
+        severity: warning
+        component: btcturk
+        slo: latency
+      annotations:
+        summary: "BTCTurk Place→ACK latency SLO warning"
+        description: "Latency exceed rate is {{ $value | humanizePercentage }} over 5m (threshold: 1%)"
+        runbook_url: "https://docs.spark.trading/runbooks/latency-slo"
+
+    - alert: PlaceAckLatencySLOCritical
+      expr: |
+        1 - (
+          increase(spark_place_ack_duration_seconds_bucket{le="1"}[5m])
+          /
+          increase(spark_place_ack_duration_seconds_count[5m])
+        ) > 0.05
+      for: 10m
+      labels:
+        severity: critical
+        component: btcturk
+        slo: latency
+      annotations:
+        summary: "BTCTurk Place→ACK latency SLO critical"
+        description: "Latency exceed rate is {{ $value | humanizePercentage }} over 5m (threshold: 5%)"
+        runbook_url: "https://docs.spark.trading/runbooks/latency-slo-critical"
+
+    # Feed→DB Latency SLO
+    - alert: FeedDbLatencySLOWarning
+      expr: |
+        1 - (
+          increase(spark_feed_to_db_seconds_bucket{le="0.3"}[5m])
+          /
+          increase(spark_feed_to_db_seconds_count[5m])
+        ) > 0.01
+      for: 10m
+      labels:
+        severity: warning
+        component: bist
+        slo: latency
+      annotations:
+        summary: "BIST Feed→DB latency SLO warning"
+        description: "Feed→DB latency exceed rate is {{ $value | humanizePercentage }} over 5m (threshold: 1%)"
+        runbook_url: "https://docs.spark.trading/runbooks/feed-db-slo"
+
+    # Nonce Error Rate
+    - alert: NonceErrorRateHigh
+      expr: rate(spark_exchange_errors_total{code="INVALID_NONCE"}[5m]) > 0.01
+      for: 5m
+      labels:
+        severity: warning
+        component: btcturk
+        error_type: nonce
+      annotations:
+        summary: "BTCTurk Invalid Nonce error rate high"
+        description: "Invalid Nonce error rate is {{ $value | humanizePercentage }} over 5m"
+        runbook_url: "https://docs.spark.trading/runbooks/nonce-errors"
+
+    # 429 Rate Limit Bursts
+    - alert: RateLimitBursts
+      expr: rate(spark_http_requests_total{status="429"}[5m]) > 0.05
+      for: 3m
+      labels:
+        severity: warning
+        component: btcturk
+        error_type: rate_limit
+      annotations:
+        summary: "BTCTurk rate limit bursts detected"
+        description: "Rate limit (429) responses: {{ $value | humanize }} per second"
+        runbook_url: "https://docs.spark.trading/runbooks/rate-limits"
+
+    # BTCTurk ACK Missing
+    - alert: BTCTurkAckMissing
+      expr: increase(spark_place_ack_duration_seconds_count[10m]) == 0
+      for: 10m
+      labels:
+        severity: critical
+        component: btcturk
+        error_type: ack_missing
+      annotations:
+        summary: "No BTCTurk order acknowledgments in 10m"
+        description: "Zero order ACKs received from BTCTurk in the last 10 minutes"
+        runbook_url: "https://docs.spark.trading/runbooks/ack-missing"
+
+    # Clock Drift High
+    - alert: ClockDriftHigh
+      expr: abs(spark_clock_drift_seconds{exchange="btcturk"}) > 5
+      for: 2m
+      labels:
+        severity: warning
+        component: btcturk
+        error_type: clock_drift
+      annotations:
+        summary: "BTCTurk clock drift high"
+        description: "Clock drift is {{ $value | humanizeDuration }} (threshold: 5s)"
+        runbook_url: "https://docs.spark.trading/runbooks/clock-drift"
+
+    # Kill Switch Active
+    - alert: KillSwitchActive
+      expr: spark_kill_switch_active == 1
+      for: 0m
+      labels:
+        severity: info
+        component: system
+        action: kill_switch
+      annotations:
+        summary: "Kill switch is active"
+        description: "Trading kill switch is enabled - all orders blocked"
+        runbook_url: "https://docs.spark.trading/runbooks/kill-switch"
+
+    # Trading Mode Changed
+    - alert: TradingModeChanged
+      expr: changes(spark_trading_mode[1m]) > 0
+      for: 0m
+      labels:
+        severity: info
+        component: system
+        action: mode_change
+      annotations:
+        summary: "Trading mode changed"
+        description: "Trading mode has changed to {{ $labels.mode }}"
+        runbook_url: "https://docs.spark.trading/runbooks/trading-mode"
+
+    # Error Rate Spike
+    - alert: ErrorRateSpike
+      expr: rate(spark_exchange_errors_total[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: warning
+        component: system
+        error_type: general
+      annotations:
+        summary: "Exchange error rate spike detected"
+        description: "Error rate is {{ $value | humanizePercentage }} over 5m"
+        runbook_url: "https://docs.spark.trading/runbooks/error-rate-spike"
+
+    # Throughput Drop
+    - alert: ThroughputDrop
+      expr: rate(spark_place_ack_duration_seconds_count[5m]) < 0.1
+      for: 5m
+      labels:
+        severity: warning
+        component: system
+        metric: throughput
+      annotations:
+        summary: "Order throughput drop detected"
+        description: "Order throughput is {{ $value | humanize }} per second (threshold: 0.1)"
+        runbook_url: "https://docs.spark.trading/runbooks/throughput-drop"

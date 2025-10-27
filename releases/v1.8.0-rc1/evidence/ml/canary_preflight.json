@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-10-08T11:17:00.255Z",
+  "service": "ml-engine",
+  "endpoint": "http://127.0.0.1:4010",
+  "baseline_metrics": {
+    "total_requests": 1000,
+    "total_errors": 0,
+    "error_rate": 0,
+    "latency_p95_ms": 1000
+  },
+  "slo_compliance": {
+    "error_rate_under_1pct": true,
+    "latency_p95_under_80ms": false
+  },
+  "raw_metrics_sample": {
+    "predict_requests_total": 1000,
+    "model_errors_total": 0,
+    "latency_buckets_count": 10
+  }
+}

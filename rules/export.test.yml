@@ -1,0 +1,20 @@
+groups:
+- name: export.rules
+  rules:
+  - alert: ExportLatencyP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(export_latency_ms_bucket[10m]))) > 10000
+    for: 10m
+    labels: {severity: warning}
+    annotations: {summary: "Export latency P95 > 10s (10m)"}
+
+  - alert: ExportFailSpike
+    expr: increase(export_fail_total[10m]) > 5
+    for: 5m
+    labels: {severity: warning}
+    annotations: {summary: "Export failures > 5 in 10m"}
+
+  - alert: ExportBytesAnomaly
+    expr: increase(export_bytes_total[1h]) > 1000000000
+    for: 0m
+    labels: {severity: warning}
+    annotations: {summary: "Export bytes > 1GB in 1h"}

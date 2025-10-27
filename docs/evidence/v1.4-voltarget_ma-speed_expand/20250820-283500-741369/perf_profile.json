@@ -1,0 +1,12 @@
+{
+  "precompute_ms": 16,
+  "grid_ms": 2732,
+  "stress_ms": 147,
+  "oos_ms": 2,
+  "total_ms": 2900,
+  "optimization_gains": {
+    "precompute_reuse": "ATR, volatility estimates, EMAs cached",
+    "vectorized_operations": "Multi-period EMA calculation",
+    "memory_efficient": "TypedArray usage for large datasets"
+  }
+}

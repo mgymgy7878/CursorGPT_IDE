@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "composite": true,
+    "declaration": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext"
+  },
+  "references": [
+    {
+      "path": "../../packages/shared"
+    },
+    {
+      "path": "../../packages/types"
+    },
+    {
+      "path": "../../packages/guardrails"
+    }
+  ],
+  "include": [
+    "src",
+    "index.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

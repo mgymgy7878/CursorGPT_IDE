@@ -1,0 +1,42 @@
+groups:
+- name: streams
+  rules:
+  - alert: StreamsLagHigh
+    expr: histogram_quantile(0.95, sum by (le) (rate(ws_gap_ms_bucket[10m]))) > 1500
+    for: 2m
+    labels:
+      severity: warning
+      service: streams
+    annotations:
+      summary: "WebSocket gap is high"
+      description: "WebSocket gap P95 is {{ $value }}ms for {{ $labels.exchange }}/{{ $labels.channel }}"
+      
+  - alert: SeqGapBurst
+    expr: rate(ws_seq_gap_total[5m]) > 0
+    for: 1m
+    labels:
+      severity: critical
+      service: streams
+    annotations:
+      summary: "Sequence gap burst detected"
+      description: "Sequence gaps detected for {{ $labels.exchange }}/{{ $labels.channel }}"
+      
+  - alert: IngestLatencyHigh
+    expr: histogram_quantile(0.95, sum by (le) (rate(ingest_latency_ms_bucket[10m]))) > 300
+    for: 3m
+    labels:
+      severity: warning
+      service: streams
+    annotations:
+      summary: "Ingest latency is high"
+      description: "Ingest latency P95 is {{ $value }}ms for {{ $labels.exchange }}/{{ $labels.channel }}"
+      
+  - alert: StreamsDown
+    expr: ws_conn_state == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: streams
+    annotations:
+      summary: "WebSocket connection down"
+      description: "WebSocket connection is down for {{ $labels.exchange }}/{{ $labels.channel }}"

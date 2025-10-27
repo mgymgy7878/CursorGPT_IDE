@@ -1,0 +1,8 @@
+{
+  "name": "@spark/types/canary",
+  "private": true,
+  "type": "module",
+  "main": "../dist/canary/index.js",
+  "module": "../dist/canary/index.js",
+  "types": "../dist/canary/index.d.ts"
+} 

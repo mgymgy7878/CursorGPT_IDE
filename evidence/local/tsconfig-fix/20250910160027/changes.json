@@ -1,0 +1,30 @@
+{
+  "TARGET": "tsconfig.base.json",
+  "changes": [
+    {
+      "file": "packages/backtest-core/backtest-engine/tsconfig.json",
+      "before": "../../tsconfig.node.json",
+      "after": "../../../tsconfig.base.json"
+    },
+    {
+      "file": "packages/backtest-core/tsconfig.json",
+      "before": "../../tsconfig.node.json",
+      "after": "../../tsconfig.base.json"
+    },
+    {
+      "file": "packages/data-pipeline/tsconfig.json",
+      "before": "../../tsconfig.node.json",
+      "after": "../../tsconfig.base.json"
+    },
+    {
+      "file": "packages/db/tsconfig.json",
+      "before": "C:/dev/CursorGPT_IDE/tsconfig.node.json",
+      "after": "../../tsconfig.base.json"
+    },
+    {
+      "file": "packages/feeds-bist/tsconfig.json",
+      "before": "C:/dev/CursorGPT_IDE/tsconfig.node.json",
+      "after": "../../tsconfig.base.json"
+    }
+  ]
+}

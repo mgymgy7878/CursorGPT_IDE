@@ -1,0 +1,181 @@
+# Prometheus Alert Rules for ML Pipeline (v1.8)
+groups:
+  - name: ml_quality
+    interval: 30s
+    rules:
+      # Shadow match rate below threshold
+      - alert: MLShadowMatchLow
+        expr: avg_over_time(ml_shadow_match_rate[10m]) < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          component: ml-shadow
+        annotations:
+          summary: "Shadow match rate below 95%"
+          description: "Shadow predictions matching baseline at {{ $value | humanizePercentage }} (threshold: 95%) over last 10 minutes"
+          
+      # Shadow error rate high
+      - alert: MLShadowErrorRateHigh
+        expr: rate(ml_shadow_error_total[5m]) > 0.02
+        for: 5m
+        labels:
+          severity: warning
+          component: ml-shadow
+        annotations:
+          summary: "Shadow error rate above 2%"
+          description: "Shadow prediction errors at {{ $value | humanizePercentage }} over last 5 minutes"
+
+  - name: ml_latency
+    interval: 30s
+    rules:
+      # ML predict latency P95 high
+      - alert: MLPredictLatencyP95High
+        expr: histogram_quantile(0.95, sum by (le) (rate(ml_predict_latency_ms_bucket[5m]))) > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: ml-engine
+        annotations:
+          summary: "ML prediction latency P95 above 80ms"
+          description: "ML prediction P95 latency at {{ $value | humanize }}ms (SLO: <80ms) over last 10 minutes"
+          
+      # Shadow total latency P95 high
+      - alert: MLShadowLatencyP95High
+        expr: histogram_quantile(0.95, sum by (le) (rate(ml_shadow_latency_ms_bucket[5m]))) > 60
+        for: 10m
+        labels:
+          severity: warning
+          component: ml-shadow
+        annotations:
+          summary: "Shadow call latency P95 above 60ms"
+          description: "Shadow prediction P95 latency at {{ $value | humanize }}ms (threshold: <60ms)"
+
+  - name: ml_drift
+    interval: 1h
+    rules:
+      # PSI score warning
+      - alert: MLPSIWarning
+        expr: avg_over_time(ml_psi_score[1h]) > 0.2
+        for: 1h
+        labels:
+          severity: warning
+          component: ml-drift
+        annotations:
+          summary: "Feature drift detected (PSI > 0.2)"
+          description: "Population Stability Index at {{ $value }} (warning threshold: 0.2) over last hour"
+          
+      # PSI score critical
+      - alert: MLPSICritical
+        expr: avg_over_time(ml_psi_score[1h]) > 0.3
+        for: 1h
+        labels:
+          severity: critical
+          component: ml-drift
+        annotations:
+          summary: "Severe feature drift detected (PSI > 0.3)"
+          description: "Population Stability Index at {{ $value }} (critical threshold: 0.3) - immediate model retraining recommended"
+
+  - name: ml_reliability
+    interval: 30s
+    rules:
+      # ML model errors high
+      - alert: MLModelErrorsHigh
+        expr: rate(ml_model_errors_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          component: ml-engine
+        annotations:
+          summary: "ML model error rate above 1%"
+          description: "ML model errors at {{ $value | humanizePercentage }} over last 5 minutes"
+          
+      # ML Engine down
+      - alert: MLEngineDown
+        expr: up{job="ml-engine"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: ml-engine
+        annotations:
+          summary: "ML Engine is down"
+          description: "ML Engine service has been unavailable for 2 minutes"
+
+  # v1.8.1 Retrain Monitoring
+  - name: ml_psi_monitoring
+    interval: 1h
+    rules:
+      # PSI Critical (promote blocker)
+      - alert: ML_PSI_Critical
+        expr: ml_psi_score > 0.3
+        for: 10m
+        labels:
+          severity: critical
+          team: ml
+          action_required: true
+        annotations:
+          summary: "PSI critical - promote blocked"
+          description: "PSI score at {{ $value }} (threshold: 0.3) - immediate retraining required"
+          runbook_url: "file://GREEN_EVIDENCE_v1.8.md#psi"
+          
+      # PSI Warning (early signal)
+      - alert: ML_PSI_Warning
+        expr: ml_psi_score > 0.15
+        for: 1h
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "PSI elevated - monitor closely"
+          description: "PSI score at {{ $value }} (warning: 0.15) - consider retraining"
+          
+  - name: ml_shadow_monitoring
+    interval: 30s
+    rules:
+      # Shadow match rate low
+      - alert: ML_Shadow_MatchRate_Low
+        expr: avg_over_time(ml_shadow_match_rate[15m]) < 0.95
+        for: 5m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Shadow match rate below 95%"
+          description: "Shadow/baseline agreement at {{ $value | humanizePercentage }} (threshold: 95%)"
+          runbook_url: "file://rules/ml.yml"
+          
+      # Shadow match rate critical
+      - alert: ML_Shadow_MatchRate_Critical
+        expr: avg_over_time(ml_shadow_match_rate[15m]) < 0.90
+        for: 5m
+        labels:
+          severity: critical
+          team: ml
+        annotations:
+          summary: "Shadow match rate critical"
+          description: "Shadow/baseline agreement at {{ $value | humanizePercentage }} - investigate immediately"
+          
+  - name: ml_latency_slo
+    interval: 30s
+    rules:
+      # Predict P95 High (SLO breach)
+      - alert: ML_Predict_P95_High
+        expr: histogram_quantile(0.95, sum(rate(ml_predict_latency_ms_bucket[5m])) by (le)) > 80
+        for: 10m
+        labels:
+          severity: critical
+          team: ml
+          slo_breach: true
+        annotations:
+          summary: "ML P95 latency above SLO"
+          description: "ML prediction P95 at {{ $value }}ms (SLO: <80ms) - may trigger canary abort"
+          
+      # Predict P95 Warning
+      - alert: ML_Predict_P95_Warning
+        expr: histogram_quantile(0.95, sum(rate(ml_predict_latency_ms_bucket[5m])) by (le)) > 60
+        for: 10m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "ML P95 latency elevated"
+          description: "ML prediction P95 at {{ $value }}ms (warning: 60ms, SLO: 80ms)"

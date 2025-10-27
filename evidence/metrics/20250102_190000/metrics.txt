@@ -1,0 +1,66 @@
+# HELP feed_events_total Feed events total
+# TYPE feed_events_total counter
+feed_events_total{source="btcturk"} 0
+feed_events_total{source="bist"} 0
+
+# HELP ws_reconnects_total WS reconnect attempts  
+# TYPE ws_reconnects_total counter
+ws_reconnects_total{source="btcturk"} 0
+ws_reconnects_total{source="bist"} 0
+
+# HELP feed_latency_ms Latency from source event to orchestrator
+# TYPE feed_latency_ms histogram
+feed_latency_ms_bucket{source="btcturk",le="50"} 0
+feed_latency_ms_bucket{source="btcturk",le="100"} 0
+feed_latency_ms_bucket{source="btcturk",le="200"} 0
+feed_latency_ms_bucket{source="btcturk",le="400"} 0
+feed_latency_ms_bucket{source="btcturk",le="800"} 0
+feed_latency_ms_bucket{source="btcturk",le="1600"} 0
+feed_latency_ms_bucket{source="btcturk",le="3200"} 0
+feed_latency_ms_bucket{source="btcturk",le="6400"} 0
+feed_latency_ms_bucket{source="btcturk",le="+Inf"} 0
+feed_latency_ms_sum{source="btcturk"} 0
+feed_latency_ms_count{source="btcturk"} 0
+
+feed_latency_ms_bucket{source="bist",le="50"} 0
+feed_latency_ms_bucket{source="bist",le="100"} 0
+feed_latency_ms_bucket{source="bist",le="200"} 0
+feed_latency_ms_bucket{source="bist",le="400"} 0
+feed_latency_ms_bucket{source="bist",le="800"} 0
+feed_latency_ms_bucket{source="bist",le="1600"} 0
+feed_latency_ms_bucket{source="bist",le="3200"} 0
+feed_latency_ms_bucket{source="bist",le="6400"} 0
+feed_latency_ms_bucket{source="bist",le="+Inf"} 0
+feed_latency_ms_sum{source="bist"} 0
+feed_latency_ms_count{source="bist"} 0
+
+# HELP event_to_db_ms Event to DB pipeline latency
+# TYPE event_to_db_ms histogram
+event_to_db_ms_bucket{table="market_event",le="5"} 0
+event_to_db_ms_bucket{table="market_event",le="10"} 0
+event_to_db_ms_bucket{table="market_event",le="20"} 0
+event_to_db_ms_bucket{table="market_event",le="40"} 0
+event_to_db_ms_bucket{table="market_event",le="80"} 0
+event_to_db_ms_bucket{table="market_event",le="160"} 0
+event_to_db_ms_bucket{table="market_event",le="320"} 0
+event_to_db_ms_bucket{table="market_event",le="640"} 0
+event_to_db_ms_bucket{table="market_event",le="+Inf"} 0
+event_to_db_ms_sum{table="market_event"} 0
+event_to_db_ms_count{table="market_event"} 0
+
+event_to_db_ms_bucket{table="tick",le="5"} 0
+event_to_db_ms_bucket{table="tick",le="10"} 0
+event_to_db_ms_bucket{table="tick",le="20"} 0
+event_to_db_ms_bucket{table="tick",le="40"} 0
+event_to_db_ms_bucket{table="tick",le="80"} 0
+event_to_db_ms_bucket{table="tick",le="160"} 0
+event_to_db_ms_bucket{table="tick",le="320"} 0
+event_to_db_ms_bucket{table="tick",le="640"} 0
+event_to_db_ms_bucket{table="tick",le="+Inf"} 0
+event_to_db_ms_sum{table="tick"} 0
+event_to_db_ms_count{table="tick"} 0
+
+# HELP db_writes_total Successful DB writes by table
+# TYPE db_writes_total counter
+db_writes_total{table="market_event"} 0
+db_writes_total{table="tick"} 0

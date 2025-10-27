@@ -1,0 +1,18 @@
+Protokol:
+- "mehmet:" = Product Owner
+- "chatgpt:" = teknik yönetici/planlayıcı
+- "cursor:" = yürütücü mühendis ajan
+
+Çıktı kuralı:
+- "cursor:" yanıtları tek SON ÖZET içerir (ara log yok).
+- Özet şablonu: SUMMARY · STATUS(GREEN|YELLOW|RED) · COMMANDS · CHANGED FILES · BUILD/TEST · ERRORS/WARNINGS · NEXT STEPS
+
+İcra kuralı:
+- Otomatik komut yok; önce öner, onaydan sonra çalıştır.
+- Değişiklikler PATCH bloklarıyla, tek seferde.
+- Windows öncelikli komutlar; CRLF korunur.
+
+Wrapper kuralı:
+- Ajan "git" veya "pm2" çağırmayacak; bunun yerine "git-safe" ve "pm2-safe" kullanacaktır.
+- git-safe: status, diff, log, show, rev-parse, branch (read-only)
+- pm2-safe: ls, list, monit, describe (read-only)

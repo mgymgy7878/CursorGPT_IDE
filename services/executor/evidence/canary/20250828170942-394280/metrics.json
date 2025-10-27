@@ -1,0 +1,29 @@
+{
+  "raw": "present",
+  "metrics": {
+    "spark_proxy_requests_total": 0,
+    "spark_proxy_errors_total": 0,
+    "spark_proxy_duration_seconds_bucket{le=\"0.1\"}": 0,
+    "spark_proxy_duration_seconds_bucket{le=\"0.5\"}": 0,
+    "spark_proxy_duration_seconds_bucket{le=\"1.0\"}": 0,
+    "spark_proxy_duration_seconds_bucket{le=\"5.0\"}": 0,
+    "spark_proxy_duration_seconds_bucket{le=\"+Inf\"}": 0,
+    "spark_proxy_body_rejected_total": 0,
+    "spark_proxy_rate_limited_total": 0,
+    "spark_proxy_circuit_open_total": 0,
+    "spark_strategy_generate_total": 0,
+    "spark_strategy_build_total": 0,
+    "spark_strategy_backtest_total": 0,
+    "spark_strategy_backtest_duration_seconds_bucket{le=\"1.0\"}": 0,
+    "spark_strategy_backtest_duration_seconds_bucket{le=\"5.0\"}": 0,
+    "spark_strategy_backtest_duration_seconds_bucket{le=\"10.0\"}": 0,
+    "spark_strategy_backtest_duration_seconds_bucket{le=\"+Inf\"}": 0,
+    "spark_strategy_paper_deploy_total": 0,
+    "spark_strategy_failures_total": 0,
+    "spark_live_orders_total": 0,
+    "spark_live_trades_total": 0,
+    "spark_live_blocked_total": 0,
+    "spark_live_reconciliation_total": 0,
+    "spark_live_ws_reconnects_total": 0
+  }
+}

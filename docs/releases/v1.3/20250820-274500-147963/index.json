@@ -1,0 +1,42 @@
+{
+  "nonce": "20250820-274500-147963",
+  "started_utc": "2025-08-20T27:45:00Z",
+  "status": "BLOCKED",
+  "reason": "BINANCE_KEYS_MISSING",
+  "components": {
+    "ingest_local": {
+      "p95_ms": 401,
+      "event_db_p95_ms": 0,
+      "seq_gap": 0
+    },
+    "guardrails_sim": {
+      "B_p95_ms": 617,
+      "circuit_open": 1,
+      "blocks": 10
+    },
+    "orderflow_real": {
+      "status": "PARTIAL",
+      "place_p95_ms": null
+    },
+    "bist": {
+      "status_component": "SKIPPED"
+    }
+  },
+  "env_gate": {
+    "binance": {
+      "present": 0,
+      "key_hash8": null,
+      "secret_hash8": null
+    },
+    "bist": {
+      "present": 0
+    }
+  },
+  "evidence_paths": {
+    "index": "docs/releases/v1.3/20250820-274500-147963/index.json",
+    "report_md": "docs/releases/v1.3/20250820-274500-147963/RELEASE_NOTES.md",
+    "runbook_md": "docs/releases/v1.3/20250820-274500-147963/RUNBOOK.md",
+    "ready_md": "docs/releases/v1.3/20250820-274500-147963/READY_CHECK.md",
+    "manifest": "docs/releases/v1.3/20250820-274500-147963/manifest.sha256"
+  }
+} 

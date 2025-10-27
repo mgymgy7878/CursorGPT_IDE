@@ -1,0 +1,279 @@
+﻿# HELP executor_process_cpu_user_seconds_total Total user CPU time spent in seconds.
+# TYPE executor_process_cpu_user_seconds_total counter
+executor_process_cpu_user_seconds_total 18.391
+
+# HELP executor_process_cpu_system_seconds_total Total system CPU time spent in seconds.
+# TYPE executor_process_cpu_system_seconds_total counter
+executor_process_cpu_system_seconds_total 9.344
+
+# HELP executor_process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE executor_process_cpu_seconds_total counter
+executor_process_cpu_seconds_total 27.735
+
+# HELP executor_process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE executor_process_start_time_seconds gauge
+executor_process_start_time_seconds 1759046700
+
+# HELP executor_process_resident_memory_bytes Resident memory size in bytes.
+# TYPE executor_process_resident_memory_bytes gauge
+executor_process_resident_memory_bytes 43401216
+
+# HELP executor_nodejs_eventloop_lag_seconds Lag of event loop in seconds.
+# TYPE executor_nodejs_eventloop_lag_seconds gauge
+executor_nodejs_eventloop_lag_seconds 0.0162756
+
+# HELP executor_nodejs_eventloop_lag_min_seconds The minimum recorded event loop delay.
+# TYPE executor_nodejs_eventloop_lag_min_seconds gauge
+executor_nodejs_eventloop_lag_min_seconds 0.005664768
+
+# HELP executor_nodejs_eventloop_lag_max_seconds The maximum recorded event loop delay.
+# TYPE executor_nodejs_eventloop_lag_max_seconds gauge
+executor_nodejs_eventloop_lag_max_seconds 0.186122239
+
+# HELP executor_nodejs_eventloop_lag_mean_seconds The mean of the recorded event loop delays.
+# TYPE executor_nodejs_eventloop_lag_mean_seconds gauge
+executor_nodejs_eventloop_lag_mean_seconds 0.016834671504238917
+
+# HELP executor_nodejs_eventloop_lag_stddev_seconds The standard deviation of the recorded event loop delays.
+# TYPE executor_nodejs_eventloop_lag_stddev_seconds gauge
+executor_nodejs_eventloop_lag_stddev_seconds 0.004440505392545577
+
+# HELP executor_nodejs_eventloop_lag_p50_seconds The 50th percentile of the recorded event loop delays.
+# TYPE executor_nodejs_eventloop_lag_p50_seconds gauge
+executor_nodejs_eventloop_lag_p50_seconds 0.015925247
+
+# HELP executor_nodejs_eventloop_lag_p90_seconds The 90th percentile of the recorded event loop delays.
+# TYPE executor_nodejs_eventloop_lag_p90_seconds gauge
+executor_nodejs_eventloop_lag_p90_seconds 0.019283967
+
+# HELP executor_nodejs_eventloop_lag_p99_seconds The 99th percentile of the recorded event loop delays.
+# TYPE executor_nodejs_eventloop_lag_p99_seconds gauge
+executor_nodejs_eventloop_lag_p99_seconds 0.031571967
+
+# HELP executor_nodejs_active_resources Number of active resources that are currently keeping the event loop alive, grouped by async resource type.
+# TYPE executor_nodejs_active_resources gauge
+executor_nodejs_active_resources{type="PipeWrap"} 3
+executor_nodejs_active_resources{type="TCPServerWrap"} 1
+executor_nodejs_active_resources{type="TCPSocketWrap"} 2
+executor_nodejs_active_resources{type="Timeout"} 1
+executor_nodejs_active_resources{type="Immediate"} 1
+
+# HELP executor_nodejs_active_resources_total Total number of active resources.
+# TYPE executor_nodejs_active_resources_total gauge
+executor_nodejs_active_resources_total 8
+
+# HELP executor_nodejs_active_handles Number of active libuv handles grouped by handle type. Every handle type is C++ class name.
+# TYPE executor_nodejs_active_handles gauge
+executor_nodejs_active_handles{type="Socket"} 5
+executor_nodejs_active_handles{type="Server"} 1
+
+# HELP executor_nodejs_active_handles_total Total number of active handles.
+# TYPE executor_nodejs_active_handles_total gauge
+executor_nodejs_active_handles_total 6
+
+# HELP executor_nodejs_active_requests Number of active libuv requests grouped by request type. Every request type is C++ class name.
+# TYPE executor_nodejs_active_requests gauge
+
+# HELP executor_nodejs_active_requests_total Total number of active requests.
+# TYPE executor_nodejs_active_requests_total gauge
+executor_nodejs_active_requests_total 0
+
+# HELP executor_nodejs_heap_size_total_bytes Process heap size from Node.js in bytes.
+# TYPE executor_nodejs_heap_size_total_bytes gauge
+executor_nodejs_heap_size_total_bytes 19513344
+
+# HELP executor_nodejs_heap_size_used_bytes Process heap size used from Node.js in bytes.
+# TYPE executor_nodejs_heap_size_used_bytes gauge
+executor_nodejs_heap_size_used_bytes 17883040
+
+# HELP executor_nodejs_external_memory_bytes Node.js external memory size in bytes.
+# TYPE executor_nodejs_external_memory_bytes gauge
+executor_nodejs_external_memory_bytes 1126768
+
+# HELP executor_nodejs_heap_space_size_total_bytes Process heap space size total from Node.js in bytes.
+# TYPE executor_nodejs_heap_space_size_total_bytes gauge
+executor_nodejs_heap_space_size_total_bytes{space="read_only"} 0
+executor_nodejs_heap_space_size_total_bytes{space="old"} 14651392
+executor_nodejs_heap_space_size_total_bytes{space="code"} 1781760
+executor_nodejs_heap_space_size_total_bytes{space="map"} 1056768
+executor_nodejs_heap_space_size_total_bytes{space="large_object"} 974848
+executor_nodejs_heap_space_size_total_bytes{space="code_large_object"} 0
+executor_nodejs_heap_space_size_total_bytes{space="new_large_object"} 0
+executor_nodejs_heap_space_size_total_bytes{space="new"} 1048576
+
+# HELP executor_nodejs_heap_space_size_used_bytes Process heap space size used from Node.js in bytes.
+# TYPE executor_nodejs_heap_space_size_used_bytes gauge
+executor_nodejs_heap_space_size_used_bytes{space="read_only"} 0
+executor_nodejs_heap_space_size_used_bytes{space="old"} 13993440
+executor_nodejs_heap_space_size_used_bytes{space="code"} 1663360
+executor_nodejs_heap_space_size_used_bytes{space="map"} 783344
+executor_nodejs_heap_space_size_used_bytes{space="large_object"} 958328
+executor_nodejs_heap_space_size_used_bytes{space="code_large_object"} 0
+executor_nodejs_heap_space_size_used_bytes{space="new_large_object"} 0
+executor_nodejs_heap_space_size_used_bytes{space="new"} 489632
+
+# HELP executor_nodejs_heap_space_size_available_bytes Process heap space size available from Node.js in bytes.
+# TYPE executor_nodejs_heap_space_size_available_bytes gauge
+executor_nodejs_heap_space_size_available_bytes{space="read_only"} 0
+executor_nodejs_heap_space_size_available_bytes{space="old"} 390136
+executor_nodejs_heap_space_size_available_bytes{space="code"} 3712
+executor_nodejs_heap_space_size_available_bytes{space="map"} 251424
+executor_nodejs_heap_space_size_available_bytes{space="large_object"} 0
+executor_nodejs_heap_space_size_available_bytes{space="code_large_object"} 0
+executor_nodejs_heap_space_size_available_bytes{space="new_large_object"} 1030976
+executor_nodejs_heap_space_size_available_bytes{space="new"} 541344
+
+# HELP executor_nodejs_version_info Node.js version info.
+# TYPE executor_nodejs_version_info gauge
+executor_nodejs_version_info{version="v18.18.2",major="18",minor="18",patch="2"} 1
+
+# HELP executor_nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.
+# TYPE executor_nodejs_gc_duration_seconds histogram
+executor_nodejs_gc_duration_seconds_bucket{le="0.001",kind="minor"} 42
+executor_nodejs_gc_duration_seconds_bucket{le="0.01",kind="minor"} 51
+executor_nodejs_gc_duration_seconds_bucket{le="0.1",kind="minor"} 51
+executor_nodejs_gc_duration_seconds_bucket{le="1",kind="minor"} 51
+executor_nodejs_gc_duration_seconds_bucket{le="2",kind="minor"} 51
+executor_nodejs_gc_duration_seconds_bucket{le="5",kind="minor"} 51
+executor_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="minor"} 51
+executor_nodejs_gc_duration_seconds_sum{kind="minor"} 0.0490940000191331
+executor_nodejs_gc_duration_seconds_count{kind="minor"} 51
+executor_nodejs_gc_duration_seconds_bucket{le="0.001",kind="incremental"} 4
+executor_nodejs_gc_duration_seconds_bucket{le="0.01",kind="incremental"} 5
+executor_nodejs_gc_duration_seconds_bucket{le="0.1",kind="incremental"} 5
+executor_nodejs_gc_duration_seconds_bucket{le="1",kind="incremental"} 5
+executor_nodejs_gc_duration_seconds_bucket{le="2",kind="incremental"} 5
+executor_nodejs_gc_duration_seconds_bucket{le="5",kind="incremental"} 5
+executor_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="incremental"} 5
+executor_nodejs_gc_duration_seconds_sum{kind="incremental"} 0.001863599993288517
+executor_nodejs_gc_duration_seconds_count{kind="incremental"} 5
+executor_nodejs_gc_duration_seconds_bucket{le="0.001",kind="major"} 0
+executor_nodejs_gc_duration_seconds_bucket{le="0.01",kind="major"} 3
+executor_nodejs_gc_duration_seconds_bucket{le="0.1",kind="major"} 3
+executor_nodejs_gc_duration_seconds_bucket{le="1",kind="major"} 3
+executor_nodejs_gc_duration_seconds_bucket{le="2",kind="major"} 3
+executor_nodejs_gc_duration_seconds_bucket{le="5",kind="major"} 3
+executor_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="major"} 3
+executor_nodejs_gc_duration_seconds_sum{kind="major"} 0.020630999989807608
+executor_nodejs_gc_duration_seconds_count{kind="major"} 3
+
+# HELP executor_http_requests_total HTTP requests total
+# TYPE executor_http_requests_total counter
+executor_http_requests_total{route="/canary/run",method="GET",status="200"} 73
+executor_http_requests_total{route="/public/metrics/prom",method="GET",status="200"} 10
+executor_http_requests_total{route="/health",method="GET",status="200"} 4
+executor_http_requests_total{route="unknown",method="GET",status="404"} 2
+
+# HELP executor_start_total Strategy start requests
+# TYPE executor_start_total counter
+executor_start_total 0
+
+# HELP executor_stop_total Strategy stop requests
+# TYPE executor_stop_total counter
+executor_stop_total 0
+
+# HELP executor_active_strategies Number of active strategies
+# TYPE executor_active_strategies gauge
+executor_active_strategies 0
+
+# HELP executor_ai_generate_total AI generation requests
+# TYPE executor_ai_generate_total counter
+
+# HELP executor_ai_latency_ms AI response latency
+# TYPE executor_ai_latency_ms histogram
+
+# HELP executor_ai_tokens_total AI token usage
+# TYPE executor_ai_tokens_total counter
+
+# HELP executor_futures_orders_blocked_total Futures orders blocked
+# TYPE executor_futures_orders_blocked_total counter
+executor_futures_orders_blocked_total 0
+
+# HELP executor_futures_uds_lifecycle_total Futures UDS lifecycle events
+# TYPE executor_futures_uds_lifecycle_total counter
+executor_futures_uds_lifecycle_total 0
+
+# HELP executor_futures_uds_last_keepalive_ts Futures UDS last keepalive timestamp
+# TYPE executor_futures_uds_last_keepalive_ts gauge
+executor_futures_uds_last_keepalive_ts 0
+
+# HELP executor_rate_limit_hits_total Rate limit hits
+# TYPE executor_rate_limit_hits_total counter
+executor_rate_limit_hits_total 0
+
+# HELP ai_chat_ms_summary AI chat end-to-end processing time (ms)
+# TYPE ai_chat_ms_summary summary
+ai_chat_ms_summary{quantile="0.5"} 0
+ai_chat_ms_summary{quantile="0.9"} 0
+ai_chat_ms_summary{quantile="0.95"} 0
+ai_chat_ms_summary{quantile="0.99"} 0
+ai_chat_ms_summary_sum 0
+ai_chat_ms_summary_count 0
+
+# HELP ai_tool_calls_total AI tool bridge calls
+# TYPE ai_tool_calls_total counter
+
+# HELP ai_guarded_actions_total Guarded (preview/confirmed) actions
+# TYPE ai_guarded_actions_total counter
+
+# HELP ai_sse_clients Current SSE client connections
+# TYPE ai_sse_clients gauge
+ai_sse_clients 0
+
+# HELP ai_confirm_errors_total Confirm/apply failures
+# TYPE ai_confirm_errors_total counter
+ai_confirm_errors_total 0
+
+# HELP ai_router_choice_total Router model selections
+# TYPE ai_router_choice_total counter
+
+# HELP ai_router_failover_total Router failovers
+# TYPE ai_router_failover_total counter
+
+# HELP ai_chars_out_total Approx streamed characters out
+# TYPE ai_chars_out_total counter
+
+# HELP ai_override_total User-scoped model override operations
+# TYPE ai_override_total counter
+
+# HELP ai_drift_explain_total Drift explain istek sayÄ±sÄ±
+# TYPE ai_drift_explain_total counter
+ai_drift_explain_total 0
+
+# HELP ai_drift_compare_total Drift compare istek sayÄ±sÄ±
+# TYPE ai_drift_compare_total counter
+ai_drift_compare_total 0
+
+# HELP ai_model_hint_total Model hint istek sayÄ±sÄ±
+# TYPE ai_model_hint_total counter
+ai_model_hint_total 0
+
+# HELP ai_rate_limit_trips_total AI SSE rate-limit exceeded events
+# TYPE ai_rate_limit_trips_total counter
+ai_rate_limit_trips_total 0
+
+# HELP ai_rate_limit_trips_by_ip_total AI SSE rate-limit exceeded events by IP
+# TYPE ai_rate_limit_trips_by_ip_total counter
+
+# HELP ai_json_out_total JSON event payloads streamed (by tool)
+# TYPE ai_json_out_total counter
+
+# HELP ai_resume_tokens_total SSE resume via Last-Event-ID occurrences
+# TYPE ai_resume_tokens_total counter
+ai_resume_tokens_total 0
+
+# HELP ai_backtest_runs_total Backtest runs
+# TYPE ai_backtest_runs_total counter
+ai_backtest_runs_total 0
+
+# HELP ai_backtest_errors_total Backtest errors
+# TYPE ai_backtest_errors_total counter
+ai_backtest_errors_total 0
+
+# HELP ai_backtest_ms_summary Backtest latency ms
+# TYPE ai_backtest_ms_summary summary
+ai_backtest_ms_summary{quantile="0.5"} 0
+ai_backtest_ms_summary{quantile="0.95"} 0
+ai_backtest_ms_summary_sum 0
+ai_backtest_ms_summary_count 0
+

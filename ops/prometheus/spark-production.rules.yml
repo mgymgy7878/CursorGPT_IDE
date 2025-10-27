@@ -1,0 +1,110 @@
+groups:
+- name: spark.production
+  rules:
+    # Nonce Error Rate High
+    - alert: NonceErrorRateHigh
+      expr: rate(spark_exchange_errors_total{code="INVALID_NONCE"}[5m]) > 0.01
+      for: 5m
+      labels:
+        severity: warning
+        component: btcturk
+      annotations:
+        summary: "BTCTurk Invalid Nonce error rate high"
+        description: "Invalid Nonce error rate is {{ $value | humanizePercentage }} over 5m"
+        runbook_url: "https://docs.spark.trading/runbooks/nonce-errors"
+
+    # 429 Rate Limit Bursts
+    - alert: RateLimitBursts
+      expr: rate(spark_http_requests_total{status="429"}[5m]) > 0.05
+      for: 3m
+      labels:
+        severity: warning
+        component: btcturk
+      annotations:
+        summary: "BTCTurk rate limit bursts detected"
+        description: "Rate limit (429) responses: {{ $value | humanize }} per second"
+        runbook_url: "https://docs.spark.trading/runbooks/rate-limits"
+
+    # BTCTurk ACK Missing
+    - alert: BTCTurkAckMissing
+      expr: increase(spark_place_ack_duration_seconds_count[10m]) == 0
+      for: 10m
+      labels:
+        severity: critical
+        component: btcturk
+      annotations:
+        summary: "No BTCTurk order acknowledgments in 10m"
+        description: "Zero order ACKs received from BTCTurk in the last 10 minutes"
+        runbook_url: "https://docs.spark.trading/runbooks/ack-missing"
+
+    # P95 Place→ACK Critical
+    - alert: PlaceAckP95Critical
+      expr: histogram_quantile(0.95, sum by (le) (rate(spark_place_ack_duration_seconds_bucket[5m]))) > 2
+      for: 10m
+      labels:
+        severity: critical
+        component: btcturk
+      annotations:
+        summary: "BTCTurk P95 Place→ACK latency critical"
+        description: "P95 Place→ACK latency is {{ $value | humanizeDuration }} (threshold: 2s)"
+        runbook_url: "https://docs.spark.trading/runbooks/p95-critical"
+
+    # P95 Place→ACK Warning
+    - alert: PlaceAckP95Warning
+      expr: histogram_quantile(0.95, sum by (le) (rate(spark_place_ack_duration_seconds_bucket[5m]))) > 1.2
+      for: 10m
+      labels:
+        severity: warning
+        component: btcturk
+      annotations:
+        summary: "BTCTurk P95 Place→ACK latency warning"
+        description: "P95 Place→ACK latency is {{ $value | humanizeDuration }} (threshold: 1.2s)"
+        runbook_url: "https://docs.spark.trading/runbooks/p95-warning"
+
+    # P95 Feed→DB Warning
+    - alert: FeedDbP95Warning
+      expr: histogram_quantile(0.95, sum by (le) (rate(spark_feed_to_db_seconds_bucket[5m]))) > 0.3
+      for: 5m
+      labels:
+        severity: warning
+        component: bist
+      annotations:
+        summary: "BIST P95 Feed→DB latency warning"
+        description: "P95 Feed→DB latency is {{ $value | humanizeDuration }} (threshold: 300ms)"
+        runbook_url: "https://docs.spark.trading/runbooks/feed-db-warning"
+
+    # Clock Drift High
+    - alert: ClockDriftHigh
+      expr: abs(spark_clock_drift_seconds{exchange="btcturk"}) > 5
+      for: 2m
+      labels:
+        severity: warning
+        component: btcturk
+      annotations:
+        summary: "BTCTurk clock drift high"
+        description: "Clock drift is {{ $value | humanizeDuration }} (threshold: 5s)"
+        runbook_url: "https://docs.spark.trading/runbooks/clock-drift"
+
+    # Kill Switch Active
+    - alert: KillSwitchActive
+      expr: spark_kill_switch_active == 1
+      for: 0m
+      labels:
+        severity: info
+        component: system
+      annotations:
+        summary: "Kill switch is active"
+        description: "Trading kill switch is enabled - all orders blocked"
+        runbook_url: "https://docs.spark.trading/runbooks/kill-switch"
+
+    # Trading Mode Changed
+    - alert: TradingModeChanged
+      expr: changes(spark_trading_mode[1m]) > 0
+      for: 0m
+      labels:
+        severity: info
+        component: system
+      annotations:
+        summary: "Trading mode changed"
+        description: "Trading mode has changed to {{ $labels.mode }}"
+        runbook_url: "https://docs.spark.trading/runbooks/trading-mode"

@@ -1,0 +1,16 @@
+{
+  "action": "/canary/confirm",
+  "params": {
+    "exchange": "btcturk",
+    "symbols": ["BTCUSDT"],
+    "budgetNotional": 50,
+    "maxOrders": 1,
+    "riskGuard": true,
+    "killSwitch": { "maxDrawdownPct": 0.2, "abortOn5xx": true },
+    "evidence": true,
+    "tags": ["v1.1","post-reboot","guardrails"]
+  },
+  "dryRun": false,
+  "confirm_required": true,
+  "reason": "Dry-run başarılı; canlıda mikro hacimle kanarya doğrulaması"
+}

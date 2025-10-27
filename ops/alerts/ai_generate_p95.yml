@@ -1,0 +1,13 @@
+groups:
+- name: ai-generate-latency
+  rules:
+  - alert: AI_Generate_P95_Too_High
+    expr: |
+      histogram_quantile(0.95, sum by (le) (rate(ai_latency_ms_bucket[5m]))) > 3000
+    for: 3m
+    labels:
+      severity: warning
+      service: executor
+    annotations:
+      summary: "AI Generate p95 yüksek"
+      description: "p95 > 3000ms (son 5dk)."

@@ -1,0 +1,32 @@
+{
+  "name": "MACD_RSI_fusion",
+  "version": "1.0.0",
+  "status": "deprecated",
+  "deprecated_reason": "Fragility top 0.5 < 0.60 threshold, OOS positive ratio 0.2 < 0.60 threshold",
+  "deprecated_date": "2025-08-20T28:25:00Z",
+  "deprecated_nonce": "20250820-282000-369147",
+  "best_candidate": {
+    "fast": 8,
+    "slow": 50,
+    "signal": 9,
+    "rsi": 14,
+    "oversold": 30,
+    "overbought": 70,
+    "regime": 1,
+    "sl": 0,
+    "tp": 0.01,
+    "sharpe": 10.13,
+    "cagr_pct": -10.36,
+    "max_dd_pct": 0.25,
+    "trades": 2,
+    "exposure_pct": 0.03,
+    "fragility_score": 0.5
+  },
+  "failure_metrics": {
+    "robust_base": 32,
+    "fragility_top": 0.5,
+    "oos_positive_ratio": 0.2,
+    "compute_ms": 1404
+  },
+  "description": "MACD_RSI_fusion strategy - deprecated due to fragility and OOS stability issues"
+} 

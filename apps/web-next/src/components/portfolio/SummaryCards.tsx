@@ -1,6 +1,4 @@
 "use client";
-import { fmtCurrencyTR } from "@/lib/ui/format";
-
 export default function SummaryCards({
   totalUsd,
   accountCount,
@@ -13,7 +11,7 @@ export default function SummaryCards({
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       <Card title="Toplam Portföy (USD)">
-        {fmtCurrencyTR(totalUsd)}
+        ${totalUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })}
       </Card>
       <Card title="Bağlı Hesap">
         {accountCount}

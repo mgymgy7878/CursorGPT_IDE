@@ -1,0 +1,130 @@
+{
+  "nonce": "20250820-283500-741369",
+  "started_utc": "2025-08-20T28:35:00Z",
+  "status": "ERROR",
+  "reason": "ROBUST_OR_FRAGILITY_WEAK",
+  "thresholds": {
+    "robust_base_ge": 4,
+    "fragility_top_ge": 0.6,
+    "oos_positive_ratio_ge": 0.6,
+    "compute_total_ms_leq": 2500
+  },
+  "dataset": {
+    "source": "docs/evidence/v1.4-backtest-real/20250820-275500-741963/data.jsonl",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 12000,
+    "from_utc": "2025-08-11T06:22:00.000Z",
+    "to_utc": "2025-08-19T14:21:00.000Z"
+  },
+  "grid_base": {
+    "shortPeriods": [
+      5,
+      10,
+      15
+    ],
+    "longPeriods": [
+      40,
+      50,
+      80
+    ],
+    "volTargets": [
+      0.12,
+      0.15,
+      0.18,
+      0.2
+    ],
+    "atrWindows": [
+      14,
+      21
+    ],
+    "kValues": [
+      0.5,
+      1
+    ],
+    "maxLeverage": 1,
+    "slTypes": [
+      1,
+      2
+    ],
+    "tpTypes": [
+      0,
+      2,
+      3
+    ],
+    "cooldowns": [
+      0,
+      5
+    ],
+    "robust_count_sharpe_gt1": 0,
+    "robust_ratio": 0,
+    "sharpe_max": -1.63,
+    "sharpe_min": -18.14,
+    "sharpe_delta": 16.51
+  },
+  "stress": {
+    "cost_scenarios": 3,
+    "noise_replicas": 20,
+    "fragility_top": 0.45,
+    "robust_count_stress_gt1": null
+  },
+  "best_candidate": {
+    "short": 5,
+    "long": 40,
+    "vol_target": 0.2,
+    "atr_win": 14,
+    "k": 1,
+    "sl": "1ATR",
+    "tp": "3ATR",
+    "cooldown": 5,
+    "sharpe": -1.63,
+    "cagr_pct": -100,
+    "max_dd_pct": 71.98,
+    "trades": 844,
+    "exposure_pct": 38.79,
+    "avg_pos_size": 0.322,
+    "fragility_score": 0.45
+  },
+  "oos_recheck": {
+    "folds": 5,
+    "positive_ratio": 0.6,
+    "median_sharpe": 2.24,
+    "min_sharpe": -12.41,
+    "metrics": [
+      {
+        "sharpe": 2.24,
+        "cagr_pct": -100,
+        "max_dd_pct": 21.71
+      },
+      {
+        "sharpe": 2.85,
+        "cagr_pct": -100,
+        "max_dd_pct": 21.54
+      },
+      {
+        "sharpe": 5.48,
+        "cagr_pct": -100,
+        "max_dd_pct": 20.98
+      },
+      {
+        "sharpe": -9.54,
+        "cagr_pct": -100,
+        "max_dd_pct": 26.61
+      },
+      {
+        "sharpe": -12.41,
+        "cagr_pct": -100,
+        "max_dd_pct": 21.38
+      }
+    ]
+  },
+  "perf": {
+    "compute_total_ms": 2900
+  },
+  "evidence_paths": {
+    "index": "docs\\evidence\\v1.4-voltarget_ma-speed_expand\\20250820-283500-741369\\index.json",
+    "metrics": "docs\\evidence\\v1.4-voltarget_ma-speed_expand\\20250820-283500-741369\\metrics.json",
+    "summary_csv": "docs\\evidence\\v1.4-voltarget_ma-speed_expand\\20250820-283500-741369\\summary.csv",
+    "manifest": "docs\\evidence\\v1.4-voltarget_ma-speed_expand\\20250820-283500-741369\\manifest.sha256"
+  }
+}

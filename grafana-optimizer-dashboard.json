@@ -1,0 +1,140 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Optimizer Concurrency Dashboard",
+    "tags": ["optimizer", "concurrency", "performance"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Queue Depth (by priority)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum by (priority) (optimizer_queue_depth)",
+            "legendFormat": "{{priority}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 100},
+                {"color": "red", "value": 200}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Queue Wait P95",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (le) (rate(optimizer_queue_wait_ms_bucket[5m])))",
+            "legendFormat": "P95 Wait",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 500},
+                {"color": "red", "value": 1000}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Step Latency P95",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (le) (rate(optimizer_step_latency_ms_bucket[5m])))",
+            "legendFormat": "P95 Latency",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 50},
+                {"color": "red", "value": 100}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Workers Running & CPU%",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "optimizer_workers_running",
+            "legendFormat": "Workers",
+            "refId": "A"
+          },
+          {
+            "expr": "avg(optimizer_resource_cpu_pct)",
+            "legendFormat": "CPU %",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 60},
+                {"color": "red", "value": 80}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Job Throughput",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(optimizer_jobs_total{status=\"succeeded\"}[1m]))",
+            "legendFormat": "Jobs/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.1},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

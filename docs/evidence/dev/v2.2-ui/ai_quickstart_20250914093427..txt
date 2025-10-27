@@ -1,0 +1,82 @@
+# AI Quickstart Smoke Test Results
+Timestamp: 2025-09-14T09:34:27.564Z
+Symbol: BTCUSDT, Qty: 0.001, Leverage: 5, Risk: low
+
+## Summary
+Passed: 0/4
+Success: ❌ NO
+
+## Test Results
+### advisor_suggest
+- URL: http://127.0.0.1:3003/api/advisor/suggest
+- Status: 0
+- Latency: 43ms
+- OK: ❌
+- Error: fetch failed
+### dry_run_order
+- URL: http://127.0.0.1:4001/api/futures/order
+- Status: 0
+- Latency: 3ms
+- OK: ❌
+- Error: fetch failed
+### metrics
+- URL: http://127.0.0.1:3003/api/public/metrics
+- Status: 0
+- Latency: 1ms
+- OK: ❌
+- Error: fetch failed
+### advisor_health
+- URL: http://127.0.0.1:4001/api/advisor/health
+- Status: 0
+- Latency: 3ms
+- OK: ❌
+- Error: fetch failed
+
+## Raw Results
+{
+  "timestamp": "2025-09-14T09:34:27.564Z",
+  "symbol": "BTCUSDT",
+  "qty": 0.001,
+  "leverage": 5,
+  "risk": "low",
+  "tests": [
+    {
+      "name": "advisor_suggest",
+      "url": "http://127.0.0.1:3003/api/advisor/suggest",
+      "status": 0,
+      "latency": 43,
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "name": "dry_run_order",
+      "url": "http://127.0.0.1:4001/api/futures/order",
+      "status": 0,
+      "latency": 3,
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "name": "metrics",
+      "url": "http://127.0.0.1:3003/api/public/metrics",
+      "status": 0,
+      "latency": 1,
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "name": "advisor_health",
+      "url": "http://127.0.0.1:4001/api/advisor/health",
+      "status": 0,
+      "latency": 3,
+      "ok": false,
+      "error": "fetch failed"
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "total": 4,
+    "success": false,
+    "timestamp": "2025-09-14T09:34:27.622Z"
+  }
+}

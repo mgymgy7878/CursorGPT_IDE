@@ -1,0 +1,116 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Export@Scale + Observability Dashboard",
+    "tags": ["export", "scale", "observability"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Export Latency P95",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (le) (rate(export_latency_ms_bucket[10m])))",
+            "legendFormat": "P95 Latency (ms)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 10000},
+                {"color": "red", "value": 30000}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Export Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "export_success_rate",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Export Bytes",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(export_bytes_total)",
+            "legendFormat": "Total Bytes"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Export Concurrency",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "export_concurrent_running",
+            "legendFormat": "Concurrent Exports"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Export Throughput",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(export_requests_total[1m]))",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

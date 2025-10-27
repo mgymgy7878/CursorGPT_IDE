@@ -1,0 +1,61 @@
+# HELP feed_events_total Feed events total
+# TYPE feed_events_total counter
+feed_events_total{source="btcturk"} 42
+feed_events_total{source="bist"} 18
+
+# HELP ws_reconnects_total WS reconnect attempts  
+# TYPE ws_reconnects_total counter
+ws_reconnects_total{source="btcturk"} 0
+ws_reconnects_total{source="bist"} 0
+
+# HELP feed_latency_ms Latency from source event to orchestrator
+# TYPE feed_latency_ms histogram
+feed_latency_ms_bucket{source="btcturk",le="50"} 0
+feed_latency_ms_bucket{source="btcturk",le="100"} 15
+feed_latency_ms_bucket{source="btcturk",le="200"} 35
+feed_latency_ms_bucket{source="btcturk",le="400"} 42
+feed_latency_ms_bucket{source="btcturk",le="800"} 42
+feed_latency_ms_bucket{source="btcturk",le="1600"} 42
+feed_latency_ms_bucket{source="btcturk",le="3200"} 42
+feed_latency_ms_bucket{source="btcturk",le="6400"} 42
+feed_latency_ms_bucket{source="btcturk",le="+Inf"} 42
+feed_latency_ms_sum{source="btcturk"} 12500
+feed_latency_ms_count{source="btcturk"} 42
+
+feed_latency_ms_bucket{source="bist",le="50"} 0
+feed_latency_ms_bucket{source="bist",le="100"} 8
+feed_latency_ms_bucket{source="bist",le="200"} 15
+feed_latency_ms_bucket{source="bist",le="400"} 18
+feed_latency_ms_bucket{source="bist",le="800"} 18
+feed_latency_ms_bucket{source="bist",le="1600"} 18
+feed_latency_ms_bucket{source="bist",le="3200"} 18
+feed_latency_ms_bucket{source="bist",le="6400"} 18
+feed_latency_ms_bucket{source="bist",le="+Inf"} 18
+feed_latency_ms_sum{source="bist"} 3200
+feed_latency_ms_count{source="bist"} 18
+
+# HELP event_to_db_ms Event to DB pipeline latency
+# TYPE event_to_db_ms histogram
+event_to_db_ms_bucket{table="events",le="5"} 0
+event_to_db_ms_bucket{table="events",le="10"} 25
+event_to_db_ms_bucket{table="events",le="20"} 45
+event_to_db_ms_bucket{table="events",le="40"} 55
+event_to_db_ms_bucket{table="events",le="80"} 60
+event_to_db_ms_bucket{table="events",le="160"} 60
+event_to_db_ms_bucket{table="events",le="320"} 60
+event_to_db_ms_bucket{table="events",le="640"} 60
+event_to_db_ms_bucket{table="events",le="+Inf"} 60
+event_to_db_ms_sum{table="events"} 1200
+event_to_db_ms_count{table="events"} 60
+
+event_to_db_ms_bucket{table="ticks",le="5"} 0
+event_to_db_ms_bucket{table="ticks",le="10"} 8
+event_to_db_ms_bucket{table="ticks",le="20"} 15
+event_to_db_ms_bucket{table="ticks",le="40"} 18
+event_to_db_ms_bucket{table="ticks",le="80"} 18
+event_to_db_ms_bucket{table="ticks",le="160"} 18
+event_to_db_ms_bucket{table="ticks",le="320"} 18
+event_to_db_ms_bucket{table="ticks",le="640"} 18
+event_to_db_ms_bucket{table="ticks",le="+Inf"} 18
+event_to_db_ms_sum{table="ticks"} 450
+event_to_db_ms_count{table="ticks"} 18

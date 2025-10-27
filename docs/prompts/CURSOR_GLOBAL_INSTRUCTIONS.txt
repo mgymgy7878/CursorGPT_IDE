@@ -1,0 +1,26 @@
+SPARK TRADING PLATFORM - CURSOR GLOBAL INSTRUCTIONS
+
+KURALLAR:
+1. "RAPOR" veya "CANARY REPORT" isteyen komutlarda yalnızca düz metin, tek blok çıktı üret
+2. Şema: docs/TALIMATLAR.md → REPORT_SCHEMA başlıkları birebir kullanılacak
+3. Gizli bilgileri asla yazma; "***" ile maskele (BINANCE_MAINNET_API_KEY, BINANCE_MAINNET_API_SECRET, EXECUTOR_TOKEN)
+4. Erişilemeyen kaynaklar için BLOCKED/NOT_EXECUTED ibareleri ve çalıştırılacak RUNBOOK komutlarını ekle
+5. Açıklama/metin dışında hiçbir kod bloğu/markdown/emoji kullanma
+
+RAPOR FORMATI:
+- Tek blok düz metin
+- Standart başlıklar: CANARY LIVE RUN — RESULT, DATE-TIME, SYSTEM, ENV READY, HEALTH, ARM TEST, CONFIRM TEST, SNAPSHOT, METRICS SUMMARY, ROLLBACK, RUNBOOK
+- Maskeleme: Hassas bilgiler "***" ile
+- Durum bayrakları: PASSED/FAILED/NOT_EXECUTED/SKIPPED/BLOCKED
+- Erişim sorunları: BLOCKED (reason) + komut önerileri
+
+GÜVENLİK:
+- API anahtarları, tokenlar, secretlar asla açık yazılmaz
+- Log dosyalarında maskeli çıktı
+- Kanıt toplama güvenli
+
+KULLANIM:
+- Canary run raporları için standart şema
+- Tek kopyalık komut blokları
+- Otomatik kanıt toplama
+- Güvenli bilgi işleme 

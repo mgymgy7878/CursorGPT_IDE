@@ -1,0 +1,142 @@
+name: Runner Watchdog CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM
+
+jobs:
+  runner-smoke-test:
+    runs-on: windows-latest
+    name: Runner Smoke Test
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+        
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.14.0
+        
+    - name: Install Dependencies
+      run: pnpm install
+      
+    - name: Runner Smoke Test
+      run: pnpm run runner:smoke
+      
+    - name: Collect Evidence
+      run: |
+        mkdir -p evidence/_ci
+        node -v > evidence/_ci/node.txt
+        pnpm -v > evidence/_ci/pnpm.txt
+        git rev-parse HEAD > evidence/_ci/git-commit.txt
+        powershell -ExecutionPolicy Bypass -File scripts/daily-report.ps1
+        
+    - name: Upload Evidence
+      uses: actions/upload-artifact@v4
+      with:
+        name: runner-evidence-${{ github.run_id }}
+        path: |
+          evidence/runner/**
+          evidence/reports/daily_report_*.zip
+          evidence/_ci/**
+        retention-days: 30
+
+  canary-retry-test:
+    runs-on: windows-latest
+    name: Canary Retry Test
+    needs: runner-smoke-test
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+        
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.14.0
+        
+    - name: Install Dependencies
+      run: pnpm install
+      
+    - name: Canary Retry Test (Success)
+      run: pnpm run canary:retry "Write-Host 'CI Canary Success'; Start-Sleep -Seconds 2; Write-Host 'Done'" "ci-success" 1 3
+      
+    - name: Canary Retry Test (Timeout)
+      run: pnpm run canary:retry "Write-Host 'CI Canary Timeout'; Start-Sleep -Seconds 30" "ci-timeout" 1 3
+      continue-on-error: true
+      
+    - name: Upload Canary Evidence
+      uses: actions/upload-artifact@v4
+      with:
+        name: canary-evidence-${{ github.run_id }}
+        path: |
+          evidence/runner/**
+        retention-days: 14
+
+  prometheus-rules-validation:
+    runs-on: ubuntu-latest
+    name: Prometheus Rules Validation
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Promtool
+      run: |
+        wget https://github.com/prometheus/prometheus/releases/download/v2.48.0/prometheus-2.48.0.linux-amd64.tar.gz
+        tar xzf prometheus-2.48.0.linux-amd64.tar.gz
+        sudo cp prometheus-2.48.0.linux-amd64/promtool /usr/local/bin/
+        
+    - name: Validate Prometheus Rules
+      run: promtool check rules config/prometheus/rules/spark-runner.rules.yml
+      
+    - name: Test Rule Expressions
+      run: promtool test rules config/prometheus/rules/spark-runner.rules.yml
+
+  security-audit:
+    runs-on: ubuntu-latest
+    name: Security Audit
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Audit Runner Scripts
+      run: |
+        echo "Checking runner script permissions..."
+        find scripts/ tools/ -name "*.ps1" -o -name "*.cjs" | while read file; do
+          echo "Auditing: $file"
+          # Check for dangerous patterns
+          if grep -q "Remove-Item.*-Force" "$file" || grep -q "rm -rf" "$file"; then
+            echo "WARNING: Dangerous deletion command found in $file"
+          fi
+          if grep -q "Invoke-Expression" "$file" || grep -q "eval(" "$file"; then
+            echo "WARNING: Code execution found in $file"
+          fi
+        done
+        
+    - name: Validate Evidence Structure
+      run: |
+        echo "Validating evidence structure..."
+        # Check if evidence files contain required fields
+        if [ -f evidence/runner/stall-events.jsonl ]; then
+          echo "Validating stall-events.jsonl format..."
+          head -1 evidence/runner/stall-events.jsonl | jq . || echo "WARNING: Invalid JSON in stall-events.jsonl"
+        fi

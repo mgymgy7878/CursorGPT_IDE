@@ -1,0 +1,38 @@
+{
+  "nonce": "20250820-254500-963852",
+  "started_utc": "2025-08-20T25:45:00Z",
+  "status": "PARTIAL",
+  "reason": "ORDERFLOW_SKIPPED",
+  "preflight": {
+    "keys_present": 0,
+    "ping_p95_ms": 603.477100007236,
+    "time_p95_ms": 442.8234999999404,
+    "clock_skew_ms": -196
+  },
+  "thresholds": {
+    "clock_skew_ms_leq": 1000,
+    "place_ack_p95_ms_leq": 1000,
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0
+  },
+  "orderflow": {
+    "n": 0,
+    "symbol": "BTCUSDT",
+    "qty": "0.00015",
+    "place_ack_ms": [],
+    "place_ack_p95_ms": null
+  },
+  "bist": {
+    "feed_url": null,
+    "ingest_lag_ms_p95": null,
+    "seq_gap_count": null,
+    "status_component": "SKIPPED",
+    "samples": 0
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-unblocker/20250820-254500-963852/index.json",
+    "preflight": "docs/evidence/v1.3-unblocker/20250820-254500-963852/preflight.json",
+    "metrics": "docs/evidence/v1.3-unblocker/20250820-254500-963852/metrics.json",
+    "manifest": "docs/evidence/v1.3-unblocker/20250820-254500-963852/manifest.sha256"
+  }
+} 

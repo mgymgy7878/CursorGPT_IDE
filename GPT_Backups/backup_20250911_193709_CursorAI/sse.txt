@@ -1,0 +1,12 @@
+event: message
+data: allowWrite=false
+
+event: message
+data: TL;DR — veri istikrarı
+Drift p95: -
+Freshness lag p95: - s (window: -s)
+Kanıt: /metrics ingest_lag, /canary/stats
+
+event: done
+data: ok
+

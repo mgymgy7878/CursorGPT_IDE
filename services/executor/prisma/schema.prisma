@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PRISMA_DATABASE_URL")
+}
+
+enum ParamStatus {
+  pending
+  approved
+  denied
+}
+
+model ParamChange {
+  id           String     @id @default(uuid())
+  strategy     String
+  diff         Json
+  newParams    Json
+  status       ParamStatus @default(pending)
+  requestedBy  String
+  requestedAt  DateTime   @default(now()) @map("requested_at")
+  decidedBy    String?    @map("decided_by")
+  decidedAt    DateTime?  @map("decided_at")
+  
+  @@index([status, strategy])
+  @@map("param_change")
+}
+
+model AuditEvent {
+  id      String   @id @default(uuid())
+  action  String
+  reason  String?
+  actor   String
+  payload Json
+  ts      DateTime @default(now())
+  
+  @@index([action, ts])
+  @@map("audit_event")
+}

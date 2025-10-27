@@ -1,0 +1,33 @@
+# v1.7 Export@Scale - Docker Compose
+# Purpose: Easy deployment of export sidecar service
+
+version: '3.8'
+
+services:
+  export-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.export
+    container_name: spark-export-v17
+    ports:
+      - "4001:4001"
+    volumes:
+      - ./exports:/app/exports
+      - ./evidence/export:/app/evidence/export
+    environment:
+      - PORT=4001
+      - HOST=0.0.0.0
+      - TS_NODE_TRANSPILE_ONLY=1
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4001/health"]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+networks:
+  default:
+    name: spark-network
+

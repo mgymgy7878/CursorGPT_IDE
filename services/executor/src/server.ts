@@ -1,50 +1,105 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-import { Registry, collectDefaultMetrics } from 'prom-client';
+import fastify from "fastify";
+import { writeFile } from "node:fs/promises";
+import fusionGate from "./plugins/fusion-gate.js";
+import { metricsRegistry } from "./metrics.js";
+// import { getMetrics, getContentType } from "../../streams/src/metrics.js";
 
-// --- Server bootstrap
-const app = Fastify({ logger: true });
-await app.register(cors, { origin: true });
+const BUILD_ID = "v1.3.4-p4-contract-lock";
 
-// --- Metrics
-const register = new Registry();
-collectDefaultMetrics({ register });
+const app = fastify({ logger: true });
 
-// --- Health
-app.get('/healthz', async () => ({
-  status: 'ok',
-  service: 'executor',
-  ts: Date.now()
-}));
+// TEK register, prefix YOK — çünkü kontrat mutlak path ile tanımlı
+await app.register(fusionGate);
 
-// --- Metrics endpoint
-app.get('/metrics', async (_req, reply) => {
-  reply.type('text/plain');
-  return register.metrics();
-});
-
-// --- Backtest dry-run (mock)
-app.post('/backtest/dry-run', async (req) => {
-  // Minimal mock payload & response
-  return {
-    ok: true,
-    jobId: `dry_${Date.now()}`,
-    received: await req.body,
-    startedAt: new Date().toISOString()
-  };
-});
-
-// --- Error Budget
-import errorBudgetRoute from './routes/errorBudget.js';
-await app.register(errorBudgetRoute);
-
-// --- Start
-const PORT = Number(process.env.PORT || 4001);
-const HOST = process.env.HOST || '0.0.0.0';
+// Optimizer plugin (v1.6-p2)
 try {
-  await app.listen({ port: PORT, host: HOST });
-  app.log.info(`✅ executor running on http://${HOST}:${PORT}`);
-} catch (err) {
-  app.log.error(err);
-  process.exit(1);
+  const optimizerPlugin = await import("../../../../packages/optimization/src/index.js");
+  await app.register(optimizerPlugin.default);
+  app.log.info("Optimizer plugin loaded successfully");
+} catch (error) {
+  app.log.warn("Optimizer plugin not available:", error.message);
 }
+
+// Drift Gates plugin (v1.6-p3)
+try {
+  const gatesPlugin = await import("../../../../packages/drift-gates/src/index.js");
+  await app.register(gatesPlugin.default);
+  app.log.info("Drift Gates plugin loaded successfully");
+} catch (error) {
+  app.log.warn("Drift Gates plugin not available:", error.message);
+}
+
+// Copilot Tools plugin (v1.9-p0.1)
+try {
+  const copilotTools = await import("./plugins/copilot-tools.js");
+  await app.register(copilotTools.default);
+  app.log.info("Copilot Tools plugin loaded successfully");
+} catch (error) {
+  app.log.warn("Copilot Tools plugin not available:", error.message);
+}
+
+// Alerts Routes plugin (v1.9-p3)
+try {
+  const alertsRoutes = await import("./routes/alerts.js");
+  await app.register(alertsRoutes.default);
+  app.log.info("Alerts Routes plugin loaded successfully");
+} catch (error) {
+  app.log.warn("Alerts Routes plugin not available:", error.message);
+}
+
+// Notifications Routes plugin (v1.9-p3c)
+try {
+  const notifyRoutes = await import("./routes/notify.js");
+  await app.register(notifyRoutes.default);
+  app.log.info("Notifications Routes plugin loaded successfully");
+} catch (error) {
+  app.log.warn("Notifications Routes plugin not available:", error.message);
+}
+
+// Strategy Bot plugin (v1.9-p1.x)
+try {
+  const strategyBot = await import("./plugins/strategy-bot.js");
+  await app.register(strategyBot.default);
+  app.log.info("Strategy Bot plugin loaded successfully");
+} catch (error) {
+  app.log.warn("Strategy Bot plugin not available:", error.message);
+}
+
+// Admin AI Providers plugin (v1.9-p1.ui)
+try {
+  const adminAI = await import("./plugins/admin-ai-providers.js");
+  await app.register(adminAI.default);
+  app.log.info("Admin AI Providers plugin loaded successfully");
+} catch (error) {
+  app.log.warn("Admin AI Providers plugin not available:", error.message);
+}
+
+// WebSocket Live plugin (v1.9-p2)
+try {
+  const wsLive = await import("./plugins/ws-live.js");
+  await app.register(wsLive.default);
+  app.log.info("WebSocket Live plugin loaded successfully");
+} catch (error) {
+  app.log.warn("WebSocket Live plugin not available:", error.message);
+}
+
+// Gürültülü kanıtlar (finalize'da sadeleştirin)
+app.get("/__ping", async (req, reply) => {
+  reply.header("x-build-id", BUILD_ID);
+  return { ok: true, build: BUILD_ID };
+});
+
+app.get("/metrics", async (req, reply) => {
+  // Executor metrics only
+  const executorMetrics = await metricsRegistry().metrics();
+  
+  reply.header("Content-Type", "text/plain");
+  return executorMetrics;
+});
+
+await app.ready();
+const tree = app.printRoutes();
+app.log.info(`[ready] ${BUILD_ID}\n--- ROUTE TREE ---\n${tree}\n--- END TREE ---`);
+await writeFile(new URL("./route-tree.txt", import.meta.url), tree).catch(() => {});
+
+await app.listen({ port: 4001, host: "0.0.0.0" });

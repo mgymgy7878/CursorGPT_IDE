@@ -1,0 +1,14 @@
+﻿{
+    "ok":  true,
+    "dryRun":  true,
+    "echo":  {
+                 "type":  "MARKET",
+                 "side":  "BUY",
+                 "leverage":  3,
+                 "market":  "futures",
+                 "notional":  10,
+                 "symbol":  "BTCUSDT",
+                 "testnet":  true
+             },
+    "ts":  1757786494656
+}

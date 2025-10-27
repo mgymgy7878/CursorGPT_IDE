@@ -1,0 +1,21 @@
+{
+  "dataset": {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "bars": 24000,
+    "seed": 1337
+  },
+  "perf": {
+    "compute_total_ms": 16,
+    "p50_ms": 16,
+    "p95_ms": 16
+  },
+  "strategy": {
+    "name": "ema_cross_12_26",
+    "trades": 883,
+    "win_rate_pct": 696.26,
+    "cagr_pct": 197.34,
+    "sharpe": 2.84,
+    "max_dd_pct": 7.27
+  }
+}

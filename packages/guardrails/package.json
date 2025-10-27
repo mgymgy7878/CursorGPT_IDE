@@ -1,0 +1,26 @@
+{
+  "name": "@spark/guardrails",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./package.json": "./package.json",
+    "./*": { "types": "./dist/*.d.ts", "import": "./dist/*.js" }
+  },
+  "scripts": { "build": "tsc -p tsconfig.build.json", "clean": "rimraf dist" },
+  "dependencies": {
+    "@spark/types": "workspace:*",
+    "prom-client": "^14.2.0"
+  },
+  "peerDependencies": { "typescript": ">=5.4" },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/ws": "^8.5.10",
+    "rimraf": "^5.0.7"
+  }
+} 

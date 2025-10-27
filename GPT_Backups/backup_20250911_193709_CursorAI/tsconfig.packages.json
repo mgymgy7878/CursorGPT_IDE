@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/@spark/shared" },
+    { "path": "./packages/@spark/auth" },
+    { "path": "./packages/@spark/security" },
+    { "path": "./packages/@spark/db" },
+    { "path": "./packages/@spark/db-lite" }
+  ]
+}

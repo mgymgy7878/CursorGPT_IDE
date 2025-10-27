@@ -1,0 +1,36 @@
+{
+  "nonce": "20250820-274000-852369",
+  "started_utc": "2025-08-20T27:40:00Z",
+  "status": "YELLOW",
+  "reason": "ORDERFLOW_PARTIAL",
+  "thresholds": {
+    "place_ack_p95_ms_leq": 1000,
+    "warn_ms": 1500,
+    "ingest_lag_p95_s_leq": 2,
+    "seq_gap_eq": 0
+  },
+  "orderflow": {
+    "n": 0,
+    "symbol": "BTCUSDT",
+    "qty": "0.00015",
+    "price_usdt": null,
+    "place_ack_ms": [],
+    "place_ack_p95_ms": null,
+    "errors": 0
+  },
+  "guardrails": {
+    "max_notional_usdt": 20,
+    "blocked_count": 0,
+    "kill_switch": 0
+  },
+  "bist": {
+    "status_component": "SKIPPED",
+    "ingest_lag_ms_p95": null,
+    "seq_gap_count": null
+  },
+  "evidence_paths": {
+    "index": "docs/evidence/v1.3-go-green/20250820-274000-852369/index.json",
+    "metrics": "docs/evidence/v1.3-go-green/20250820-274000-852369/metrics.json",
+    "manifest": "docs/evidence/v1.3-go-green/20250820-274000-852369/manifest.sha256"
+  }
+} 

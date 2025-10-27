@@ -1,0 +1,68 @@
+groups:
+- name: spark.slo
+  rules:
+  - alert: PlaceAckP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(spark_place_ack_duration_seconds_bucket[5m]))) > 1.2
+    for: 10m
+    labels: 
+      severity: warning
+      team: spark
+      service: executor
+    annotations:
+      summary: "P95 Place→ACK yükseldi"
+      description: "Son 10dk P95={{ $value | humanizeDuration }}s (hedef: <1000ms)"
+      
+  - alert: PlaceAckP95Critical
+    expr: histogram_quantile(0.95, sum by (le) (rate(spark_place_ack_duration_seconds_bucket[5m]))) > 2.0
+    for: 5m
+    labels: 
+      severity: critical
+      team: spark
+      service: executor
+    annotations:
+      summary: "P95 Place→ACK kritik seviyede"
+      description: "Son 5dk P95={{ $value | humanizeDuration }}s (hedef: <1000ms) - Kill-switch aktifleştir"
+      
+  - alert: FeedToDbP95High
+    expr: histogram_quantile(0.95, sum by (le) (rate(spark_feed_to_db_seconds_bucket[5m]))) > 0.3
+    for: 10m
+    labels: 
+      severity: warning
+      team: spark
+      service: executor
+    annotations:
+      summary: "P95 Feed→DB yükseldi"
+      description: "Son 10dk P95={{ $value | humanizeDuration }}s (hedef: <300ms)"
+      
+  - alert: RateLimitHits
+    expr: rate(spark_btcturk_errors_total{error_type="rate_limit"}[5m]) > 0.1
+    for: 5m
+    labels: 
+      severity: warning
+      team: spark
+      service: executor
+    annotations:
+      summary: "BTCTurk rate limit ihlalleri artıyor"
+      description: "Son 5dk rate limit hata oranı: {{ $value | printf \"%.2f\" }}/s"
+      
+  - alert: InvalidNonceErrors
+    expr: rate(spark_btcturk_errors_total{error_type="invalid_nonce"}[5m]) > 0.05
+    for: 5m
+    labels: 
+      severity: warning
+      team: spark
+      service: executor
+    annotations:
+      summary: "BTCTurk invalid nonce hataları"
+      description: "Son 5dk invalid nonce hata oranı: {{ $value | printf \"%.2f\" }}/s - Clock drift kontrolü gerekli"
+      
+  - alert: BistSessionViolation
+    expr: increase(spark_bist_session_violations_total[5m]) > 0
+    for: 0m
+    labels: 
+      severity: warning
+      team: spark
+      service: executor
+    annotations:
+      summary: "BIST seans dışı işlem denemesi"
+      description: "Son 5dk içinde {{ $value }} adet BIST seans dışı işlem denemesi"

@@ -1,0 +1,22 @@
+{
+  "name": "@spark/marketdata",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "fetch:binance": "node dist/binance/fetch.js",
+    "dump:csv": "node dist/utils/csv_dump.js",
+    "load:pg": "node dist/db/load_pg.js"
+  },
+  "dependencies": {
+    "undici": "^6",
+    "p-limit": "^5",
+    "yargs": "^17",
+    "fastest-levenshtein": "^1"
+  },
+  "devDependencies": {
+    "typescript": "^5.5",
+    "@types/node": "^20"
+  }
+}

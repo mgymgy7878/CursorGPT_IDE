@@ -1,0 +1,46 @@
+﻿# HELP ml_predict_requests_total Total number of prediction requests
+# TYPE ml_predict_requests_total counter
+ml_predict_requests_total{model_version="v1.8-b0",status="success"} 1000
+
+# HELP ml_predict_latency_ms Prediction latency in milliseconds
+# TYPE ml_predict_latency_ms histogram
+ml_predict_latency_ms_bucket{le="1",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="5",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="10",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="20",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="50",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="100",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="200",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="500",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="1000",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_bucket{le="+Inf",model_version="v1.8-b0"} 1000
+ml_predict_latency_ms_sum{model_version="v1.8-b0"} 0
+ml_predict_latency_ms_count{model_version="v1.8-b0"} 1000
+
+# HELP ml_model_version Current model version
+# TYPE ml_model_version gauge
+ml_model_version{version="v1.8-b0"} 1
+
+# HELP ml_feature_extractions_total Total feature extractions from snapshots
+# TYPE ml_feature_extractions_total counter
+ml_feature_extractions_total 1000
+
+# HELP ml_prediction_score Distribution of prediction scores
+# TYPE ml_prediction_score histogram
+ml_prediction_score_bucket{le="0"} 0
+ml_prediction_score_bucket{le="0.1"} 0
+ml_prediction_score_bucket{le="0.2"} 0
+ml_prediction_score_bucket{le="0.3"} 0
+ml_prediction_score_bucket{le="0.4"} 0
+ml_prediction_score_bucket{le="0.5"} 0
+ml_prediction_score_bucket{le="0.6"} 0
+ml_prediction_score_bucket{le="0.7"} 0
+ml_prediction_score_bucket{le="0.8"} 0
+ml_prediction_score_bucket{le="0.9"} 0
+ml_prediction_score_bucket{le="1"} 1000
+ml_prediction_score_bucket{le="+Inf"} 1000
+ml_prediction_score_sum 999.9990000000024
+ml_prediction_score_count 1000
+
+# HELP ml_model_errors_total Total model errors
+# TYPE ml_model_errors_total counter

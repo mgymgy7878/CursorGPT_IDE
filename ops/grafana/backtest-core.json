@@ -1,0 +1,116 @@
+{
+  "dashboard": {
+    "id": 1001,
+    "title": "Backtest Core",
+    "tags": ["spark", "backtest", "core"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Backtest Runtime P95 (5m)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bt_runtime_ms_p95_5m",
+            "legendFormat": "P95 Runtime"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 15000},
+                {"color": "red", "value": 30000}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Backtest Runs (10m)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bt_runs_10m",
+            "legendFormat": "Total Runs"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Backtest Trades Total",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bt_trades_total",
+            "legendFormat": "Total Trades"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Max Drawdown (1h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bt_max_dd_1h",
+            "legendFormat": "Max DD"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.2},
+                {"color": "red", "value": 0.5}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Sharpe Ratio",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bt_sharpe",
+            "legendFormat": "Sharpe"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 1},
+                {"color": "green", "value": 2}
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}
