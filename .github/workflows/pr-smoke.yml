@@ -4,29 +4,28 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - "**.md"
-      - "docs/**"
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
 jobs:
   pr-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Node kurulumu + pnpm cache
       - name: Setup Node (20.x) + pnpm cache
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: '20'
+          cache: 'pnpm'
           cache-dependency-path: |
             pnpm-lock.yaml
             **/pnpm-lock.yaml
 
-      # pnpm sürümünü corepack ile senkronize et
       - name: Enable corepack & sync pnpm version
         run: |
           corepack enable
@@ -36,21 +35,22 @@ jobs:
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile
 
-      # Next standalone build
       - name: Build web-next (standalone)
         working-directory: apps/web-next
         env:
           NODE_ENV: production
         run: pnpm run build
 
-      # Standalone çıktısı gerçekten var mı? (log amaçlı)
       - name: Verify build output exists
         working-directory: apps/web-next
         run: |
-          test -f ".next/standalone/server.js" || echo "No standalone, will rely on next start"
+          if [ -f ".next/standalone/server.js" ]; then
+            echo "Standalone build present ✔"
+          else
+            echo "No standalone, will rely on next start ⚠"
+          fi
 
-      # Sunucuyu başlat (fallback: next start)
-      - name: Start server (with fallback)
+      - name: Start server (standalone with fallback)
         working-directory: apps/web-next
         env:
           NODE_ENV: production
@@ -59,13 +59,10 @@ jobs:
         run: |
           if [ -f ".next/standalone/server.js" ]; then
             nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
-            sleep 2
           else
             nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
-            sleep 2
           fi
 
-      # Health bekleme süresini 120sn'ye çıkar
       - name: Wait for health (120s)
         uses: jb-1980/wait-on-action@v1
         with:
@@ -73,7 +70,6 @@ jobs:
           timeout: 120000
           log: true
 
-      # Ekstra poll (sağlamlaştırma)
       - name: Extra health poll (curl)
         run: |
           for i in $(seq 1 10); do
@@ -90,13 +86,12 @@ jobs:
       - name: Curl metrics (JSON)
         run: |
           curl -fsS -D - http://127.0.0.1:3003/api/public/metrics -o metrics.json
-          cat metrics.json
+        cat metrics.json
 
       - name: Curl metrics (Prometheus)
         run: |
           curl -fsS -D headers.txt http://127.0.0.1:3003/api/public/metrics.prom -o metrics.prom
           cat headers.txt
-          # Content-Type: text/plain; version=0.0.4 (charset opsiyonel)
           grep -E "^content-type:\s*text/plain;\s*version=0\.0\.4" -i headers.txt
 
       - name: Upload artifacts
