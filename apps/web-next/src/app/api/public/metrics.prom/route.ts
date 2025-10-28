@@ -35,11 +35,11 @@ export async function GET() {
     '',
   ].join('\n');
 
-  const response = new NextResponse(metrics);
-  
-  // Official Prometheus text format 0.0.4
-  response.headers.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
-  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  
-  return response;
+  return new Response(metrics, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
+      'Cache-Control': 'no-store'
+    }
+  });
 }
