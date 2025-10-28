@@ -8,7 +8,7 @@
 
 ## 🚀 HIZLI BAŞLATMA (Tek Komut)
 
-### Otomatik Script ile:
+### Otomatik Script ile
 
 ```powershell
 powershell -File scripts/p0_prod_setup.ps1 `
@@ -344,4 +344,3 @@ Get-Content evidence/final_summary.txt | Select-Object -First 1
 ---
 
 **HAZIR - Gerçek production secrets girdikten sonra bu komutu çalıştırın!** 🚀
-

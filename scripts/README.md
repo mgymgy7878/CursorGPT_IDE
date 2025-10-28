@@ -30,5 +30,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\p0_trigger.ps1
 5. `gh run download <RUN_ID> -n <artifact>` ile kanıt paketini indirme (`evidence/` klasörü)
 6. `evidence/final_summary.txt` ilk satırı yazdırma
 
-> Not: GitHub CLI kurulu olmalıdır: https://cli.github.com/manual/gh
-
+> Not: GitHub CLI kurulu olmalıdır: <https://cli.github.com/manual/gh>

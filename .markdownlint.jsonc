@@ -1,13 +1,17 @@
 {
-  // Markdownlint configuration - relaxed for existing docs
-  "default": false,
-  "MD013": false,
-  "MD022": false,
-  "MD031": false,
-  "MD032": false,
-  "MD033": false,
-  "MD041": false,
-  "MD024": false,
-  "MD025": false,
-  "MD036": false,
+  // Markdownlint configuration
+  // Most rules enabled, with exceptions for existing docs
+  "default": true,
+  "MD013": false, // line-length - varied lengths in docs
+  "MD022": false, // blanks-around-headings - inconsistent in existing docs
+  "MD031": false, // blanks-around-fences - inconsistent in existing docs
+  "MD032": false, // blanks-around-lists - inconsistent in existing docs
+  "MD033": false, // no-inline-html - needed for complex layouts
+  "MD041": false, // first-line-heading - not all docs start with h1
+  "MD040": false, // fenced-code-language - many code blocks without language
+  "MD029": false, // ol-prefix - some lists have non-sequential numbering
+  "MD051": false, // link-fragments - Turkish characters in anchors need special handling
+  "MD024": false, // no-duplicate-heading - some docs have repeated section headings
+  "MD025": false, // single-h1 - some docs have multiple h1 headings
+  "MD036": false // no-emphasis-as-heading - some docs use bold for subheadings
 }
