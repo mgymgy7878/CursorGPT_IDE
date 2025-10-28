@@ -36,6 +36,7 @@ export default function PriceChart({ candles, fibLevels, bbSeries }: PriceChartP
             </>
           )}
           {fibLevels?.map(l => (
+            // @ts-ignore - Recharts type issue
             <ReferenceLine
               key={l.ratio}
               y={l.price}
