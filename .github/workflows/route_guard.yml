@@ -11,19 +11,44 @@ jobs:
   route-200:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      CI: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NODE_OPTIONS: "--max_old_space_size=4096"
+      NEXT_PUBLIC_EXECUTOR_URL: "http://127.0.0.1:4001"
+      NEXT_PUBLIC_MARKETDATA_URL: "http://127.0.0.1:5001"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.11.1"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
       - name: Enable pnpm
         run: |
           corepack enable
           corepack prepare pnpm@10.0.0 --activate
-      - name: Install
-        run: pnpm -w i --frozen-lockfile=false
+      - name: Print env + versions
+        run: |
+          node -v
+          pnpm -v
+          printenv | grep -E "(CI|NODE|NEXT|PNPM)" | sort
+      - name: Install (verbose)
+        run: pnpm -w i --frozen-lockfile=false 2>&1 | tee install.log
+      - name: Upload install logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: route-200-install-logs
+          path: install.log
       - name: Build standalone
-        run: pnpm -w --filter web-next build
+        run: pnpm -w --filter web-next build 2>&1 | tee build.log
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: route-200-build-logs
+          path: build.log
       - name: Prepare standalone assets
         run: |
           mkdir -p apps/web-next/.next/standalone/apps/web-next/.next
@@ -55,3 +80,7 @@ jobs:
         run: |
           echo '--- SERVER LOG TAIL ---'
           tail -n +1 server.log || true
+          echo '--- BUILD LOG TAIL ---'
+          tail -n 50 build.log || true
+          echo '--- INSTALL LOG TAIL ---'
+          tail -n 50 install.log || true

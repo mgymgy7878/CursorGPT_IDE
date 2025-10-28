@@ -13,6 +13,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NODE_OPTIONS: "--max_old_space_size=4096"
+      NEXT_PUBLIC_EXECUTOR_URL: "http://127.0.0.1:4001"
+      NEXT_PUBLIC_MARKETDATA_URL: "http://127.0.0.1:5001"
     steps:
       - uses: actions/checkout@v4
       
@@ -24,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.11.1'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
       
@@ -35,13 +41,31 @@ jobs:
           echo "Expected: $EXPECTED, Actual: $ACTUAL"
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm version mismatch"; exit 1; }
       
+      - name: Print env + versions
+        run: |
+          node -v
+          pnpm -v
+          printenv | grep -E "(CI|NODE|NEXT|PNPM)" | sort
+      
       - name: Fetch dependencies (pre-warm store)
         run: pnpm fetch --prod=false
       
       - name: Install deps (offline mode)
-        run: pnpm -w i --offline --frozen-lockfile --strict-peer-dependencies
+        run: pnpm -w i --offline --frozen-lockfile --strict-peer-dependencies 2>&1 | tee install.log
+      - name: Upload install logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: standalone-install-logs
+          path: install.log
       - name: Build web-next (standalone)
-        run: pnpm -w --filter web-next build
+        run: pnpm -w --filter web-next build 2>&1 | tee build.log
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: standalone-build-logs
+          path: build.log
       - name: Pack standalone artefact
         run: |
           tar -czf web-next-standalone.tgz -C apps/web-next/.next/standalone .
