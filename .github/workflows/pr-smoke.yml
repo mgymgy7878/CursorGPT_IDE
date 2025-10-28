@@ -1,0 +1,95 @@
+name: pr-smoke
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install (workspace)
+        run: |
+          set -euo pipefail
+          corepack enable
+          pnpm -v
+          pnpm -w install --frozen-lockfile=false
+
+      - name: Build web-next (full log)
+        working-directory: apps/web-next
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+        run: |
+          set -euo pipefail
+          : > $GITHUB_WORKSPACE/build.log
+          pnpm build --no-color 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
+
+      - name: Start standalone & wait
+        if: success()
+        working-directory: apps/web-next
+        env:
+          PORT: 3000
+          HOSTNAME: 127.0.0.1
+          NODE_ENV: production
+        run: |
+          set -euo pipefail
+          node .next/standalone/server.js >server.log 2>&1 &
+          echo $! > server.pid
+          npx -y wait-on -s http-get://127.0.0.1:3000/api/health
+
+      - name: Probe endpoints
+        run: |
+          set -euo pipefail
+          echo "=== Health ==="
+          curl -sv --max-time 10 http://127.0.0.1:3000/api/health | head -n 50
+          echo ""
+          echo "=== Metrics JSON ==="
+          curl -s http://127.0.0.1:3000/api/public/metrics | head -n 50
+          echo ""
+          echo "=== Metrics Prom Headers ==="
+          curl -svI --max-time 10 http://127.0.0.1:3000/api/public/metrics.prom | sed -n '1,20p'
+
+      - name: Assert Prometheus header
+        run: |
+          set -euo pipefail
+          ct=$(curl -sI http://127.0.0.1:3000/api/public/metrics.prom | awk -F': ' '/^content-type/{print tolower($2)}' | tr -d '\r')
+          echo "Content-Type: $ct"
+          test "$ct" = "text/plain; version=0.0.4" || (echo "Bad Content-Type: $ct" && exit 1)
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: ${{ github.workspace }}/build.log
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-log
+          path: apps/web-next/server.log
+
+      - name: Teardown
+        if: always()
+        working-directory: apps/web-next
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid) 2>/dev/null || true
+          fi
+
