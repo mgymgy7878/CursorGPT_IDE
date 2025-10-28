@@ -1,0 +1,32 @@
+name: route_guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  route-200:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: corepack enable && corepack prepare pnpm@10.0.0 --activate
+      - run: pnpm -w i --frozen-lockfile=false
+      - run: pnpm -w --filter web-next build
+      - run: pnpm -w --filter web-next start:prod &
+      - run: npx wait-on http://127.0.0.1:3003/api/health
+      - name: Assert health 200
+        run: curl -sfI http://127.0.0.1:3003/api/health | grep '200'
+      - name: Assert metrics JSON
+        run: curl -sfI http://127.0.0.1:3003/api/public/metrics | grep 'application/json'
+      - name: Assert metrics.prom headers
+        run: |
+          curl -sI http://127.0.0.1:3003/api/public/metrics.prom | tee headers.txt
+          grep -E 'Content-Type: text/plain; version=0.0.4' headers.txt
+          grep -Ei 'cache-control: no-store' headers.txt
+

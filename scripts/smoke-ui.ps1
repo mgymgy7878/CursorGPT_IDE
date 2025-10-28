@@ -1,61 +1,15 @@
-#!/usr/bin/env pwsh
-<#
-.SYNOPSIS
-    UI Smoke Test - Quick health check for all pages
-.DESCRIPTION
-    Tests that all core pages return 200 OK status
-    Used for rapid deployment validation
-.EXAMPLE
-    .\scripts\smoke-ui.ps1
-    .\scripts\smoke-ui.ps1 -BaseUrl "http://localhost:3003"
-#>
-
-param(
-    [string]$BaseUrl = "http://127.0.0.1:3003"
-)
-
-$pages = @(
-    "/",
-    "/portfolio",
-    "/strategies",
-    "/running",
-    "/settings",
-    "/api/health"
-)
-
-Write-Host "🧪 Starting UI Smoke Test..." -ForegroundColor Cyan
-Write-Host "Base URL: $BaseUrl`n" -ForegroundColor Gray
-
-$allPassed = $true
-$startTime = Get-Date
-
-foreach ($page in $pages) {
-    $url = "$BaseUrl$page"
-    
-    try {
-        $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
-        
-        if ($response.StatusCode -eq 200) {
-            Write-Host "✅ OK   $page" -ForegroundColor Green
-        } else {
-            Write-Host "❌ FAIL $page (Status: $($response.StatusCode))" -ForegroundColor Red
-            $allPassed = $false
-        }
-    }
-    catch {
-        Write-Host "❌ FAIL $page (Error: $($_.Exception.Message))" -ForegroundColor Red
-        $allPassed = $false
-    }
+$ErrorActionPreference='Stop'
+$Base='http://127.0.0.1:3003'
+$endpoints=@('/','/portfolio','/strategies','/running','/settings','/api/health')
+$ok=$true
+New-Item -Force -ItemType Directory -Path 'evidence/ui-smoke' | Out-Null
+foreach($p in $endpoints){
+  $r=Invoke-WebRequest -UseBasicParsing -Uri ($Base+$p) -Method Get -TimeoutSec 10 -ErrorAction SilentlyContinue
+  if(-not $r -or $r.StatusCode -ne 200){ Write-Host "FAIL $p"; $ok=$false } else { Write-Host "OK $p" }
 }
-
-$duration = (Get-Date) - $startTime
-Write-Host "`n⏱️  Duration: $($duration.TotalSeconds.ToString('F2'))s" -ForegroundColor Gray
-
-if ($allPassed) {
-    Write-Host "`n🎉 All pages passed smoke test!" -ForegroundColor Green
-    exit 0
-} else {
-    Write-Host "`n💥 Some pages failed. Check server logs." -ForegroundColor Red
-    exit 1
-}
-
+$hdr=(Invoke-WebRequest -UseBasicParsing -Method Head -Uri "$Base/api/public/metrics.prom").Headers
+$ct=$hdr['Content-Type']; $cc=$hdr['Cache-Control']
+if($ct -notlike 'text/plain; version=0.0.4*'){ Write-Host "BAD CT: $ct"; $ok=$false } else { Write-Host "OK CT" }
+if(($cc -notlike '*no-store*')){ Write-Host "BAD CC: $cc"; $ok=$false } else { Write-Host "OK CC" }
+"CT=$ct`nCC=$cc" | Out-File evidence/ui-smoke/headers.txt -Encoding utf8
+if(-not $ok){ throw 'SMOKE FAIL' } else { 'SMOKE PASS' | Out-File evidence/ui-smoke/_summary.txt }
