@@ -39,7 +39,11 @@ export default function PriceChart({ candles, fibLevels, bbSeries }: PriceChartP
             <ReferenceLine
               key={l.ratio}
               y={l.price}
-              label={{ value: `${(l.ratio * 100).toFixed(1)}%`, position: 'right', fill: '#fbbf24' }}
+              label={{
+                value: `${(l.ratio * 100).toFixed(1)}%`,
+                position: 'right' as const,
+                fill: '#fbbf24'
+              }}
               stroke={l.ratio === 0.618 ? '#fbbf24' : '#666'}
               strokeDasharray="3 3"
             />
