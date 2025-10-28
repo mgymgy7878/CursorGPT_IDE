@@ -34,9 +34,9 @@ VS Code'un "Problems" panelinde görünen bu warning'ler **VS Code GitHub Action
    ```yaml
    if: ${{ (vars.FREEZE || '') == '1' || (env.FREEZE || '') == '1' }}
    ```
-   - Warning: "Context access might be invalid: FREEZE" (2x)
-   - **Gerçek durum:** FREEZE repository variable olarak tanımlanabilir
-   - **Runtime:** ✅ Çalışır (tanımlı değilse skip eder)
+- Warning: "Context access might be invalid: FREEZE" (2x)
+- **Gerçek durum:** FREEZE repository variable olarak tanımlanabilir
+- **Runtime:** ✅ Çalışır (tanımlı değilse skip eder)
 
 ---
 
@@ -154,4 +154,3 @@ VS Code workspace settings'e ekle:
 
 **Updated:** 25 Ekim 2025  
 **Status:** ✅ EXPLAINED & SAFE TO IGNORE
-

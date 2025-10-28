@@ -303,4 +303,3 @@ ENABLE_NEW_UI=true pnpm -F web-next start &
 **Last Updated:** 2025-10-27  
 **Prepared By:** Spark Trading Team  
 **Decision:** 🟢 **GO** - All criteria met, PR ready for merge
-

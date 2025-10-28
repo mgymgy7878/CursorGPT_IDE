@@ -135,4 +135,3 @@ git checkout -b feature/v1.3-p5-health-viz-migration
 **P5:** 🟢 HAZIR → PATCH → SMOKE → SUMMARY
 
 **Sonraki adım:** P4 PR manuel aç → P5'e geç 🚀
-

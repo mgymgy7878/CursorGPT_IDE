@@ -343,4 +343,3 @@ pwsh scripts/smoke-ui.ps1
 **SONRAKİ ADIM:** `pwsh scripts/local-validation.ps1` → Evidence topla → PR aç 🚀
 
 **Hazır mısınız?** 🎯
-

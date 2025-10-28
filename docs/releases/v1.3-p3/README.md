@@ -44,4 +44,3 @@ git push origin feature/v1.3-p3-ui-guardrails
 
 - [P2 Release](../v1.3-p2/README.md)
 - [P4 Plan](../V1.3-P4_PLAN.md)
-

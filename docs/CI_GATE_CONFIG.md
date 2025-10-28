@@ -66,4 +66,3 @@ const SafeThemeToggle = must(ThemeToggle, "ThemeToggle@AppShell");
 2. must() catches undefined at runtime (dev-only)
 3. CI fails PR if lint/build fails
 4. No shadcn re-exports through barrels
-

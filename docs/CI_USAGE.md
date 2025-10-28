@@ -122,7 +122,7 @@ Affected nodes: 2
 
 `.github/PULL_REQUEST_TEMPLATE.md` kullanarak her PR şu bilgileri içermelidir:
 
-### Zorunlu Checklist'ler:
+### Zorunlu Checklist'ler
 
 1. **UX-ACK**: Nielsen Norman veya WCAG prensibi belirtilmeli
    ```
@@ -185,7 +185,7 @@ const PAGES = [
 
 CI'lar sadece ilgili dosyalar değiştiğinde çalışır. **Örnek:**
 
-### Lighthouse CI Path Filter:
+### Lighthouse CI Path Filter
 ```yaml
 paths:
   - 'apps/web-next/**'      # Frontend değişiklikleri
@@ -195,7 +195,7 @@ paths:
 
 **Çalışmaz:** Backend/executor, docs, scripts değişiklikleri
 
-### Axe Path Filter:
+### Axe Path Filter
 ```yaml
 paths:
   - 'apps/web-next/**'
@@ -303,4 +303,3 @@ lhci server --storage.storageMethod=sql --storage.sqlDatabasePath=./lhci.db
 
 **Son güncelleme:** 2025-10-27  
 **Maintainer:** Spark Trading Team
-

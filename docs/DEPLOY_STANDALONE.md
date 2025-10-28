@@ -358,4 +358,3 @@ pm2 status
 
 **Son Güncelleme:** 2025-10-24  
 **Bakım:** Next.js versiyonu güncellendiğinde revize edilir
-

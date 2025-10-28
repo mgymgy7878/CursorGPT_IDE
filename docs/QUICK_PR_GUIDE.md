@@ -229,4 +229,3 @@ gh pr ready
 **Estimated Time:** 20 dakika (validation + PR açma + evidence ekleme)  
 **Success Rate:** 100% (GO/NO-GO 12/12 pass)  
 **Next Step:** `pwsh scripts/local-validation.ps1` → PR aç → Merge 🚀
-

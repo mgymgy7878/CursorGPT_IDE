@@ -246,4 +246,3 @@ pnpm --filter web-next typecheck
 
 **Son Güncelleme:** 2025-10-24  
 **Güncelleme Sıklığı:** Sprint bazlı (2 haftada bir)
-

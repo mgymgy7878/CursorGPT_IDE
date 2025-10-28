@@ -11,4 +11,3 @@ Rollback kas hafızası + sinyal okur yazarlığı.
 ## PASS Ölçütü
 - Rollback komutu çalıştı ve kanıt dosyası üretildi.
 - En az 6/8 sinyal sözlü olarak doğru yorumlandı.
-
