@@ -19,15 +19,15 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.18.3 --activate
+          pnpm -v
 
       - name: Install (workspace)
         run: |
           set -euo pipefail
-          corepack enable
-          pnpm -v
           pnpm -w install --frozen-lockfile=false
 
       - name: Build web-next (full log)
