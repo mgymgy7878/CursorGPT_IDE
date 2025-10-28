@@ -1,71 +1,98 @@
-# UI/UX Planı ve Talimatları — Spark Trading Platform
+# Spark Trading Platform — UI/UX İyileştirme Planı
 
-> docs ping: trigger docs-lint 2025-10-28
+> Standart: NN/g Heuristics + WCAG 2.2 (AA)  
+> Kapsam: Mevcut ve planlanan sayfalar; bileşen kütüphanesi; kabul kriterleri.
 
-**Amaç:** NN/g kullanılabilirlik prensipleri ve WCAG 2.2 (AA) uyumuyla; erişilebilir, tutarlı, performanslı bir arayüz standardı tanımlamak ve proaktif kabul kriterleriyle doğrulamak.
+## 🎯 Amaç
 
-## 1) Stratejik Hedefler
-- **Sistem Durumu Görünürlüğü:** Skeleton/loading ve boş durum (empty state) şablonları her kritik sayfada.
-- **Erişilebilirlik (AA):** Kontrast ≥ 4.5:1, tüm eylemler klavyeyle erişilebilir, anlamlı `aria-*` etiketleri.
-- **Tutarlı Terminoloji:** TR odaklı etiketler; menüler, başlıklar ve butonlar tek dilde.
-- **Form Kalitesi:** Inline doğrulama, alan altı hata mesajı, submit sırasında `disabled+spinner`.
-- **Navigasyon Netliği:** Aktif menü vurgusu + (gerektiğinde) breadcrumb.
-
-## 2) Sayfa Bazlı İş Listesi (çekirdek)
-**🏠 Ana Sayfa**
-- [ ] Ticker/strateji panellerinde skeleton states
-- [ ] Üst çubukta WS bağlantı durumu
-- [ ] Menüde aktif sayfa highlight
-
-**🧪 Strategy Lab**
-- [ ] Kaydet/Backtest işlemlerine spinner + toast
-- [ ] Monaco hataları için inline açıklama (satır/kolon)
-- [ ] Kısayollar: `Ctrl+Enter` backtest, `Ctrl+Shift+O` optimize
-
-**📋 Stratejilerim**
-- [ ] Sonsuz kaydırma veya sayfalama
-- [ ] Sil/Düzenle için onay modal (ikili seçim)
-
-**🏃‍♂️ Çalışan Stratejiler**
-- [ ] Sparkline boyutu + tooltip
-- [ ] Pause/Resume ikon+metin; durum rozeti (running/paused/error)
-
-**💼 Portföy**
-- [ ] Fixlenmiş header + zebra tablo
-- [ ] Canlı güncellenen satırlara yumuşak vurgu animasyonu
-
-**⚙️ Ayarlar**
-- [ ] Label + `aria-describedby` bağları
-- [ ] Tema/dil seçimi TAB ile gezilebilir
-- [ ] Kaydet altında işlem spinner'ı
-
-> Planlanan sayfalar: **Alerts**, **Market Analysis**, **Risk Dashboard** — boş durum metinleri, net CTA'lar, grafiklerde eksen başlıkları ve birimler zorunlu.
-
-## 3) Bileşen Kuralları
-**Butonlar**: Birincil/ikincil ayrımı, net odak halkası, anlamlı `aria-label`.
-**Formlar**: Zorunlu alan * işareti, gerçek zamanlı validasyon, submit'te `disabled`.
-**Tablolar/Grafikler**: `thead>th[scope]`, zebra; grafiklerde başlık + eksen etiketleri + birim.
-
-## 4) Test & Kabul Kriterleri (AA + Heuristics)
-- **Kontrast (AA):** Tüm metinler ≥ 4.5:1.
-- **Klavye Erişimi:** Tüm etkileşimler TAB ile erişilebilir; odak sırası mantıklı.
-- **Form Hataları:** 5/5 senaryo alan altı mesajla yakalanır; "genel" toast tek başına yeterli değildir.
-- **Skeleton/Boş Durum:** Dashboard, Strategy Lab, Portföy'de en az 1 örnek.
-- **Yükleme P95:** < 3s içinde iskelet görünür; kritik CTA'lar FCP < 2s hedeflenir.
-
-## 5) Ölçülebilir Başarı Metrikleri
-- **SUS/CSAT ≥ 80/100**, **Görev Tamamlama ≥ %95** (Lab→Backtest→Run ilk deneme).
-- **A11y Otomasyon:** Axe/Playwright denetimleri CI'da PASS (0 kritik ihlal).
-- **Hata Oranı (Form):** Yanlış gönderimler %50 → %10.
-
-## 6) Uygulama ve Doğrulama
-- **A11y/Vis Testleri:** Playwright + Axe; `npm run test:e2e:a11y` (CI job).
-- **Lighthouse CI:** 5 sayfada PWA değil; erişilebilirlik ve performans kartları izlenir.
-- **Evidence:** `evidence/ui-ux/<YYYYMMDD>/` klasöründe rapor, screenshot, axe çıktıları.
-
-## 7) Kaynaklar
-- NN/g Heuristics, WCAG 2.2 Quickref, Data Viz Best Practices.
+Kullanıcı deneyimini ölçülebilir şekilde güçlendirmek; erişilebilir, tutarlı ve hızlı bir arayüz standardı sağlamak.
 
 ---
-**Not:** Bu plan; mevcut tasarım sistemini koruyup tutarlılığı artırırken, canlı veri senaryolarında (WS staleness vb.) kullanıcıya kesintisiz geri bildirim sağlamayı hedefler.
 
+## 1) Stratejik Hedefler (Kısa)
+
+- **Sistem durumu görünürlüğü:** skeleton/loading + boş durumlar
+- **Formlarda inline validasyon** ve alan-bazlı hata mesajları
+- **Kontrast AA** (≥4.5:1) ve klavye ile tam gezinim
+- **Sol menüde aktif sayfa vurgusu** + gerekirse breadcrumb
+
+---
+
+## 2) Sayfa Bazlı İş Listesi (Özet)
+
+### 🏠 Ana Sayfa
+
+- [ ] Ticker/strateji panellerinde skeleton
+- [ ] WS bağlantı durumu göstergesi (header)
+- [ ] Menüde aktif sayfa highlight
+
+### 🧪 Strategy Lab
+
+- [ ] Kaydet/Backtest: spinner + başarı/toast
+- [ ] Monaco hata satırında inline açıklama
+- [ ] Kısayollar: `Ctrl+Enter` (backtest), `Ctrl+Shift+O` (optimize)
+
+### 📋 Stratejilerim
+
+- [ ] Sayfalama/sonsuz kaydırma
+- [ ] Sil/Düzenle için onay modalı
+
+### 🏃 Çalışan Stratejiler
+
+- [ ] Sparkline boyutu + tooltip
+- [ ] Pause/Resume ikon+metin; durum rozeti
+
+### 💼 Portföy
+
+- [ ] Sabit thead, zebra satırlar; sıralama ikonları
+- [ ] Periyodik güncelleme satırında kısa vurgu animasyonu
+
+### ⚙️ Ayarlar
+
+- [ ] Tüm inputlara label + aria-describedby
+- [ ] Tema/dil seçimi TAB ile gezilebilir; Kaydet altında spinner
+
+---
+
+## 3) Bileşen Kuralları
+
+### Butonlar
+
+- Birincil/ikincil hiyerarşi
+- Her zaman anlamlı metin/aria-label
+- Belirgin focus halkası (`ring-2 ring-blue-500`)
+
+### Formlar
+
+- Zorunlu alan işareti (`*`)
+- Gerçek zamanlı validasyon
+- Submit sırasında disabled+spinner
+
+### Tablo & Grafik
+
+- `thead>th[scope]` + zebra
+- Grafiklerde başlık, eksen etiketleri ve birim
+
+---
+
+## 4) Test & Kabul Kriterleri
+
+- [ ] **WCAG AA kontrast:** tüm metinler ≥4.5:1
+- [ ] **Klavye erişimi:** tüm interaktif öğeler TAB ile ulaşılabilir
+- [ ] **Form hataları:** 5/5 senaryo alan altında yakalanır (inline)
+- [ ] **Yükleme P95 <3s:** skeleton gösterimi mevcut
+- [ ] **Boş durum:** en az 1 örnek/sayfa
+
+---
+
+## 5) Kaynaklar
+
+- [NN/g 10 Heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)
+- [WCAG 2.2](https://www.w3.org/WAI/WCAG22/quickref/)
+- Data viz en iyi pratikler
+
+---
+
+## 6) Sonraki Adım
+
+Bu planın görevleri issue/PR'lara bölünür; her PR kabul kriterlerini referans alır.

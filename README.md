@@ -2,6 +2,8 @@
 
 ## Quick Links / Docs
 
+- [UI & UX Planı](docs/UI_UX_PLAN.md)
+
 ### GREEN Receipt (v1.6-p1)
 - **Streams Service**: `services/streams/` - WebSocket streams with Prometheus metrics
 - **Alert Rules**: `rules/streams.yml` - Prometheus alert rules for streams monitoring
