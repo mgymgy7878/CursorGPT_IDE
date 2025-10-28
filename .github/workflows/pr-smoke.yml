@@ -2,94 +2,69 @@ name: pr-smoke
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, labeled]
-
-permissions:
-  contents: read
+    branches: [main]
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/web-next
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: true
+
+      - name: Show tool versions
         run: |
-          corepack enable
-          corepack prepare pnpm@10.18.3 --activate
+          node -v
           pnpm -v
 
-      - name: Install (workspace)
-        run: |
-          set -euo pipefail
-          pnpm -w install --frozen-lockfile=false
+      - name: Build web-next (standalone)
+        run: pnpm build
 
-      - name: Build web-next (full log)
-        working-directory: apps/web-next
+      - name: Start Next standalone & wait
         env:
-          NEXT_TELEMETRY_DISABLED: 1
-        run: |
-          set -euo pipefail
-          : > $GITHUB_WORKSPACE/build.log
-          pnpm build --no-color 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
-
-      - name: Start standalone & wait
-        if: success()
-        working-directory: apps/web-next
-        env:
-          PORT: 3000
+          PORT: 3003
           HOSTNAME: 127.0.0.1
-          NODE_ENV: production
         run: |
-          set -euo pipefail
-          node .next/standalone/server.js >server.log 2>&1 &
-          echo $! > server.pid
-          npx -y wait-on -s http-get://127.0.0.1:3000/api/health
+          mkdir -p ../../evidence/build
+          nohup node .next/standalone/server.js > ../../evidence/build/server.log 2>&1 &
+          npx wait-on http-get://127.0.0.1:3003/api/health -t 60000
 
-      - name: Probe endpoints
+      - name: Smoke checks (health, metrics)
         run: |
-          set -euo pipefail
-          echo "=== Health ==="
-          curl -sv --max-time 10 http://127.0.0.1:3000/api/health | head -n 50
-          echo ""
-          echo "=== Metrics JSON ==="
-          curl -s http://127.0.0.1:3000/api/public/metrics | head -n 50
-          echo ""
-          echo "=== Metrics Prom Headers ==="
-          curl -svI --max-time 10 http://127.0.0.1:3000/api/public/metrics.prom | sed -n '1,20p'
+          curl -sSf http://127.0.0.1:3003/api/health | tee ../../evidence/build/health.json
+          curl -sSf http://127.0.0.1:3003/api/public/metrics | tee ../../evidence/build/metrics.json
+          curl -sSI http://127.0.0.1:3003/api/public/metrics.prom | tee ../../evidence/build/metrics.headers.txt
 
       - name: Assert Prometheus header
         run: |
-          set -euo pipefail
-          ct=$(curl -sI http://127.0.0.1:3000/api/public/metrics.prom | awk -F': ' '/^content-type/{print tolower($2)}' | tr -d '\r')
+          ct=$(curl -sI http://127.0.0.1:3003/api/public/metrics.prom | awk -F': ' '/^content-type/{print tolower($2)}' | tr -d '\r')
           echo "Content-Type: $ct"
-          test "$ct" = "text/plain; version=0.0.4" || (echo "Bad Content-Type: $ct" && exit 1)
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: ${{ github.workspace }}/build.log
-
-      - name: Upload server log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-log
-          path: apps/web-next/server.log
-
-      - name: Teardown
-        if: always()
-        working-directory: apps/web-next
-        run: |
-          if [ -f server.pid ]; then
-            kill $(cat server.pid) 2>/dev/null || true
+          if [ "$ct" != "text/plain; version=0.0.4" ]; then
+            echo "Bad Content-Type: $ct"
+            exit 1
           fi
 
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-smoke-evidence
+          path: evidence/build
+
+      - name: Cleanup
+        if: always()
+        run: |
+          pkill -f "node .next/standalone/server.js" || true
