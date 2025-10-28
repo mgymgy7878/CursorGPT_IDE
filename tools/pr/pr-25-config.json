@@ -1,0 +1,12 @@
+{
+  "action": "cursor.requestReviewAndPrepareMerge",
+  "params": {
+    "pr_number": 25,
+    "reviewers": ["mgymgy7878"],
+    "pr_comment": "Final durum: ✅ PR Smoke PASS (docs-only). Axe/Guard/Docs/LHCI/UI-D2 PASS. ❌ Guard Validate & ❌ route-200 kapsam dışı; #26 ile takip. Onay sonrası **squash merge** önerilir.\nÖnerilen mesaj: `docs: add UI/UX plan & analysis report + ci: pr-smoke docs-only filter`",
+    "merge_method": "squash"
+  },
+  "dryRun": false,
+  "confirm_required": false,
+  "reason": "Branch policy gereği review akışını netleştirip onay sonrası hızlı kapanış"
+}
