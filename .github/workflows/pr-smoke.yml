@@ -86,7 +86,7 @@ jobs:
       - name: Curl metrics (JSON)
         run: |
           curl -fsS -D - http://127.0.0.1:3003/api/public/metrics -o metrics.json
-        cat metrics.json
+          cat metrics.json
 
       - name: Curl metrics (Prometheus)
         run: |
