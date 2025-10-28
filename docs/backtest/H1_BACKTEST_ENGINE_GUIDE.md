@@ -40,7 +40,7 @@ Content-Type: application/json
 
 ### 2. UI Kullanımı
 
-1. Tarayıcıda açın: http://localhost:3003/backtest-lab
+1. Tarayıcıda açın: <http://localhost:3003/backtest-lab>
 2. Symbol, timeframe, tarih aralığı girin
 3. Exchange seçin (Binance/BTCTurk)
 4. "Backtest Çalıştır" butonuna tıklayın
@@ -53,7 +53,7 @@ Prometheus metrics:
 - `spark_backtest_latency_ms`: Backtest çalışma süresi (histogram)
 - `spark_backtest_errors_total`: Hata sayısı
 
-Grafana Dashboard: http://localhost:3005 → "Spark • Backtest Jobs"
+Grafana Dashboard: <http://localhost:3005> → "Spark • Backtest Jobs"
 
 ## 🔧 Parametre Açıklamaları
 
@@ -134,4 +134,3 @@ Start-Process "http://localhost:3003/backtest-lab"
 - [Strategy Lab Guide](../strategy/STRATEGY_LAB_GUIDE.md)
 - [Copilot Integration](../copilot/COPILOT_GUIDE.md)
 - [Portfolio Management](../portfolio/PORTFOLIO_GUIDE.md)
-
