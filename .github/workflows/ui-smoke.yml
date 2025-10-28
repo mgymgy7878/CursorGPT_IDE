@@ -18,7 +18,10 @@ jobs:
       - run: corepack enable && corepack prepare pnpm@10.0.0 --activate
       - run: pnpm -w i --frozen-lockfile=false
       - run: pnpm -w --filter web-next build
-      - run: pnpm -w --filter web-next start:prod &
+      - name: Start standalone server (prod @3003)
+        run: |
+          PORT=3003 HOSTNAME=127.0.0.1 NODE_ENV=production \
+          node apps/web-next/.next/standalone/server.js &
       - run: npx wait-on http://127.0.0.1:3003
       - name: Smoke endpoints (6x 200)
         run: |

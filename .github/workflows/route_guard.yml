@@ -18,15 +18,18 @@ jobs:
       - run: corepack enable && corepack prepare pnpm@10.0.0 --activate
       - run: pnpm -w i --frozen-lockfile=false
       - run: pnpm -w --filter web-next build
-      - run: pnpm -w --filter web-next start:prod &
+      - name: Start standalone server (prod @3003)
+        run: |
+          PORT=3003 HOSTNAME=127.0.0.1 NODE_ENV=production \
+          node apps/web-next/.next/standalone/server.js &
       - run: npx wait-on http://127.0.0.1:3003/api/health
       - name: Assert health 200
-        run: curl -sfI http://127.0.0.1:3003/api/health | grep '200'
+        run: curl -sfI http://127.0.0.1:3003/api/health | grep -i '200'
       - name: Assert metrics JSON
-        run: curl -sfI http://127.0.0.1:3003/api/public/metrics | grep 'application/json'
-      - name: Assert metrics.prom headers
+        run: curl -sI http://127.0.0.1:3003/api/public/metrics | grep -i 'content-type: application/json'
+      - name: Assert metrics.prom headers (ctype + no-store)
         run: |
           curl -sI http://127.0.0.1:3003/api/public/metrics.prom | tee headers.txt
-          grep -E 'Content-Type: text/plain; version=0.0.4' headers.txt
-          grep -Ei 'cache-control: no-store' headers.txt
+          grep -iE '^content-type:\s*text/plain;\s*version=0\.0\.4(;\s*charset=.*)?$' headers.txt
+          grep -iE '^cache-control:.*no-store' headers.txt
 
