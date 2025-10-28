@@ -20,7 +20,8 @@ export default function BacktestRunner() {
     setJobId(null);
     setReport(null);
     try {
-      const r = await fetch("http://localhost:4001/backtest/job", {
+      const EXECUTOR_URL = process.env.NEXT_PUBLIC_EXECUTOR_URL || "http://localhost:4001";
+      const r = await fetch(`${EXECUTOR_URL}/backtest/job`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -81,6 +82,7 @@ export default function BacktestRunner() {
           onClick={run}
           disabled={loading || !!(progress && progress.status === "running")}
           className="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800 disabled:opacity-50 focus:ring-2 focus:ring-blue-500"
+          aria-label="Backtest çalıştır"
         >
           {loading || (progress && progress.status === "running")
             ? "Running..."

@@ -37,8 +37,9 @@ export function useBacktestSSE(jobId: string | null) {
       eventSourceRef.current.close();
     }
 
+    const EXECUTOR_URL = process.env.NEXT_PUBLIC_EXECUTOR_URL || "http://localhost:4001";
     const eventSource = new EventSource(
-      `http://localhost:4001/backtest/stream/${jobId}`
+      `${EXECUTOR_URL}/backtest/stream/${jobId}`
     );
     eventSourceRef.current = eventSource;
 
@@ -91,8 +92,9 @@ export function useBacktestSSE(jobId: string | null) {
     if (!jobId) return null;
 
     try {
+      const EXECUTOR_URL = process.env.NEXT_PUBLIC_EXECUTOR_URL || "http://localhost:4001";
       const response = await fetch(
-        `http://localhost:4001/backtest/report/${jobId}`
+        `${EXECUTOR_URL}/backtest/report/${jobId}`
       );
       if (!response.ok) throw new Error("Failed to fetch report");
       return await response.json();

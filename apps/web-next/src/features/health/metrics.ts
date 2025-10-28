@@ -3,9 +3,11 @@ export type WsHealth = { source: string; staleness: number };
 export async function fetchWsHealth(): Promise<WsHealth[]> {
   try {
     // Fetch from marketdata service
-    const res = await fetch("http://127.0.0.1:5001/metrics", {
+    const MARKETDATA_URL = process.env.NEXT_PUBLIC_MARKETDATA_URL || "http://127.0.0.1:5001";
+    const res = await fetch(`${MARKETDATA_URL}/metrics`, {
       cache: "no-store",
     });
+    if (!res.ok) return [];
     const text = await res.text();
 
     // Parse Prom metrics: ws_staleness_seconds{source="BTCTURK"} 1.23

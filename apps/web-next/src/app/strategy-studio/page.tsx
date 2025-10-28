@@ -20,6 +20,7 @@ export default function StrategyStudio() {
         <button
           onClick={() => setShowWizard(true)}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-blue-500"
+          aria-label="Strategy generator wizard aç"
         >
           + Generate Strategy
         </button>

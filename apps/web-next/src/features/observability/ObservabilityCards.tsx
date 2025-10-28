@@ -27,7 +27,9 @@ export default function ObservabilityCards() {
 
       // Guardrails
       try {
-        const grRes = await fetch("http://127.0.0.1:4001/metrics");
+        const EXECUTOR_URL = process.env.NEXT_PUBLIC_EXECUTOR_URL || "http://127.0.0.1:4001";
+        const grRes = await fetch(`${EXECUTOR_URL}/metrics`);
+        if (!grRes.ok) return;
         const grText = await grRes.text();
         const ksMatch = /guardrails_kill_switch_state\s+(\d+)/.exec(grText);
         if (ksMatch) {
