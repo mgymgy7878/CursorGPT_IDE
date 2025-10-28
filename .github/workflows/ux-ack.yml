@@ -2,6 +2,9 @@ name: ux-ack
 on:
   pull_request:
     types: [opened, edited, synchronize, labeled, unlabeled, ready_for_review]
+concurrency:
+  group: ux-ack-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   pull-requests: read
   contents: read
