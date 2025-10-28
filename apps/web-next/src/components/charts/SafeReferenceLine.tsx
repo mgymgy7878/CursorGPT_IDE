@@ -1,6 +1,15 @@
+"use client";
+
 import { ReferenceLine, Label } from "recharts";
 
-type SafeRefProps = { y: number; label?: string | number; dash?: string };
+type SafeRefProps = {
+  y: number;
+  label?: string | number;
+  dash?: string;
+};
+
+// @ts-ignore - recharts v3 type compatibility
+const ReferenceLineFixed = ReferenceLine as any;
 
 export function SafeReferenceLine({
   y,
@@ -8,10 +17,12 @@ export function SafeReferenceLine({
   dash = "3 3",
 }: SafeRefProps) {
   return (
-    <ReferenceLine
+    <ReferenceLineFixed
       y={y}
       strokeDasharray={dash}
-      label={<Label value={String(label)} position="right" />}
+      label={
+        label ? <Label value={String(label)} position="right" /> : undefined
+      }
     />
   );
 }
