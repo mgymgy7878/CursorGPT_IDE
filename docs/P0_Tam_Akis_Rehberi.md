@@ -80,5 +80,3 @@ curl -I https://$ENV:CDN_HOST/desktop/latest.yml
 ### Güvenlik Notu
 - SSH/CDN değerlerini betiğe gömmeyin; yalnızca `$ENV:` üzerinden yerel oturumda set edin.
 - Bu değerleri sürüm kontrolüne koymayın.
-
-

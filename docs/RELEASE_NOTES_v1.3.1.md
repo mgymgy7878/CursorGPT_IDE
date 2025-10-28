@@ -298,8 +298,8 @@ git push origin v1.3.1
 
 ## 📞 Support
 
-**Issues:** https://github.com/mgymgy7878/CursorGPT_IDE/issues  
-**Discussions:** https://github.com/mgymgy7878/CursorGPT_IDE/discussions
+**Issues:** <https://github.com/mgymgy7878/CursorGPT_IDE/issues>  
+**Discussions:** <https://github.com/mgymgy7878/CursorGPT_IDE/discussions>
 
 **For questions about:**
 - Prometheus metrics: See [docs/METRICS_CANARY.md](METRICS_CANARY.md)
@@ -311,4 +311,3 @@ git push origin v1.3.1
 **Release:** v1.3.1  
 **Status:** ✅ Production Ready  
 **Next:** v1.4.0 (Database + Execution Engine)
-

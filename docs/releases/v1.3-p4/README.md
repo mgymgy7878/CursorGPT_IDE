@@ -77,4 +77,3 @@ git push origin feature/v1.3-p4-health-viz
 - [P3 Release](../v1.3-p3/README.md)
 - [P4 Summary](./V1.3-P4_FINAL_SUMMARY.md)
 - [P5 Plan](../V1.3-P5_PLAN.md) (yakında)
-

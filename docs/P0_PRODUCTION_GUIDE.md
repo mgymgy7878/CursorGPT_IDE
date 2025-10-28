@@ -695,7 +695,7 @@ After successful P0 Chain run:
 
 **GitHub Actions Issues:**
 - Check workflow logs: `gh run view <RUN_ID> --log-failed`
-- View on GitHub: https://github.com/mgymgy7878/CursorGPT_IDE/actions
+- View on GitHub: <https://github.com/mgymgy7878/CursorGPT_IDE/actions>
 
 **SSH/NGINX Issues:**
 - Test SSH: `ssh -i ~/.ssh/id_rsa deploy@prod.yourdomain.com`
@@ -710,4 +710,3 @@ After successful P0 Chain run:
 **Last Updated:** 2025-10-24  
 **Maintained By:** DevOps Team  
 **Next Review:** After first successful production run
-

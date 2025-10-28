@@ -66,7 +66,7 @@ curl 'http://prometheus:9090/api/v1/query?query=SLOBurnFast'
 ### Özellikler
 - **Metric:** Error Budget Remaining %
 - **Query:** Prometheus (rate-based)
-- **Thresholds:** 
+- **Thresholds:**
   - 🔴 <30% (Critical)
   - 🟡 30-60% (Warning)
   - 🟢 ≥60% (Healthy)
@@ -97,16 +97,16 @@ Error Budget Dashboard: http://grafana/d/error-budget
 ## 📖 Referanslar
 
 1. **Google SRE Workbook - Alerting on SLOs**
-   https://sre.google/workbook/alerting-on-slos/
+   <https://sre.google/workbook/alerting-on-slos/>
 
 2. **Prometheus Alerting Rules**
-   https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+   <https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/>
 
 3. **Grafana Panel JSON**
-   https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/create-dashboard/
+   <https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/create-dashboard/>
 
 4. **Multi-Window Multi-Burn-Rate**
-   https://sre.google/workbook/alerting-on-slos/#6-multiwindow-multi-burn-rate-alerts
+   <https://sre.google/workbook/alerting-on-slos/#6-multiwindow-multi-burn-rate-alerts>
 
 ## 🚀 Hızlı Başlangıç
 
@@ -181,9 +181,9 @@ docker run -d -p 3000:3000 \
 ```
 
 ### Access
-- **Prometheus:** http://localhost:9090
-- **Alertmanager:** http://localhost:9093
-- **Grafana:** http://localhost:3000 (admin/admin)
+- **Prometheus:** <http://localhost:9090>
+- **Alertmanager:** <http://localhost:9093>
+- **Grafana:** <http://localhost:3000> (admin/admin)
 
 ### Environment Variables
 ```bash
@@ -194,4 +194,3 @@ export SLO_ALLOWED_ERROR_RATE=0.01  # 1% (99% SLO)
 # Alertmanager
 export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 ```
-

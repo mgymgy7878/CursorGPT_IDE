@@ -259,4 +259,3 @@ redirects: async () => [
 **Maintainer:** Spark Trading Team  
 **Last Updated:** 2025-10-27  
 **Related Docs:** `CI_USAGE.md`, `UI_RECONSTRUCTION_PLAN.md`, `COMPONENT_INTERFACES.md`
-

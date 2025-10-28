@@ -68,4 +68,3 @@
 
 ---
 **Not:** Bu plan; mevcut tasarım sistemini koruyup tutarlılığı artırırken, canlı veri senaryolarında (WS staleness vb.) kullanıcıya kesintisiz geri bildirim sağlamayı hedefler.
-

@@ -56,4 +56,3 @@ git push origin feature/v1.3-p2-ui-polish
 - [Commit Mesajı](./V1.3-P2_COMMIT_MESSAGE.md)
 - [PR Açıklaması](./V1.3-P2_PR_DESCRIPTION.md)
 - [P3 Planı](../V1.3-P3_PLAN_DRAFT.md)
-

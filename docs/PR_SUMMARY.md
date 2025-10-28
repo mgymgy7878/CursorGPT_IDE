@@ -252,4 +252,3 @@ pwsh scripts/smoke-ui.ps1
 **Ready for Review** ✅
 
 All CI checks passing, evidence collected, rollback plan documented.
-
