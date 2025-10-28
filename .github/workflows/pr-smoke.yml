@@ -17,12 +17,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Detect changed paths (docs vs code)
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            docs:
+              - 'docs/**'
+              - 'README.md'
+              - '.github/workflows/**'
+            code:
+              - 'apps/**'
+              - 'services/**'
+              - 'packages/**'
+              - 'tools/**'
+
       - name: Setup Node & pnpm (corepack)
+        if: steps.changes.outputs.code == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Enable corepack & pin pnpm
+        if: steps.changes.outputs.code == 'true'
         run: |
           set -e
           corepack enable
@@ -30,6 +48,7 @@ jobs:
           pnpm -v && which pnpm || command -v pnpm
 
       - name: Print workspace info
+        if: steps.changes.outputs.code == 'true'
         run: |
           echo "=== Environment ==="
           node -v
@@ -39,6 +58,7 @@ jobs:
           echo "================"
 
       - name: Install deps (force, verbose)
+        if: steps.changes.outputs.code == 'true'
         run: |
           set -euxo pipefail
           test -f pnpm-lock.yaml || (echo '⚠️ pnpm-lock.yaml kökte yok' && ls -la)
@@ -50,6 +70,7 @@ jobs:
           pnpm -w list --depth 1 | head -200 || true
 
       - name: Verify critical deps
+        if: steps.changes.outputs.code == 'true'
         run: |
           set -e
           echo "Verifying critical dependencies..."
@@ -58,11 +79,18 @@ jobs:
           echo "✓ All critical deps verified"
 
       - name: Build web-next (standalone)
+        if: steps.changes.outputs.code == 'true'
         run: pnpm --filter web-next build
         env:
           NODE_ENV: production
 
+      - name: Docs-only smoke (skip build)
+        if: steps.changes.outputs.docs == 'true' && steps.changes.outputs.code != 'true'
+        run: |
+          echo '✅ Docs-only değişim tespit edildi; build/typecheck atlandı.'
+
       - name: Verify build output exists
+        if: steps.changes.outputs.code == 'true'
         working-directory: apps/web-next
         run: |
           if [ -f ".next/standalone/server.js" ]; then
@@ -72,6 +100,7 @@ jobs:
           fi
 
       - name: Start server (standalone with fallback)
+        if: steps.changes.outputs.code == 'true'
         working-directory: apps/web-next
         env:
           NODE_ENV: production
@@ -86,6 +115,7 @@ jobs:
           fi
 
       - name: Wait for health (bash, 120s)
+        if: steps.changes.outputs.code == 'true'
         run: |
           set -e
           URL="http://127.0.0.1:3003/api/health"
@@ -102,6 +132,7 @@ jobs:
           exit 1
 
       - name: Extra health poll (curl)
+        if: steps.changes.outputs.code == 'true'
         run: |
           for i in $(seq 1 10); do
             if curl -fsS http://127.0.0.1:3003/api/health >/dev/null; then exit 0; fi
@@ -110,23 +141,26 @@ jobs:
           echo "Extra health poll failed ❌"; exit 1
 
       - name: Curl health
+        if: steps.changes.outputs.code == 'true'
         run: |
           curl -fsS -D - http://127.0.0.1:3003/api/health -o health.json
           cat health.json
 
       - name: Curl metrics (JSON)
+        if: steps.changes.outputs.code == 'true'
         run: |
           curl -fsS -D - http://127.0.0.1:3003/api/public/metrics -o metrics.json
           cat metrics.json
 
       - name: Curl metrics (Prometheus)
+        if: steps.changes.outputs.code == 'true'
         run: |
           curl -fsS -D headers.txt http://127.0.0.1:3003/api/public/metrics.prom -o metrics.prom
           cat headers.txt
           grep -E "^content-type:\s*text/plain;\s*version=0\.0\.4" -i headers.txt
 
       - name: Upload debug artefacts on failure
-        if: failure()
+        if: failure() && steps.changes.outputs.code == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: pr-smoke-debug
@@ -143,6 +177,7 @@ jobs:
           retention-days: 1
 
       - name: Upload artifacts
+        if: steps.changes.outputs.code == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: pr-smoke-artifacts
