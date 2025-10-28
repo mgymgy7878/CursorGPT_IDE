@@ -2,11 +2,13 @@ name: UX-ACK Gate
 
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, synchronize, edited, reopened, ready_for_review]
+  pull_request_target:
+    types: [labeled, unlabeled]
 
 permissions:
-  contents: read
   pull-requests: read
+  checks: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,22 +18,36 @@ jobs:
   ux_ack:
     runs-on: ubuntu-latest
     steps:
-      - name: Check PR body for UX-ACK
-        shell: pwsh
+      - name: Load PR and check UX-ACK
+        uses: actions/github-script@v7
+        id: check
+        with:
+          script: |
+            const {data: pr} = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            const hasLabel = (pr.labels || []).some(l => l.name === 'UX-ACK');
+            const hasMarker = (pr.body || '').includes('UX-ACK:');
+            
+            const satisfied = hasLabel || hasMarker;
+            console.log(`Label UX-ACK: ${hasLabel}`);
+            console.log(`Marker in body: ${hasMarker}`);
+            console.log(`Result: ${satisfied ? '✅ PASS' : '❌ FAIL'}`);
+            
+            core.setOutput('ok', satisfied);
+            
+      - name: Enforce UX-ACK
         run: |
-          $body = @'
-          ${{ github.event.pull_request.body }}
-          '@
-
-          Write-Host "Checking PR body for UX-ACK marker..."
-
-          if ($body -match 'UX-ACK:') {
-            Write-Host "[PASS] UX-ACK marker found in PR description"
-            exit 0
-          } else {
-            Write-Host "[FAIL] UX-ACK marker not found in PR description"
-            Write-Host ""
-            Write-Host "Please add the following to your PR description:"
-            Write-Host "UX-ACK: [your acknowledgment message]"
+          if [ "${{ steps.check.outputs.ok }}" != "true" ]; then
+            echo "❌ UX-ACK missing"
+            echo ""
+            echo "Please either:"
+            echo "1. Add 'UX-ACK' label to the PR, or"
+            echo "2. Add 'UX-ACK: approved' to the PR description"
             exit 1
-          }
+          else
+            echo "✅ UX-ACK satisfied"
+          fi
