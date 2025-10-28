@@ -43,14 +43,32 @@ jobs:
       - name: Build web-next (standalone)
         run: pnpm build
 
-      - name: Start Next standalone & wait
+      - name: Start server
         env:
+          NODE_ENV: production
           PORT: 3003
           HOSTNAME: 127.0.0.1
+        working-directory: apps/web-next
         run: |
-          mkdir -p ../../evidence/build
-          nohup node .next/standalone/server.js > ../../evidence/build/server.log 2>&1 &
-          npx wait-on http-get://127.0.0.1:3003/api/health -t 60000
+          set -e
+          if [ -f ".next/standalone/server.js" ]; then
+            nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
+            sleep 2
+            if ! (command -v lsof >/dev/null && lsof -i :3003 -sTCP:LISTEN >/dev/null 2>&1); then
+              echo "Standalone not listening, fallback to next start" | tee -a ../../pr-smoke-server.log
+              nohup npx next start -p 3003 -H 127.0.0.1 >> ../../pr-smoke-server.log 2>&1 &
+            fi
+          else
+            echo "No .next/standalone found, using next start" | tee -a ../../pr-smoke-server.log
+            nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
+          fi
+
+      - name: Wait for health (120s)
+        uses: jb-1980/wait-on-action@v1
+        with:
+          resource: http-get://127.0.0.1:3003/api/health
+          timeout: 120000
+          log: true
 
       - name: Smoke checks (health, metrics)
         run: |
