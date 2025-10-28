@@ -17,29 +17,43 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node (20.x)
+      - name: Setup Node & pnpm (corepack)
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "none"
 
-      - name: Enable corepack & sync pnpm version
+      - name: Enable corepack & pin pnpm
         run: |
           set -e
           corepack enable
-          corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10.18.3 --activate
-          pnpm -v && which pnpm || command -v pnpm || true
+          corepack prepare pnpm@10.18.3 --activate
+          pnpm -v && which pnpm || command -v pnpm
 
-      - name: Install workspace deps
+      - name: Print workspace info
+        run: |
+          echo "=== Environment ==="
+          node -v
+          pnpm -v
+          echo "PNPM_HOME=$PNPM_HOME"
+          echo "Store: $(pnpm store path || echo 'N/A')"
+          echo "================"
+
+      - name: Install deps (force, verbose)
+        run: |
+          set -euxo pipefail
+          echo "Starting install..."
+          pnpm -w install --frozen-lockfile --reporter=ndjson || pnpm -w install --reporter=ndjson
+          echo "✓ Install completed"
+          pnpm -w list --depth 1 | head -200 || true
+
+      - name: Verify critical deps
         run: |
           set -e
-          pnpm -w install --frozen-lockfile || (echo "Install failed, trying without frozen..." && pnpm -w install)
-          echo "✓ Install completed"
-          ls -la node_modules | head -20 || true
-          ls -la apps/web-next/node_modules | head -20 || true
-
-      - name: Verify dependencies
-        run: |
-          pnpm list react react-hook-form swr --depth=0 || true
+          echo "Verifying critical dependencies..."
+          pnpm --filter web-next exec node -e "require.resolve('react-hook-form')" || (echo "react-hook-form NOT FOUND" && exit 1)
+          pnpm --filter web-next exec node -e "require.resolve('swr')" || (echo "swr NOT FOUND" && exit 1)
+          echo "✓ All critical deps verified"
 
       - name: Build web-next (standalone)
         run: pnpm --filter web-next build
@@ -109,7 +123,7 @@ jobs:
           cat headers.txt
           grep -E "^content-type:\s*text/plain;\s*version=0\.0\.4" -i headers.txt
 
-      - name: Upload build artefacts on failure
+      - name: Upload debug artefacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -118,12 +132,11 @@ jobs:
           path: |
             pr-smoke-server.log
             apps/web-next/.next/**
-            apps/web-next/node_modules/.pnpm/**
             pnpm-lock.yaml
-            **/tsconfig.json
+            pnpm-workspace.yaml
             **/package.json
+            **/tsconfig.json
             **/next.config.*
-            **/.eslintrc*
             apps/web-next/logs/**
           retention-days: 1
 
