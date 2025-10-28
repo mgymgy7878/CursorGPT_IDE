@@ -41,8 +41,11 @@ jobs:
       - name: Install deps (force, verbose)
         run: |
           set -euxo pipefail
-          echo "Starting install..."
+          test -f pnpm-lock.yaml || (echo '⚠️ pnpm-lock.yaml kökte yok' && ls -la)
+          echo "Starting workspace install..."
           pnpm -w install --frozen-lockfile --reporter=ndjson || pnpm -w install --reporter=ndjson
+          echo "Starting web-next install..."
+          pnpm --filter web-next install --reporter=ndjson || true
           echo "✓ Install completed"
           pnpm -w list --depth 1 | head -200 || true
 
