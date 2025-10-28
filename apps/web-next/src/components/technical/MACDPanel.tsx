@@ -1,5 +1,6 @@
 "use client";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
+import { SafeZeroLine } from "@/components/charts/SafeReferenceLine";
 
 export interface MACDPanelProps {
   macd: number[];
@@ -21,8 +22,7 @@ export default function MACDPanel({ macd, signal, hist }: MACDPanelProps) {
             contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
             labelStyle={{ color: '#999' }}
           />
-          {/* @ts-ignore - ReferenceLine type issue with recharts */}
-          <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" />
+          <SafeZeroLine />
           <Line type="monotone" dataKey="macd" stroke="#3b82f6" dot={false} strokeWidth={1.5} />
           <Line type="monotone" dataKey="signal" stroke="#f59e0b" dot={false} strokeWidth={1.5} />
         </LineChart>
