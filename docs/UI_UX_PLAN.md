@@ -1,6 +1,6 @@
 # Spark Trading Platform — UI/UX İyileştirme Planı
 
-> Standart: NN/g Heuristics + WCAG 2.2 (AA)  
+> Standart: NN/g Heuristics + WCAG 2.2 (AA)
 > Kapsam: Mevcut ve planlanan sayfalar; bileşen kütüphanesi; kabul kriterleri.
 
 ## 🎯 Amaç
