@@ -1,0 +1,15 @@
+node_modules/
+.evidence/
+evidence/
+apps/**/.next/
+apps/**/dist/
+**/*.zip
+**/*.7z
+**/*.tgz
+**/*.log
+**/*.mp4
+**/*.iso
+**/data/chunks_head/
+GPT_Backups/
+.dev/
+

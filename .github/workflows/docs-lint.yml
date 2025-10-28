@@ -3,8 +3,8 @@ name: Docs Lint
 on:
   pull_request:
     paths:
-      - 'docs/**'
-      - 'CONTRIBUTING.md'
+      - "docs/**"
+      - "CONTRIBUTING.md"
   workflow_dispatch:
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - name: Install linters
         run: |
           npm i -g markdownlint-cli markdown-link-check
@@ -26,5 +26,3 @@ jobs:
       - name: markdown-link-check
         run: |
           git ls-files '*.md' | xargs -I{} markdown-link-check -q -c .mlc_config.json {}
-
-

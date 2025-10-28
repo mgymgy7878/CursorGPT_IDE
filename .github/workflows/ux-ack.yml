@@ -22,9 +22,9 @@ jobs:
           $body = @'
           ${{ github.event.pull_request.body }}
           '@
-          
+
           Write-Host "Checking PR body for UX-ACK marker..."
-          
+
           if ($body -match 'UX-ACK:') {
             Write-Host "[PASS] UX-ACK marker found in PR description"
             exit 0

@@ -1,0 +1,20 @@
+{
+  "name": "marketdata-service",
+  "version": "0.1.0",
+  "description": "Market Data Feed Orchestrator",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "fastify": "^4.29.1",
+    "@fastify/cors": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.124",
+    "typescript": "^5.9.2"
+  }
+}

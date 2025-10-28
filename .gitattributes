@@ -1,3 +1,21 @@
+# Git attributes
+
+# Large binary files - no diff, no merge
+GPT_Backups/** -diff -merge
+*.zip -diff -merge
+*.7z -diff -merge
+*.mp4 -diff -merge
+*.iso -diff -merge
+
+# Text files with specific line endings
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
 *.ps1 text eol=crlf
-*.sh  text eol=lf
-*     text=auto
+
