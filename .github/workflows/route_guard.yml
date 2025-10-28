@@ -22,12 +22,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20.11.1"
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
       - name: Enable pnpm
         run: |
           corepack enable
           corepack prepare pnpm@10.0.0 --activate
+      - name: Setup pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
       - name: Print env + versions
         run: |
           node -v
