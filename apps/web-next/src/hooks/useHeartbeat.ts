@@ -5,6 +5,7 @@ import { fetchJson } from '@/lib/health'
 import { ErrorBudgetSchema, type ErrorBudget } from '@/schema/api'
 
 export function useHeartbeat() {
+  // Use unknown to enforce runtime validation - we validate with Zod before use
   const { data, error, isLoading } = useSWR<unknown>('/api/public/error-budget', fetchJson, {
     refreshInterval: 5000
   })

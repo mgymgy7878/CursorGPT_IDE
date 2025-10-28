@@ -5,6 +5,7 @@ import { fetchJson } from '@/lib/health'
 import { EngineHealthSchema, type EngineHealth } from '@/schema/api'
 
 export function useEngineHealth() {
+  // Use unknown to enforce runtime validation - we validate with Zod before use
   const { data, error } = useSWR<unknown>('/api/public/engine-health', fetchJson, {
     refreshInterval: 10000
   })
