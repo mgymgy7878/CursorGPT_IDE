@@ -3,6 +3,12 @@ name: pr-smoke
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run smoke tests on'
+        required: false
+        type: string
 
 jobs:
   smoke:
