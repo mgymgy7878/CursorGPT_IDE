@@ -6,8 +6,8 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ReferenceLine,
 } from "recharts";
+import { SafeReferenceLine } from "@/components/charts/SafeReferenceLine";
 
 export interface StochPanelProps {
   k: number[];
@@ -28,10 +28,8 @@ export default function StochPanel({ k, d }: StochPanelProps) {
             contentStyle={{ backgroundColor: "#111", border: "1px solid #333" }}
             labelStyle={{ color: "#999" }}
           />
-          {/* @ts-expect-error - Recharts ReferenceLine type issue */}
-          <ReferenceLine y={20} stroke="#ef4444" strokeDasharray="3 3" />
-          {/* @ts-expect-error - Recharts ReferenceLine type issue */}
-          <ReferenceLine y={80} stroke="#10b981" strokeDasharray="3 3" />
+          <SafeReferenceLine y={20} label="20" />
+          <SafeReferenceLine y={80} label="80" />
           <Line
             type="monotone"
             dataKey="k"
