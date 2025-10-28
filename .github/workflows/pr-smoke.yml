@@ -1,68 +1,71 @@
-name: pr-smoke
+name: PR Smoke
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to run smoke tests on'
-        required: false
-        type: string
 
 jobs:
-  smoke:
+  pr-smoke:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web-next
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.18.3
-          run_install: false
-
-      - name: Setup Node.js
+      # Node kurulumu + pnpm cache
+      - name: Setup Node (20.x) + pnpm cache
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Show tool versions
+      # pnpm sürümünü corepack ile senkronize et
+      - name: Enable corepack & sync pnpm version
         run: |
-          node -v
+          corepack enable
+          corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10 --activate
           pnpm -v
 
-      - name: Build web-next (standalone)
-        run: pnpm build
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile
 
-      - name: Start server
+      # Next standalone build
+      - name: Build web-next (standalone)
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+        run: pnpm run build
+
+      # Standalone çıktısı gerçekten var mı? (log amaçlı)
+      - name: Verify build output exists
+        working-directory: apps/web-next
+        run: |
+          test -f ".next/standalone/server.js" || echo "No standalone, will rely on next start"
+
+      # Sunucuyu başlat (fallback: next start)
+      - name: Start server (with fallback)
+        working-directory: apps/web-next
         env:
           NODE_ENV: production
           PORT: 3003
           HOSTNAME: 127.0.0.1
-        working-directory: apps/web-next
         run: |
-          set -e
           if [ -f ".next/standalone/server.js" ]; then
             nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
             sleep 2
-            if ! (command -v lsof >/dev/null && lsof -i :3003 -sTCP:LISTEN >/dev/null 2>&1); then
-              echo "Standalone not listening, fallback to next start" | tee -a ../../pr-smoke-server.log
-              nohup npx next start -p 3003 -H 127.0.0.1 >> ../../pr-smoke-server.log 2>&1 &
-            fi
           else
-            echo "No .next/standalone found, using next start" | tee -a ../../pr-smoke-server.log
             nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
+            sleep 2
           fi
 
+      # Health bekleme süresini 120sn'ye çıkar
       - name: Wait for health (120s)
         uses: jb-1980/wait-on-action@v1
         with:
@@ -70,28 +73,40 @@ jobs:
           timeout: 120000
           log: true
 
-      - name: Smoke checks (health, metrics)
+      # Ekstra poll (sağlamlaştırma)
+      - name: Extra health poll (curl)
         run: |
-          curl -sSf http://127.0.0.1:3003/api/health | tee ../../evidence/build/health.json
-          curl -sSf http://127.0.0.1:3003/api/public/metrics | tee ../../evidence/build/metrics.json
-          curl -sSI http://127.0.0.1:3003/api/public/metrics.prom | tee ../../evidence/build/metrics.headers.txt
+          for i in $(seq 1 10); do
+            if curl -fsS http://127.0.0.1:3003/api/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo "Health endpoint did not respond in time"; exit 1
 
-      - name: Assert Prometheus header
+      - name: Curl health
         run: |
-          ct=$(curl -sI http://127.0.0.1:3003/api/public/metrics.prom | awk -F': ' '/^content-type/{print tolower($2)}' | tr -d '\r')
-          echo "Content-Type: $ct"
-          if [ "$ct" != "text/plain; version=0.0.4" ]; then
-            echo "Bad Content-Type: $ct"
-            exit 1
-          fi
+          curl -fsS -D - http://127.0.0.1:3003/api/health -o health.json
+          cat health.json
 
-      - name: Upload evidence
+      - name: Curl metrics (JSON)
+        run: |
+          curl -fsS -D - http://127.0.0.1:3003/api/public/metrics -o metrics.json
+          cat metrics.json
+
+      - name: Curl metrics (Prometheus)
+        run: |
+          curl -fsS -D headers.txt http://127.0.0.1:3003/api/public/metrics.prom -o metrics.prom
+          cat headers.txt
+          # Content-Type: text/plain; version=0.0.4 (charset opsiyonel)
+          grep -E "^content-type:\s*text/plain;\s*version=0\.0\.4" -i headers.txt
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pr-smoke-evidence
-          path: evidence/build
-
-      - name: Cleanup
-        if: always()
-        run: |
-          pkill -f "node .next/standalone/server.js" || true
+          name: pr-smoke-artifacts
+          path: |
+            pr-smoke-server.log
+            apps/web-next/.next/**/*
+            health.json
+            metrics.json
+            metrics.prom
+            headers.txt
