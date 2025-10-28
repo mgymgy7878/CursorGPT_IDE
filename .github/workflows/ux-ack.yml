@@ -2,58 +2,23 @@ name: UX-ACK Gate
 
 on:
   pull_request:
-    types: [opened, synchronize, edited, reopened, ready_for_review]
-  pull_request_target:
-    types: [labeled, unlabeled]
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: "PR number to check"
-        required: false
-        type: string
-
-permissions:
-  pull-requests: read
-  checks: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ main ]
 
 jobs:
-  ux_ack:
+  ux-ack:
     runs-on: ubuntu-latest
     steps:
-      - name: Load PR and check UX-ACK
-        uses: actions/github-script@v7
-        id: check
-        with:
-          script: |
-            const {data: pr} = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-
-            const hasLabel = (pr.labels || []).some(l => l.name === 'UX-ACK');
-            const hasMarker = (pr.body || '').includes('UX-ACK:');
-
-            const satisfied = hasLabel || hasMarker;
-            console.log(`Label UX-ACK: ${hasLabel}`);
-            console.log(`Marker in body: ${hasMarker}`);
-            console.log(`Result: ${satisfied ? '✅ PASS' : '❌ FAIL'}`);
-
-            core.setOutput('ok', satisfied);
-
-      - name: Enforce UX-ACK
+      - name: Check PR body contains "UX-ACK: approved"
+        shell: bash
         run: |
-          if [ "${{ steps.check.outputs.ok }}" != "true" ]; then
-            echo "❌ UX-ACK missing"
-            echo ""
-            echo "Please either:"
-            echo "1. Add 'UX-ACK' label to the PR, or"
-            echo "2. Add 'UX-ACK: approved' to the PR description"
+          BODY="${{ github.event.pull_request.body }}"
+          echo "PR body (first 200 chars):"
+          echo "$BODY" | cut -c1-200
+          echo
+          echo "Checking for 'UX-ACK: approved'..."
+          echo "$BODY" | grep -qiE '^UX-ACK:\s*approved' && {
+            echo "UX-ACK present ✅"
+          } || {
+            echo "UX-ACK missing ❌"
             exit 1
-          else
-            echo "✅ UX-ACK satisfied"
-          fi
+          }

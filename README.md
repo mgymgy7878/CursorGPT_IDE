@@ -2,7 +2,11 @@
 
 ## Quick Links / Docs
 
+- [UI & UX Planı](docs/UI_UX_PLAN.md)
+- **Raporlar**: [2025-01-14 Detaylı Proje Analizi](docs/reports/PROJE_ANALIZ_2025_01_14_DETAYLI_TAM_RAPOR.md)
+
 ### GREEN Receipt (v1.6-p1)
+
 - **Streams Service**: `services/streams/` - WebSocket streams with Prometheus metrics
 - **Alert Rules**: `rules/streams.yml` - Prometheus alert rules for streams monitoring
 - **Grafana Dashboard**: `grafana-dashboard.json` - Import ready dashboard with 3 panels
@@ -10,17 +14,20 @@
 - **Health Check**: `scripts/health-check.sh` - Multi-service health validation
 
 ### Services
+
 - **Web**: Next.js frontend (port 3003)
-- **Executor**: Trading engine (port 4001) 
+- **Executor**: Trading engine (port 4001)
 - **Streams**: WebSocket data feeds (port 4001)
 - **Marketdata**: Market data orchestrator
 
 ### Monitoring
+
 - **Prometheus**: Metrics collection and alerting
 - **Grafana**: Dashboards and visualization
 - **Health Checks**: Automated service validation
 
 ### Development
+
 ```bash
 # Start all services
 pnpm -w install
@@ -57,12 +64,14 @@ localStorage.setItem("admin-token", "your-generated-token")
 ```
 
 **Security Notes:**
+
 - Never commit `ADMIN_TOKEN` to git
 - Use strong tokens (≥32 bytes random)
 - Rotate tokens regularly
 - Audit logs: `logs/audit/backtest_*.log`
 
 ### Production Deployment
+
 - **Docker Compose**: Multi-service orchestration
 - **Nginx**: Reverse proxy with `/streams/metrics` route
 - **Prometheus**: Scrape config for all services

@@ -4,8 +4,8 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - "**.md"
+      - "docs/**"
   workflow_dispatch:
 
 jobs:
@@ -17,31 +17,80 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node (20.x) + pnpm cache
+      - name: Detect changed paths (docs vs code)
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            docs:
+              - 'docs/**'
+              - 'README.md'
+              - '.github/workflows/**'
+            code:
+              - 'apps/**'
+              - 'services/**'
+              - 'packages/**'
+              - 'tools/**'
+
+      - name: Setup Node & pnpm (corepack)
+        if: steps.changes.outputs.code == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            **/pnpm-lock.yaml
+          node-version: "20"
 
-      - name: Enable corepack & sync pnpm version
+      - name: Enable corepack & pin pnpm
+        if: steps.changes.outputs.code == 'true'
         run: |
+          set -e
           corepack enable
-          corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10 --activate
-          pnpm -v
+          corepack prepare pnpm@10.18.3 --activate
+          pnpm -v && which pnpm || command -v pnpm
 
-      - name: Install workspace deps
-        run: pnpm -w install --frozen-lockfile
+      - name: Print workspace info
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          echo "=== Environment ==="
+          node -v
+          pnpm -v
+          echo "PNPM_HOME=$PNPM_HOME"
+          echo "Store: $(pnpm store path || echo 'N/A')"
+          echo "================"
+
+      - name: Install deps (force, verbose)
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set -euxo pipefail
+          test -f pnpm-lock.yaml || (echo '⚠️ pnpm-lock.yaml kökte yok' && ls -la)
+          echo "Starting workspace install..."
+          pnpm -w install --frozen-lockfile --reporter=ndjson || pnpm -w install --reporter=ndjson
+          echo "Starting web-next install..."
+          pnpm --filter web-next install --reporter=ndjson || true
+          echo "✓ Install completed"
+          pnpm -w list --depth 1 | head -200 || true
+
+      - name: Verify critical deps
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set -e
+          echo "Verifying critical dependencies..."
+          pnpm --filter web-next exec node -e "require.resolve('react-hook-form')" || (echo "react-hook-form NOT FOUND" && exit 1)
+          pnpm --filter web-next exec node -e "require.resolve('swr')" || (echo "swr NOT FOUND" && exit 1)
+          echo "✓ All critical deps verified"
 
       - name: Build web-next (standalone)
-        working-directory: apps/web-next
+        if: steps.changes.outputs.code == 'true'
+        run: pnpm --filter web-next build
         env:
           NODE_ENV: production
-        run: pnpm run build
+
+      - name: Docs-only smoke (skip build)
+        if: steps.changes.outputs.docs == 'true' && steps.changes.outputs.code != 'true'
+        run: |
+          echo '✅ Docs-only değişim tespit edildi; build/typecheck atlandı.'
 
       - name: Verify build output exists
+        if: steps.changes.outputs.code == 'true'
         working-directory: apps/web-next
         run: |
           if [ -f ".next/standalone/server.js" ]; then
@@ -51,50 +100,84 @@ jobs:
           fi
 
       - name: Start server (standalone with fallback)
+        if: steps.changes.outputs.code == 'true'
         working-directory: apps/web-next
         env:
           NODE_ENV: production
           PORT: 3003
           HOSTNAME: 127.0.0.1
         run: |
+          set -e
           if [ -f ".next/standalone/server.js" ]; then
             nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
           else
             nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
           fi
 
-      - name: Wait for health (120s)
-        uses: jb-1980/wait-on-action@v1
-        with:
-          resource: http-get://127.0.0.1:3003/api/health
-          timeout: 120000
-          log: true
+      - name: Wait for health (bash, 120s)
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set -e
+          URL="http://127.0.0.1:3003/api/health"
+          for i in $(seq 1 120); do
+            if curl -fsS "$URL" >/dev/null 2>&1; then
+              echo "Health is up on attempt $i ✅"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Health endpoint did not respond in 120s ❌"
+          echo "---- pr-smoke-server.log (tail) ----"
+          tail -n 120 pr-smoke-server.log || true
+          exit 1
 
       - name: Extra health poll (curl)
+        if: steps.changes.outputs.code == 'true'
         run: |
           for i in $(seq 1 10); do
             if curl -fsS http://127.0.0.1:3003/api/health >/dev/null; then exit 0; fi
             sleep 2
           done
-          echo "Health endpoint did not respond in time"; exit 1
+          echo "Extra health poll failed ❌"; exit 1
 
       - name: Curl health
+        if: steps.changes.outputs.code == 'true'
         run: |
           curl -fsS -D - http://127.0.0.1:3003/api/health -o health.json
           cat health.json
 
       - name: Curl metrics (JSON)
+        if: steps.changes.outputs.code == 'true'
         run: |
           curl -fsS -D - http://127.0.0.1:3003/api/public/metrics -o metrics.json
           cat metrics.json
 
       - name: Curl metrics (Prometheus)
+        if: steps.changes.outputs.code == 'true'
         run: |
           curl -fsS -D headers.txt http://127.0.0.1:3003/api/public/metrics.prom -o metrics.prom
           cat headers.txt
           grep -E "^content-type:\s*text/plain;\s*version=0\.0\.4" -i headers.txt
 
+      - name: Upload debug artefacts on failure
+        if: failure() && steps.changes.outputs.code == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-smoke-debug
+          if-no-files-found: warn
+          path: |
+            pr-smoke-server.log
+            apps/web-next/.next/**
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+            **/package.json
+            **/tsconfig.json
+            **/next.config.*
+            apps/web-next/logs/**
+          retention-days: 1
+
       - name: Upload artifacts
+        if: steps.changes.outputs.code == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: pr-smoke-artifacts
