@@ -2,10 +2,10 @@ name: PR Smoke
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - "**.md"
+      - "docs/**"
   workflow_dispatch:
 
 jobs:
@@ -17,21 +17,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node (20.x) + pnpm cache
+      - name: Setup Node (20.x)
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            **/pnpm-lock.yaml
+          node-version: "20"
 
       - name: Enable corepack & sync pnpm version
         run: |
           set -e
           corepack enable
-          corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10 --activate
+          corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10.18.3 --activate
           pnpm -v
+          which pnpm
 
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile
