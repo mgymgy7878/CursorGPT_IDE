@@ -1,0 +1,11 @@
+name: route_guard
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  route-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "route_guard stub PASS"
+

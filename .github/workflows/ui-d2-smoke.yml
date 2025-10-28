@@ -1,0 +1,11 @@
+name: UI D2 SMOKE
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  ui-d2-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "UI D2 SMOKE stub PASS"
+

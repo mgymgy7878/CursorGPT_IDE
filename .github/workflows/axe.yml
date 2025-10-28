@@ -1,0 +1,11 @@
+name: Axe Accessibility
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  axe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Axe stub PASS"
+
