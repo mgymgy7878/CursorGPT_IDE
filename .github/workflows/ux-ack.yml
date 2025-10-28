@@ -5,6 +5,12 @@ on:
     types: [opened, synchronize, edited, reopened, ready_for_review]
   pull_request_target:
     types: [labeled, unlabeled]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to check'
+        required: false
+        type: string
 
 permissions:
   pull-requests: read
