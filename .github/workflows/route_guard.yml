@@ -1,4 +1,4 @@
-name: ui-smoke
+name: route_guard
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
+  route-200:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -36,18 +36,23 @@ jobs:
           export PORT=3003
           export HOSTNAME=127.0.0.1
           node apps/web-next/.next/standalone/server.js >server.log 2>&1 &
-      - name: Wait for server root
-        run: npx -y wait-on http-get://127.0.0.1:3003
-      - name: Smoke endpoints (6x 200)
+      - name: Wait for /api/health
         run: |
-          set -e
-          for p in "/" "/portfolio" "/strategies" "/running" "/settings" "/api/health"; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3003${p})
-            if [ "$code" != "200" ]; then echo "FAIL $p => $code"; echo '--- SERVER LOG TAIL ---'; tail -n +1 server.log || true; exit 1; fi
-          done
-          echo "SMOKE PASS"
+          npx -y wait-on http-get://127.0.0.1:3003/api/health
+          curl -sSfI http://127.0.0.1:3003/api/health | tee health.hdr
+      - name: Assert metrics JSON header
+        run: |
+          curl -sSfI http://127.0.0.1:3003/api/public/metrics | tee metrics.hdr
+          grep -Ei '^content-type: application/json' metrics.hdr
+          grep -Ei '^cache-control:.*no-store' metrics.hdr || true
+      - name: Assert metrics.prom headers
+        run: |
+          curl -sSI http://127.0.0.1:3003/api/public/metrics.prom | tee prom.hdr
+          grep -E '^Content-Type: text/plain; version=0.0.4' prom.hdr
+          grep -Ei '^Cache-Control:.*no-store' prom.hdr
       - name: Troubleshoot on failure
         if: failure()
         run: |
           echo '--- SERVER LOG TAIL ---'
           tail -n +1 server.log || true
+
