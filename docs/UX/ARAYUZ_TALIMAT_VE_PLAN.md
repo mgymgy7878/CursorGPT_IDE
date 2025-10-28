@@ -1,228 +1,404 @@
-# ⚡ Spark Trading Platform — Arayüz Talimatı ve Uygulama Planı
-**Sürüm:** v1.0 • **Tarih:** 2025-10-27 • **Kapsam:** Web (Next.js App Router)
+# Arayüz Talimatları ve Uygulama Planı
+## Spark Trading Platform
 
-## 0) Hedef ve İlke Seti
-- **Kullanılabilirlik:** NN/g 10 Heuristic ve veri yoğun arayüz best-practice'leri.
-- **Erişilebilirlik:** WCAG 2.2 **AA** (klavye erişimi, kontrast, odak yönetimi).
-- **Performans:** LCP < **2.5s**, INP < **200ms**, CLS < **0.1** (P95).
-- **Tutarlılık:** Tek tasarım sistemi, tek kaynaklı bileşenler, net dil (TR öncelikli).
-- **Gözlemlenebilirlik:** Web Vitals RUM + custom UX metrikleri; "evidence-first" yaklaşım.
+**Sürüm:** 1.0  
+**Tarih:** 28 Ekim 2025  
+**Kapsam:** `apps/web-next`
 
 ---
 
-## 1) Bilgi Mimarisi ve Navigasyon
-- **Kök rota:** `/` (Dashboard). `(dashboard)` route-group **URL'de görünmez**.
-- **Temel rotalar:** `/portfolio`, `/strategies`, `/strategy-lab`, `/running`, `/settings`.
-- **Planlanan rotalar:** `/alerts`, `/risk`, `/market`, `/news`.
-- **Kurallar**
-  - Sol menüde **aktif öğe** vurgulu (hem renk hem left-bar).
-  - Üst başlıkta **PageHeader**: başlık, alt başlık, yardımcı eylemler.
-  - Breadcrumb yalnızca derin içerikte (≥ 2 hiyerarşi).
+## 📋 İçindekiler
+
+1. [Genel Bakış](#genel-bakış)
+2. [WCAG 2.2 AA Uyumluluk](#wcag-22-aa-uyumluluk)
+3. [Tasarım Sistemi](#tasarım-sistemi)
+4. [CI Gates & Doğrulama](#ci-gates--doğrulama)
+5. [Uygulama Backlog](#uygulama-backlog)
+6. [Referanslar](#referanslar)
 
 ---
 
-## 2) Tasarım Sistemi ve Temalar
-- **Design Tokens** (CSS custom properties):
-  - Renk: `--bg-page`, `--bg-card`, `--text-strong`, `--text-muted`, `--accent`, `--danger`, `--success`, `--warning`
-  - Tipografi: `--font-sans`, `--font-mono`, `--size-xs/sm/md/lg/xl`, `--lh-tight/normal`
-  - Boşluk: `--space-1..6`
-  - Sınır: `--radius-md/xl/2xl`, `--shadow-sm/md`
-- **Işık/Koyu:** `prefers-color-scheme` + manuel toggle (persist).
-- **Durum renkleri:** `colors.status.{ok, warn, err, paused, unknown}`; kontrast **AA ≥ 4.5:1** zorunlu.
-- **Sayı tipografisi:** `.tabular` / `.mono` zorunlu olduğu yerler (tablolar, metrikler).
+## 🎯 Genel Bakış
+
+Spark Trading Platform'un UI/UX stratejisi **erişilebilirlik**, **tutarlılık** ve **kullanıcı deneyimi** odaklıdır. Bu doküman, tüm arayüz geliştirmeleri için **Single Source of Truth (SSoT)** olarak tasarlanmıştır.
+
+### Hedefler
+
+- ✅ WCAG 2.2 AA tam uyumluluk
+- ✅ Tasarım sistemi tutarlılığı (tokens, komponentler)
+- ✅ CI otomatik doğrulama (Axe, Lighthouse, ESLint)
+- ✅ Progressive enhancement (basit kullanıcı → güçlü kullanıcı)
+- ✅ Responsive design (mobile-first)
+
+### Bağlam
+
+- **Platform:** Next.js 14 App Router (`apps/web-next`)
+- **Framework:** React 18 + TypeScript
+- **Styling:** Tailwind CSS + CSS Modules
+- **CI:** GitHub Actions (Axe, Lighthouse, ESLint)
+- **PR gates:** Automated accessibility & performance checks
 
 ---
 
-## 3) Bileşen Kuralları (tek kaynaklı)
-- **Button**
-  - Varyantlar: `primary`, `secondary`, `ghost`, `danger`, `link`.
-  - Yükleniyor durumu: spinner + `aria-busy="true"`, buton **disabled**.
-  - Klavye: `Enter/Space` çalışır; odak halkası görünür.
-- **Link**
-  - İç navigasyon: `next/link`; dış bağlantı: `rel="noopener"` + `target="_blank"`.
-- **Form**
-  - Her input **label** ile bağlı (`for/id`), hata metni `aria-describedby`.
-  - Zorunlu alan: `*` + "Zorunlu" metni; inline validasyon.
-- **Table**
-  - `thead > th[scope="col"]`, satır başına `th[scope="row"]` opsiyonu.
-  - Zebra şerit, **sticky header**, görsel sıralama göstergesi (▲▼).
-- **Modal**
-  - **Focus trap**, kapama: ESC + overlay tıklaması.
-  - `aria-modal="true"`, başlık `aria-labelledby`.
-- **Toast**
-  - Anlık geri bildirim; hata durumunda `role="alert"`.
-- **Skeleton**
-  - 300ms+ bekleyen veri için kullan; içerik iskeleti sayfa iskeleti ile eşleşir.
-- **Tooltip**
-  - Bilgilendirici, **kritik bilgi için değil**; `aria-label` alternatifi düşün.
-- **StatusBadge / Pill**
-  - Tek kaynaklı renk/ikon eşlemesi; metinle birlikte göster (renge bağımlı anlam yok).
+## ♿ WCAG 2.2 AA Uyumluluk
 
----
+### Temel Prensipler
 
-## 4) Sayfa Bazlı Uygulama Listesi
+| **Prensip** | **Açıklama** | **CI Doğrulama** |
+|-------------|--------------|------------------|
+| **Perceivable** | Bilgiler kullanıcıya sunulabilir olmalı | Axe: Images, ARIA |
+| **Operable** | UI bileşenleri kullanılabilir olmalı | Axe: Keyboard, Focus |
+| **Understandable** | Bilgiler anlaşılabilir olmalı | ESLint: Semantics |
+| **Robust** | Assistive tech'lerle uyumlu olmalı | Lighthouse: A11y Score |
 
-### 4.1 Ana Sayfa (`/`)
-- [ ] **Skeleton** yükleme (hero + 4 metrik kart).
-- [ ] **StatusPills**: API/WS/Engine durumu (aria-live="polite").
-- [ ] Hızlı eylemler: Strategy Lab, Stratejilerim, Portföy.
-- [ ] **Boş durum** mesajları (veri yoksa).
+### Zorunlu Standartlar
 
-### 4.2 Strategy Lab (`/strategy-lab`)
-- [ ] Monaco editor: şablonlar, sözdizimi vurgusu, parametre çıkarımı.
-- [ ] **Inline hata**: derleme/backtest hataları ilgili satıra pinned.
-- [ ] Kısayollar: **Ctrl+Enter** (Çalıştır), **Ctrl+S** (Kaydet).
-- [ ] **Backtest akışı**: Çalıştır → "Koşuyor" durumu → Sonuç linki.
+#### 1. Renk Kontrastı
 
-### 4.3 Stratejilerim (`/strategies`)
-- [ ] Arama + filtre + sıralama.
-- [ ] **Pagination** (≥ 50 kayıt).
-- [ ] Silmede **onay diyaloğu**; geri alma (undo 5sn).
-
-### 4.4 Çalışan Stratejiler (`/running`)
-- [ ] Sparkline + **tooltip** (son 24h).
-- [ ] Durum eylemleri: durdur/duraklat/açıklama — metin etiketli.
-- [ ] WS staleness göstergesi (< 30s hedef).
-
-### 4.5 Portföy (`/portfolio`)
-- [ ] Sticky header + **zebra** tablo.
-- [ ] TR para formatı, **tabular numbers**.
-- [ ] Canlı güncellemede **flash highlight** (1s).
-
-### 4.6 Ayarlar (`/settings`)
-- [ ] Bölümlü form (genel, bildirimler, görünüm).
-- [ ] **Inline validasyon** + alan altı hata.
-- [ ] Tema/dil seçiminde klavye erişimi.
-
-### 4.7 Planlananlar
-- **Alerts (`/alerts`)**: Boş durum + kural sihirbazı (3 adım).
-- **Risk (`/risk`)**: Limitler, exposure, drawdown; status kart + açıklayıcı metin.
-- **Market (`/market`)**: "fazla grafik" uyarısı — önceliklendirme ve sekmelere böl.
-- **News (`/news`)**: Başlık/özet/hisseler; okuma sırası için tipografik hiyerarşi.
-
----
-
-## 5) Erişilebilirlik (WCAG 2.2 AA) — Zorunlu Kontrol Listesi
-- [ ] **Klavye ile tüm işlevler**: TAB sırası mantıklı, `:focus` görünür.
-- [ ] **Kontrast**: Tüm metinlerde **≥ 4.5:1**; ikon/rozet metinle destekli.
-- [ ] **Canlı bölgeler**: Durum/sonuç için `aria-live`.
-- [ ] **Form**: Etiketli alanlar, hata tanımlı, öneri metinleri.
-- [ ] **Hareket**: Otomatik animasyonlar düşük; "reduce motion" desteği.
-- [ ] **Dil**: `lang="tr"`; terimler tek dilde (TR) — İngilizce yalnız teknik etiketlerde.
-
----
-
-## 6) Performans Bütçeleri ve İzleme
-- **Sayfa bütçeleri (P95)**: LCP < **2.5s**, INP < **200ms**, CLS < **0.1**.
-- **Bundle hedefi**: İlk yük **< 200KB** (gzip); grafik kütüphaneleri **dinamik import**.
-- **RUM**: Web Vitals → `/api/vitals` (örnek RUM endpoint); kullanıcı ajanı, route, TTFB/LCP/INP raporla.
-- **Önbellek**: SWR stratejileri (stale-while-revalidate), kritik veri için 30–60s.
-
-**Doğrulama komutları (örnek)**
-```bash
-# Lighthouse (CI)
-pnpm exec lighthouse http://127.0.0.1:3003/ --only-categories=performance,accessibility --quiet
-
-# Web Vitals yerel log
-curl -s http://127.0.0.1:3003/api/vitals | jq .
+```css
+/* Text (normal): 4.5:1 */
+/* Text (large): 3:1 */
+/* UI Components: 3:1 */
 ```
 
+**Örnekler:**
+```typescript
+// ✅ İyi: WCAG AA uyumlu
+<p className="text-text-base">...</p>  // 4.5:1+
+<button className="btn-primary">...</button>  // 3:1+
+
+// ❌ Kötü: Düşük kontrast
+<p style={{ color: '#aaa' }}>...</p>  // ~2.5:1
+```
+
+**CI Doğrulama:** `Lighthouse CI` → `color-contrast` rule
+
+#### 2. Klavye Erişimi
+
+```typescript
+// ✅ Zorunlu: Tüm interaktif elementler focusable
+<button onClick={...}>...</button>
+<a href="...">...</a>
+<div role="button" tabIndex={0} onClick={...}>...</div>
+
+// ❌ Yasak: Mouse-only interactions
+<div onClick={...} style={{ cursor: 'pointer' }}>...</div>
+```
+
+**CI Doğrulama:** `Axe Accessibility Tests` → `keyboard` rules
+
+#### 3. ARIA Etiketleri
+
+```typescript
+// ✅ Gerekli ARIA
+<nav aria-label="Main navigation">
+  <ul role="list">
+    <li><a href="...">...</a></li>
+  </ul>
+</nav>
+
+// ❌ Eksik: Rol belirsiz
+<div>
+  <div>...</div>
+</div>
+```
+
+**CI Doğrulama:** Axe → `aria-*` rules
+
+#### 4. Semantik HTML
+
+```typescript
+// ✅ İyi: Uygun tag kullanımı
+<article>
+  <h1>...</h1>
+  <p>...</p>
+</article>
+
+// ❌ Kötü: Generic div
+<div>
+  <div>...</div>
+  <div>...</div>
+</div>
+```
+
+**CI Doğrulama:** ESLint → `@next/next/no-html-link-for-pages`
+
+#### 5. Görsel Alternatifler
+
+```typescript
+// ✅ Zorunlu: Alt text
+<img src="..." alt="Dashboard overview" />
+
+// ✅ Decorative: Empty alt
+<img src="..." alt="" aria-hidden="true" />
+
+// ❌ Yasak: Alt eksik
+<img src="..." />
+```
+
+**CI Doğrulama:** Axe → `image-alt` rule
+
 ---
 
-## 7) Test ve Kabul Kriterleri
+## 🎨 Tasarım Sistemi
 
-**Unit**
-- Bileşenler: Button, StatusBadge, Table header sort — **%100** case.
-- Yardımcılar: formatCurrency, getHealthStatus — sınır değer testleri.
+### Renk Tokens
 
-**E2E (Playwright)**
-- `/` yüklenir, StatusPills görünür, skeleton→içerik geçişi.
-- `/strategy-lab` Ctrl+Enter backtest tetikler; sonuç toast/rail.
-- `/strategies` filtre/paging çalışır; silme onayı ve **undo**.
-
-**A11y (otomasyon + manuel)**
-- `@axe-core/playwright` kritik hatasız.
-- Klavye rotası: menü → içerik → modal → çıkış.
-
-**Kabul (Definition of Done)**
-- [ ] WCAG 2.2 AA kontrolleri geçti.
-- [ ] Performans bütçeleri P95'de sağlandı.
-- [ ] Tüm sayfa görevleri işaretlendi.
-- [ ] Evidence dosyaları repo'ya eklendi:
-  - `evidence/ui/snapshots/<route>_lighthouse.json`
-  - `evidence/ui/a11y/<route>_axe.txt`
-  - `evidence/ui/rum/<date>.json`
-
----
-
-## 8) Uygulama Planı (Sprint'ler)
-
-### Sprint 1 (2 hafta) — **Görünürlük & Erişilebilirlik Temelleri**
-- [ ] Skeleton (Ana, Portföy)
-- [ ] Aktif menü vurgusu + PageHeader
-- [ ] Toast host + inline form validasyon
-- [ ] Table: sticky header + zebra
-- **Çıktı metrikleri:** A11y ≥ 90, Perf ≥ 90
-
-### Sprint 2 (2 hafta) — **Etkileşim ve Akışlar**
-- [ ] Kısayollar (Lab), silme onayı + undo
-- [ ] Modal focus trap, ESC/overlay
-- [ ] Boş durumlar (Ana, Alerts)
-- [ ] Grafik tooltips + açıklamalar
-
-### Sprint 3 (2 hafta) — **WCAG Kapanış + Performans**
-- [ ] Kontrast düzeltmeleri
-- [ ] Kod bölme (grafik/monaco dinamik import)
-- [ ] RUM + metrik panosu (Grafana)
-- [ ] A11y E2E + Lighthouse bütçe kapatma
-
----
-
-## 9) İçerik ve Yerelleştirme (TR)
-- Terimler sözlüğü tek kaynak: `packages/i18n`.
-- Para biçimi: TR formatı, **tabular numbers**; dar kesintisiz boşluk.
-- Karmaşık ikon → **metinli buton** veya tooltip.
-
----
-
-## 10) Değişiklik Yönetimi
-- Tüm UI değişiklikleri PR açıklamasında **UX-ACK**: "Hangi heuristik/WCAG maddesi".
-- Her PR'da **evidence** artefaktları zorunlu (Lighthouse + Axe + screenshot).
-- "Kırmızı çizgi": Kontrast düşüren, klavye erişimini bozan değişiklik **merge edilmez**.
-
----
-
-## Ek A — Hızlı Kontrol Kartı (Her PR için)
-- [ ] Odak halkası her etkileşimli öğede görünür.
-- [ ] Kontrast ≥ 4.5:1 (metin/arka plan).
-- [ ] TAB sırası mantıklı; modaldan ESC ile çıkılıyor.
-- [ ] Skeleton/boş durum/ hata mesajı hazır.
-- [ ] Primary buton tek ve açık etiketli.
-- [ ] Dinamik import kritik büyük paketler için aktif.
-- [ ] Evidence eklendi (Lighthouse, Axe, screenshot).
-
-## Ek B — Örnek Lighthouse Bütçe
-
-```json
-{
-  "ci": {
-    "collect": { "url": ["http://127.0.0.1:3003/","http://127.0.0.1:3003/portfolio"] },
-    "assert": {
-      "assertions": {
-        "categories:performance": ["error", {"minScore": 0.90}],
-        "categories:accessibility": ["error", {"minScore": 0.90}],
-        "unused-javascript": "warn",
-        "total-byte-weight": ["warn", {"maxNumericValue": 250000}]
-      }
-    }
-  }
+```typescript
+// src/styles/theme.css
+:root {
+  /* Text Colors */
+  --color-text-base: #e5e7eb;        /* 4.5:1+ kontrast */
+  --color-text-strong: #f9fafb;      /* 7:1 kontrast */
+  --color-text-muted: #9ca3af;       /* 3:1 kontrast (large text) */
+  
+  /* Backgrounds */
+  --color-bg-base: #0f0f0f;
+  --color-bg-card: #1a1a1a;
+  --color-bg-hover: #222222;
+  
+  /* Accents */
+  --color-accent: #3b82f6;           /* Primary blue */
+  --color-success: #10b981;          /* Green */
+  --color-warning: #f59e0b;          /* Amber */
+  --color-error: #ef4444;            /* Red */
+  
+  /* Borders */
+  --color-border: #333333;
+  --color-border-hover: #444444;
 }
 ```
 
+### Komponentler
+
+#### Button (Zorunlu: focusable, aria-label)
+
+```typescript
+// ✅ Standart button
+<button 
+  className="btn-primary" 
+  onClick={...}
+  aria-label="Submit order"
+>
+  Submit
+</button>
+
+// ✅ Link styling (navigation)
+<a href="..." className="btn-secondary">
+  Portfolio
+</a>
+```
+
+#### Form Input (Zorunlu: label, aria-describedby)
+
+```typescript
+// ✅ Tam erişilebilir form
+<div className="form-group">
+  <label htmlFor="price" className="input-label">
+    Price (TRY)
+  </label>
+  <input
+    id="price"
+    type="number"
+    className="input"
+    aria-describedby="price-help"
+    aria-invalid={hasError}
+  />
+  {hasError && (
+    <p id="price-help" className="input-error" role="alert">
+      Invalid price
+    </p>
+  )}
+</div>
+```
+
+#### Modal/Dialog (Zorunlu: role, aria-modal, focus trap)
+
+```typescript
+// ✅ Modal pattern
+<div role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <h2 id="modal-title">Confirm Order</h2>
+  <button onClick={close} aria-label="Close modal">×</button>
+  {/* Focus trap implementation */}
+</div>
+```
+
+### Typography Scale
+
+```css
+/* Headings: h1 → 3xl, h2 → 2xl, h3 → xl */
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+
+/* Body: base (1rem) → small (0.875rem) */
+.text-base { font-size: 1rem; line-height: 1.5rem; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+```
+
+### Spacing System
+
+```typescript
+// Tailwind: 4px base
+const spacing = {
+  xs: '0.25rem',   // 4px
+  sm: '0.5rem',    // 8px
+  md: '1rem',      // 16px
+  lg: '1.5rem',    // 24px
+  xl: '2rem',      // 32px
+  '2xl': '3rem',   // 48px
+};
+```
+
 ---
 
-**Hazırlayan:** cursor (Claude Sonnet 4.5)  
-**Kaynak:** PROJE_EVRIMI_VE_GELECEK_PLANI_2025_10_27.md temel alınarak hazırlandı  
-**Versiyon:** v1.0.0  
-**Son Güncelleme:** 2025-10-27
+## ✅ CI Gates & Doğrulama
 
+### PR #21 CI Checklist
+
+| **Gate** | **Tool** | **Min Score** | **Config** |
+|----------|----------|---------------|------------|
+| **Axe Accessibility** | @axe-core/react | 0 violations | `.github/workflows/axe.yml` |
+| **Lighthouse A11y** | Lighthouse CI | 90+ | `.github/workflows/lighthouse.yml` |
+| **ESLint Semantic** | ESLint | 0 errors | `apps/web-next/eslint.config.js` |
+
+### Axe Test Pattern
+
+```typescript
+// ✅ Component test
+import { render } from '@testing-library/react';
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+test('Button has no accessibility violations', async () => {
+  const { container } = render(<Button>Submit</Button>);
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+### Lighthouse Config
+
+```javascript
+// lighthouse-ci.yml
+ci:
+  collect:
+    url: ['http://localhost:3000']
+  assert:
+    assertions:
+      'categories.accessibility': ['error', { minScore: 0.90 }]
+      'color-contrast': ['error', { minScore: 1 }]
+```
+
+---
+
+## 📝 Uygulama Backlog
+
+### Sprint 1: Foundation (Week 1-2)
+
+- [ ] **Tasarım token'ları standardize et** (`theme.css`)
+  - [ ] Text colors (base, strong, muted)
+  - [ ] Background colors (base, card, hover)
+  - [ ] Accent colors (primary, success, warning, error)
+  - [ ] Border colors
+
+- [ ] **Component library güncelle**
+  - [ ] Button variants (primary, secondary, ghost)
+  - [ ] Input variants (text, number, select)
+  - [ ] Modal/Dialog base
+  - [ ] Toast notifications
+
+### Sprint 2: Accessibility (Week 3-4)
+
+- [ ] **ARIA implementation**
+  - [ ] Navigation landmarks
+  - [ ] Form labels & descriptions
+  - [ ] Error messages (role="alert")
+  - [ ] Live regions (announcements)
+
+- [ ] **Keyboard navigation**
+  - [ ] Focus management (traps, restoration)
+  - [ ] Skip links
+  - [ ] Tab order optimization
+
+### Sprint 3: Forms & Validation (Week 5-6)
+
+- [ ] **Form components**
+  - [ ] React Hook Form + Zod integration
+  - [ ] Error handling & display
+  - [ ] Loading states
+  - [ ] Success feedback
+
+- [ ] **Input enhancements**
+  - [ ] Auto-complete (aria-autocomplete)
+  - [ ] Input masks (price, date)
+  - [ ] Validation messages
+
+### Sprint 4: Charts & Data Viz (Week 7-8)
+
+- [ ] **Chart accessibility**
+  - [ ] Alt text for charts (aria-label)
+  - [ ] Data tables (accessible alternatives)
+  - [ ] Color-blind friendly palettes
+  - [ ] Keyboard navigation for interactive charts
+
+- [ ] **Loading states**
+  - [ ] Skeleton loaders
+  - [ ] Progress indicators (aria-live)
+  - [ ] Error states (aria-alert)
+
+### Sprint 5: Polish & Testing (Week 9-10)
+
+- [ ] **E2E accessibility tests**
+  - [ ] Screen reader testing (NVDA/JAWS)
+  - [ ] Keyboard-only navigation flows
+  - [ ] Color contrast audit
+
+- [ ] **Performance optimization**
+  - [ ] Image optimization (next/image)
+  - [ ] Code splitting
+  - [ ] Lazy loading
+
+---
+
+## 📚 Referanslar
+
+### WCAG Resources
+
+- [WCAG 2.2 Guidelines](https://www.w3.org/WAI/WCAG22/quickref/)
+- [ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/)
+- [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
+
+### Tools
+
+- **Axe DevTools:** Browser extension for runtime testing
+- **Lighthouse CI:** CI integration for performance & a11y
+- **WAVE:** Visual accessibility testing
+- **Pa11y:** CLI accessibility testing
+
+### Next.js Resources
+
+- [Next.js Accessibility](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts#accessibility)
+- [next/head for metadata](https://nextjs.org/docs/api-reference/next/head)
+- [Image Optimization](https://nextjs.org/docs/app/building-your-application/optimizing/images)
+
+---
+
+## 📌 Notlar
+
+**Bu talimatlar PR #21'in CI doğrulamalarına uyumludur:**  
+- ✅ Axe Accessibility Tests (zero violations)  
+- ✅ Lighthouse CI (90+ a11y score)  
+- ✅ ESLint semantic rules  
+
+**Doküman güncelleme:**  
+- Her major arayüz değişikliğinde bu dokümanı güncelleyin  
+- CI gate'ler bu dokümana referans olarak kullanılır  
+- Tasarım sistemi değişiklikleri burada belgelenmelidir  
+
+---
+
+**Son güncelleme:** 28 Ekim 2025  
+**Versiyon:** 1.0  
+**Durum:** ✅ CI Gates'e Uyumlu
