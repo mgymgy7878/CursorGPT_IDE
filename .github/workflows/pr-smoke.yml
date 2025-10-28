@@ -1,0 +1,107 @@
+name: PR Smoke
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  pr-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node (20.x) + pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
+
+      - name: Enable corepack & sync pnpm version
+        run: |
+          corepack enable
+          corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10 --activate
+          pnpm -v
+
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile
+
+      - name: Build web-next (standalone)
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+        run: pnpm run build
+
+      - name: Verify build output exists
+        working-directory: apps/web-next
+        run: |
+          if [ -f ".next/standalone/server.js" ]; then
+            echo "Standalone build present ✔"
+          else
+            echo "No standalone, will rely on next start ⚠"
+          fi
+
+      - name: Start server (standalone with fallback)
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+          PORT: 3003
+          HOSTNAME: 127.0.0.1
+        run: |
+          if [ -f ".next/standalone/server.js" ]; then
+            nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
+          else
+            nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
+          fi
+
+      - name: Wait for health (120s)
+        uses: jb-1980/wait-on-action@v1
+        with:
+          resource: http-get://127.0.0.1:3003/api/health
+          timeout: 120000
+          log: true
+
+      - name: Extra health poll (curl)
+        run: |
+          for i in $(seq 1 10); do
+            if curl -fsS http://127.0.0.1:3003/api/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo "Health endpoint did not respond in time"; exit 1
+
+      - name: Curl health
+        run: |
+          curl -fsS -D - http://127.0.0.1:3003/api/health -o health.json
+          cat health.json
+
+      - name: Curl metrics (JSON)
+        run: |
+          curl -fsS -D - http://127.0.0.1:3003/api/public/metrics -o metrics.json
+        cat metrics.json
+
+      - name: Curl metrics (Prometheus)
+        run: |
+          curl -fsS -D headers.txt http://127.0.0.1:3003/api/public/metrics.prom -o metrics.prom
+          cat headers.txt
+          grep -E "^content-type:\s*text/plain;\s*version=0\.0\.4" -i headers.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-smoke-artifacts
+          path: |
+            pr-smoke-server.log
+            apps/web-next/.next/**/*
+            health.json
+            metrics.json
+            metrics.prom
+            headers.txt
