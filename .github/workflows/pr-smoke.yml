@@ -1,0 +1,73 @@
+name: pr-smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web-next
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm -v
+
+      - name: Build web-next (standalone)
+        run: pnpm build
+
+      - name: Start Next standalone & wait
+        env:
+          PORT: 3003
+          HOSTNAME: 127.0.0.1
+        run: |
+          mkdir -p ../../evidence/build
+          nohup node .next/standalone/server.js > ../../evidence/build/server.log 2>&1 &
+          npx wait-on http-get://127.0.0.1:3003/api/health -t 60000
+
+      - name: Smoke checks (health, metrics)
+        run: |
+          curl -sSf http://127.0.0.1:3003/api/health | tee ../../evidence/build/health.json
+          curl -sSf http://127.0.0.1:3003/api/public/metrics | tee ../../evidence/build/metrics.json
+          curl -sSI http://127.0.0.1:3003/api/public/metrics.prom | tee ../../evidence/build/metrics.headers.txt
+
+      - name: Assert Prometheus header
+        run: |
+          ct=$(curl -sI http://127.0.0.1:3003/api/public/metrics.prom | awk -F': ' '/^content-type/{print tolower($2)}' | tr -d '\r')
+          echo "Content-Type: $ct"
+          if [ "$ct" != "text/plain; version=0.0.4" ]; then
+            echo "Bad Content-Type: $ct"
+            exit 1
+          fi
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-smoke-evidence
+          path: evidence/build
+
+      - name: Cleanup
+        if: always()
+        run: |
+          pkill -f "node .next/standalone/server.js" || true
