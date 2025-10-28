@@ -28,9 +28,9 @@ export default function StochPanel({ k, d }: StochPanelProps) {
             contentStyle={{ backgroundColor: "#111", border: "1px solid #333" }}
             labelStyle={{ color: "#999" }}
           />
-          {/* @ts-ignore - ReferenceLine type issue with recharts */}
+          {/* @ts-expect-error - Recharts ReferenceLine type issue */}
           <ReferenceLine y={20} stroke="#ef4444" strokeDasharray="3 3" />
-          {/* @ts-ignore - ReferenceLine type issue with recharts */}
+          {/* @ts-expect-error - Recharts ReferenceLine type issue */}
           <ReferenceLine y={80} stroke="#10b981" strokeDasharray="3 3" />
           <Line
             type="monotone"

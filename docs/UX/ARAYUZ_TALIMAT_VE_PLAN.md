@@ -1,8 +1,9 @@
 # Arayüz Talimatları ve Uygulama Planı
+
 ## Spark Trading Platform
 
-**Sürüm:** 1.0  
-**Tarih:** 28 Ekim 2025  
+**Sürüm:** 1.0
+**Tarih:** 28 Ekim 2025
 **Kapsam:** `apps/web-next`
 
 ---
@@ -44,12 +45,12 @@ Spark Trading Platform'un UI/UX stratejisi **erişilebilirlik**, **tutarlılık*
 
 ### Temel Prensipler
 
-| **Prensip** | **Açıklama** | **CI Doğrulama** |
-|-------------|--------------|------------------|
-| **Perceivable** | Bilgiler kullanıcıya sunulabilir olmalı | Axe: Images, ARIA |
-| **Operable** | UI bileşenleri kullanılabilir olmalı | Axe: Keyboard, Focus |
-| **Understandable** | Bilgiler anlaşılabilir olmalı | ESLint: Semantics |
-| **Robust** | Assistive tech'lerle uyumlu olmalı | Lighthouse: A11y Score |
+| **Prensip**        | **Açıklama**                            | **CI Doğrulama**       |
+| ------------------ | --------------------------------------- | ---------------------- |
+| **Perceivable**    | Bilgiler kullanıcıya sunulabilir olmalı | Axe: Images, ARIA      |
+| **Operable**       | UI bileşenleri kullanılabilir olmalı    | Axe: Keyboard, Focus   |
+| **Understandable** | Bilgiler anlaşılabilir olmalı           | ESLint: Semantics      |
+| **Robust**         | Assistive tech'lerle uyumlu olmalı      | Lighthouse: A11y Score |
 
 ### Zorunlu Standartlar
 
@@ -62,6 +63,7 @@ Spark Trading Platform'un UI/UX stratejisi **erişilebilirlik**, **tutarlılık*
 ```
 
 **Örnekler:**
+
 ```typescript
 // ✅ İyi: WCAG AA uyumlu
 <p className="text-text-base">...</p>  // 4.5:1+
@@ -151,18 +153,18 @@ Spark Trading Platform'un UI/UX stratejisi **erişilebilirlik**, **tutarlılık*
   --color-text-base: #e5e7eb;        /* 4.5:1+ kontrast */
   --color-text-strong: #f9fafb;      /* 7:1 kontrast */
   --color-text-muted: #9ca3af;       /* 3:1 kontrast (large text) */
-  
+
   /* Backgrounds */
   --color-bg-base: #0f0f0f;
   --color-bg-card: #1a1a1a;
   --color-bg-hover: #222222;
-  
+
   /* Accents */
   --color-accent: #3b82f6;           /* Primary blue */
   --color-success: #10b981;          /* Green */
   --color-warning: #f59e0b;          /* Amber */
   --color-error: #ef4444;            /* Red */
-  
+
   /* Borders */
   --color-border: #333333;
   --color-border-hover: #444444;
@@ -175,8 +177,8 @@ Spark Trading Platform'un UI/UX stratejisi **erişilebilirlik**, **tutarlılık*
 
 ```typescript
 // ✅ Standart button
-<button 
-  className="btn-primary" 
+<button
+  className="btn-primary"
   onClick={...}
   aria-label="Submit order"
 >
@@ -227,13 +229,28 @@ Spark Trading Platform'un UI/UX stratejisi **erişilebilirlik**, **tutarlılık*
 
 ```css
 /* Headings: h1 → 3xl, h2 → 2xl, h3 → xl */
-.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-.text-2xl { font-size: 1.5rem; line-height: 2rem; }
-.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
 
 /* Body: base (1rem) → small (0.875rem) */
-.text-base { font-size: 1rem; line-height: 1.5rem; }
-.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
 ```
 
 ### Spacing System
@@ -241,12 +258,12 @@ Spark Trading Platform'un UI/UX stratejisi **erişilebilirlik**, **tutarlılık*
 ```typescript
 // Tailwind: 4px base
 const spacing = {
-  xs: '0.25rem',   // 4px
-  sm: '0.5rem',    // 8px
-  md: '1rem',      // 16px
-  lg: '1.5rem',    // 24px
-  xl: '2rem',      // 32px
-  '2xl': '3rem',   // 48px
+  xs: "0.25rem", // 4px
+  sm: "0.5rem", // 8px
+  md: "1rem", // 16px
+  lg: "1.5rem", // 24px
+  xl: "2rem", // 32px
+  "2xl": "3rem", // 48px
 };
 ```
 
@@ -256,11 +273,11 @@ const spacing = {
 
 ### PR #21 CI Checklist
 
-| **Gate** | **Tool** | **Min Score** | **Config** |
-|----------|----------|---------------|------------|
-| **Axe Accessibility** | @axe-core/react | 0 violations | `.github/workflows/axe.yml` |
-| **Lighthouse A11y** | Lighthouse CI | 90+ | `.github/workflows/lighthouse.yml` |
-| **ESLint Semantic** | ESLint | 0 errors | `apps/web-next/eslint.config.js` |
+| **Gate**              | **Tool**        | **Min Score** | **Config**                         |
+| --------------------- | --------------- | ------------- | ---------------------------------- |
+| **Axe Accessibility** | @axe-core/react | 0 violations  | `.github/workflows/axe.yml`        |
+| **Lighthouse A11y**   | Lighthouse CI   | 90+           | `.github/workflows/lighthouse.yml` |
+| **ESLint Semantic**   | ESLint          | 0 errors      | `apps/web-next/eslint.config.js`   |
 
 ### Axe Test Pattern
 
@@ -387,18 +404,20 @@ ci:
 
 ## 📌 Notlar
 
-**Bu talimatlar PR #21'in CI doğrulamalarına uyumludur:**  
-- ✅ Axe Accessibility Tests (zero violations)  
-- ✅ Lighthouse CI (90+ a11y score)  
-- ✅ ESLint semantic rules  
+**Bu talimatlar PR #21'in CI doğrulamalarına uyumludur:**
 
-**Doküman güncelleme:**  
-- Her major arayüz değişikliğinde bu dokümanı güncelleyin  
-- CI gate'ler bu dokümana referans olarak kullanılır  
-- Tasarım sistemi değişiklikleri burada belgelenmelidir  
+- ✅ Axe Accessibility Tests (zero violations)
+- ✅ Lighthouse CI (90+ a11y score)
+- ✅ ESLint semantic rules
+
+**Doküman güncelleme:**
+
+- Her major arayüz değişikliğinde bu dokümanı güncelleyin
+- CI gate'ler bu dokümana referans olarak kullanılır
+- Tasarım sistemi değişiklikleri burada belgelenmelidir
 
 ---
 
-**Son güncelleme:** 28 Ekim 2025  
-**Versiyon:** 1.0  
+**Son güncelleme:** 28 Ekim 2025
+**Versiyon:** 1.0
 **Durum:** ✅ CI Gates'e Uyumlu
