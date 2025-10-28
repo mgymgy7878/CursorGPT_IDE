@@ -1,0 +1,65 @@
+name: smoke-test
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web-next/**'
+      - '.github/workflows/smoke-test.yml'
+    types: [opened, synchronize, reopened]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        run: corepack enable && corepack prepare pnpm@10.18.3 --activate
+      
+      - name: Install dependencies
+        run: pnpm -w install --frozen-lockfile=false
+      
+      - name: Build web-next
+        run: pnpm -w --filter web-next build
+      
+      - name: Start production server
+        run: |
+          cd apps/web-next
+          PORT=3003 NODE_ENV=production node .next/standalone/server.js &
+          echo $! > server.pid
+      
+      - name: Wait for server
+        run: npx wait-on -t 30000 http://127.0.0.1:3003/api/health
+      
+      - name: Smoke endpoints (6x 200)
+        run: |
+          set -e
+          for p in "/" "/portfolio" "/strategies" "/running" "/settings" "/api/health"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3003${p})
+            echo "Endpoint: $p => $code"
+            [ "$code" = "200" ] || exit 1
+          done
+          echo "✓ All endpoints return 200"
+      
+      - name: Check metrics headers
+        run: |
+          headers=$(curl -sI http://127.0.0.1:3003/api/public/metrics.prom)
+          echo "$headers"
+          echo "$headers" | grep -i "content-type:.*text/plain" && echo "✓ Content-Type OK"
+          echo "$headers" | grep -i "cache-control:.*no-store" && echo "✓ Cache-Control OK"
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -f apps/web-next/server.pid ]; then
+            kill $(cat apps/web-next/server.pid) 2>/dev/null || true
+          fi
+
