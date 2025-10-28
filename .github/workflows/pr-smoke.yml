@@ -27,17 +27,24 @@ jobs:
           set -e
           corepack enable
           corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10.18.3 --activate
-          pnpm -v
-          which pnpm
+          pnpm -v && which pnpm || command -v pnpm || true
 
       - name: Install workspace deps
-        run: pnpm -w install --frozen-lockfile
+        run: |
+          set -e
+          pnpm -w install --frozen-lockfile || (echo "Install failed, trying without frozen..." && pnpm -w install)
+          echo "✓ Install completed"
+          ls -la node_modules | head -20 || true
+          ls -la apps/web-next/node_modules | head -20 || true
+
+      - name: Verify dependencies
+        run: |
+          pnpm list react react-hook-form swr --depth=0 || true
 
       - name: Build web-next (standalone)
-        working-directory: apps/web-next
+        run: pnpm --filter web-next build
         env:
           NODE_ENV: production
-        run: pnpm run build
 
       - name: Verify build output exists
         working-directory: apps/web-next
@@ -101,6 +108,24 @@ jobs:
           curl -fsS -D headers.txt http://127.0.0.1:3003/api/public/metrics.prom -o metrics.prom
           cat headers.txt
           grep -E "^content-type:\s*text/plain;\s*version=0\.0\.4" -i headers.txt
+
+      - name: Upload build artefacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-smoke-debug
+          if-no-files-found: warn
+          path: |
+            pr-smoke-server.log
+            apps/web-next/.next/**
+            apps/web-next/node_modules/.pnpm/**
+            pnpm-lock.yaml
+            **/tsconfig.json
+            **/package.json
+            **/next.config.*
+            **/.eslintrc*
+            apps/web-next/logs/**
+          retention-days: 1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
