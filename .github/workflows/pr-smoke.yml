@@ -2,7 +2,7 @@ name: PR Smoke
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -28,6 +28,7 @@ jobs:
 
       - name: Enable corepack & sync pnpm version
         run: |
+          set -e
           corepack enable
           corepack prepare pnpm@$(jq -r '.packageManager' package.json | cut -d'@' -f2) --activate || corepack prepare pnpm@10 --activate
           pnpm -v
@@ -57,18 +58,28 @@ jobs:
           PORT: 3003
           HOSTNAME: 127.0.0.1
         run: |
+          set -e
           if [ -f ".next/standalone/server.js" ]; then
             nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
           else
             nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
           fi
 
-      - name: Wait for health (120s)
-        uses: jb-1980/wait-on-action@v1
-        with:
-          resource: http-get://127.0.0.1:3003/api/health
-          timeout: 120000
-          log: true
+      - name: Wait for health (bash, 120s)
+        run: |
+          set -e
+          URL="http://127.0.0.1:3003/api/health"
+          for i in $(seq 1 120); do
+            if curl -fsS "$URL" >/dev/null 2>&1; then
+              echo "Health is up on attempt $i ✅"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Health endpoint did not respond in 120s ❌"
+          echo "---- pr-smoke-server.log (tail) ----"
+          tail -n 120 pr-smoke-server.log || true
+          exit 1
 
       - name: Extra health poll (curl)
         run: |
@@ -76,7 +87,7 @@ jobs:
             if curl -fsS http://127.0.0.1:3003/api/health >/dev/null; then exit 0; fi
             sleep 2
           done
-          echo "Health endpoint did not respond in time"; exit 1
+          echo "Extra health poll failed ❌"; exit 1
 
       - name: Curl health
         run: |
