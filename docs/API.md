@@ -1,4 +1,5 @@
 ## API — Taslaklar
+
 - POST `/api/strategy/nl-compile` → {text} → {strategyIR, explain[]}
 - POST `/api/strategy/backtest` → {IR|id, range} → {metrics, curve, logs}
 - POST `/api/strategy/optimize` → {IR|id, search} → {best, leaderboard}
