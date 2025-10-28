@@ -2,7 +2,7 @@ name: UX-ACK Gate
 
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, edited, synchronize, labeled]
 
 permissions:
   contents: read
@@ -16,22 +16,37 @@ jobs:
   ux_ack:
     runs-on: ubuntu-latest
     steps:
-      - name: Check PR body for UX-ACK
+      - name: Get PR labels
+        id: pr_labels
+        run: |
+          $labels = ${{ toJson(github.event.pull_request.labels.*.name) }}
+          Write-Host "PR Labels: $labels"
+          echo "labels=$labels" >> $GITHUB_OUTPUT
+
+      - name: Check for UX-ACK label
         shell: pwsh
         run: |
+          $labels = '${{ steps.pr_labels.outputs.labels }}'
+          Write-Host "Checking for UX-ACK label or marker..."
+          
+          if ($labels -match 'UX-ACK') {
+            Write-Host "[PASS] UX-ACK label found"
+            exit 0
+          }
+          
+          # Fallback: Check PR body
           $body = @'
           ${{ github.event.pull_request.body }}
           '@
-
-          Write-Host "Checking PR body for UX-ACK marker..."
-
+          
           if ($body -match 'UX-ACK:') {
             Write-Host "[PASS] UX-ACK marker found in PR description"
             exit 0
           } else {
-            Write-Host "[FAIL] UX-ACK marker not found in PR description"
+            Write-Host "[FAIL] UX-ACK not found in labels or PR description"
             Write-Host ""
-            Write-Host "Please add the following to your PR description:"
-            Write-Host "UX-ACK: [your acknowledgment message]"
+            Write-Host "Please either:"
+            Write-Host "1. Add 'UX-ACK' label to the PR, or"
+            Write-Host "2. Add to PR description: UX-ACK: [your acknowledgment message]"
             exit 1
           }

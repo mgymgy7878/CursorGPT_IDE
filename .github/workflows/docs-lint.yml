@@ -2,6 +2,7 @@ name: Docs Lint
 
 on:
   pull_request:
+    types: [opened, edited, synchronize, labeled]
     paths:
       - "docs/**"
       - "CONTRIBUTING.md"
