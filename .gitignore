@@ -70,3 +70,13 @@ CursorGPT_IDE/
 *.7z
 *.tgz
 evidence/
+.evidence/
+
+# local/dev junk
+.dev/
+*.pid
+.env.private
+GPT_Backups/
+**/*.mp4
+**/*.iso
+**/data/chunks_head/
