@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'PR number to check'
+        description: "PR number to check"
         required: false
         type: string
 
@@ -34,17 +34,17 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-            
+
             const hasLabel = (pr.labels || []).some(l => l.name === 'UX-ACK');
             const hasMarker = (pr.body || '').includes('UX-ACK:');
-            
+
             const satisfied = hasLabel || hasMarker;
             console.log(`Label UX-ACK: ${hasLabel}`);
             console.log(`Marker in body: ${hasMarker}`);
             console.log(`Result: ${satisfied ? '✅ PASS' : '❌ FAIL'}`);
-            
+
             core.setOutput('ok', satisfied);
-            
+
       - name: Enforce UX-ACK
         run: |
           if [ "${{ steps.check.outputs.ok }}" != "true" ]; then
