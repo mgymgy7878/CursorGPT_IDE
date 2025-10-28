@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
+import React, { useEffect, useState } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine as ReferenceLineClass } from "recharts";
 import { SLO_TARGETS } from "@/lib/constants/slo";
 
 type TimeWindow = "7d" | "30d" | "90d";
@@ -124,14 +124,14 @@ export default function SLOTimechart({ metric = "p95_ms", window = "7d" }: Props
               <CartesianGrid strokeDasharray="3 3" stroke="#404040" />
               <XAxis 
                 dataKey="timestamp" 
-                tickFormatter={(ts: any) => new Date(ts).toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' })}
+                tickFormatter={(ts: number) => new Date(ts).toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' })}
                 stroke="#737373"
                 style={{ fontSize: '10px' }}
               />
               <YAxis 
                 stroke="#737373"
                 style={{ fontSize: '10px' }}
-                tickFormatter={(v: any) => metric === "error_rate" ? `${(v * 100).toFixed(0)}%` : v.toFixed(0)}
+                tickFormatter={(v: number) => metric === "error_rate" ? `${(v * 100).toFixed(0)}%` : v.toFixed(0)}
               />
               <Tooltip 
                 contentStyle={{
@@ -140,21 +140,21 @@ export default function SLOTimechart({ metric = "p95_ms", window = "7d" }: Props
                   borderRadius: "8px",
                   fontSize: "12px"
                 }}
-                labelFormatter={(ts: any) => new Date(ts).toLocaleString('tr-TR')}
-                formatter={(value: any) => [config.formatter(value), config.label]}
+                labelFormatter={(ts: number) => new Date(ts).toLocaleString('tr-TR')}
+                formatter={(value: number) => [config.formatter(value), config.label]}
               />
-              {/* @ts-ignore - ReferenceLine type issue with recharts */}
-              <ReferenceLine 
-                y={config.threshold} 
-                stroke="#ef4444" 
-                strokeDasharray="3 3"
-                label={{ 
-                  value: `Eşik: ${config.formatter(config.threshold)}`, 
+              {/* Use React.createElement to bypass JSX type issues with recharts v3 */}
+              {React.createElement(ReferenceLineClass as any, {
+                y: config.threshold,
+                stroke: "#ef4444",
+                strokeDasharray: "3 3",
+                label: {
+                  value: `Eşik: ${config.formatter(config.threshold)}`,
                   position: 'right',
                   fill: '#ef4444',
                   fontSize: 10
-                }}
-              />
+                }
+              })}
               <Line 
                 type="monotone" 
                 dataKey={metric} 
