@@ -52,6 +52,22 @@ export function useKeyboardShortcuts() {
         return;
       }
 
+      if (lastKey === "g" && e.key === "m" && now - lastKeyTime < 500) {
+        // g + m = Market
+        e.preventDefault();
+        router.push("/market");
+        lastKey = "";
+        return;
+      }
+
+      if (lastKey === "g" && e.key === "p" && now - lastKeyTime < 500) {
+        // g + p = Portfolio
+        e.preventDefault();
+        router.push("/portfolio");
+        lastKey = "";
+        return;
+      }
+
       // Track 'g' key for vim-style navigation
       if (e.key === "g" && !e.ctrlKey && !e.metaKey && !e.altKey) {
         lastKey = "g";

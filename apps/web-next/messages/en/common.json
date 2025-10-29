@@ -56,6 +56,7 @@
   "noCanaryTests": "No canary tests",
   "noRecentAlarms": "No recent alarms",
   "noRecentCanary": "No recent canary tests",
-  "observability": "Observability"
+  "observability": "Observability",
+  "market": "Market"
 }
 

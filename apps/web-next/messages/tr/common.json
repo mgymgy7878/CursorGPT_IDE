@@ -56,6 +56,7 @@
   "noCanaryTests": "Canary testi bulunmuyor",
   "noRecentAlarms": "Son alarm bulunmuyor",
   "noRecentCanary": "Son canary testi bulunmuyor",
-  "observability": "İzlenebilirlik"
+  "observability": "İzlenebilirlik",
+  "market": "Piyasa Verileri"
 }
 

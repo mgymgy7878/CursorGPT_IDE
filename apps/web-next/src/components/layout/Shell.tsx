@@ -14,9 +14,8 @@ const SmokeCard = dynamic(() => import("@/components/dashboard/SmokeCard"), {
 
 const ROUTES = [
   { key: "dashboard", path: "/dashboard" },
-  { key: "observability", path: "/observability" },
-  { key: "strategyLab", path: "/strategy-lab" },
-  { key: "audit", path: "/audit" },
+  { key: "market", path: "/market" },
+  { key: "running", path: "/running" },
   { key: "portfolio", path: "/portfolio" },
   { key: "settings", path: "/settings" },
 ] as const;
