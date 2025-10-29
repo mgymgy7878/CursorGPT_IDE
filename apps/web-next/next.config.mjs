@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
+
+// CI canary mode: disable standalone to use `next start` for full runtime
+const CI_CANARY = process.env.CI_CANARY === '1';
+
 const nextConfig = {
   // Export aşamasında 500.html rename hatasını önlemek için standalone moda geçiyoruz
-  output: "standalone",
+  // CI canary'de kapalı (next start ile tam uyumluluk), prod'da açık
+  output: CI_CANARY ? undefined : "standalone",
   eslint: {
     // Build sırasında lint hatalarını yok say (D1 PASS için)
     ignoreDuringBuilds: true,

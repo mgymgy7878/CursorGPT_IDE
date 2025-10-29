@@ -42,6 +42,12 @@ function copyDir(src, dest) {
 
 console.log('📦 Copying standalone assets...\n');
 
+// Skip in CI canary mode (no standalone build)
+if (process.env.CI_CANARY === '1') {
+  console.log('ℹ️  CI_CANARY mode detected, skipping standalone asset copy');
+  process.exit(0);
+}
+
 // Check if standalone build exists
 if (!fs.existsSync(STANDALONE_DIR)) {
   console.error('❌ Standalone build not found. Run `pnpm build` first.');
