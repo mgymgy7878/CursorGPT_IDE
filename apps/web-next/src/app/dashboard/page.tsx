@@ -6,6 +6,7 @@ import StatusPills from '@/components/layout/StatusPills';
 import Metric from '@/components/ui/Metric';
 import LiveMarketCard from '@/components/marketdata/LiveMarketCard';
 import ErrorBudgetBadge from '@/components/ops/ErrorBudgetBadge';
+import EmptyState from '@/components/ui/EmptyState';
 import { formatDuration } from '@/lib/format';
 import { t } from '@/lib/i18n';
 import { useMarketStore } from '@/stores/marketStore';
@@ -79,13 +80,25 @@ export default function DashboardPage() {
             {/* Alarm Drafts Card */}
             <div className="rounded-2xl bg-card/60 p-4 min-h-[200px]">
               <div className="text-sm font-medium mb-2">{t('dashboard.alarmDrafts')}</div>
-              <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+              <EmptyState
+                icon="📋"
+                title={t('noData')}
+                description={t('noAlarmDrafts')}
+                action={{
+                  label: t('createAlert'),
+                  onClick: handleCreateAlert
+                }}
+              />
             </div>
 
             {/* Canary Tests Card */}
             <div className="rounded-2xl bg-card/60 p-4 min-h-[200px]">
               <div className="text-sm font-medium mb-2">{t('dashboard.canaryTests')}</div>
-              <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+              <EmptyState
+                icon="🧪"
+                title={t('noData')}
+                description={t('noCanaryTests')}
+              />
             </div>
           </div>
 
@@ -101,13 +114,21 @@ export default function DashboardPage() {
           {/* Last Alarm Status */}
           <div className="rounded-2xl bg-card/60 p-4">
             <div className="text-sm font-medium mb-2">{t('dashboard.lastAlarm')}</div>
-            <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+            <EmptyState
+              icon="🔔"
+              title={t('noData')}
+              description={t('noRecentAlarms')}
+            />
           </div>
 
           {/* Last Canary Test */}
           <div className="rounded-2xl bg-card/60 p-4">
             <div className="text-sm font-medium mb-2">{t('dashboard.lastCanary')}</div>
-            <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+            <EmptyState
+              icon="🧪"
+              title={t('noData')}
+              description={t('noRecentCanary')}
+            />
           </div>
         </aside>
       </div>

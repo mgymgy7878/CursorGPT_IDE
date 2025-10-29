@@ -50,6 +50,11 @@
   "manageStrategies": "Trading stratejilerinizi yönetin ve performanslarını takip edin",
   "target": "Hedef",
   "threshold": "Eşik",
-  "opsQuickHelp": "Ops Hızlı Yardım"
+  "opsQuickHelp": "Ops Hızlı Yardım",
+  "noData": "Henüz veri yok",
+  "noAlarmDrafts": "Alarm taslağı bulunmuyor",
+  "noCanaryTests": "Canary testi bulunmuyor",
+  "noRecentAlarms": "Son alarm bulunmuyor",
+  "noRecentCanary": "Son canary testi bulunmuyor"
 }
 

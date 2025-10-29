@@ -24,7 +24,7 @@ export function useKeyboardShortcuts() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const now = Date.now();
-      
+
       // Vim-style navigation (g + key within 500ms)
       if (e.key === "g" && now - lastKeyTime < 500) {
         // g + d = Dashboard
@@ -69,4 +69,3 @@ export function useKeyboardShortcuts() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [router]);
 }
-

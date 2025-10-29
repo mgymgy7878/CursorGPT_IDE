@@ -50,6 +50,11 @@
   "manageStrategies": "Manage your trading strategies and track their performance",
   "target": "Target",
   "threshold": "Threshold",
-  "opsQuickHelp": "Ops Quick Help"
+  "opsQuickHelp": "Ops Quick Help",
+  "noData": "No data yet",
+  "noAlarmDrafts": "No alarm drafts",
+  "noCanaryTests": "No canary tests",
+  "noRecentAlarms": "No recent alarms",
+  "noRecentCanary": "No recent canary tests"
 }
 
