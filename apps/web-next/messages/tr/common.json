@@ -12,6 +12,15 @@
   "errorBudget": "Hata Bütçesi",
   "environment": "Ortam",
   "test": "Deneme",
-  "production": "Canlı"
+  "production": "Canlı",
+  "copilot": "Copilot",
+  "close": "Kapat",
+  "analysis": "Analiz",
+  "manage": "Yönet",
+  "strategy": "Strateji",
+  "marketAnalysis": "Piyasa Analizi",
+  "systemManagement": "Sistem Yönetimi",
+  "strategyAssistant": "Strateji Asistanı",
+  "guardValidate": "Koruma Doğrulama"
 }
 

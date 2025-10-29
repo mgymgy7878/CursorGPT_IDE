@@ -9,6 +9,7 @@ import ChunkGuard from "@/components/ChunkGuard";
 import MarketProvider from "@/providers/MarketProvider";
 import StatusBar from "@/components/status-bar";
 import LeftNav from "@/components/left-nav";
+import CopilotDock from "@/components/copilot/CopilotDock";
 import "@/styles/theme.css";
 
 export const metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
             <ErrorSink />
             <CommandPalette />
             <FloatingActions />
+            <CopilotDock />
           </MarketProvider>
         </ThemeProvider>
       </body>

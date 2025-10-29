@@ -1,82 +1,153 @@
 "use client";
-import { useState } from "react";
 
-interface CopilotDockProps {
-  open?: boolean;
-  onToggle?: () => void;
-}
+import { useEffect } from "react";
+import { useCopilotStore } from "@/stores/copilotStore";
+import { useTranslation } from "@/i18n/useTranslation";
 
-export default function CopilotDock({ open = true, onToggle }: CopilotDockProps) {
-  const [isOpen, setIsOpen] = useState(open);
-  const arrow = isOpen ? "▲" : "▼"; // only on client
+export default function CopilotDock() {
+  const { open, mode, openWith, toggle, close } = useCopilotStore();
+  const t = useTranslation("common");
 
-  const quickActions = [
-    { label: "BTC/ETH trend analizi", icon: "📈" },
-    { label: "Portföy risk özeti", icon: "⚠️" },
-    { label: "Çalışan stratejiler sağlığı", icon: "💚" },
-    { label: "Canlı Özet", icon: "📊" },
-    { label: "Durum JSON", icon: "🔍" },
-    { label: "Detay", icon: "📋" }
-  ];
+  // Hotkey handler: Ctrl/Cmd + K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMod = e.ctrlKey || e.metaKey;
+      if (isMod && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        toggle();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggle]);
 
   return (
-    <div className="h-dvh flex flex-col">
+    <>
+      {/* Floating Action Button (bottom-right) */}
       <button
-        type="button"
-        onClick={() => { setIsOpen(v=>!v); onToggle?.(); }}
-        className="w-full px-4 py-3 border-b border-neutral-800 text-left hover:bg-neutral-800/50 transition-colors"
+        onClick={toggle}
+        aria-label="Copilot"
+        className="fixed right-4 bottom-4 z-50 rounded-2xl px-4 py-2 shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
       >
-        <span suppressHydrationWarning>Copilot {arrow}</span>
+        💬 Copilot
       </button>
 
-      {isOpen && (
-        <div className="min-h-0 flex-1 overflow-y-auto p-4 space-y-4">
-          {/* Quick Actions Grid */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-300">Hızlı Aksiyonlar</h3>
-            <div className="grid grid-cols-1 gap-2">
-              {quickActions.map((action, index) => (
-                <button
-                  key={index}
-                  className="flex items-center gap-3 px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  <span>{action.icon}</span>
-                  <span className="text-xs">{action.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Drawer Modal */}
+      {open && (
+        <div className="fixed inset-0 z-50" aria-modal="true" role="dialog">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={close}
+            aria-hidden="true"
+          />
 
-          {/* Import & Search */}
-          <div className="space-y-3">
-            <div className="flex gap-2">
-              <button className="flex-1 px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                İçe Aktar
+          {/* Drawer Panel */}
+          <aside className="absolute right-0 top-0 h-full w-[420px] bg-zinc-900 border-l border-zinc-800 overflow-y-auto animate-slide-in-right">
+            {/* Header */}
+            <div className="sticky top-0 bg-zinc-900 border-b border-zinc-800 p-4 flex items-center justify-between">
+              <div className="font-semibold text-lg">
+                Copilot
+                <span className="ml-2 text-xs text-zinc-500 uppercase">
+                  {mode}
+                </span>
+              </div>
+              <button
+                onClick={close}
+                aria-label="Kapat"
+                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-xl leading-none"
+              >
+                ×
               </button>
             </div>
-            <input
-              type="text"
-              placeholder="Ara..."
-              className="w-full px-3 py-2 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none"
-            />
-          </div>
 
-          {/* Content Area */}
-          <div className="space-y-3">
-            <div className="text-sm text-neutral-500">Kayıt yok.</div>
-          </div>
+            {/* Mode Switcher */}
+            <div className="p-4 border-b border-zinc-800">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openWith("analysis")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    mode === "analysis"
+                      ? "bg-blue-600 text-white"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  📊 Analiz
+                </button>
+                <button
+                  onClick={() => openWith("manage")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    mode === "manage"
+                      ? "bg-blue-600 text-white"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  🧩 Yönet
+                </button>
+                <button
+                  onClick={() => openWith("strategy")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    mode === "strategy"
+                      ? "bg-blue-600 text-white"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  🧠 Strateji
+                </button>
+              </div>
+            </div>
 
-          {/* Tabs */}
-          <div className="flex border-b border-neutral-800">
-            <button className="flex-1 px-3 py-2 text-sm text-neutral-300 border-b-2 border-blue-500">
-              Stratejiler
-            </button>
-            <button className="flex-1 px-3 py-2 text-sm text-neutral-500 border-b-2 border-transparent hover:text-neutral-300">
-              Açık Emirler
-            </button>
-          </div>
+            {/* Content */}
+            <div className="p-4">
+              {mode === "analysis" && (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-sm text-zinc-300">
+                    Piyasa Analizi
+                  </h3>
+                  <p className="text-sm text-zinc-500">
+                    📊 Piyasa analizi, teknik göstergeler ve özetler buraya
+                    gelecek.
+                  </p>
+                  <div className="text-xs text-zinc-600">
+                    Yakında: BTC/USDT trend, RSI, MA analizi
+                  </div>
+                </div>
+              )}
+
+              {mode === "manage" && (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-sm text-zinc-300">
+                    Sistem Yönetimi
+                  </h3>
+                  <p className="text-sm text-zinc-500">
+                    🧩 Uygulama ve servis kontrolleri (API/WS/Engine) buraya
+                    gelecek.
+                  </p>
+                  <div className="text-xs text-zinc-600">
+                    Yakında: Kill switch, stratejileri durdur, log temizleme
+                  </div>
+                </div>
+              )}
+
+              {mode === "strategy" && (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-sm text-zinc-300">
+                    Strateji Asistanı
+                  </h3>
+                  <p className="text-sm text-zinc-500">
+                    🧠 Strateji üretici, parametre diff ve backtest tetikleyici
+                    buraya gelecek.
+                  </p>
+                  <div className="text-xs text-zinc-600">
+                    Yakında: AI prompt, parametre optimizasyonu, deploy asistanı
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
       )}
-    </div>
+    </>
   );
 }

@@ -12,6 +12,15 @@
   "errorBudget": "Error Budget",
   "environment": "Environment",
   "test": "Test",
-  "production": "Production"
+  "production": "Production",
+  "copilot": "Copilot",
+  "close": "Close",
+  "analysis": "Analysis",
+  "manage": "Manage",
+  "strategy": "Strategy",
+  "marketAnalysis": "Market Analysis",
+  "systemManagement": "System Management",
+  "strategyAssistant": "Strategy Assistant",
+  "guardValidate": "Guard Validate"
 }
 
