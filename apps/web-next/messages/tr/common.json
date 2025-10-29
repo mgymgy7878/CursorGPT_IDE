@@ -33,6 +33,12 @@
   "broker": "Aracı",
   "checking": "Kontrol ediliyor",
   "audit": "Denetim",
-  "portfolio": "Portföy"
+  "portfolio": "Portföy",
+  "healthy": "Sağlıklı",
+  "degraded": "Kötüleşmiş",
+  "down": "Çalışmıyor",
+  "online": "Çevrimiçi",
+  "offline": "Çevrimdışı",
+  "mock": "Deneme"
 }
 

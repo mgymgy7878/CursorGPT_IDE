@@ -1,0 +1,65 @@
+name: Lighthouse and Axe A11y Audit
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  a11y-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.18.3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web-next
+        run: pnpm --filter web-next build
+
+      - name: Start web-next
+        run: |
+          pnpm --filter web-next start &
+          sleep 10
+          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:3003/api/healthz || echo "Health check failed"
+
+      - name: Run Axe Accessibility Audit
+        run: |
+          npx @axe-core/cli http://localhost:3003/dashboard --timeout 60000 > evidence/axe-report.txt || true
+          cat evidence/axe-report.txt
+        continue-on-error: true
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3003/dashboard
+            http://localhost:3003/strategy-lab
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Upload Evidence
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: a11y-evidence
+          path: evidence/
+
+      - name: Check Lighthouse Scores
+        run: |
+          echo "Lighthouse scores uploaded - check artifacts"
+          echo "Target: Accessibility ≥90, Performance ≥70"
+

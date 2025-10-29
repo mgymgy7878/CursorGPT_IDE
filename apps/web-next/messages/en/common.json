@@ -33,6 +33,12 @@
   "broker": "Broker",
   "checking": "Checking",
   "audit": "Audit",
-  "portfolio": "Portfolio"
+  "portfolio": "Portfolio",
+  "healthy": "Healthy",
+  "degraded": "Degraded",
+  "down": "Down",
+  "online": "Online",
+  "offline": "Offline",
+  "mock": "Mock"
 }
 

@@ -7,6 +7,7 @@ export const tr = {
   common: {
     cmdk_mac: "⌘K Komutlar",
     cmdk_win: "Ctrl+K Komutlar",
+    commands: "Komutlar",
   },
   settings: {
     theme: {
