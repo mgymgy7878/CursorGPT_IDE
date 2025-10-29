@@ -39,6 +39,7 @@ jobs:
         run: pnpm --filter web-next build
         env:
           NODE_ENV: production
+          CI_CANARY: '1'
 
       - name: Start web-next (next start)
         working-directory: apps/web-next
@@ -46,6 +47,7 @@ jobs:
           NODE_ENV: production
           PORT: 3003
           HOSTNAME: 127.0.0.1
+          CI_CANARY: '1'
         run: |
           set -euo pipefail
           nohup npx next start -p 3003 -H 127.0.0.1 > ../../canary-server.log 2>&1 &
