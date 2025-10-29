@@ -1,0 +1,17 @@
+{
+  "dashboard": "Home",
+  "strategyLab": "Strategy Lab",
+  "strategies": "My Strategies",
+  "running": "Running",
+  "settings": "Settings",
+  "search": "Search...",
+  "commands": "Commands",
+  "api": "API",
+  "ws": "WS",
+  "engine": "Engine",
+  "errorBudget": "Error Budget",
+  "environment": "Environment",
+  "test": "Test",
+  "production": "Production"
+}
+

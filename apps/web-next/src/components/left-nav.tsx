@@ -1,27 +1,44 @@
-import Link from 'next/link'
+'use client';
 
-const items = [
-  ['Dashboard', '/dashboard'],
-  ['Market Data', '/market-data'],
-  ['Strategy Lab', '/strategy-lab'],
-  ['Backtest', '/backtest'],
-  ['Portfolio', '/portfolio'],
-  ['Alerts', '/alerts']
-] as const
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useTranslation } from '@/i18n/useTranslation';
+
+// PRIMARY navigation items only
+// SECONDARY pages (market-data, alerts, audit, observability) can be toggled in settings
+const navItems = [
+  { key: 'dashboard', href: '/dashboard' },
+  { key: 'strategyLab', href: '/strategy-lab' },
+  { key: 'strategies', href: '/strategies' },
+  { key: 'running', href: '/running' },
+  { key: 'settings', href: '/settings' },
+] as const;
 
 export default function LeftNav() {
+  const pathname = usePathname();
+  const t = useTranslation('common');
+  
   return (
     <aside className="w-56 border-r h-full p-3 space-y-1">
-      {items.map(([title, href]) => (
-        <Link 
-          key={href} 
-          href={href} 
-          className="block px-3 py-2 rounded-lg hover:bg-zinc-900 text-sm transition-colors"
-        >
-          {title}
-        </Link>
-      ))}
+      {navItems.map(({ key, href }) => {
+        const isActive = pathname === href || pathname?.startsWith(href + '/');
+        
+        return (
+          <Link 
+            key={href} 
+            href={href}
+            aria-current={isActive ? 'page' : undefined}
+            className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
+              isActive 
+                ? 'bg-blue-600 text-white' 
+                : 'hover:bg-zinc-900 text-neutral-300'
+            }`}
+          >
+            {t(key)}
+          </Link>
+        );
+      })}
     </aside>
-  )
+  );
 }
 

@@ -5,8 +5,14 @@
 ## Quick Links / Docs
 
 - [**UI/UX Guide**](docs/UI_UX_GUIDE.md) — UI standartları, erişilebilirlik kuralları, bileşen standartları ve 2 haftalık uygulama planı
-- [UI & UX Planı](docs/UI_UX_PLAN.md)
-- **Raporlar**: [2025-01-14 Detaylı Proje Analizi](docs/reports/PROJE_ANALIZ_2025_01_14_DETAYLI_TAM_RAPOR.md)
+- [**UI/UX Plan**](docs/UI_UX_PLAN.md) — NN/g + WCAG 2.2 AA uyumlu sayfa-bazlı checklist ve kabul kriterleri
+- [Architecture](docs/ARCHITECTURE.md) — Sistem mimarisi ve teknik yapı
+- [API](docs/API.md) — API dokümantasyonu
+- [Metrics & Canary](docs/METRICS_CANARY.md) — Monitoring ve canary deployment
+- **Raporlar**:
+  - [2025-10-29 Detaylı Proje Analizi ve Eylem Planı](PROJE_ANALIZ_VE_EYLEM_PLANI_2025_10_29.md)
+  - [2025-10-29 Hızlı Özet Rapor](PROJE_OZET_RAPOR_2025_10_29.md)
+  - [2025-01-14 Detaylı Proje Analizi](docs/reports/PROJE_ANALIZ_2025_01_14_DETAYLI_TAM_RAPOR.md)
 
 ### GREEN Receipt (v1.6-p1)
 

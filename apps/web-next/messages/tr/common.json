@@ -1,0 +1,17 @@
+{
+  "dashboard": "Anasayfa",
+  "strategyLab": "Strateji Lab",
+  "strategies": "Stratejilerim",
+  "running": "Çalışan Stratejiler",
+  "settings": "Ayarlar",
+  "search": "Ara...",
+  "commands": "Komutlar",
+  "api": "API",
+  "ws": "WS",
+  "engine": "Motor",
+  "errorBudget": "Hata Bütçesi",
+  "environment": "Ortam",
+  "test": "Deneme",
+  "production": "Canlı"
+}
+

@@ -1,98 +1,77 @@
-# Spark Trading Platform — UI/UX İyileştirme Planı
+# Spark Trading Platform — UI/UX Planı (D1–D3 Sonrası)
 
-> Standart: NN/g Heuristics + WCAG 2.2 (AA)
-> Kapsam: Mevcut ve planlanan sayfalar; bileşen kütüphanesi; kabul kriterleri.
+**Amaç:** Spark arayüzünde erişilebilirlik, kullanılabilirlik ve veri görselleştirme standartlarını NN/g (10 Heuristic) ve WCAG 2.2 AA ile hizalamak; sayfa-bazlı checklist ve kabul kriterleri ile ölçülebilir kalite sağlamak.
 
-## 🎯 Amaç
+## 1) Standartlar ve İlkeler
 
-Kullanıcı deneyimini ölçülebilir şekilde güçlendirmek; erişilebilir, tutarlı ve hızlı bir arayüz standardı sağlamak.
+- NN/g 10 Heuristic: sistem durumu görünürlüğü, kullanıcı kontrolü, tutarlılık, hata önleme, minimalist tasarım.
+- WCAG 2.2 (AA) odak: Kontrast ≥4.5:1, klavye ile tam kullanım (SC 2.1.1), odak görünür, anlamlı etiketler/role/aria-\*.
+- Klavye-yalnız akış: TAB sırası, kaçış (Esc), modal/dialog tuzak yok, scrollable bölgeler odaklanabilir.
+- Veri görselleştirme: her grafikte **başlık + eksen etiketleri + birim + tooltip**; dashboard'larda 2–3 ana görünüm kuralı.
 
----
+## 2) Sayfa Bazlı İş Listesi
 
-## 1) Stratejik Hedefler (Kısa)
+**🏠 Dashboard**
 
-- **Sistem durumu görünürlüğü:** skeleton/loading + boş durumlar
-- **Formlarda inline validasyon** ve alan-bazlı hata mesajları
-- **Kontrast AA** (≥4.5:1) ve klavye ile tam gezinim
-- **Sol menüde aktif sayfa vurgusu** + gerekirse breadcrumb
-
----
-
-## 2) Sayfa Bazlı İş Listesi (Özet)
-
-### 🏠 Ana Sayfa
-
-- [ ] Ticker/strateji panellerinde skeleton
-- [ ] WS bağlantı durumu göstergesi (header)
-- [ ] Menüde aktif sayfa highlight
-
-### 🧪 Strategy Lab
-
-- [ ] Kaydet/Backtest: spinner + başarı/toast
-- [ ] Monaco hata satırında inline açıklama
-- [ ] Kısayollar: `Ctrl+Enter` (backtest), `Ctrl+Shift+O` (optimize)
-
-### 📋 Stratejilerim
-
-- [ ] Sayfalama/sonsuz kaydırma
-- [ ] Sil/Düzenle için onay modalı
-
-### 🏃 Çalışan Stratejiler
-
-- [ ] Sparkline boyutu + tooltip
-- [ ] Pause/Resume ikon+metin; durum rozeti
-
-### 💼 Portföy
-
-- [ ] Sabit thead, zebra satırlar; sıralama ikonları
-- [ ] Periyodik güncelleme satırında kısa vurgu animasyonu
-
-### ⚙️ Ayarlar
-
-- [ ] Tüm inputlara label + aria-describedby
-- [ ] Tema/dil seçimi TAB ile gezilebilir; Kaydet altında spinner
-
----
+- [ ] Ticker/strateji panellerinde skeleton.
+- [ ] Sol menüde **aktif sayfa vurgusu**.
+- [ ] Üst çubukta **WS durumu** (green/yellow/red).
+      **🧪 Strategy Lab**
+- [ ] **Kaydet/Backtest** sırasında spinner + başarı/hatada toast.
+- [ ] Editor hatalarında **inline açıklama**.
+- [ ] Kısayollar: `Ctrl+Enter` backtest, `Ctrl+Shift+O` optimize.
+      **📋 Stratejiler**
+- [ ] Sayfalama/sonsuz kaydırma.
+- [ ] Sil/Düzenle için onay diyalogu.
+      **🏃‍♂️ Çalışan Stratejiler**
+- [ ] Sparkline boyutu ↑, tooltip ve birim.
+- [ ] Pause/Resume **ikon+metin**, **durum rozeti** (running/paused/error).
+      **💼 Portföy**
+- [ ] Sticky thead, zebra tablo, kolon sıralama ikonları.
+- [ ] Periyodik güncellenen satırlarda kısa "pulse" animasyonu.
+      **⚙️ Ayarlar**
+- [ ] Her input için `label` + `aria-describedby`.
+- [ ] Tema/dil seçimi **TAB ile** gezilebilir.
+- [ ] Kaydet'te disabled + spinner.
+      **🔔 Alerts (Planlanan)**
+- [ ] "Henüz alarm yok" boş durum + CTA.
+- [ ] Form validasyonu + onay diyalogu.
+      **📊 Market Analysis (Planlanan)**
+- [ ] Grid düzeni sadeleştirme.
+- [ ] Grafiklerde **başlık, eksen, birim zorunlu**; tooltip'te renkli değer + birim.
 
 ## 3) Bileşen Kuralları
 
-### Butonlar
+**Butonlar**
 
-- Birincil/ikincil hiyerarşi
-- Her zaman anlamlı metin/aria-label
-- Belirgin focus halkası (`ring-2 ring-blue-500`)
+- Birincil/ikincil hiyerarşi; net odak halkası; `aria-label` zorunlu (ikon-yalnız).
+  **Formlar**
+- Zorunlu alan işareti; **inline** validasyon; submit'te disabled + spinner; `for/id` bağları.
+  **Tablo & Grafik**
+- `thead > th[scope]`, zebra pattern, sıralama ikonları.
+- Grafikte **başlık/eksensel etiket/birim/legend**; `aria-label` tanımı.
 
-### Formlar
+## 4) Test & Kabul Kriterleri (Definition of Done)
 
-- Zorunlu alan işareti (`*`)
-- Gerçek zamanlı validasyon
-- Submit sırasında disabled+spinner
+- **WCAG AA Kontrast:** tüm metin ≥4.5:1.
+- **Klavye-yalnız:** kritik akışlar (Dashboard, Strategy Run, Settings) tamamen klavye ile tamamlanır.
+- **Form Hataları:** 5/5 olumsuz senaryoda alan altında anlamlı mesaj.
+- **Skeleton & Yükleme:** P95 <3s, iskelet ekran görünüyor.
+- **Boş Durumlar:** her ana sayfada en az 1 boş durum mesajı + CTA.
+- **Lighthouse A11y ≥90**, Axe kritik/serious 0.
 
-### Tablo & Grafik
+## 5) Uygulama Notları
 
-- `thead>th[scope]` + zebra
-- Grafiklerde başlık, eksen etiketleri ve birim
+- `dark`/`light` için `color-scheme` ayarı; odak görünürlüğü token'larla (örn. `outline-ring`).
+- Klavye test turları: `TAB`, `Shift+TAB`, `Enter`, `Space`, `Esc`; scrollable bölgeler `tabindex="0"` ile odaklanabilir.
+- Dashboard'da en fazla **2–3 ana görünüm**; fazlası yeni panele ayrılır.
 
----
+## 6) İzleme ve Araçlar
 
-## 4) Test & Kabul Kriterleri
-
-- [ ] **WCAG AA kontrast:** tüm metinler ≥4.5:1
-- [ ] **Klavye erişimi:** tüm interaktif öğeler TAB ile ulaşılabilir
-- [ ] **Form hataları:** 5/5 senaryo alan altında yakalanır (inline)
-- [ ] **Yükleme P95 <3s:** skeleton gösterimi mevcut
-- [ ] **Boş durum:** en az 1 örnek/sayfa
-
----
-
-## 5) Kaynaklar
-
-- [NN/g 10 Heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)
-- [WCAG 2.2](https://www.w3.org/WAI/WCAG22/quickref/)
-- Data viz en iyi pratikler
+- **Axe** (Playwright/CLI) ile erişilebilirlik taraması.
+- **Lighthouse**: A11y + Performance raporu.
+- "UI-A11Y" GitHub Action (isteğe bağlı) ile PR'da otomatik skor.
 
 ---
 
-## 6) Sonraki Adım
-
-Bu planın görevleri issue/PR'lara bölünür; her PR kabul kriterlerini referans alır.
+**Ek:** Bu plan, kurum içi "Ui Ux Improvements Spark.pdf" ve "arayüz detaylı araştırma.txt" bulgularının sadeleştirilmiş uygulama talimatıdır.
