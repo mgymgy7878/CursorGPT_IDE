@@ -32,6 +32,7 @@ jobs:
         run: |
           set -euxo pipefail
           pnpm -w install --frozen-lockfile || pnpm -w install
+          pnpm --filter web-next install || true
 
       - name: Build web-next
         run: pnpm --filter web-next build
