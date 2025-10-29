@@ -1,12 +1,24 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useCopilotStore } from "@/stores/copilotStore";
 import { useTranslation } from "@/i18n/useTranslation";
 
 export default function CopilotDock() {
   const { open, mode, openWith, toggle, close } = useCopilotStore();
   const t = useTranslation("common");
+  const pathname = usePathname();
+
+  // Context-aware mode selection based on current page
+  useEffect(() => {
+    if (pathname?.includes("/strategy-lab")) {
+      // Strategy Lab: default to strategy mode
+      if (!open && mode !== "strategy") {
+        useCopilotStore.setState({ mode: "strategy" });
+      }
+    }
+  }, [pathname, open, mode]);
 
   // Hotkey handler: Ctrl/Cmd + K
   useEffect(() => {
@@ -14,13 +26,19 @@ export default function CopilotDock() {
       const isMod = e.ctrlKey || e.metaKey;
       if (isMod && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
-        toggle();
+        // Open with context-aware mode
+        const currentMode = pathname?.includes("/strategy-lab") ? "strategy" : "analysis";
+        if (!open) {
+          openWith(currentMode);
+        } else {
+          close();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggle]);
+  }, [toggle, pathname, open, openWith, close]);
 
   return (
     <>

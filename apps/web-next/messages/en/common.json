@@ -21,6 +21,18 @@
   "marketAnalysis": "Market Analysis",
   "systemManagement": "System Management",
   "strategyAssistant": "Strategy Assistant",
-  "guardValidate": "Guard Validate"
+  "guardValidate": "Guard Validate",
+  "generate": "Generate",
+  "backtest": "Backtest",
+  "optimize": "Optimize",
+  "deploy": "Deploy",
+  "aiStrategy": "AI Strategy",
+  "bestOf": "Best Of",
+  "env": "Env",
+  "feed": "Feed",
+  "broker": "Broker",
+  "checking": "Checking",
+  "audit": "Audit",
+  "portfolio": "Portfolio"
 }
 

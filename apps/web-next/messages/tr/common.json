@@ -21,6 +21,18 @@
   "marketAnalysis": "Piyasa Analizi",
   "systemManagement": "Sistem Yönetimi",
   "strategyAssistant": "Strateji Asistanı",
-  "guardValidate": "Koruma Doğrulama"
+  "guardValidate": "Koruma Doğrulama",
+  "generate": "Üret",
+  "backtest": "Backtest",
+  "optimize": "Optimizasyon",
+  "deploy": "Dağıt",
+  "aiStrategy": "AI Strateji",
+  "bestOf": "En İyi",
+  "env": "Ortam",
+  "feed": "Veri Akışı",
+  "broker": "Aracı",
+  "checking": "Kontrol ediliyor",
+  "audit": "Denetim",
+  "portfolio": "Portföy"
 }
 
