@@ -57,6 +57,10 @@
   "noRecentAlarms": "No recent alarms",
   "noRecentCanary": "No recent canary tests",
   "observability": "Observability",
-  "market": "Market"
+  "market": "Market",
+  "alerts": "Alerts",
+  "guardrails": "Risk Guardrails",
+  "expand": "Expand",
+  "collapse": "Collapse"
 }
 

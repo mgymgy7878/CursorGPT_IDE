@@ -1,30 +1,26 @@
 "use client";
+export const dynamic = "force-dynamic";
 
-import { Suspense } from "react";
-import GuardrailsPanel from "@/features/guardrails/GuardrailsPanel";
+import { useTranslation } from "@/i18n/useTranslation";
+import EmptyState from "@/components/ui/EmptyState";
 
-function SafeBoundary({ children }: { children: React.ReactNode }) {
-  try {
-    return <>{children}</>;
-  } catch (err) {
-    console.error("Guardrails render error:", err);
-    return (
-      <div role="status" className="p-4 border border-neutral-800 rounded-lg">
-        Guardrails paneli yüklenemedi
-      </div>
-    );
-  }
-}
+export default function GuardrailsPage() {
+  const t = useTranslation("common");
 
-export default function Page() {
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-semibold mb-6">Guardrails</h1>
-      <Suspense fallback={<div role="status" aria-label="Loading guardrails">Loading guardrails...</div>}>
-        <SafeBoundary>
-          <GuardrailsPanel />
-        </SafeBoundary>
-      </Suspense>
-    </main>
+    <div className="px-6 py-4 min-h-screen bg-neutral-950">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold mb-2">{t("guardrails")}</h1>
+        <p className="text-sm text-zinc-500">
+          Risk yönetimi, koruma kuralları ve limit kontrolleri
+        </p>
+      </div>
+
+      <EmptyState
+        icon="🛡️"
+        title={t("noData")}
+        description="Risk koruma kuralları ve limitler yakında burada görünecek"
+      />
+    </div>
   );
 }

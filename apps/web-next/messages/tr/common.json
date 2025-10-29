@@ -57,6 +57,10 @@
   "noRecentAlarms": "Son alarm bulunmuyor",
   "noRecentCanary": "Son canary testi bulunmuyor",
   "observability": "İzlenebilirlik",
-  "market": "Piyasa Verileri"
+  "market": "Piyasa Verileri",
+  "alerts": "Uyarılar",
+  "guardrails": "Risk/Koruma",
+  "expand": "Genişlet",
+  "collapse": "Daralt"
 }
 
