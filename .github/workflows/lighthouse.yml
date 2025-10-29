@@ -39,31 +39,27 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Start web-next
+      - name: Start web-next (next start)
         working-directory: apps/web-next
         env:
           NODE_ENV: production
           PORT: 3003
           HOSTNAME: 127.0.0.1
         run: |
-          set -e
-          if [ -f ".next/standalone/server.js" ]; then
-            nohup node .next/standalone/server.js > ../../lh-server.log 2>&1 &
-          else
-            nohup npx next start -p 3003 -H 127.0.0.1 > ../../lh-server.log 2>&1 &
-          fi
+          set -euo pipefail
+          nohup npx next start -p 3003 -H 127.0.0.1 > ../../canary-server.log 2>&1 &
 
-      - name: Wait for health
+      - name: Wait for health (120s)
         run: |
-          set -e
-          for i in $(seq 1 60); do
+          set -euo pipefail
+          for i in {1..24}; do
             if curl -fsS http://127.0.0.1:3003/api/health >/dev/null 2>&1; then
-              echo "✅ Server ready"
+              echo "✅ Server ready on attempt $i"
               exit 0
             fi
-            sleep 2
+            sleep 5
           done
-          echo "❌ Server timeout"
+          echo "❌ Health endpoint timeout" >&2
           exit 1
 
       - name: Install Lighthouse CI
@@ -82,7 +78,7 @@ jobs:
           name: lighthouse-results
           path: |
             .lighthouseci/**/*
-            lh-server.log
+            canary-server.log
           retention-days: 7
 
       - name: Upload logs on failure
@@ -91,6 +87,6 @@ jobs:
         with:
           name: lighthouse-debug
           path: |
-            lh-server.log
+            canary-server.log
             apps/web-next/.next/**
           retention-days: 1
