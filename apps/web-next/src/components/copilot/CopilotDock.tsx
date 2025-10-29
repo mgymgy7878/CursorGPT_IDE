@@ -46,10 +46,10 @@ export default function CopilotDock() {
       {/* Safe margins to avoid content overlap */}
       <button
         onClick={toggle}
-        aria-label="Copilot"
+        aria-label={t("copilot")}
         className="fixed right-6 bottom-6 md:right-8 md:bottom-8 z-50 rounded-2xl px-4 py-2 shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
       >
-        💬 Copilot
+        💬 {t("copilot")}
       </button>
 
       {/* Drawer Modal */}
@@ -67,14 +67,14 @@ export default function CopilotDock() {
             {/* Header */}
             <div className="sticky top-0 bg-zinc-900 border-b border-zinc-800 p-4 flex items-center justify-between">
               <div className="font-semibold text-lg">
-                Copilot
+                {t("copilot")}
                 <span className="ml-2 text-xs text-zinc-500 uppercase">
-                  {mode}
+                  {t(mode)}
                 </span>
               </div>
               <button
                 onClick={close}
-                aria-label="Kapat"
+                aria-label={t("close")}
                 className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-xl leading-none"
               >
                 ×

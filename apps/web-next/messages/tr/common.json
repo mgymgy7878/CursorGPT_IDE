@@ -55,6 +55,7 @@
   "noAlarmDrafts": "Alarm taslağı bulunmuyor",
   "noCanaryTests": "Canary testi bulunmuyor",
   "noRecentAlarms": "Son alarm bulunmuyor",
-  "noRecentCanary": "Son canary testi bulunmuyor"
+  "noRecentCanary": "Son canary testi bulunmuyor",
+  "observability": "İzlenebilirlik"
 }
 

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import CommandPalette from "@/components/ui/CommandPalette";
+import { useTranslation } from "@/i18n/useTranslation";
+
 const AlarmCard = dynamic(() => import("@/components/dashboard/AlarmCard"), {
   ssr: false,
 });
@@ -11,18 +13,19 @@ const SmokeCard = dynamic(() => import("@/components/dashboard/SmokeCard"), {
 });
 
 const ROUTES = [
-  { name: "Dashboard", path: "/dashboard" },
-  { name: "Observability", path: "/observability" },
-  { name: "Strategy Lab", path: "/strategy-lab" },
-  { name: "Audit", path: "/audit" },
-  { name: "Portfolio", path: "/portfolio" },
-  { name: "Settings", path: "/settings" },
+  { key: "dashboard", path: "/dashboard" },
+  { key: "observability", path: "/observability" },
+  { key: "strategyLab", path: "/strategy-lab" },
+  { key: "audit", path: "/audit" },
+  { key: "portfolio", path: "/portfolio" },
+  { key: "settings", path: "/settings" },
 ] as const;
 
 type RouteItem = (typeof ROUTES)[number];
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const t = useTranslation("common");
   const NavItem = ({ href, label }: { href: string; label: string }) => {
     const active = pathname?.startsWith(href) ?? false;
     return (
@@ -57,11 +60,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto max-w-[1400px] px-4 py-4 grid grid-cols-1 md:grid-cols-[240px_1fr_360px] gap-4">
         <aside className="md:sticky md:top-16 h-max border border-neutral-800 rounded-2xl p-3">
           <nav className="space-y-1">
-            <NavItem href="/dashboard" label="Dashboard" />
-            <NavItem href="/strategy-lab" label="Strategy Lab" />
-            <NavItem href="/audit" label="Audit" />
-            <NavItem href="/portfolio" label="Portfolio" />
-            <NavItem href="/settings" label="Settings" />
+            {ROUTES.map((route) => (
+              <NavItem key={route.key} href={route.path} label={t(route.key)} />
+            ))}
           </nav>
         </aside>
         <main id="main" className="min-h-[60vh]">
