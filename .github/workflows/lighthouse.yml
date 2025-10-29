@@ -4,16 +4,16 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'apps/web-next/**'
-      - '.github/workflows/lighthouse.yml'
+      - "apps/web-next/**"
+      - ".github/workflows/lighthouse.yml"
   workflow_dispatch:
 
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true  # Canary mode
-    
+    continue-on-error: true # Canary mode
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       base_url: ${{ steps.export.outputs.base_url }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,7 +71,7 @@ jobs:
           $url = "http://127.0.0.1:${{ inputs.port }}/api/health"
           $maxRetries = 120
           $retryCount = 0
-          
+
           while ($retryCount -lt $maxRetries) {
             try {
               $response = Invoke-WebRequest -Uri $url -TimeoutSec 2 -ErrorAction Stop
@@ -84,7 +84,7 @@ jobs:
               Start-Sleep -Seconds 1
             }
           }
-          
+
           Write-Host "❌ Health check failed after $maxRetries attempts"
           Get-Content server.log -ErrorAction SilentlyContinue | Select-Object -Last 50
           exit 1
@@ -103,4 +103,3 @@ jobs:
           name: reusable-start-logs
           path: server.log
           retention-days: 1
-

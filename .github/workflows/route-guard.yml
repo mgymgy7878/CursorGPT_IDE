@@ -4,17 +4,17 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'apps/web-next/**'
-      - 'services/**'
-      - '.github/workflows/route-guard.yml'
+      - "apps/web-next/**"
+      - "services/**"
+      - ".github/workflows/route-guard.yml"
   workflow_dispatch:
 
 jobs:
   route-guard:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true  # Canary mode
-    
+    continue-on-error: true # Canary mode
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,20 +69,20 @@ jobs:
       - name: Test critical routes
         run: |
           BASE_URL="http://127.0.0.1:3003"
-          
+
           echo "Testing critical routes..."
-          
+
           # Dashboard
           curl -fsS "${BASE_URL}/" -o /dev/null || echo "⚠️ Dashboard check failed"
-          
+
           # Health endpoint
           curl -fsS "${BASE_URL}/api/health" -o health.json
           cat health.json
-          
+
           # Metrics endpoints
           curl -fsS "${BASE_URL}/api/public/metrics" -o metrics.json || echo "⚠️ Metrics JSON failed"
           curl -fsS "${BASE_URL}/api/public/metrics.prom" -o metrics.prom || echo "⚠️ Metrics Prom failed"
-          
+
           echo "✅ Route guard check completed (canary)"
 
       - name: Upload route test results

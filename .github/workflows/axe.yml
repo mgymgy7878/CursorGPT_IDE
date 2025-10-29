@@ -4,16 +4,16 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'apps/web-next/**'
-      - '.github/workflows/axe.yml'
+      - "apps/web-next/**"
+      - ".github/workflows/axe.yml"
   workflow_dispatch:
 
 jobs:
   axe:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    continue-on-error: true  # Canary mode
-    
+    continue-on-error: true # Canary mode
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4

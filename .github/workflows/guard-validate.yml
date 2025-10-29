@@ -3,9 +3,9 @@ name: Guard Validate
 on:
   pull_request:
     paths:
-      - '.github/workflows/**'
-      - '.github/scripts/**'
-      - '.github/*.md'
+      - ".github/workflows/**"
+      - ".github/scripts/**"
+      - ".github/*.md"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,15 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: ${{ !github.event.pull_request.head.repo.fork }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Validate workflow fork guards
         shell: pwsh
         run: ./.github/scripts/validate-workflow-guards.ps1
-      
+
       - name: Report status
         if: always()
         run: |
@@ -35,4 +35,3 @@ jobs:
             echo "❌ Some workflows lack fork guards - see job logs"
             exit 1
           fi
-
