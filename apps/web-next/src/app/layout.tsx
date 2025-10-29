@@ -33,7 +33,7 @@ export default function RootLayout({
               <StatusBar />
               <div className="flex flex-1 overflow-hidden">
                 <LeftNav />
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1 overflow-auto pb-24 md:pb-28">
                   {children}
                 </main>
               </div>

@@ -39,6 +39,17 @@
   "down": "Çalışmıyor",
   "online": "Çevrimiçi",
   "offline": "Çevrimdışı",
-  "mock": "Deneme"
+  "mock": "Deneme",
+  "createStrategy": "Strateji Oluştur",
+  "createAlert": "Uyarı Oluştur",
+  "newStrategy": "Yeni Strateji",
+  "noStrategiesYet": "Henüz strateji bulunmuyor",
+  "noRunningStrategies": "Şu anda çalışan strateji yok",
+  "clickNewStrategy": "İlk stratejinizi oluşturmak için yukarıdaki \"Yeni Strateji\" butonuna tıklayın",
+  "viewAndManage": "Aktif stratejileri görüntüle ve yönet",
+  "manageStrategies": "Trading stratejilerinizi yönetin ve performanslarını takip edin",
+  "target": "Hedef",
+  "threshold": "Eşik",
+  "opsQuickHelp": "Ops Hızlı Yardım"
 }
 

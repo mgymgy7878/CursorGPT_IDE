@@ -39,6 +39,17 @@
   "down": "Down",
   "online": "Online",
   "offline": "Offline",
-  "mock": "Mock"
+  "mock": "Mock",
+  "createStrategy": "Create Strategy",
+  "createAlert": "Create Alert",
+  "newStrategy": "New Strategy",
+  "noStrategiesYet": "No strategies yet",
+  "noRunningStrategies": "No running strategies currently",
+  "clickNewStrategy": "Click the \"New Strategy\" button above to create your first strategy",
+  "viewAndManage": "View and manage active strategies",
+  "manageStrategies": "Manage your trading strategies and track their performance",
+  "target": "Target",
+  "threshold": "Threshold",
+  "opsQuickHelp": "Ops Quick Help"
 }
 

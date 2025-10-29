@@ -62,21 +62,20 @@ export const tr = {
 };
 
 export const t = (path: string, vars?: Record<string, any>): string => {
-  const keys = path.split('.');
+  const keys = path.split(".");
   let value: any = tr;
-  
+
   for (const key of keys) {
     value = value?.[key];
     if (value === undefined) return path;
   }
-  
-  if (typeof value !== 'string') return path;
-  
+
+  if (typeof value !== "string") return path;
+
   // Template replacement
   if (vars) {
-    return value.replace(/\{\{(\w+)\}\}/g, (_, k) => String(vars[k] ?? ''));
+    return value.replace(/\{\{(\w+)\}\}/g, (_, k) => String(vars[k] ?? ""));
   }
-  
+
   return value;
 };
-

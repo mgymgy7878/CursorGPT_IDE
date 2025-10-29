@@ -43,10 +43,11 @@ export default function CopilotDock() {
   return (
     <>
       {/* Floating Action Button (bottom-right) */}
+      {/* Safe margins to avoid content overlap */}
       <button
         onClick={toggle}
         aria-label="Copilot"
-        className="fixed right-4 bottom-4 z-50 rounded-2xl px-4 py-2 shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+        className="fixed right-6 bottom-6 md:right-8 md:bottom-8 z-50 rounded-2xl px-4 py-2 shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
       >
         💬 Copilot
       </button>
