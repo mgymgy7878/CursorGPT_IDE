@@ -1,0 +1,106 @@
+name: Reusable Start (web-next)
+
+on:
+  workflow_call:
+    inputs:
+      port:
+        description: "Port to start web-next on"
+        required: false
+        default: "3003"
+        type: string
+      wait_seconds:
+        description: "Seconds to wait after starting server"
+        required: false
+        default: "6"
+        type: string
+    outputs:
+      base_url:
+        description: "Base URL of the started server"
+        value: ${{ jobs.start.outputs.base_url }}
+
+jobs:
+  start:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      base_url: ${{ steps.export.outputs.base_url }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.11.1"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+
+      - name: Install dependencies
+        run: |
+          set -euxo pipefail
+          pnpm -w install --frozen-lockfile || pnpm -w install
+          echo "✓ Dependencies installed"
+
+      - name: Build web-next
+        run: pnpm --filter web-next build
+        env:
+          NODE_ENV: production
+
+      - name: Start web-next (background)
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+          PORT: ${{ inputs.port }}
+          HOSTNAME: 127.0.0.1
+        run: |
+          set -e
+          if [ -f ".next/standalone/server.js" ]; then
+            nohup node .next/standalone/server.js > ../../server.log 2>&1 &
+          else
+            nohup npx next start -p ${{ inputs.port }} -H 127.0.0.1 > ../../server.log 2>&1 &
+          fi
+          echo "Server started (pid: $!)"
+
+      - name: Wait for health
+        shell: pwsh
+        run: |
+          $url = "http://127.0.0.1:${{ inputs.port }}/api/health"
+          $maxRetries = 120
+          $retryCount = 0
+          
+          while ($retryCount -lt $maxRetries) {
+            try {
+              $response = Invoke-WebRequest -Uri $url -TimeoutSec 2 -ErrorAction Stop
+              if ($response.StatusCode -eq 200) {
+                Write-Host "✅ Health check passed on attempt $($retryCount + 1)"
+                exit 0
+              }
+            } catch {
+              $retryCount++
+              Start-Sleep -Seconds 1
+            }
+          }
+          
+          Write-Host "❌ Health check failed after $maxRetries attempts"
+          Get-Content server.log -ErrorAction SilentlyContinue | Select-Object -Last 50
+          exit 1
+
+      - name: Additional wait
+        run: sleep ${{ inputs.wait_seconds }}
+
+      - name: Export BASE_URL
+        id: export
+        run: echo "base_url=http://127.0.0.1:${{ inputs.port }}" >> $GITHUB_OUTPUT
+
+      - name: Upload server logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reusable-start-logs
+          path: server.log
+          retention-days: 1
+

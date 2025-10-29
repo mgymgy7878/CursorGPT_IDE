@@ -1,11 +1,96 @@
-name: Axe Accessibility
+name: Axe Accessibility (Canary)
+
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'apps/web-next/**'
+      - '.github/workflows/axe.yml'
+  workflow_dispatch:
+
 jobs:
   axe:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true  # Canary mode
+    
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "Axe stub PASS"
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.11.1"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+
+      - name: Install dependencies
+        run: |
+          set -euxo pipefail
+          pnpm -w install --frozen-lockfile || pnpm -w install
+
+      - name: Build web-next
+        run: pnpm --filter web-next build
+        env:
+          NODE_ENV: production
+
+      - name: Start web-next
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+          PORT: 3003
+          HOSTNAME: 127.0.0.1
+        run: |
+          set -e
+          if [ -f ".next/standalone/server.js" ]; then
+            nohup node .next/standalone/server.js > ../../axe-server.log 2>&1 &
+          else
+            nohup npx next start -p 3003 -H 127.0.0.1 > ../../axe-server.log 2>&1 &
+          fi
+
+      - name: Wait for health
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3003/api/health >/dev/null 2>&1; then
+              echo "✅ Server ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "❌ Server timeout"
+          exit 1
+
+      - name: Install Axe CLI
+        run: npm install -g @axe-core/cli
+
+      - name: Run Axe accessibility scan
+        run: |
+          axe http://127.0.0.1:3003 \
+            --exit \
+            --save axe-results.json \
+            --reporter json || echo "⚠️ Axe violations found (canary mode)"
+
+      - name: Upload Axe results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-results
+          path: |
+            axe-results.json
+            axe-server.log
+          retention-days: 7
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-debug
+          path: |
+            axe-server.log
+            apps/web-next/.next/**
+          retention-days: 1
