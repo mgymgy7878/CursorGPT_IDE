@@ -1,101 +1,87 @@
-<testsuites id="" name="" tests="2" failures="1" skipped="1" errors="0" time="17.926158">
-<testsuite name="ws-badge.spec.ts" timestamp="2025-10-30T16:36:02.541Z" hostname="chromium" tests="2" failures="1" skipped="1" time="13.109" errors="0">
-<testcase name="WS badge › Dev/Mock: gri rozet ve &quot;Dev Mode&quot; metni" classname="ws-badge.spec.ts" time="12.828">
-<failure message="ws-badge.spec.ts:4:7 Dev/Mock: gri rozet ve &quot;Dev Mode&quot; metni" type="FAILURE">
-<![CDATA[  [chromium] › ws-badge.spec.ts:4:7 › WS badge › Dev/Mock: gri rozet ve "Dev Mode" metni ───────────
+<testsuites id="" name="" tests="2" failures="1" skipped="1" errors="0" time="40.037851">
+<testsuite name="ws-badge.spec.ts" timestamp="2025-10-30T17:00:15.204Z" hostname="chromium" tests="2" failures="1" skipped="1" time="33.203" errors="0">
+<testcase name="WS badge deterministic › Dev/Mock: gri rozet + Dev Mode metni" classname="ws-badge.spec.ts" time="32.933">
+<failure message="ws-badge.spec.ts:4:7 Dev/Mock: gri rozet + Dev Mode metni" type="FAILURE">
+<![CDATA[  [chromium] › ws-badge.spec.ts:4:7 › WS badge deterministic › Dev/Mock: gri rozet + Dev Mode metni 
 
-    Error: expect(locator).toBeVisible() failed
-
-    Locator: getByTestId('ws-badge').first()
-    Expected: visible
-    Timeout: 5000ms
-    Error: element(s) not found
-
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
     Call log:
-      - Expect "toBeVisible" with timeout 5000ms
-      - waiting for getByTestId('ws-badge').first()
+      - waiting for getByTestId('status-bar') to be visible
 
 
-       8 |     const env = await page.locator('body').getAttribute('data-env');
-       9 |     const badge = page.getByTestId('ws-badge').first();
-    > 10 |     await expect(badge).toBeVisible();
-         |                         ^
-      11 |
-      12 |     if (env !== 'prod') {
-      13 |       await expect(badge).toHaveAttribute('data-variant', 'unknown');
-        at C:\dev\CursorGPT_IDE\apps\web-next\tests\e2e\ws-badge.spec.ts:10:25
+      4 |   test('Dev/Mock: gri rozet + Dev Mode metni', async ({ page }) => {
+      5 |     await page.goto('/dashboard');
+    > 6 |     await page.getByTestId('status-bar').waitFor({ state: 'visible', timeout: 15000 });
+        |                                          ^
+      7 |     const env = await page.locator('body').getAttribute('data-env');
+      8 |     const badge = page.getByTestId('ws-badge').first();
+      9 |     await expect(badge, 'ws-badge yok').toBeVisible();
+        at C:\dev\CursorGPT_IDE\apps\web-next\tests\e2e\ws-badge.spec.ts:6:42
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium\test-failed-1.png
+    ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium\test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium\video.webm
+    ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium\video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
-    Error Context: ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium\error-context.md
+    Error Context: ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium\error-context.md
 
     Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
 
-    Error: expect(locator).toBeVisible() failed
-
-    Locator: getByTestId('ws-badge').first()
-    Expected: visible
-    Timeout: 5000ms
-    Error: element(s) not found
-
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
     Call log:
-      - Expect "toBeVisible" with timeout 5000ms
-      - waiting for getByTestId('ws-badge').first()
+      - waiting for getByTestId('status-bar') to be visible
 
 
-       8 |     const env = await page.locator('body').getAttribute('data-env');
-       9 |     const badge = page.getByTestId('ws-badge').first();
-    > 10 |     await expect(badge).toBeVisible();
-         |                         ^
-      11 |
-      12 |     if (env !== 'prod') {
-      13 |       await expect(badge).toHaveAttribute('data-variant', 'unknown');
-        at C:\dev\CursorGPT_IDE\apps\web-next\tests\e2e\ws-badge.spec.ts:10:25
+      4 |   test('Dev/Mock: gri rozet + Dev Mode metni', async ({ page }) => {
+      5 |     await page.goto('/dashboard');
+    > 6 |     await page.getByTestId('status-bar').waitFor({ state: 'visible', timeout: 15000 });
+        |                                          ^
+      7 |     const env = await page.locator('body').getAttribute('data-env');
+      8 |     const badge = page.getByTestId('ws-badge').first();
+      9 |     await expect(badge, 'ws-badge yok').toBeVisible();
+        at C:\dev\CursorGPT_IDE\apps\web-next\tests\e2e\ws-badge.spec.ts:6:42
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\test-failed-1.png
+    ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\video.webm
+    ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
-    Error Context: ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\error-context.md
+    Error Context: ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\error-context.md
 
     attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\trace.zip
+    ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\trace.zip
     Usage:
 
-        pnpm exec playwright show-trace ..\..\test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\trace.zip
+        pnpm exec playwright show-trace ..\..\test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\trace.zip
 
     ────────────────────────────────────────────────────────────────────────────────────────────────
 ]]>
 </failure>
 <system-out>
 <![CDATA[
-[[ATTACHMENT|test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium\test-failed-1.png]]
+[[ATTACHMENT|test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium\test-failed-1.png]]
 
-[[ATTACHMENT|test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium\video.webm]]
+[[ATTACHMENT|test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium\video.webm]]
 
-[[ATTACHMENT|test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium\error-context.md]]
+[[ATTACHMENT|test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium\error-context.md]]
 
-[[ATTACHMENT|test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\test-failed-1.png]]
+[[ATTACHMENT|test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\test-failed-1.png]]
 
-[[ATTACHMENT|test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\video.webm]]
+[[ATTACHMENT|test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\video.webm]]
 
-[[ATTACHMENT|test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\error-context.md]]
+[[ATTACHMENT|test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\error-context.md]]
 
-[[ATTACHMENT|test-results\ws-badge-WS-badge-Dev-Mock-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\trace.zip]]
+[[ATTACHMENT|test-results\ws-badge-WS-badge-determin-2355c-ck-gri-rozet-Dev-Mode-metni-chromium-retry1\trace.zip]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="WS badge › Prod: WS kapalıyken kırmızı" classname="ws-badge.spec.ts" time="0.281">
+<testcase name="WS badge deterministic › Prod: WS down -&gt; kırmızı" classname="ws-badge.spec.ts" time="0.27">
 <properties>
 <property name="skip" value="Sadece prod envde koşar">
 </property>
