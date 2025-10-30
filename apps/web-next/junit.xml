@@ -1,0 +1,107 @@
+<testsuites id="" name="" tests="2" failures="1" skipped="1" errors="0" time="18.119383000000003">
+<testsuite name="ws-badge.spec.ts" timestamp="2025-10-30T16:28:23.820Z" hostname="chromium" tests="2" failures="1" skipped="1" time="13.208" errors="0">
+<testcase name="WS Badge › DEV/MOCK: gri rozet ve Dev Mode metni" classname="ws-badge.spec.ts" time="12.882">
+<failure message="ws-badge.spec.ts:4:7 DEV/MOCK: gri rozet ve Dev Mode metni" type="FAILURE">
+<![CDATA[  [chromium] › ws-badge.spec.ts:4:7 › WS Badge › DEV/MOCK: gri rozet ve Dev Mode metni ─────────────
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: getByTestId('ws-badge')
+    Expected: "unknown"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 5000ms
+      - waiting for getByTestId('ws-badge')
+
+
+      4 |   test('DEV/MOCK: gri rozet ve Dev Mode metni', async ({ page }) => {
+      5 |     await page.goto('/dashboard');
+    > 6 |     await expect(page.getByTestId('ws-badge')).toHaveAttribute('data-variant', 'unknown');
+        |                                                ^
+      7 |     await expect(page.getByText(/Dev Mode/i)).toBeVisible();
+      8 |   });
+      9 |
+        at C:\dev\CursorGPT_IDE\apps\web-next\tests\e2e\ws-badge.spec.ts:6:48
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium\error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: getByTestId('ws-badge')
+    Expected: "unknown"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 5000ms
+      - waiting for getByTestId('ws-badge')
+
+
+      4 |   test('DEV/MOCK: gri rozet ve Dev Mode metni', async ({ page }) => {
+      5 |     await page.goto('/dashboard');
+    > 6 |     await expect(page.getByTestId('ws-badge')).toHaveAttribute('data-variant', 'unknown');
+        |                                                ^
+      7 |     await expect(page.getByText(/Dev Mode/i)).toBeVisible();
+      8 |   });
+      9 |
+        at C:\dev\CursorGPT_IDE\apps\web-next\tests\e2e\ws-badge.spec.ts:6:48
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium\video.webm]]
+
+[[ATTACHMENT|test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium\error-context.md]]
+
+[[ATTACHMENT|test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\test-failed-1.png]]
+
+[[ATTACHMENT|test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\video.webm]]
+
+[[ATTACHMENT|test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\error-context.md]]
+
+[[ATTACHMENT|test-results\ws-badge-WS-Badge-DEV-MOCK-gri-rozet-ve-Dev-Mode-metni-chromium-retry1\trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="WS Badge › PROD: WS kapalıyken kırmızı rozet" classname="ws-badge.spec.ts" time="0.326">
+<properties>
+<property name="skip" value="Sadece prod env için">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

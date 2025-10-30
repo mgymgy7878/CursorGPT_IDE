@@ -1,0 +1,157 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - status [ref=e3]:
+      - generic [ref=e4]:
+        - 'status "API: kontrol ediliyor"'
+        - text: API
+      - generic [ref=e5]:
+        - 'status "WS: çevrimdışı"'
+        - text: WS
+      - generic [ref=e6]:
+        - 'status "Executor: kontrol ediliyor"'
+        - text: Executor
+      - link "Koruma Doğrulama" [ref=e8] [cursor=pointer]:
+        - /url: "#"
+    - generic [ref=e9]:
+      - complementary [ref=e10]:
+        - button "Daralt" [ref=e11]:
+          - img [ref=e12]
+        - navigation [ref=e14]:
+          - link "Anasayfa" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - text: Anasayfa
+          - link "Piyasa Verileri" [ref=e19] [cursor=pointer]:
+            - /url: /market
+            - img [ref=e20]
+            - text: Piyasa Verileri
+          - link "Strateji Lab" [ref=e23] [cursor=pointer]:
+            - /url: /strategy-lab
+            - img [ref=e24]
+            - text: Strateji Lab
+          - link "Stratejilerim" [ref=e26] [cursor=pointer]:
+            - /url: /strategies
+            - img [ref=e27]
+            - text: Stratejilerim
+          - link "Çalışan Stratejiler" [ref=e29] [cursor=pointer]:
+            - /url: /running
+            - img [ref=e30]
+            - text: Çalışan Stratejiler
+        - navigation [ref=e32]:
+          - link "Portföy" [ref=e33] [cursor=pointer]:
+            - /url: /portfolio
+            - img [ref=e34]
+            - text: Portföy
+          - link "Uyarılar" [ref=e37] [cursor=pointer]:
+            - /url: /alerts
+            - img [ref=e38]
+            - text: Uyarılar
+          - link "Denetim" [ref=e41] [cursor=pointer]:
+            - /url: /audit
+            - img [ref=e42]
+            - text: Denetim
+          - link "Risk/Koruma" [ref=e47] [cursor=pointer]:
+            - /url: /guardrails
+            - img [ref=e48]
+            - text: Risk/Koruma
+          - link "Ayarlar" [ref=e51] [cursor=pointer]:
+            - /url: /settings
+            - img [ref=e52]
+            - text: Ayarlar
+        - button "Rahat görünüme geç" [ref=e56]:
+          - img [ref=e57]
+          - text: Kompakt
+      - main [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - generic [ref=e65]:
+              - heading "Spark TradingEB 0.0%" [level=1] [ref=e66]:
+                - generic [ref=e67]:
+                  - text: Spark Trading
+                  - generic "Error rate 0.000% / allowed 0.0%" [ref=e68]: EB 0.0%
+              - paragraph [ref=e69]: Dashboard
+              - generic [ref=e70]: "Hedef: 1200 msEşik: 30 sn"
+            - generic [ref=e71]:
+              - button "Strateji Oluştur" [ref=e72]
+              - button "Uyarı Oluştur" [ref=e73]
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - generic [ref=e77]: EB
+              - generic [ref=e78]: 0.0%
+            - generic [ref=e79]:
+              - status
+              - generic [ref=e80]: API
+              - generic [ref=e81]: Kontrol
+            - generic [ref=e82]:
+              - status
+              - generic [ref=e83]: WS
+              - generic [ref=e84]: Çevrimdışı
+            - generic [ref=e85]:
+              - status
+              - generic [ref=e86]: Executor
+              - generic [ref=e87]: Kontrol
+            - generic [ref=e88]:
+              - generic [ref=e89]: Bakiye
+              - generic [ref=e90]: $12.847,50
+            - generic [ref=e91]:
+              - generic [ref=e92]: P&L 24h
+              - generic [ref=e93]: $1.247,50
+            - generic [ref=e94]:
+              - generic [ref=e95]: Çalışan
+              - generic [ref=e96]: "0"
+            - generic [ref=e97]:
+              - generic [ref=e98]: Uyarı
+              - generic [ref=e99]: "0"
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - generic [ref=e103]:
+                  - generic [ref=e104]: P95 Gecikme
+                  - generic [ref=e105]: 58 ms
+                  - generic [ref=e106]: "Hedef: 1200 ms"
+                - generic [ref=e107]:
+                  - generic [ref=e108]: Güncellik Gecikmesi
+                  - generic [ref=e109]: 0 sn
+                  - generic [ref=e110]: "Eşik: 30 sn"
+              - generic [ref=e111]:
+                - generic [ref=e112]:
+                  - generic [ref=e113]: Alarm Taslakları
+                  - status [ref=e114]:
+                    - img [ref=e115]
+                    - heading "noData" [level=3] [ref=e118]
+                    - paragraph [ref=e119]: noAlarmDrafts
+                    - button "createAlert" [ref=e120]
+                - generic [ref=e121]:
+                  - generic [ref=e122]: Canary Testleri
+                  - status [ref=e123]:
+                    - img [ref=e124]
+                    - heading "noData" [level=3] [ref=e126]
+                    - paragraph [ref=e127]: noCanaryTests
+              - generic [ref=e128]:
+                - generic [ref=e129]:
+                  - heading "BTCUSDT" [level=3] [ref=e131]
+                  - generic [ref=e133]: Bağlanıyor...
+                - generic [ref=e134]:
+                  - heading "ETHUSDT" [level=3] [ref=e136]
+                  - generic [ref=e138]: Bağlanıyor...
+            - complementary [ref=e139]:
+              - generic [ref=e140]:
+                - generic [ref=e141]: Son Alarm Durumu
+                - status [ref=e142]:
+                  - img [ref=e143]
+                  - heading "noData" [level=3] [ref=e146]
+                  - paragraph [ref=e147]: noRecentAlarms
+              - generic [ref=e148]:
+                - generic [ref=e149]: Son Canary Testi
+                - status [ref=e150]:
+                  - img [ref=e151]
+                  - heading "noData" [level=3] [ref=e153]
+                  - paragraph [ref=e154]: noRecentCanary
+  - generic "Hızlı komutlar" [ref=e155]:
+    - button "Ctrl+K Komutlar" [ref=e156]
+    - button "Operasyon yardımı" [ref=e157]: Ops Hızlı Yardım
+  - button "Copilot" [ref=e158]: 💬 Copilot
+```
