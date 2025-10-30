@@ -41,6 +41,10 @@ test.describe('WS badge deterministic', () => {
     
     const badge = page.getByTestId('ws-badge').first();
     await expect(badge, 'ws-badge yok').toBeVisible();
+    
+    // Debug: check if the badge has the expected attributes
+    const badgeVariant = await badge.getAttribute('data-variant');
+    console.log('Badge data-variant:', badgeVariant);
 
     if (env !== 'prod') {
       await expect(badge).toHaveAttribute('data-variant', 'unknown');
