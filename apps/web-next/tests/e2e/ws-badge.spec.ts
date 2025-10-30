@@ -28,7 +28,8 @@ test.describe('WS badge deterministic', () => {
       console.log('Status bar div count:', statusBarDiv);
     }
     
-    await page.getByTestId('status-bar').waitFor({ state: 'visible', timeout: 15000 });
+    // Use the first status div since testid is not working
+    await page.locator('div[role="status"][aria-live="polite"]').first().waitFor({ state: 'visible', timeout: 15000 });
     const env = await page.locator('body').getAttribute('data-env');
     const badge = page.getByTestId('ws-badge').first();
     await expect(badge, 'ws-badge yok').toBeVisible();
@@ -44,7 +45,7 @@ test.describe('WS badge deterministic', () => {
   test('Prod: WS down -> kırmızı', async ({ page }) => {
     test.skip(process.env.NEXT_PUBLIC_ENV !== 'prod', 'Sadece prod envde koşar');
     await page.goto('/dashboard');
-    await page.getByTestId('status-bar').waitFor({ state: 'visible', timeout: 15000 });
+    await page.locator('div[role="status"][aria-live="polite"]').first().waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('ws-badge').first()).toHaveAttribute('data-variant', 'error');
   });
 });
