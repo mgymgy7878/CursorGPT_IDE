@@ -1,5 +1,7 @@
 # Spark Trading Platform
 
+[![WS Badge e2e](https://img.shields.io/badge/WS%20Badge-e2e%20%E2%9C%85-brightgreen)](docs/DEV_MODE.md)
+
 [![UI/UX Guide](https://img.shields.io/badge/UI%2FUX-Guide-blue)](docs/UI_UX_GUIDE.md)
 
 ## Quick Links / Docs

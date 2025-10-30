@@ -245,6 +245,7 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload CI evidence
         if: always()
@@ -253,6 +254,7 @@ jobs:
           name: ci-evidence-${{ matrix.browser }}-${{ matrix.shard }}
           path: evidence/ci
           if-no-files-found: ignore
+          retention-days: 7
 
       - name: Stop app
         if: always()

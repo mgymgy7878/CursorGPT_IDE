@@ -53,6 +53,16 @@ jobs:
       - name: WS badge deterministic spec
         working-directory: apps/web-next
         run: pnpm run e2e:ws-badge
+      - name: Upload Playwright artefacts (matrix)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-pw-${{ matrix.browser }}-${{ matrix.envMode }}
+          path: |
+            apps/web-next/playwright-report
+            apps/web-next/test-results
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Run E2E (matrix)
         working-directory: apps/web-next
         env:
