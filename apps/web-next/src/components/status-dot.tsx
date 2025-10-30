@@ -1,6 +1,7 @@
 'use client'
 
 import type { ServiceStatus } from '@/hooks/useUnifiedStatus';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface StatusDotProps {
   /** Service status - unified across all indicators */
@@ -13,6 +14,9 @@ interface StatusDotProps {
 
 /**
  * StatusDot - Unified status indicator
+ * 
+ * Erişilebilirlik: aria-hidden ile ekran okuyuculardan gizlenir
+ * Ana durum mesajı StatusBar'da tek canlı bölge olarak sunulur
  *
  * Colors:
  * - unknown: gray pulse (loading/checking)
@@ -20,6 +24,8 @@ interface StatusDotProps {
  * - down: red (error/offline)
  */
 export function StatusDot({ status, ok, label }: StatusDotProps) {
+  const t = useTranslation();
+  
   // Backward compatibility: ok boolean → status
   const finalStatus: ServiceStatus = status ?? (ok === undefined ? 'unknown' : ok ? 'up' : 'down');
 
@@ -37,25 +43,30 @@ export function StatusDot({ status, ok, label }: StatusDotProps) {
   const color = colors[finalStatus];
   const variant = finalStatus === 'up' ? 'success' : finalStatus === 'down' ? 'error' : 'unknown';
 
-  // Special tooltip for dev/mock mode
-  const getAriaLabel = () => {
+  // Tooltip için durum metni
+  const getTooltipText = () => {
     if (!label) return undefined;
 
     if (finalStatus === 'unknown' && isDevMode) {
-      return `${label}: Dev/Mock aktif — gerçek tick akışı yok`;
+      return `${label}: ${t('service.dev_mode')} ${t('service.dev_mode_desc')}`;
     }
 
-    return `${label}: ${finalStatus === 'up' ? 'çevrimiçi' : finalStatus === 'down' ? 'çevrimdışı' : 'kontrol ediliyor'}`;
+    const statusText = finalStatus === 'up' 
+      ? t('status.online') 
+      : finalStatus === 'down' 
+        ? t('status.offline') 
+        : t('status.checking');
+
+    return `${label}: ${statusText}`;
   };
 
   return (
     <span
       className={`inline-block h-2.5 w-2.5 rounded-full ${color}`}
-      role="status"
-      aria-label={getAriaLabel()}
-      title={finalStatus === 'unknown' && isDevMode ? 'Dev/Mock aktif — gerçek tick akışı yok' : undefined}
+      aria-hidden="true"
+      title={getTooltipText()}
       data-variant={variant}
-      data-testid={label === 'WS' ? 'ws-badge' : undefined}
+      data-testid={label === t('service.ws') ? 'ws-badge' : undefined}
     />
   );
 }

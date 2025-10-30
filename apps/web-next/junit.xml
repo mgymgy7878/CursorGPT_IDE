@@ -1,6 +1,6 @@
-<testsuites id="" name="" tests="2" failures="0" skipped="1" errors="0" time="3.9245360000000002">
-<testsuite name="ws-badge.spec.ts" timestamp="2025-10-30T17:20:10.536Z" hostname="chromium" tests="2" failures="0" skipped="1" time="2.207" errors="0">
-<testcase name="WS badge deterministic › Dev/Mock: gri rozet + Dev Mode metni" classname="ws-badge.spec.ts" time="2.069">
+<testsuites id="" name="" tests="2" failures="0" skipped="1" errors="0" time="5.093618">
+<testsuite name="ws-badge.spec.ts" timestamp="2025-10-30T17:46:53.030Z" hostname="chromium" tests="2" failures="0" skipped="1" time="2.577" errors="0">
+<testcase name="WS badge deterministic › Dev/Mock: gri rozet + Dev Mode metni" classname="ws-badge.spec.ts" time="2.32">
 <system-out>
 <![CDATA[Status bar count: [33m1[39m
 First status div HTML: <div class="flex items-center gap-2"><span class="inline-block h-2.5 w-2.5 rounded-full bg-zinc-400 animate-pulse" role="status" aria-label="API: Dev/Mock aktif — gerçek tick akışı yok" title="Dev/Mock aktif — gerçek tick akışı yok" data-variant="unknown"></span><span>API</span></div><div class="flex items-center gap-2" data-testid="ws-badge" data-variant="unknown"><span class="inline-block h-2.5 w-2.5 rounded-full bg-zinc-400 animate-pulse" role="status" aria-label="WS: Dev/Mock aktif — gerçek tick akışı yok" title="Dev/Mock aktif — gerçek tick akışı yok" data-variant="unknown" data-testid="ws-badge"></span><span>WS</span></div><div class="flex items-center gap-2"><span class="inline-block h-2.5 w-2.5 rounded-full bg-zinc-400 animate-pulse" role="status" aria-label="Executor: Dev/Mock aktif — gerçek tick akışı yok" title="Dev/Mock aktif — gerçek tick akışı yok" data-variant="unknown"></span><span>Executor</span></div><div class="ml-auto"><a class="underline hover:no-underline text-zinc-400 hover:text-zinc-200" target="_blank" href="#">Koruma Doğrulama</a></div>
@@ -9,7 +9,7 @@ Badge data-variant: unknown
 ]]>
 </system-out>
 </testcase>
-<testcase name="WS badge deterministic › Prod: WS down -&gt; kırmızı" classname="ws-badge.spec.ts" time="0.138">
+<testcase name="WS badge deterministic › Prod: WS down -&gt; kırmızı" classname="ws-badge.spec.ts" time="0.257">
 <properties>
 <property name="skip" value="Sadece prod envde koşar">
 </property>

@@ -1,85 +1,112 @@
 /**
- * Format utilities - P0.2 unit standardization
+ * Tutarlı sayı, para ve süre formatlaması için utility fonksiyonları
+ * Tüm uygulama genelinde tek format standardı sağlar
  */
 
-export type TimeUnit = 'ms' | 's';
-
-/**
- * Format duration with unit - P0.2 Fix
- *
- * @param value - Duration value
- * @param unit - 'ms' for latency, 's' for staleness/threshold
- * @returns Formatted string (e.g., "58 ms", "30 sn")
- */
-export function formatDuration(value: number, unit: TimeUnit = 'ms'): string {
-  return unit === 'ms' ? `${value} ms` : `${value} sn`;
-}
+export type Currency = 'USD' | 'TRY';
+export type Locale = 'tr-TR' | 'en-US';
 
 /**
- * Format currency in Turkish locale
- *
- * @param value - Amount
- * @param locale - Locale (default: tr-TR)
- * @param currency - Currency code (default: USD)
- * @returns Formatted currency string
+ * Para birimi formatlaması
+ * @param value - Formatlanacak değer
+ * @param currency - Para birimi (USD/TRY)
+ * @param locale - Yerel ayar
+ * @returns Formatlanmış para birimi string'i
  */
-export function formatCurrency(value: number, locale = 'tr-TR', currency = 'USD'): string {
+export const fmtMoney = (
+  value: number, 
+  currency: Currency = 'USD', 
+  locale: Locale = 'tr-TR'
+): string => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(value);
-}
+};
 
 /**
- * Format number with locale-specific separators
- *
- * @param value - Number to format
- * @param locale - Locale (default: tr-TR)
- * @param options - Intl.NumberFormat options
- * @returns Formatted number string
+ * Yüzde formatlaması
+ * @param value - 0-1 arası değer (örn: 0.023 = %2.3)
+ * @param locale - Yerel ayar
+ * @returns Formatlanmış yüzde string'i
  */
-export function formatNumber(value: number, locale = 'tr-TR', options?: Intl.NumberFormatOptions): string {
-  return new Intl.NumberFormat(locale, options).format(value);
-}
+export const fmtPct = (value: number, locale: Locale = 'tr-TR'): string => {
+  return new Intl.NumberFormat(locale, {
+    style: 'percent',
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+  }).format(value);
+};
 
 /**
- * Format percentage
- *
- * @param value - Decimal value (e.g., 0.025 for 2.5%)
- * @param decimals - Number of decimal places (default: 1)
- * @returns Formatted percentage string (e.g., "+2.5%")
+ * Tam sayı formatlaması
+ * @param value - Formatlanacak değer
+ * @param locale - Yerel ayar
+ * @returns Formatlanmış tam sayı string'i
  */
-export function formatPercent(value: number, decimals = 1): string {
-  const sign = value >= 0 ? '+' : '';
-  return `${sign}${(value * 100).toFixed(decimals)}%`;
-}
+export const fmtInt = (value: number, locale: Locale = 'tr-TR'): string => {
+  return new Intl.NumberFormat(locale).format(value);
+};
 
 /**
- * Check if value meets threshold with status
- *
- * @param value - Current value
- * @param target - Target/threshold value
- * @param reverseLogic - true if lower is better (latency), false if higher is better
- * @returns Status: 'good' | 'warn' | 'bad'
+ * Süre formatlaması (milisaniye → okunabilir format)
+ * @param ms - Milisaniye cinsinden süre
+ * @returns Formatlanmış süre string'i (örn: "2.5 sn", "1 dk 30 sn")
  */
-export function thresholdStatus(
-  value: number,
-  target: number,
-  reverseLogic = true
-): 'good' | 'warn' | 'bad' {
-  const ratio = value / target;
-
-  if (reverseLogic) {
-    // Lower is better (latency)
-    if (ratio < 0.5) return 'good';
-    if (ratio < 1.0) return 'warn';
-    return 'bad';
-  } else {
-    // Higher is better (uptime, availability)
-    if (ratio > 0.9) return 'good';
-    if (ratio > 0.7) return 'warn';
-    return 'bad';
+export const fmtDuration = (ms: number): string => {
+  if (ms < 1000) {
+    return `${ms} ms`;
   }
-}
+  
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 60) {
+    return `${seconds} sn`;
+  }
+  
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  
+  if (minutes < 60) {
+    return remainingSeconds > 0 
+      ? `${minutes} dk ${remainingSeconds} sn`
+      : `${minutes} dk`;
+  }
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  return remainingMinutes > 0
+    ? `${hours} sa ${remainingMinutes} dk`
+    : `${hours} sa`;
+};
+
+/**
+ * Büyük sayılar için kısaltma (1K, 1M, 1B)
+ * @param value - Formatlanacak değer
+ * @param locale - Yerel ayar
+ * @returns Kısaltılmış sayı string'i
+ */
+export const fmtCompact = (value: number, locale: Locale = 'tr-TR'): string => {
+  return new Intl.NumberFormat(locale, {
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(value);
+};
+
+/**
+ * Tarih formatlaması
+ * @param date - Formatlanacak tarih
+ * @param locale - Yerel ayar
+ * @returns Formatlanmış tarih string'i
+ */
+export const fmtDate = (date: Date, locale: Locale = 'tr-TR'): string => {
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+};
