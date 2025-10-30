@@ -3,10 +3,13 @@
 // CI canary mode: disable standalone to use `next start` for full runtime
 const CI_CANARY = process.env.CI_CANARY === '1';
 
+// Local dev/build: conditional standalone to avoid 'next start' conflicts
+const BUILD_STANDALONE = process.env.BUILD_STANDALONE === '1';
+
 const nextConfig = {
   // Export aşamasında 500.html rename hatasını önlemek için standalone moda geçiyoruz
-  // CI canary'de kapalı (next start ile tam uyumluluk), prod'da açık
-  output: CI_CANARY ? undefined : "standalone",
+  // BUILD_STANDALONE=1 ise standalone, yoksa next start ile uyumluluk için undefined
+  output: BUILD_STANDALONE ? "standalone" : undefined,
   eslint: {
     // Build sırasında lint hatalarını yok say (D1 PASS için)
     ignoreDuringBuilds: true,

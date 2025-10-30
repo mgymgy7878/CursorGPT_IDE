@@ -53,7 +53,7 @@ export default function Settings() {
           </TabsList>
 
           <TabsContent value="exchange">
-            <div className="space-y-6">
+            <div className="space-y-4">
               <ApiForm
                 title="Binance"
                 fields={[
@@ -77,7 +77,7 @@ export default function Settings() {
           </TabsContent>
 
           <TabsContent value="ai">
-            <div className="space-y-6">
+            <div className="space-y-4">
               <ApiForm
                 title="OpenAI"
                 fields={[

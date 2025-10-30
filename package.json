@@ -8,7 +8,9 @@
     "dev:all": "pnpm --parallel --filter ./services/* dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
+    "test:coverage": "pnpm -r test:coverage",
     "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
     "clean": "pnpm -r exec rm -rf dist .next node_modules",
     "dev:exec": "pnpm --filter @spark/executor dev",
     "build:exec": "pnpm --filter @spark/executor build",
@@ -32,5 +34,12 @@
     "react-dom": "18.3.1",
     "recharts": "^3.2.1",
     "zustand": "^5.0.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "next": "14.2.13",
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
   }
 }

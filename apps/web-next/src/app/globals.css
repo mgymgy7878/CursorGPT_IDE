@@ -2,14 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Proje teması */
+/* Proje teması - WCAG AA compliant, semantic tokens */
 :root {
   color-scheme: dark;
+
+  /* Legacy (keep for now) */
   --surface: 222 20% 8%;
   --card: 222 17% 12%;
   --success: 142 70% 45%;
   --warn: 38 92% 50%;
   --danger: 0 90% 58%;
+
+  /* Status - semantic colors (WCAG AA+ on dark) */
+  --ok: #16a34a;        /* green-600 - better contrast */
+  --warn-color: #d97706;     /* amber-600 - better contrast */
+  --danger-color: #dc2626;   /* red-600 - better contrast */
+  --idle: #9ca3af;      /* gray-400 */
+
+  /* Text on dark backgrounds */
+  --text-strong: #e5e7eb; /* gray-200 */
+  --text-mute: #9ca3af;   /* gray-400 */
+
+  /* Surface hierarchy */
+  --bg-page: #0b0f14;   /* darkest */
+  --bg-card: #0f141b;   /* elevated +1 */
+  --bg-elev: #131924;   /* elevated +2 */
+
+  /* Brand accent */
+  --brand: #3b82f6;     /* blue-500 */
 }
 
 html, body {
@@ -58,15 +78,89 @@ html, body {
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
+/* PR-8: Semantic color utilities */
+.text-strong { color: var(--text-strong); }
+.text-mute { color: var(--text-mute); }
+.bg-card { background: var(--bg-card); }
+.bg-elev { background: var(--bg-elev); }
+
+.badge-ok {
+  background: color-mix(in oklab, var(--ok) 22%, black);
+  color: var(--ok);
+}
+.badge-warn {
+  background: color-mix(in oklab, var(--warn-color) 22%, black);
+  color: var(--warn-color);
+}
+.badge-danger {
+  background: color-mix(in oklab, var(--danger-color) 22%, black);
+  color: var(--danger-color);
+}
+
+/* PR-8: Density system */
+.d-compact .pad-sm { padding: 0.5rem; }
+.d-compact .pad-md { padding: 0.75rem; }
+.d-compact .row-sm { line-height: 1.25rem; height: 2.25rem; }
+.d-compact .h-card { height: 180px; }
+
+.d-comfortable .pad-sm { padding: 0.75rem; }
+.d-comfortable .pad-md { padding: 1rem; }
+.d-comfortable .row-sm { height: 2.75rem; }
+.d-comfortable .h-card { height: 220px; }
+
+/* PR-8.5: Page skeleton - refined stacking and scroll */
+.page-layout {
+  height: calc(100dvh - var(--header-h));
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--bg-page);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgb(39 39 42 / 0.5); /* zinc-800/50 */
+  isolation: isolate; /* Stacking context */
+}
+
+.page-body {
+  overflow-y: auto;
+  position: relative;
+  padding-top: var(--content-pad-y);
+}
+
+/* Content padding for pages with summary strips */
+.has-summary .page-body {
+  padding-top: calc(var(--summary-h) + var(--content-pad-y));
+}
+
+/* Sticky shadow for visual depth */
+.sticky-shadow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 12px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2), transparent);
+}
+
 /* Accessibility - Focus rings */
 :where(button, [role="button"], a, input, textarea, select):focus-visible {
   outline: 2px solid hsl(var(--success));
   outline-offset: 2px;
 }
 
-/* Sticky header support (safe-area aware) */
+/* PR-8.5: Refined header heights - consistent across all pages */
 :root {
-  --sticky-top: 56px;
+  --header-h: 56px;       /* StatusBar height */
+  --summary-h: 72px;      /* Dashboard SummaryStrip */
+  --content-pad-y: 16px;  /* Standard vertical padding */
+  --sticky-top: 56px;     /* Legacy, use --header-h */
   --shadow-scroll-top: 0 2px 8px rgba(0,0,0,0.35);
   --shadow-scroll-bottom: 0 -2px 8px rgba(0,0,0,0.35);
 }

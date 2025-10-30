@@ -1,0 +1,254 @@
+name: PR-6 E2E (monorepo + standalone + canary)
+
+on:
+  pull_request:
+    branches: [main, develop, staging]
+    paths:
+      - "apps/web-next/**"
+      - "tests/e2e/**"
+      - ".github/workflows/pr6-e2e.yml"
+      - "docs/**"
+  workflow_dispatch:
+
+jobs:
+  # 0️⃣ SIFIR NUMARALI İŞ — CANARY
+  canary_smoke:
+    name: 0 - Canary Smoke (healthz + metrics + executor)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      PORT: 3003
+      SPARK_CI_MODE: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
+
+      - name: Build web-next (for canary)
+        run: |
+          pnpm -w build
+
+      - name: Start app (standalone-aware)
+        run: |
+          cd apps/web-next
+          if [ -f ".next/standalone/server.js" ]; then
+            node .next/standalone/server.js --port 3003 &
+          else
+            pnpm start -- --port 3003 &
+          fi
+          echo $! > /tmp/next.pid
+
+      - name: Wait for /api/healthz
+        run: |
+          for i in {1..30}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3003/api/healthz || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "healthz OK"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "healthz FAILED"
+          cat /tmp/next.pid 2>/dev/null || true
+          exit 1
+
+      - name: Check metrics endpoint
+        run: |
+          curl -fsS http://127.0.0.1:3003/api/public/metrics.prom | head -n 80
+
+      - name: Check executor health (soft)
+        run: |
+          curl -fsS http://127.0.0.1:4001/api/public/engine-health | head -n 80 || true
+
+      - name: Check BIST/BTCTurk readers (optional)
+        run: |
+          curl -fsS http://127.0.0.1:3003/api/public/bist/health || echo "BIST reader not available"
+          curl -fsS http://127.0.0.1:3003/api/public/btcturk/health || echo "BTCTurk reader not available"
+
+      - name: Collect canary evidence
+        if: always()
+        run: |
+          mkdir -p evidence/canary
+
+          # Zorunlu olanlar
+          curl -s http://127.0.0.1:3003/api/healthz > evidence/canary/healthz.json || true
+          curl -s http://127.0.0.1:3003/api/public/metrics.prom > evidence/canary/metrics.prom || true
+
+          # Opsiyoneller (CI ortamına bağlı)
+          curl -s http://127.0.0.1:4001/api/public/engine-health > evidence/canary/executor.json || true
+          curl -s http://127.0.0.1:3003/api/public/bist/health > evidence/canary/bist.json || true
+          curl -s http://127.0.0.1:3003/api/public/btcturk/health > evidence/canary/btcturk.json || true
+
+      - name: Upload canary evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-evidence-canary
+          path: evidence/canary
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next.pid ]; then
+            kill $(cat /tmp/next.pid) || true
+          fi
+
+  # 1️⃣ BUILD — MONOREPO + STANDALONE
+  build_web:
+    name: 1 - Build web-next (monorepo)
+    needs: canary_smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
+
+      - name: Build workspace
+        run: |
+          pnpm -w build
+
+      - name: Upload web-next build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-next-build
+          path: |
+            apps/web-next/.next
+            apps/web-next/public
+            apps/web-next/package.json
+            apps/web-next/next.config.mjs
+            pnpm-lock.yaml
+
+  # 2️⃣ E2E — PLAYWRIGHT MATRIX + EVIDENCE
+  e2e:
+    name: 2 - Playwright E2E (matrix)
+    needs: build_web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+        shard: ["1/2", "2/2"]
+
+    env:
+      PORT: 3003
+      SPARK_CI_MODE: "true"
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:4001/api/public
+      NEXT_PUBLIC_WS_URL: ws://127.0.0.1:4001
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      CI: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
+
+      - name: Download web-next build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-next-build
+          path: apps/web-next
+
+      - name: Install Playwright
+        run: |
+          pnpm --filter web-next exec playwright install --with-deps
+
+      - name: Start app (non-standalone)
+        run: |
+          cd apps/web-next
+          node ../../node_modules/next/dist/bin/next start -p 3003 -H 127.0.0.1 &
+          echo $! > /tmp/next.pid
+
+      - name: Wait for /api/health
+        run: |
+          for i in {1..30}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3003/api/health || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "health OK"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "health FAILED"
+          cat /tmp/next.pid 2>/dev/null || true
+          exit 1
+
+      - name: Run Playwright smoke tests
+        env:
+          SKIP_WEBSERVER: '1'
+          BASE_URL: 'http://127.0.0.1:3003'
+        run: |
+          cd apps/web-next
+          pnpm exec playwright test tests/e2e/smoke.spec.ts \
+            --project=${{ matrix.browser }} \
+            --shard=${{ matrix.shard }}
+
+      - name: Collect CI evidence
+        if: always()
+        run: |
+          mkdir -p evidence/ci
+          curl -s http://127.0.0.1:3003/api/healthz > evidence/ci/healthz.json || true
+          cp -r playwright-report evidence/ci/ 2>/dev/null || true
+          cp -r test-results evidence/ci/ 2>/dev/null || true
+
+      - name: Upload Playwright artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pw-${{ matrix.browser }}-${{ matrix.shard }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+
+      - name: Upload CI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-evidence-${{ matrix.browser }}-${{ matrix.shard }}
+          path: evidence/ci
+          if-no-files-found: ignore
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next.pid ]; then
+            kill $(cat /tmp/next.pid) || true
+          fi

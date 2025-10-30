@@ -21,7 +21,7 @@ export function SecretInput({ label, placeholder, value, onChange }: Props) {
 
   return (
     <div>
-      <label className="block text-sm font-medium text-neutral-300 mb-2">
+      <label className="block text-xs font-medium text-neutral-400 mb-1.5">
         {label}
       </label>
       <div className="relative">
@@ -30,12 +30,12 @@ export function SecretInput({ label, placeholder, value, onChange }: Props) {
           placeholder={placeholder}
           value={inputValue}
           onChange={handleChange}
-          className="w-full px-3 py-2 pr-20 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none font-mono text-sm"
+          className="w-full h-9 px-3 pr-20 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none font-mono text-sm"
         />
         <button
           type="button"
           onClick={() => setShowSecret(!showSecret)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs text-neutral-400 hover:text-white transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs text-neutral-400 hover:text-white transition-colors"
         >
           {showSecret ? "Gizle" : "Göster"}
         </button>
@@ -58,7 +58,7 @@ export function ApiForm({ title, fields, onSave, onTest }: ApiFormProps) {
   const handleSave = async () => {
     await onSave(values);
     setSaved(true);
-    
+
     // Mask values after save
     const masked = Object.keys(values).reduce((acc, key) => {
       acc[key] = values[key] ? "••••••••" : "";
@@ -69,8 +69,18 @@ export function ApiForm({ title, fields, onSave, onTest }: ApiFormProps) {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const [testState, setTestState] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+
   const handleTest = async () => {
-    await onTest(values);
+    setTestState('testing');
+    try {
+      await onTest(values);
+      setTestState('success');
+      setTimeout(() => setTestState('idle'), 2000);
+    } catch (error) {
+      setTestState('error');
+      setTimeout(() => setTestState('idle'), 3000);
+    }
   };
 
   return (
@@ -86,15 +96,15 @@ export function ApiForm({ title, fields, onSave, onTest }: ApiFormProps) {
             onChange={(value) => setValues({ ...values, [field.envKey]: value })}
           />
         ))}
-        
+
         <div className="flex gap-3 pt-2">
-          <Button 
+          <Button
             onClick={handleSave}
             variant={saved ? "success" : "primary"}
           >
             {saved ? "✓ Kaydedildi" : "Kaydet"}
           </Button>
-          <Button 
+          <Button
             onClick={handleTest}
             variant="secondary"
           >

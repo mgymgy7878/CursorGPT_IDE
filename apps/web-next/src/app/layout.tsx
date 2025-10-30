@@ -11,6 +11,7 @@ import StatusBar from "@/components/status-bar";
 import LeftNav from "@/components/left-nav";
 import CopilotDock from "@/components/copilot/CopilotDock";
 import WsToast from "@/components/toast/WsToast";
+import DevModeBanner from "@/components/DevModeBanner";
 import "@/styles/theme.css";
 
 export const metadata = {
@@ -20,6 +21,8 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic';
 
+import { DensityProvider } from "@/providers/DensityProvider";
+
 export default function RootLayout({
   children,
 }: {
@@ -27,11 +30,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" className="h-full">
-      <body className="h-full bg-surface text-neutral-100 overflow-hidden">
+      <DensityProvider>
         <ThemeProvider>
           <MarketProvider>
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col" data-env={process.env.NEXT_PUBLIC_ENV}>
               <StatusBar />
+              <DevModeBanner />
               <div className="flex flex-1 overflow-hidden">
                 <LeftNav />
                 <main className="flex-1 overflow-auto pb-24 md:pb-28">
@@ -48,7 +52,7 @@ export default function RootLayout({
             <CopilotDock />
           </MarketProvider>
         </ThemeProvider>
-      </body>
+      </DensityProvider>
     </html>
   )
 }

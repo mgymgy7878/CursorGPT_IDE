@@ -2,28 +2,22 @@
 export const dynamic = "force-dynamic";
 
 import PageHeader from "@/components/layout/PageHeader";
-import StatusPills from "@/components/layout/StatusPills";
+import SummaryStrip from "@/components/dashboard/SummaryStrip";
 import KpiCard from "@/components/ui/KpiCard";
 import LiveMarketCard from "@/components/marketdata/LiveMarketCard";
 import ErrorBudgetBadge from "@/components/ops/ErrorBudgetBadge";
 import EmptyState from "@/components/ui/EmptyState";
 import { thresholdStatus } from "@/lib/format";
+import { useUnifiedStatus } from "@/hooks/useUnifiedStatus";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 import { t } from "@/lib/i18n";
-import { useMarketStore } from "@/stores/marketStore";
 import React from "react";
 
 export default function DashboardPage() {
-  // Get WS status from market store
-  const wsStatus = useMarketStore((s) => s.status);
-
-  const env = "Mock";
-  const feed =
-    wsStatus === "healthy"
-      ? "Healthy"
-      : wsStatus === "degraded"
-        ? "Degraded"
-        : "Down";
-  const broker = "Offline";
+  // PR-8: Unified status for summary strip
+  const { api, ws, executor } = useUnifiedStatus();
+  const { data: heartbeatData } = useHeartbeat();
+  const errorBudget = heartbeatData?.errorBudget ?? 0;
 
   // P0.2 Fix: Standardize units - latency in ms, staleness in seconds
   const p95Ms = 58;
@@ -69,9 +63,19 @@ export default function DashboardPage() {
         ]}
       />
 
-      <div className="mb-4">
-        <StatusPills env={env} feed={feed} broker={broker} />
-      </div>
+      {/* PR-8: At-a-glance summary strip */}
+      <SummaryStrip
+        data={{
+          errorBudget: errorBudget * 100,
+          api,
+          ws,
+          executor,
+          balance: 12847.50, // Mock
+          pnl24h: 1247.50, // Mock
+          runningStrategies: 0, // Mock
+          activeAlerts: 0, // Mock
+        }}
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
         {/* Left column - Main content */}

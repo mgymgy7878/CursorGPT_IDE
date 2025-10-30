@@ -81,17 +81,17 @@ export default function EmptyState({
 
   return (
     <div
-      className="flex flex-col items-center justify-center p-8 text-center"
+      className="flex flex-col items-center justify-center py-10 px-6 text-center"
       role="status"
       aria-live="polite"
     >
       {renderIcon()}
-      <h3 className="text-lg font-medium mb-2 text-neutral-300">{title}</h3>
-      <p className="text-sm text-neutral-400 mb-6 max-w-md leading-relaxed">{description}</p>
+      <h3 className="text-base font-semibold mb-1.5 text-neutral-300">{title}</h3>
+      <p className="text-xs text-neutral-400 mb-4 max-w-md leading-relaxed">{description}</p>
       {finalAction && (
         <button
           onClick={finalAction.onClick}
-          className={`px-4 py-2 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 ${
+          className={`px-3 py-1.5 text-sm rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 ${
             finalAction.variant === "ghost"
               ? "bg-transparent border border-zinc-700 hover:bg-zinc-800 text-neutral-300"
               : "bg-blue-600 hover:bg-blue-700 text-white focus-visible:outline-blue-500"

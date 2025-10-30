@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import IconButton from "@/components/ui/IconButton";
 import { toast } from "@/components/toast/Toaster";
 import { formatCurrency } from "@/lib/format";
 
@@ -38,6 +38,12 @@ export function OptimisticPositionsTable() {
   ]);
 
   const [pending, setPending] = useState<Record<string, boolean>>({});
+
+  // Calculate totals
+  const totalPnl = positions.reduce((sum, pos) => sum + pos.pnl, 0);
+  const totalPnlPercent = positions.length > 0
+    ? positions.reduce((sum, pos) => sum + parseFloat(pos.pnlPercent), 0) / positions.length
+    : 0;
 
   const handleClose = async (asset: string) => {
     // Optimistic UI: immediately mark as pending
@@ -119,24 +125,24 @@ export function OptimisticPositionsTable() {
   return (
     <div className="overflow-x-auto table-wrapper">
       <table className="w-full">
-        <thead>
-          <tr className="border-b border-neutral-700">
-            <th className="text-left py-3 px-2 text-sm font-medium text-neutral-400">
+        <thead className="sticky top-0 bg-card z-10">
+          <tr className="border-b border-neutral-700 row-sm">
+            <th className="text-left py-2 px-2 text-xs font-medium text-mute uppercase tracking-wide">
               Varlık
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-right py-2 px-2 text-xs font-medium text-mute uppercase tracking-wide">
               Miktar
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
-              Fiyat (USD)
+            <th className="text-right py-2 px-2 text-xs font-medium text-mute uppercase tracking-wide">
+              Fiyat
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
-              PnL (USD)
+            <th className="text-right py-2 px-2 text-xs font-medium text-mute uppercase tracking-wide">
+              PnL $
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-right py-2 px-2 text-xs font-medium text-mute uppercase tracking-wide">
               PnL %
             </th>
-            <th className="text-center py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-right py-2 px-2 text-xs font-medium text-mute uppercase tracking-wide">
               Aksiyon
             </th>
           </tr>
@@ -145,24 +151,24 @@ export function OptimisticPositionsTable() {
           {positions.map((position) => (
             <tr
               key={position.asset}
-              className={`border-b border-neutral-800 transition-opacity ${
+              className={`border-b border-neutral-800 row-sm transition-opacity hover:bg-zinc-900/30 ${
                 pending[position.asset] ? "opacity-50" : ""
               }`}
             >
-              <td className="py-3 px-2">
-                <div className="font-medium strategy-name">{position.asset}</div>
+              <td className="py-2 px-2">
+                <div className="font-medium text-sm text-strong">{position.asset}</div>
               </td>
-              <td className="py-3 px-2 text-right text-sm tabular whitespace-nowrap">{position.amount}</td>
-              <td className="py-3 px-2 text-right text-sm tabular whitespace-nowrap">{formatCurrency(position.price, 'tr-TR', 'USD')}</td>
+              <td className="py-2 px-2 text-right text-sm tabular whitespace-nowrap text-neutral-300">{position.amount}</td>
+              <td className="py-2 px-2 text-right text-sm tabular whitespace-nowrap text-neutral-300">{formatCurrency(position.price, 'tr-TR', 'USD')}</td>
               <td
-                className={`py-3 px-2 text-right text-sm tabular whitespace-nowrap ${
+                className={`py-2 px-2 text-right text-sm tabular whitespace-nowrap ${
                   position.pnl >= 0 ? "text-green-400" : "text-red-400"
                 }`}
               >
                 {position.pnl >= 0 ? '+' : ''}{formatCurrency(position.pnl, 'tr-TR', 'USD')}
               </td>
               <td
-                className={`py-3 px-2 text-right text-sm tabular whitespace-nowrap ${
+                className={`py-2 px-2 text-right text-sm tabular whitespace-nowrap ${
                   position.pnlPercent.startsWith("+")
                     ? "text-green-400"
                     : "text-red-400"
@@ -170,33 +176,47 @@ export function OptimisticPositionsTable() {
               >
                 {position.pnlPercent}
               </td>
-              <td className="py-3 px-2 text-center">
-                <div className="flex gap-2 justify-center">
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleClose(position.asset)}
-                    disabled={pending[position.asset]}
-                  >
-                    {pending[position.asset] ? "Kapatılıyor..." : "Pozisyonu Kapat"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => handleReverse(position.asset)}
-                    disabled={pending[`${position.asset}-reverse`]}
-                  >
-                    {pending[`${position.asset}-reverse`]
-                      ? "Çevriliyor..."
-                      : "Ters Pozisyon Aç"}
-                  </Button>
+              <td className="py-2 px-2">
+                <div className="flex gap-1 justify-end">
+                    <IconButton
+                      icon="SquareX"
+                      title="Pozisyonu Kapat"
+                      variant="danger"
+                      onClick={() => handleClose(position.asset)}
+                      disabled={pending[position.asset]}
+                    />
+                    <IconButton
+                      icon="ArrowLeftRight"
+                      title="Ters Pozisyon Aç"
+                      variant="neutral"
+                      onClick={() => handleReverse(position.asset)}
+                      disabled={pending[`${position.asset}-reverse`]}
+                    />
                 </div>
               </td>
             </tr>
           ))}
-        </tbody>
-      </table>
-    </div>
+                </tbody>
+              </table>
+
+              {/* Total PnL Row */}
+              <div className="mt-4 pt-3 border-t border-neutral-700">
+                <div className="flex justify-end gap-8 text-sm">
+                  <div className="text-right">
+                    <div className="text-xs text-mute uppercase tracking-wide">Toplam PnL $</div>
+                    <div className={`font-semibold tabular ${totalPnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {totalPnl >= 0 ? '+' : ''}{formatCurrency(totalPnl, 'tr-TR', 'USD')}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-mute uppercase tracking-wide">Toplam PnL %</div>
+                    <div className={`font-semibold tabular ${totalPnlPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {totalPnlPercent >= 0 ? '+' : ''}{totalPnlPercent.toFixed(2)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
   );
 }
 

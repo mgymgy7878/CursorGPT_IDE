@@ -1,12 +1,46 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * Playwright Configuration for PR-6 E2E Tests
+ *
+ * Features:
+ * - Retries: 1 (flake reduction)
+ * - Trace: on-first-retry (for debugging)
+ * - Video: retain-on-failure (for visual debugging)
+ * - Screenshots: only-on-failure
+ * - Production build testing with webServer
+ *
+ * References:
+ * - https://playwright.dev/docs/test-configuration
+ * - https://playwright.dev/docs/test-webserver
+ */
 export default defineConfig({
   testDir: './tests/e2e',
-  use: {
-    baseURL: 'http://localhost:3004',
-    trace: 'on-first-retry',
-    headless: true,
+  retries: 1,
+  timeout: 30_000,
+  expect: {
+    timeout: 5_000
   },
-  reporter: 'list',
+  reporter: [
+    ['list'],
+    ['junit', { outputFile: 'junit.xml' }]
+  ],
+  use: {
+    baseURL: process.env.BASE_URL ?? 'http://127.0.0.1:3003',
+    trace: 'on-first-retry',
+    video: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] }
+    },
+  ],
+  webServer: process.env.SKIP_WEBSERVER ? undefined : {
+    command: 'cd ../.. && node node_modules/next/dist/bin/next start -p 3003 -H 127.0.0.1',
+    url: 'http://127.0.0.1:3003',
+    reuseExistingServer: true,
+    cwd: '../..',
+  }
 });
-

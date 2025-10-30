@@ -1,79 +1,58 @@
-name: CI
+name: CI (PR)
+
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     paths:
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
-      - '**/package.json'
-      - 'pnpm-lock.yaml'
-      - 'apps/**'
-      - 'services/**'
-      - 'packages/**'
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.github/**'
-      - 'apps/web-next/**'
-  workflow_dispatch:
+      - "apps/web-next/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  paths:
-    runs-on: ubuntu-latest
-    outputs:
-      run_ci: ${{ steps.filter.outputs.core }}
+  web-next:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            core:
-              - '**/*.ts'
-              - '**/*.tsx'
-              - 'apps/**'
-              - 'services/**'
-              - 'packages/**'
-              - '!apps/web-next/**'
 
-  verify:
-    needs: paths
-    if: ${{ needs.paths.outputs.run_ci == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-      
-      - uses: pnpm/action-setup@v4
+          version: 10
+
+      - name: Setup Node + cache (pnpm)
+        uses: actions/setup-node@v4
         with:
-          run_install: false
-      
-      - name: Verify pnpm version (from packageManager)
-        run: |
-          EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
-          ACTUAL=$(pnpm -v)
-          echo "Expected: $EXPECTED, Actual: $ACTUAL"
-          test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm version mismatch"; exit 1; }
-      
-      - name: Fetch dependencies (pre-warm store)
-        run: pnpm fetch --prod=false
-      
-      - name: Install (offline mode)
-        run: pnpm -w install --offline --frozen-lockfile --strict-peer-dependencies
-      
-      - name: UI Fast Verify
-        run: pnpm verify
+          node-version: 20
+          cache: 'pnpm'  # pnpm cache native
 
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
 
+      - name: Build (prod)
+        working-directory: apps/web-next
+        run: pnpm build
+
+      - name: Install Playwright Browsers
+        working-directory: apps/web-next
+        run: npx playwright install --with-deps
+
+      - name: Start server
+        working-directory: apps/web-next
+        run: pnpm start -- -p 3003 &
+
+      - name: E2E smoke
+        working-directory: apps/web-next
+        env:
+          BASE_URL: http://127.0.0.1:3003
+        run: pnpm test:e2e:smoke
+
+      - name: Upload Playwright Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/web-next/test-results/

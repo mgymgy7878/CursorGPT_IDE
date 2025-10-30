@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import DensityToggle from "@/components/layout/DensityToggle";
 
 type Route = {
   key: string;
@@ -102,6 +103,11 @@ export default function LeftNav() {
           <NavItem key={route.path} route={route} />
         ))}
       </nav>
+
+      {/* Density Toggle */}
+      <div className="mt-auto pt-3 border-t border-zinc-800">
+        <DensityToggle />
+      </div>
     </aside>
   );
 }

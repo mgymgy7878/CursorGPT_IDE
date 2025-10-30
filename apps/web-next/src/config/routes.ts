@@ -9,6 +9,7 @@ export const appPaths = {
 export type Role = "guest" | "user" | "admin";
 
 export const redirects: Array<{ from: string; to: string }> = [
+  { from: "/", to: "/dashboard" },
   { from: "/home", to: "/dashboard" },
   { from: "/backtest-lab", to: "/backtest" },
 ];

@@ -21,7 +21,7 @@ export default function GuardrailsPage() {
     };
 
     const template = templates[templateType];
-    
+
     toast({
       type: 'success',
       title: 'Şablon Oluşturuldu (Mock)',
