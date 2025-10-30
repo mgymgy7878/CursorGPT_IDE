@@ -26,7 +26,11 @@ export default function StatusBar() {
           </span>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div
+        className="flex items-center gap-2"
+        data-testid="ws-badge"
+        data-variant={ws === 'up' ? 'success' : ws === 'down' ? 'error' : 'unknown'}
+      >
         <StatusDot status={ws} label="WS" />
         <span>{t("ws")}</span>
       </div>
