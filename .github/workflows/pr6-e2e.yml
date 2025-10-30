@@ -210,6 +210,14 @@ jobs:
           cat /tmp/next.pid 2>/dev/null || true
           exit 1
 
+      - name: WS badge (dev/mock) deterministic test
+        run: |
+          pnpm --filter web-next run test:build
+          pnpm --filter web-next run test:serve &
+          $env:PW_BASE_URL = 'http://127.0.0.1:3003'
+          pnpm --filter web-next run e2e:ws-badge
+        shell: pwsh
+
       - name: Run Playwright smoke tests
         env:
           SKIP_WEBSERVER: '1'

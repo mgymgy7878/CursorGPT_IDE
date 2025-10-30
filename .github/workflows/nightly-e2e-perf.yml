@@ -15,6 +15,7 @@ jobs:
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
+        envMode: [dev, prod]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -24,16 +25,21 @@ jobs:
           node-version: 20
           cache: 'pnpm'  # pnpm cache native
       - run: pnpm install --frozen-lockfile
-      - name: Build (non-standalone)
+      - name: Build & Serve (matrix env)
         working-directory: apps/web-next
         run: |
-          BUILD_STANDALONE=0 pnpm build
+          if [ "${{ matrix.envMode }}" = "prod" ]; then
+            pnpm run test:build:prod
+            pnpm run test:serve:prod &
+            echo "PROD serve started"
+          else
+            pnpm run test:build
+            pnpm run test:serve &
+            echo "DEV serve started"
+          fi
       - name: Install Playwright
         working-directory: apps/web-next
         run: npx playwright install --with-deps
-      - name: Start server
-        working-directory: apps/web-next
-        run: node ../../node_modules/next/dist/bin/next start -p 3003 -H 127.0.0.1 &
       - name: Wait for health
         run: |
           for i in {1..30}; do
@@ -44,6 +50,9 @@ jobs:
             sleep 2
           done
           exit 1
+      - name: WS badge deterministic spec
+        working-directory: apps/web-next
+        run: pnpm run e2e:ws-badge
       - name: Run E2E (matrix)
         working-directory: apps/web-next
         env:

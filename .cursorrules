@@ -1,0 +1,30 @@
+# CursorGPT_IDE Proje Kuralları
+
+## Dil ve İletişim
+- **TÜM AÇIKLAMALAR TÜRKÇE OLMALIDIR**
+- Proje Türkçe olduğu için tüm yanıtlar, açıklamalar ve dokümantasyon Türkçe yazılmalı
+- Kod yorumları ve değişken isimleri Türkçe olabilir
+- Teknik terimler gerekirse parantez içinde İngilizce karşılığı verilebilir
+
+## Proje Yapısı
+- Bu proje Spark Trading Platform için geliştirilmiş bir Next.js 14 uygulamasıdır
+- pnpm workspace monorepo yapısı kullanılmaktadır
+- TypeScript strict mode aktif
+- Tailwind CSS ile styling
+
+## Geliştirme Standartları
+- Tüm kod değişiklikleri önce test edilmeli
+- E2E testler Playwright ile yazılmalı
+- Environment değişkenleri .env.local dosyasında tanımlanmalı
+- Feature flag'ler NEXT_PUBLIC_ prefix'i ile başlamalı
+
+## Test Stratejisi
+- Unit testler Jest ile
+- E2E testler Playwright ile
+- Test dosyaları tests/ dizininde
+- Test ID'ler data-testid attribute'u ile
+
+## Commit Mesajları
+- Türkçe yazılmalı
+- Format: "kategori: açıklama"
+- Örnek: "test(e2e): ws rozeti için deterministik test eklendi"

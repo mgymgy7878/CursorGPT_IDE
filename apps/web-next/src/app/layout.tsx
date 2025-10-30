@@ -28,12 +28,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const env = process.env.NEXT_PUBLIC_ENV ?? 'dev'
   return (
     <html lang="tr" className="h-full">
       <DensityProvider>
         <ThemeProvider>
           <MarketProvider>
-            <div className="h-full flex flex-col" data-env={process.env.NEXT_PUBLIC_ENV}>
+            <div className="h-full flex flex-col" data-env={env}>
               <StatusBar />
               <DevModeBanner />
               <div className="flex flex-1 overflow-hidden">
