@@ -38,10 +38,9 @@ export default defineConfig({
     },
   ],
   webServer: process.env.SKIP_WEBSERVER ? undefined : {
-    command: 'cd ../.. && node node_modules/next/dist/bin/next start -p 3003 -H 127.0.0.1',
+    command: 'pnpm --filter web-next start',
     url: 'http://127.0.0.1:3003',
     reuseExistingServer: true,
-    cwd: '../..',
     timeout: 120000
   }
 });

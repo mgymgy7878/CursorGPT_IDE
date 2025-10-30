@@ -16,6 +16,7 @@ export default function StatusBar() {
       className="w-full border-b bg-zinc-950/40 backdrop-blur px-4 py-2 text-sm flex items-center gap-4"
       role="status"
       aria-live="polite"
+      data-testid="status-bar"
     >
       <div className="flex items-center gap-2">
         <StatusDot status={api} label="API" />
