@@ -1,6 +1,7 @@
 import React from 'react';
 import { Strategy } from '@/hooks/useStrategies';
 import StatusBadge from '@/components/ui/StatusBadge';
+import EmptyState from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -75,15 +76,12 @@ export const StrategyList: React.FC<StrategyListProps> = ({
   if (strategies.length === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              Henüz strateji bulunmuyor
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              İlk stratejinizi oluşturmak için yukarıdaki "Yeni Strateji" butonuna tıklayın.
-            </p>
-          </div>
+        <CardContent className="py-8">
+          <EmptyState
+            icon="FolderKanban"
+            title="Henüz strateji bulunmuyor"
+            description="İlk stratejinizi oluşturmak için yukarıdaki 'Yeni Strateji' butonuna tıklayın."
+          />
         </CardContent>
       </Card>
     );
@@ -146,12 +144,12 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 Oluşturulma: {formatDate(strategy.createdAt)}
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 {strategy.status === 'active' && (
                   <Button
@@ -189,7 +187,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                     Durdur
                   </Button>
                 )}
-                
+
                 <Button
                   size="sm"
                   variant="outline"
@@ -197,7 +195,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                 >
                   Düzenle
                 </Button>
-                
+
                 <Button
                   size="sm"
                   variant="outline"

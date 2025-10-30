@@ -1,7 +1,6 @@
 "use client";
 export const dynamic = 'force-dynamic';
 import React from "react";
-import AppShell from "@/components/layout/AppShell";
 import { MarketCard } from "../../components/market/MarketCard";
 import { useMarketStore } from "@/stores/marketStore";
 import { useMetrics } from "@/lib/hooks/useMetrics";
@@ -11,9 +10,9 @@ const symbols = ["BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","XRPUSDT","ADAUSDT","AV
 
 export default function DashboardPage(){
   return (
-    <AppShell>
+    <div className="px-6 py-4 min-h-screen bg-neutral-950">
       <Grid />
-    </AppShell>
+    </div>
   );
 }
 

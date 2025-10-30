@@ -60,12 +60,24 @@ export default function CommandPalette() {
         <div className="p-4 border-b border-neutral-800">
           <input
             type="text"
-            placeholder="Search commands..."
+            placeholder="Komut ara veya kısayol: g, m, l, s, r..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
+          {/* Keyboard shortcuts hint */}
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-neutral-500">
+            <kbd className="px-1.5 py-0.5 bg-neutral-800 border border-neutral-700 rounded">g</kbd> Dashboard
+            <span className="text-neutral-700">•</span>
+            <kbd className="px-1.5 py-0.5 bg-neutral-800 border border-neutral-700 rounded">m</kbd> Market
+            <span className="text-neutral-700">•</span>
+            <kbd className="px-1.5 py-0.5 bg-neutral-800 border border-neutral-700 rounded">l</kbd> Lab
+            <span className="text-neutral-700">•</span>
+            <kbd className="px-1.5 py-0.5 bg-neutral-800 border border-neutral-700 rounded">s</kbd> Strategies
+            <span className="text-neutral-700">•</span>
+            <kbd className="px-1.5 py-0.5 bg-neutral-800 border border-neutral-700 rounded">r</kbd> Running
+          </div>
         </div>
 
         {/* Commands List */}

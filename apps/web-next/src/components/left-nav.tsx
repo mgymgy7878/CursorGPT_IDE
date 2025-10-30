@@ -55,14 +55,18 @@ export default function LeftNav() {
         href={route.path}
         aria-current={isActive ? "page" : undefined}
         title={collapsed ? t(route.key) : undefined}
-        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-          isActive
+        className={`
+          flex items-center gap-3 rounded-lg px-3
+          h-10
+          text-sm transition-colors
+          ${isActive
             ? "bg-blue-600 text-white"
             : "hover:bg-zinc-800 text-neutral-300"
-        }`}
+          }
+        `}
       >
-        <Icon className="h-5 w-5 shrink-0" />
-        {!collapsed && <span className="truncate">{t(route.key)}</span>}
+        <Icon className="size-5 shrink-0" aria-hidden="true" />
+        {!collapsed && <span className="truncate leading-none">{t(route.key)}</span>}
       </Link>
     );
   };
@@ -77,9 +81,9 @@ export default function LeftNav() {
       <button
         onClick={() => setCollapsed(!collapsed)}
         aria-label={collapsed ? t("expand") : t("collapse")}
-        className="w-full flex items-center justify-center px-3 py-2 mb-3 rounded-lg hover:bg-zinc-800 text-neutral-400 transition-colors"
+        className="w-full flex items-center justify-center px-3 h-10 mb-3 rounded-lg hover:bg-zinc-800 text-neutral-400 transition-colors"
       >
-        {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+        {collapsed ? <ChevronRight className="size-5" /> : <ChevronLeft className="size-5" />}
       </button>
 
       {/* Primary Navigation */}

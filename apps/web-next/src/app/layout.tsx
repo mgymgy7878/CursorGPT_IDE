@@ -10,6 +10,7 @@ import MarketProvider from "@/providers/MarketProvider";
 import StatusBar from "@/components/status-bar";
 import LeftNav from "@/components/left-nav";
 import CopilotDock from "@/components/copilot/CopilotDock";
+import WsToast from "@/components/toast/WsToast";
 import "@/styles/theme.css";
 
 export const metadata = {
@@ -40,6 +41,7 @@ export default function RootLayout({
             </div>
             <ChunkGuard />
             <Toaster />
+            <WsToast />
             <ErrorSink />
             <CommandPalette />
             <FloatingActions />

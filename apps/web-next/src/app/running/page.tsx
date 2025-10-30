@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
 import DataModeBadge from "@/components/ui/DataModeBadge";
+import EmptyState from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useStrategies } from "@/hooks/useStrategies";
 
@@ -59,7 +60,15 @@ export default function RunningPage() {
       </div>
 
       {running.length === 0 && (
-        <div className="text-neutral-400">Şu anda çalışan strateji yok.</div>
+        <EmptyState
+          icon="Activity"
+          title="Şu anda çalışan strateji yok"
+          description="Stratejilerim sayfasından mevcut bir stratejiyi başlatabilir veya yeni strateji oluşturabilirsiniz"
+          action={{
+            label: "Stratejilere Git",
+            onClick: () => window.location.href = "/strategies"
+          }}
+        />
       )}
     </div>
   );

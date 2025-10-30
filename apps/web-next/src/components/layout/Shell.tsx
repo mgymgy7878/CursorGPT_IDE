@@ -1,4 +1,10 @@
 "use client";
+/**
+ * @deprecated Shell is deprecated. Use the root layout (app/layout.tsx) with LeftNav instead.
+ * This component creates a duplicate sidebar when used with the new layout system.
+ *
+ * Migration: Remove Shell wrapper from pages - content will render directly in the root layout.
+ */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";

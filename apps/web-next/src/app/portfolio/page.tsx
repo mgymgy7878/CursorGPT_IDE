@@ -1,4 +1,3 @@
-import AppShell from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { ClientDateTime } from "@/components/ui/ClientDateTime";
@@ -53,7 +52,7 @@ function LivePnL() {
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h3 
+        <h3
           className={`text-2xl font-bold num-tight ${pnl24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
           aria-live="polite"
           aria-atomic="true">
@@ -83,12 +82,12 @@ function LivePnL() {
 
 export default function Portfolio() {
   return (
-    <AppShell>
+    <div className="px-6 py-4 min-h-screen bg-neutral-950 safe-bottom">
       <PageHeader
         title="Portföy"
         subtitle="Canlı pozisyonlar, PnL ve borsa durumu"
       />
-      
+
       <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
         <Card title="Borsa Bağlantısı">
           <ExchangeStatus />
@@ -117,6 +116,6 @@ export default function Portfolio() {
           <OptimisticPositionsTable />
         </Card>
       </div>
-    </AppShell>
+    </div>
   );
 }

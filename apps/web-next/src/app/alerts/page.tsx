@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import TableSkeleton from "@/components/ui/TableSkeleton";
+import EmptyState from "@/components/ui/EmptyState";
 const AlertsControl = dynamic(()=>import("@/components/alerts/AlertsControl"), { ssr:false });
 
 type AlertItem = {
@@ -100,79 +102,89 @@ export default function AlertsPage() {
         </button>
       </div>
 
-      <div className="overflow-x-auto border border-neutral-800 rounded-xl">
-        <table className="w-full text-sm">
-          <thead className="text-left text-neutral-300 bg-neutral-900/50">
-            <tr className="border-b border-neutral-800">
-              <th className="py-3 px-4">ID</th>
-              <th className="py-3 px-4">Symbol</th>
-              <th className="py-3 px-4">TF</th>
-              <th className="py-3 px-4">Type</th>
-              <th className="py-3 px-4">Active</th>
-              <th className="py-3 px-4">Last Triggered</th>
-              <th className="py-3 px-4 text-right">Actions</th>
-              <th className="py-3 px-4">Kontrol</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((a) => (
-              <tr key={a.id} className="border-b border-neutral-900 hover:bg-neutral-900/30">
-                <td className="py-3 px-4 font-mono text-xs opacity-70">{a.id.slice(0, 8)}…</td>
-                <td className="py-3 px-4 font-semibold">{a.symbol}</td>
-                <td className="py-3 px-4">{a.timeframe}</td>
-                <td className="py-3 px-4">
-                  <span className="px-2 py-1 rounded bg-neutral-800 text-xs">{a.type}</span>
-                </td>
-                <td className="py-3 px-4">{a.active ? "🟢 Active" : "⚪ Paused"}</td>
-                <td className="py-3 px-4 text-xs">
-                  {a.lastTriggeredAt ? new Date(a.lastTriggeredAt).toLocaleString() : "-"}
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex gap-1 justify-end">
-                    <button
-                      onClick={() => enable(a.id, !a.active)}
-                      className="px-2 py-1 text-xs rounded border border-neutral-700 hover:bg-neutral-800"
-                    >
-                      {a.active ? "Pause" : "Resume"}
-                    </button>
-                    <button
-                      onClick={() => showHistory(a.id)}
-                      className="px-2 py-1 text-xs rounded border border-neutral-700 hover:bg-neutral-800"
-                    >
-                      📜
-                    </button>
-                    <button
-                      onClick={() => test(a.id)}
-                      className="px-2 py-1 text-xs rounded border border-neutral-700 hover:bg-neutral-800"
-                    >
-                      🧪
-                    </button>
-                    <button
-                      onClick={() => del(a.id)}
-                      className="px-2 py-1 text-xs rounded border border-red-700 text-red-300 hover:bg-red-900/20"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </td>
-                <td className="py-3 px-4"><AlertsControl id={a.id} onResult={(m: any)=>console.log(m)} /></td>
+      {/* P0.4 Fix: Table skeleton while loading */}
+      {loading ? (
+        <TableSkeleton
+          rows={10}
+          headers={["ID", "Symbol", "TF", "Type", "Active", "Last Triggered", "Actions", "Kontrol"]}
+          showCount
+          countLabel="Total: 0"
+        />
+      ) : items.length === 0 ? (
+        <div className="border border-neutral-800 rounded-xl p-12">
+          <EmptyState
+            title="Henüz alert yok"
+            description="Teknik analiz sayfasından hızlı uyarı oluşturabilirsiniz"
+            icon="Bell"
+            action={{
+              label: "Technical Analysis → Hızlı Uyarı",
+              onClick: () => window.location.href = "/technical-analysis"
+            }}
+          />
+        </div>
+      ) : (
+        <div className="overflow-x-auto border border-neutral-800 rounded-xl">
+          <table className="w-full text-sm">
+            <thead className="text-left text-neutral-300 bg-neutral-900/50">
+              <tr className="border-b border-neutral-800">
+                <th className="py-3 px-4">ID</th>
+                <th className="py-3 px-4">Symbol</th>
+                <th className="py-3 px-4">TF</th>
+                <th className="py-3 px-4">Type</th>
+                <th className="py-3 px-4">Active</th>
+                <th className="py-3 px-4">Last Triggered</th>
+                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4">Kontrol</th>
               </tr>
-            ))}
-            {items.length === 0 && (
-              <tr>
-                <td colSpan={8} className="py-12 text-center opacity-60 text-sm">
-                  <div className="space-y-2">
-                    <div>Henüz alert yok</div>
-                    <a href="/technical-analysis" className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm">
-                      Technical Analysis → Hızlı Uyarı
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {items.map((a) => (
+                <tr key={a.id} className="border-b border-neutral-900 hover:bg-neutral-900/30">
+                  <td className="py-3 px-4 font-mono text-xs opacity-70">{a.id.slice(0, 8)}…</td>
+                  <td className="py-3 px-4 font-semibold">{a.symbol}</td>
+                  <td className="py-3 px-4">{a.timeframe}</td>
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-1 rounded bg-neutral-800 text-xs">{a.type}</span>
+                  </td>
+                  <td className="py-3 px-4">{a.active ? "🟢 Active" : "⚪ Paused"}</td>
+                  <td className="py-3 px-4 text-xs">
+                    {a.lastTriggeredAt ? new Date(a.lastTriggeredAt).toLocaleString() : "-"}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <button
+                        onClick={() => enable(a.id, !a.active)}
+                        className="px-2 py-1 text-xs rounded border border-neutral-700 hover:bg-neutral-800"
+                      >
+                        {a.active ? "Pause" : "Resume"}
+                      </button>
+                      <button
+                        onClick={() => showHistory(a.id)}
+                        className="px-2 py-1 text-xs rounded border border-neutral-700 hover:bg-neutral-800"
+                      >
+                        📜
+                      </button>
+                      <button
+                        onClick={() => test(a.id)}
+                        className="px-2 py-1 text-xs rounded border border-neutral-700 hover:bg-neutral-800"
+                      >
+                        🧪
+                      </button>
+                      <button
+                        onClick={() => del(a.id)}
+                        className="px-2 py-1 text-xs rounded border border-red-700 text-red-300 hover:bg-red-900/20"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4"><AlertsControl id={a.id} onResult={(m: any)=>console.log(m)} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* History Modal */}
       {history && (

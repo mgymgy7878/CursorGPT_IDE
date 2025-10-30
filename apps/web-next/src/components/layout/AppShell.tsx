@@ -1,4 +1,10 @@
 "use client";
+/**
+ * @deprecated AppShell is deprecated. Use the root layout (app/layout.tsx) with LeftNav instead.
+ * This component creates a duplicate sidebar when used with the new layout system.
+ *
+ * Migration: Remove AppShell wrapper from pages - content will render directly in the root layout.
+ */
 import React from "react";
 import { StatusChip } from "./StatusChip";
 import { OpsDrawer } from "./OpsDrawer";
@@ -59,7 +65,7 @@ export default function AppShell({ children, title, subtitle }: AppShellProps) {
             </div>
             <span className="font-semibold">Spark Trading</span>
           </div>
-          
+
           <nav className="space-y-1">
             {filtered.map((item: any) => (
               <a
@@ -76,7 +82,7 @@ export default function AppShell({ children, title, subtitle }: AppShellProps) {
             ))}
           </nav>
         </div>
-        
+
         {/* Tema seçici - alt */}
         <div className="p-4 border-t border-neutral-800">
           <SafeThemeToggle />

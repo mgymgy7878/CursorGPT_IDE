@@ -9,13 +9,19 @@ export interface PageHeaderProps {
   subtitle?: string;
   chips?: Chip[];
   actions?: Action[];
+  /**
+   * Make the header sticky at the top of scrollable content
+   * @default false
+   */
+  sticky?: boolean;
 }
 
 export default function PageHeader({
   title,
   subtitle,
   chips = [],
-  actions = []
+  actions = [],
+  sticky = false,
 }: PageHeaderProps) {
   const toneClass = (t?: Chip['tone']) =>
     t === 'success' ? 'text-green-400' :
@@ -23,8 +29,12 @@ export default function PageHeader({
     t === 'info'    ? 'text-sky-300' :
                       'text-neutral-400';
 
+  const stickyClass = sticky
+    ? 'sticky top-[var(--sticky-top,56px)] z-20 bg-neutral-950/85 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/60 border-b border-zinc-800 pb-4 -mx-6 px-6 pt-4 mb-4'
+    : 'pb-4';
+
   return (
-    <div className="flex items-start justify-between gap-4 pb-4">
+    <div className={`flex items-start justify-between gap-4 ${stickyClass}`}>
       <div>
         <h1 className="text-2xl font-semibold">{title}</h1>
         {subtitle && <p className="text-sm text-neutral-400 mt-1">{subtitle}</p>}
@@ -41,12 +51,12 @@ export default function PageHeader({
         )}
       </div>
       {actions.length > 0 && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           {actions.map((a, i) => (
             <button
               key={i}
               onClick={a.onClick}
-              className={`px-3 py-2 rounded-xl transition
+              className={`px-3 py-2 rounded-xl transition whitespace-nowrap
                 ${a.variant === 'ghost'
                   ? 'bg-transparent hover:bg-card'
                   : 'bg-sky-600 hover:bg-sky-700 text-white'}`}>
