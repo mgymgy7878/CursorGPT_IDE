@@ -5,7 +5,21 @@ test.describe('WS badge', () => {
     await page.goto('/dashboard');
     // Status bar container'ı bekle (unique class combination)
     await page.locator('div.w-full.border-b.bg-zinc-950\\/40.backdrop-blur').waitFor({ state: 'visible', timeout: 15000 });
+    
+    // Debug: log what we find
     const env = await page.locator('body').getAttribute('data-env');
+    console.log('Environment:', env);
+    
+    // Check if ws-badge exists
+    const badgeCount = await page.getByTestId('ws-badge').count();
+    console.log('WS badge count:', badgeCount);
+    
+    if (badgeCount === 0) {
+      // Debug: log all testids on page
+      const allTestIds = await page.locator('[data-testid]').all();
+      console.log('All testids found:', await Promise.all(allTestIds.map(el => el.getAttribute('data-testid'))));
+    }
+    
     const badge = page.getByTestId('ws-badge').first();
     await expect(badge).toBeVisible();
 
