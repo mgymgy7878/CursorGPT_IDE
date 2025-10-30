@@ -30,7 +30,15 @@ test.describe('WS badge deterministic', () => {
     
     // Use the first status div since testid is not working
     await page.locator('div[role="status"][aria-live="polite"]').first().waitFor({ state: 'visible', timeout: 15000 });
+    
+    // Debug: check what's in the first status div
+    const firstStatusDiv = page.locator('div[role="status"][aria-live="polite"]').first();
+    const statusDivHtml = await firstStatusDiv.innerHTML();
+    console.log('First status div HTML:', statusDivHtml);
+    
     const env = await page.locator('body').getAttribute('data-env');
+    console.log('Body data-env:', env);
+    
     const badge = page.getByTestId('ws-badge').first();
     await expect(badge, 'ws-badge yok').toBeVisible();
 
