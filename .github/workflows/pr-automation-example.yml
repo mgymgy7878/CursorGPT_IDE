@@ -1,0 +1,66 @@
+name: PR Automation Example
+# This is an example workflow showing how to use the PR review request tool
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to process'
+        required: true
+        type: number
+      dry_run:
+        description: 'Run in dry-run mode (no actual changes)'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  request-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Request PR Review and Prepare Merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Use the configuration file for the specific PR
+          # Or create a dynamic configuration
+          
+          # Option 1: Use existing config file
+          if [ -f "tools/pr/pr-${{ inputs.pr_number }}-config.json" ]; then
+            npx tsx tools/pr/request-review-and-prepare-merge.ts \
+              "tools/pr/pr-${{ inputs.pr_number }}-config.json"
+          
+          # Option 2: Generate config dynamically
+          else
+            npx tsx tools/pr/request-review-and-prepare-merge.ts --json '{
+              "action": "cursor.requestReviewAndPrepareMerge",
+              "params": {
+                "pr_number": ${{ inputs.pr_number }},
+                "reviewers": ["mgymgy7878"],
+                "pr_comment": "Automated review request triggered by workflow",
+                "merge_method": "squash"
+              },
+              "dryRun": ${{ inputs.dry_run }},
+              "reason": "Workflow dispatch by ${{ github.actor }}"
+            }'
+          fi
+
+      - name: Summary
+        run: |
+          echo "### PR Automation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- PR Number: ${{ inputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
