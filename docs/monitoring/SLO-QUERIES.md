@@ -262,4 +262,3 @@ curl http://localhost:4001/api/metrics/json
 **Last Updated:** 2025-10-11  
 **Version:** v1.0.0  
 **Maintainer:** Spark Platform Team
-

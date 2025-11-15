@@ -3,7 +3,7 @@
 
 **Version:** 1.0  
 **Last Updated:** 2025-01-16  
-**Emergency Contact:** ops@spark-trading.com
+**Emergency Contact:** <ops@spark-trading.com>
 
 ---
 
@@ -262,4 +262,3 @@ curl -X POST http://localhost:3003/api/tools/kill-switch/override \
 
 *Kırmızı Düğme Runbook - Spark Trading Platform*  
 *"Panik değil, prosedür"* 🔴
-

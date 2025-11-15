@@ -814,4 +814,3 @@ export async function GET() {
 **Maintainer:** Spark Trading Team  
 **Son güncelleme:** 2025-10-27  
 **Kaynak:** Production UI Screenshots (Ekim 2025)
-

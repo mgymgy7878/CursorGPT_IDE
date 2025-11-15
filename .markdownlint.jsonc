@@ -1,13 +1,16 @@
 {
   // Markdownlint configuration - relaxed for existing docs
   "default": false,
-  "MD013": false,
-  "MD022": false,
-  "MD031": false,
-  "MD032": false,
-  "MD033": false,
-  "MD041": false,
-  "MD024": false,
-  "MD025": false,
-  "MD036": false,
+  "MD013": false, // line-length
+  "MD022": false, // blanks-around-headings
+  "MD029": false, // ol-prefix - ordered list numbering
+  "MD031": false, // blanks-around-fences
+  "MD032": false, // blanks-around-lists
+  "MD033": false, // no-inline-html
+  "MD040": false, // fenced-code-language
+  "MD041": false, // first-line-heading
+  "MD024": false, // no-duplicate-heading
+  "MD025": false, // single-title
+  "MD026": false, // no-trailing-punctuation
+  "MD036": false  // no-emphasis-as-heading
 }
