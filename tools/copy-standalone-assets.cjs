@@ -11,6 +11,13 @@
 const fs = require('fs');
 const path = require('path');
 
+// Marker: Script execution start (CI verification)
+console.log('[copy-standalone-assets] START', JSON.stringify({
+  cwd: process.cwd(),
+  __dirname: __dirname,
+  timestamp: new Date().toISOString(),
+}, null, 2));
+
 const WEB_NEXT_DIR = path.join(__dirname, '../apps/web-next');
 const STANDALONE_DIR = path.join(WEB_NEXT_DIR, '.next/standalone');
 const STATIC_DIR = path.join(WEB_NEXT_DIR, '.next/static');
@@ -105,7 +112,7 @@ try {
 if (styledJsxDir && fs.existsSync(styledJsxDir)) {
   console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir}`);
   copyDir(styledJsxDir, standaloneStyledJsxDir);
-  
+
   // Fail-fast: Verify styled-jsx was actually copied
   const targetPkgJson = path.join(standaloneStyledJsxDir, 'package.json');
   if (!fs.existsSync(targetPkgJson)) {
@@ -113,6 +120,8 @@ if (styledJsxDir && fs.existsSync(styledJsxDir)) {
     process.exit(1);
   }
   console.log(`✅ Verified: styled-jsx/package.json exists in standalone`);
+  // Marker: styled-jsx copy verified (CI verification)
+  console.log('[copy-standalone-assets] styled-jsx OK:', targetPkgJson);
 } else {
   console.error('❌ styled-jsx not found - this will cause server startup failures in CI');
   console.error('   Aborting build to prevent CI failures.');

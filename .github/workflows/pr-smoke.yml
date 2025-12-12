@@ -99,6 +99,29 @@ jobs:
             echo "No standalone, will rely on next start ⚠"
           fi
 
+      - name: Assert styled-jsx in standalone (fail-fast)
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set -e
+          STYLED_JSX_PATH="apps/web-next/.next/standalone/node_modules/styled-jsx/package.json"
+          echo "[pr-smoke] Checking styled-jsx in standalone: $STYLED_JSX_PATH"
+          if [ -f "$STYLED_JSX_PATH" ]; then
+            echo "✅ styled-jsx found in standalone: $STYLED_JSX_PATH"
+            echo "[pr-smoke] styled-jsx package.json content (first 5 lines):"
+            head -5 "$STYLED_JSX_PATH" || true
+            echo "[pr-smoke] styled-jsx directory listing:"
+            ls -la apps/web-next/.next/standalone/node_modules/styled-jsx/ | head -10
+          else
+            echo "❌ styled-jsx NOT found in standalone: $STYLED_JSX_PATH"
+            echo "[pr-smoke] Checking standalone structure:"
+            echo "Standalone root:"
+            ls -la apps/web-next/.next/standalone/ || true
+            echo "Standalone node_modules:"
+            ls -la apps/web-next/.next/standalone/node_modules/ || true
+            echo "[pr-smoke] Build log should contain '[copy-standalone-assets]' markers"
+            exit 1
+          fi
+
       - name: Start server (standalone with fallback)
         if: steps.changes.outputs.code == 'true'
         working-directory: apps/web-next
