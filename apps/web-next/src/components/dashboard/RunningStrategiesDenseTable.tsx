@@ -8,9 +8,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { cn, toDomId } from "@/lib/ui";
-import type { StrategyRow } from "@/types/telemetry";
 import useSWR from "swr";
 import { t } from "@/lib/i18n";
 import {
@@ -20,6 +18,19 @@ import {
 } from "@/lib/backtest/formatBacktestMetric";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+interface StrategyRow {
+  id: string;
+  name: string;
+  status: "running" | "inactive" | "paused" | "active";
+  pnl_1d: number;
+  sharpe_30d?: number | null;
+  winrate_30d?: number | null;
+  open_positions?: number;
+  last_run_ms?: number;
+  latency_ms?: number;
+  sparkline_30d?: number[];
+}
 
 interface StrategyTableRowProps {
   strategy: StrategyRow;
@@ -57,7 +68,7 @@ function StrategyTableRow({ strategy }: StrategyTableRowProps) {
   // İşlem yaptığı semboller
   const symbols = strategy.name
     .split(" ")
-    .filter((word) => /[A-Z]{2,}/.test(word))
+    .filter((word: string) => /[A-Z]{2,}/.test(word))
     .slice(0, 3);
 
   // Pozisyon yönü ve büyüklüğü
@@ -381,7 +392,7 @@ export default function RunningStrategiesDenseTable({
           aria-label={`${t("table.view_all")} — ${t("running.title")}`}
         >
           {t("table.view_all")}
-          <ChevronRight className="size-3" aria-hidden="true" />
+          <span className="inline-block size-3" aria-hidden="true">→</span>
         </Link>
       </div>
 
