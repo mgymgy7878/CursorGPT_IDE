@@ -18,6 +18,7 @@ const nextConfig = {
     outputFileTracingIncludes: {
       "/**": [
         "node_modules/styled-jsx/**/*",
+        "node_modules/styled-jsx/package.json",
       ],
     },
   },

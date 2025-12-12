@@ -105,9 +105,18 @@ try {
 if (styledJsxDir && fs.existsSync(styledJsxDir)) {
   console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir}`);
   copyDir(styledJsxDir, standaloneStyledJsxDir);
+  
+  // Fail-fast: Verify styled-jsx was actually copied
+  const targetPkgJson = path.join(standaloneStyledJsxDir, 'package.json');
+  if (!fs.existsSync(targetPkgJson)) {
+    console.error(`❌ styled-jsx copy failed: ${targetPkgJson} not found after copy`);
+    process.exit(1);
+  }
+  console.log(`✅ Verified: styled-jsx/package.json exists in standalone`);
 } else {
-  console.warn('⚠️  styled-jsx not found, skipping...');
-  console.warn('   This may cause server startup failures in CI.');
+  console.error('❌ styled-jsx not found - this will cause server startup failures in CI');
+  console.error('   Aborting build to prevent CI failures.');
+  process.exit(1);
 }
 
 console.log('\n✨ Standalone assets copied successfully!');
