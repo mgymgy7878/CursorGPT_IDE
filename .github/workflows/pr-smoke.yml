@@ -80,7 +80,24 @@ jobs:
 
       - name: Build web-next (standalone)
         if: steps.changes.outputs.code == 'true'
-        run: pnpm --filter web-next build
+        run: |
+          set -e
+          echo "[pr-smoke] Building web-next (standalone mode)"
+          echo "[pr-smoke] Command: pnpm --filter web-next build"
+          pnpm --filter web-next build 2>&1 | tee build.log
+          echo "[pr-smoke] Build completed. Checking for copy-standalone-assets markers..."
+          if grep -q "\[copy-standalone-assets\] START" build.log; then
+            echo "✅ [copy-standalone-assets] START marker found in build log"
+          else
+            echo "⚠️  [copy-standalone-assets] START marker NOT found in build log"
+            echo "   This may indicate the postbuild script did not run"
+          fi
+          if grep -q "\[copy-standalone-assets\] styled-jsx OK" build.log; then
+            echo "✅ [copy-standalone-assets] styled-jsx OK marker found in build log"
+          else
+            echo "⚠️  [copy-standalone-assets] styled-jsx OK marker NOT found in build log"
+            echo "   This may indicate styled-jsx copy failed"
+          fi
         env:
           NODE_ENV: production
 
@@ -103,22 +120,55 @@ jobs:
         if: steps.changes.outputs.code == 'true'
         run: |
           set -e
-          STYLED_JSX_PATH="apps/web-next/.next/standalone/node_modules/styled-jsx/package.json"
-          echo "[pr-smoke] Checking styled-jsx in standalone: $STYLED_JSX_PATH"
-          if [ -f "$STYLED_JSX_PATH" ]; then
-            echo "✅ styled-jsx found in standalone: $STYLED_JSX_PATH"
+          echo "[pr-smoke] Assert styled-jsx in standalone (fail-fast)"
+          echo "[pr-smoke] Current working directory: $(pwd)"
+          
+          # Try both paths: repo-root and app-cwd
+          PATH_REPO_ROOT="apps/web-next/.next/standalone/node_modules/styled-jsx/package.json"
+          PATH_APP_CWD=".next/standalone/node_modules/styled-jsx/package.json"
+          
+          FOUND_PATH=""
+          if [ -f "$PATH_REPO_ROOT" ]; then
+            FOUND_PATH="$PATH_REPO_ROOT"
+            echo "✅ styled-jsx found (repo-root path): $FOUND_PATH"
+          elif [ -f "$PATH_APP_CWD" ]; then
+            FOUND_PATH="$PATH_APP_CWD"
+            echo "✅ styled-jsx found (app-cwd path): $FOUND_PATH"
+          fi
+          
+          if [ -n "$FOUND_PATH" ]; then
             echo "[pr-smoke] styled-jsx package.json content (first 5 lines):"
-            head -5 "$STYLED_JSX_PATH" || true
+            head -5 "$FOUND_PATH" || true
             echo "[pr-smoke] styled-jsx directory listing:"
-            ls -la apps/web-next/.next/standalone/node_modules/styled-jsx/ | head -10
+            if [ "$FOUND_PATH" = "$PATH_REPO_ROOT" ]; then
+              ls -la apps/web-next/.next/standalone/node_modules/styled-jsx/ | head -10
+            else
+              ls -la .next/standalone/node_modules/styled-jsx/ | head -10
+            fi
           else
-            echo "❌ styled-jsx NOT found in standalone: $STYLED_JSX_PATH"
+            echo "❌ styled-jsx NOT found in standalone"
+            echo "[pr-smoke] Tried paths:"
+            echo "  - Repo-root: $PATH_REPO_ROOT (exists: $([ -f "$PATH_REPO_ROOT" ] && echo 'YES' || echo 'NO'))"
+            echo "  - App-cwd: $PATH_APP_CWD (exists: $([ -f "$PATH_APP_CWD" ] && echo 'YES' || echo 'NO'))"
+            echo "[pr-smoke] Current directory structure:"
+            echo "  - pwd: $(pwd)"
+            echo "  - apps/web-next exists: $([ -d "apps/web-next" ] && echo 'YES' || echo 'NO')"
+            echo "  - .next exists: $([ -d ".next" ] && echo 'YES' || echo 'NO')"
             echo "[pr-smoke] Checking standalone structure:"
-            echo "Standalone root:"
-            ls -la apps/web-next/.next/standalone/ || true
-            echo "Standalone node_modules:"
-            ls -la apps/web-next/.next/standalone/node_modules/ || true
-            echo "[pr-smoke] Build log should contain '[copy-standalone-assets]' markers"
+            if [ -d "apps/web-next/.next/standalone" ]; then
+              echo "Standalone root (repo-root):"
+              ls -la apps/web-next/.next/standalone/ | head -20 || true
+              echo "Standalone node_modules (repo-root):"
+              ls -la apps/web-next/.next/standalone/node_modules/ 2>/dev/null | head -20 || echo "node_modules not found"
+            elif [ -d ".next/standalone" ]; then
+              echo "Standalone root (app-cwd):"
+              ls -la .next/standalone/ | head -20 || true
+              echo "Standalone node_modules (app-cwd):"
+              ls -la .next/standalone/node_modules/ 2>/dev/null | head -20 || echo "node_modules not found"
+            else
+              echo "Standalone directory not found in either location"
+            fi
+            echo "[pr-smoke] Build log should contain '[copy-standalone-assets] START' and '[copy-standalone-assets] styled-jsx OK' markers"
             exit 1
           fi
 
