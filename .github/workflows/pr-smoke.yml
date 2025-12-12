@@ -180,11 +180,17 @@ jobs:
           HOSTNAME: 127.0.0.1
         run: |
           set -e
-          if [ -f "apps/web-next/.next/standalone/server.js" ]; then
+          # Next.js standalone structure: .next/standalone/apps/web-next/server.js
+          if [ -f "apps/web-next/.next/standalone/apps/web-next/server.js" ]; then
             # Standalone server must be run from its own directory for correct node_modules resolution
+            cd apps/web-next/.next/standalone/apps/web-next
+            nohup node server.js > ../../../../../pr-smoke-server.log 2>&1 &
+            echo "[pr-smoke] Started standalone server from: $(pwd)"
+          elif [ -f "apps/web-next/.next/standalone/server.js" ]; then
+            # Fallback: old standalone structure
             cd apps/web-next/.next/standalone
             nohup node server.js > ../../../../pr-smoke-server.log 2>&1 &
-            echo "[pr-smoke] Started standalone server from: $(pwd)"
+            echo "[pr-smoke] Started standalone server (old structure) from: $(pwd)"
           else
             cd apps/web-next
             nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
