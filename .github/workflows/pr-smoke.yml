@@ -122,11 +122,11 @@ jobs:
           set -e
           echo "[pr-smoke] Assert styled-jsx in standalone (fail-fast)"
           echo "[pr-smoke] Current working directory: $(pwd)"
-          
+
           # Try both paths: repo-root and app-cwd
           PATH_REPO_ROOT="apps/web-next/.next/standalone/node_modules/styled-jsx/package.json"
           PATH_APP_CWD=".next/standalone/node_modules/styled-jsx/package.json"
-          
+
           FOUND_PATH=""
           if [ -f "$PATH_REPO_ROOT" ]; then
             FOUND_PATH="$PATH_REPO_ROOT"
@@ -135,7 +135,7 @@ jobs:
             FOUND_PATH="$PATH_APP_CWD"
             echo "✅ styled-jsx found (app-cwd path): $FOUND_PATH"
           fi
-          
+
           if [ -n "$FOUND_PATH" ]; then
             echo "[pr-smoke] styled-jsx package.json content (first 5 lines):"
             head -5 "$FOUND_PATH" || true
@@ -174,17 +174,21 @@ jobs:
 
       - name: Start server (standalone with fallback)
         if: steps.changes.outputs.code == 'true'
-        working-directory: apps/web-next
         env:
           NODE_ENV: production
           PORT: 3003
           HOSTNAME: 127.0.0.1
         run: |
           set -e
-          if [ -f ".next/standalone/server.js" ]; then
-            nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
+          if [ -f "apps/web-next/.next/standalone/server.js" ]; then
+            # Standalone server must be run from its own directory for correct node_modules resolution
+            cd apps/web-next/.next/standalone
+            nohup node server.js > ../../../../pr-smoke-server.log 2>&1 &
+            echo "[pr-smoke] Started standalone server from: $(pwd)"
           else
+            cd apps/web-next
             nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
+            echo "[pr-smoke] Started next start fallback"
           fi
 
       - name: Wait for health (bash, 120s)
