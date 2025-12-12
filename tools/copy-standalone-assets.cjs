@@ -110,18 +110,33 @@ try {
 }
 
 if (styledJsxDir && fs.existsSync(styledJsxDir)) {
+  // Copy to root standalone node_modules (for .next/standalone/server.js)
   console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir}`);
   copyDir(styledJsxDir, standaloneStyledJsxDir);
 
-  // Fail-fast: Verify styled-jsx was actually copied
+  // Also copy to nested standalone node_modules (for .next/standalone/apps/web-next/server.js)
+  const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
+  const nestedStandaloneStyledJsxDir = path.join(nestedStandaloneNodeModules, 'styled-jsx');
+  console.log(`✅ Copying styled-jsx → ${nestedStandaloneStyledJsxDir} (nested)`);
+  copyDir(styledJsxDir, nestedStandaloneStyledJsxDir);
+
+  // Fail-fast: Verify styled-jsx was actually copied in both locations
   const targetPkgJson = path.join(standaloneStyledJsxDir, 'package.json');
+  const nestedTargetPkgJson = path.join(nestedStandaloneStyledJsxDir, 'package.json');
+  
   if (!fs.existsSync(targetPkgJson)) {
     console.error(`❌ styled-jsx copy failed: ${targetPkgJson} not found after copy`);
     process.exit(1);
   }
-  console.log(`✅ Verified: styled-jsx/package.json exists in standalone`);
+  if (!fs.existsSync(nestedTargetPkgJson)) {
+    console.error(`❌ styled-jsx nested copy failed: ${nestedTargetPkgJson} not found after copy`);
+    process.exit(1);
+  }
+  
+  console.log(`✅ Verified: styled-jsx/package.json exists in standalone (both locations)`);
   // Marker: styled-jsx copy verified (CI verification)
   console.log('[copy-standalone-assets] styled-jsx OK:', targetPkgJson);
+  console.log('[copy-standalone-assets] styled-jsx OK (nested):', nestedTargetPkgJson);
 } else {
   console.error('❌ styled-jsx not found - this will cause server startup failures in CI');
   console.error('   Aborting build to prevent CI failures.');
