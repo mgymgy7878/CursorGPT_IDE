@@ -72,20 +72,44 @@ if (fs.existsSync(PUBLIC_DIR)) {
 
 // Fix: Copy styled-jsx (Next.js internal dependency not auto-included in standalone)
 // https://github.com/vercel/next.js/issues/42641
-try {
-  const styledJsxPath = require.resolve('styled-jsx/package.json');
-  const styledJsxDir = path.dirname(styledJsxPath);
-  const standaloneNodeModules = path.join(STANDALONE_DIR, 'node_modules');
-  const standaloneStyledJsxDir = path.join(standaloneNodeModules, 'styled-jsx');
+// In pnpm workspace, styled-jsx is in .pnpm store
+const standaloneNodeModules = path.join(STANDALONE_DIR, 'node_modules');
+const standaloneStyledJsxDir = path.join(standaloneNodeModules, 'styled-jsx');
 
-  if (fs.existsSync(styledJsxDir)) {
-    console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir}`);
-    copyDir(styledJsxDir, standaloneStyledJsxDir);
-  } else {
-    console.warn('⚠️  styled-jsx not found, skipping...');
-  }
+// Try multiple resolution strategies
+let styledJsxDir = null;
+
+// Strategy 1: Try require.resolve from web-next context
+const originalCwd = process.cwd();
+try {
+  process.chdir(WEB_NEXT_DIR);
+  const styledJsxPath = require.resolve('styled-jsx/package.json');
+  styledJsxDir = path.dirname(styledJsxPath);
 } catch (err) {
-  console.warn(`⚠️  Could not resolve styled-jsx: ${err.message}`);
+  // Strategy 2: Find in pnpm store (.pnpm/styled-jsx@*/node_modules/styled-jsx)
+  const pnpmStoreDir = path.join(ROOT_DIR, 'node_modules/.pnpm');
+  if (fs.existsSync(pnpmStoreDir)) {
+    const entries = fs.readdirSync(pnpmStoreDir);
+    for (const entry of entries) {
+      if (entry.startsWith('styled-jsx@')) {
+        const candidate = path.join(pnpmStoreDir, entry, 'node_modules/styled-jsx');
+        if (fs.existsSync(candidate)) {
+          styledJsxDir = candidate;
+          break;
+        }
+      }
+    }
+  }
+} finally {
+  process.chdir(originalCwd);
+}
+
+if (styledJsxDir && fs.existsSync(styledJsxDir)) {
+  console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir}`);
+  copyDir(styledJsxDir, standaloneStyledJsxDir);
+} else {
+  console.warn('⚠️  styled-jsx not found, skipping...');
+  console.warn('   This may cause server startup failures in CI.');
 }
 
 console.log('\n✨ Standalone assets copied successfully!');
