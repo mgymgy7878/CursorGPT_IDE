@@ -72,36 +72,19 @@ if (fs.existsSync(PUBLIC_DIR)) {
 
 // Fix: Copy styled-jsx (Next.js internal dependency not auto-included in standalone)
 // https://github.com/vercel/next.js/issues/42641
-// In pnpm workspace, styled-jsx is in .pnpm store
+// Resolve styled-jsx from web-next context (store-layout independent)
 const standaloneNodeModules = path.join(STANDALONE_DIR, 'node_modules');
 const standaloneStyledJsxDir = path.join(standaloneNodeModules, 'styled-jsx');
 
-// Try multiple resolution strategies
 let styledJsxDir = null;
-
-// Strategy 1: Try require.resolve from web-next context
-const originalCwd = process.cwd();
 try {
-  process.chdir(WEB_NEXT_DIR);
-  const styledJsxPath = require.resolve('styled-jsx/package.json');
+  // Resolve from web-next context (works regardless of pnpm store layout)
+  const styledJsxPath = require.resolve('styled-jsx/package.json', {
+    paths: [WEB_NEXT_DIR],
+  });
   styledJsxDir = path.dirname(styledJsxPath);
 } catch (err) {
-  // Strategy 2: Find in pnpm store (.pnpm/styled-jsx@*/node_modules/styled-jsx)
-  const pnpmStoreDir = path.join(ROOT_DIR, 'node_modules/.pnpm');
-  if (fs.existsSync(pnpmStoreDir)) {
-    const entries = fs.readdirSync(pnpmStoreDir);
-    for (const entry of entries) {
-      if (entry.startsWith('styled-jsx@')) {
-        const candidate = path.join(pnpmStoreDir, entry, 'node_modules/styled-jsx');
-        if (fs.existsSync(candidate)) {
-          styledJsxDir = candidate;
-          break;
-        }
-      }
-    }
-  }
-} finally {
-  process.chdir(originalCwd);
+  console.warn(`⚠️  Could not resolve styled-jsx: ${err.message}`);
 }
 
 if (styledJsxDir && fs.existsSync(styledJsxDir)) {
