@@ -108,12 +108,18 @@ jobs:
 
       - name: Verify build output exists
         if: steps.changes.outputs.code == 'true'
-        working-directory: apps/web-next
         run: |
-          if [ -f ".next/standalone/server.js" ]; then
-            echo "Standalone build present ✔"
+          echo "[pr-smoke] Checking standalone server.js locations..."
+          if [ -f "apps/web-next/.next/standalone/apps/web-next/server.js" ]; then
+            echo "✅ Standalone server.js found (nested): apps/web-next/.next/standalone/apps/web-next/server.js"
+            ls -la apps/web-next/.next/standalone/apps/web-next/ | head -10
+          elif [ -f "apps/web-next/.next/standalone/server.js" ]; then
+            echo "✅ Standalone server.js found (root): apps/web-next/.next/standalone/server.js"
+            ls -la apps/web-next/.next/standalone/ | head -10
           else
-            echo "No standalone, will rely on next start ⚠"
+            echo "⚠️  No standalone server.js found, will rely on next start"
+            echo "Checking standalone structure:"
+            find apps/web-next/.next/standalone -name "server.js" 2>/dev/null || echo "No server.js found"
           fi
 
       - name: Assert styled-jsx in standalone (fail-fast)
