@@ -77,14 +77,29 @@ const standaloneNodeModules = path.join(STANDALONE_DIR, 'node_modules');
 const standaloneStyledJsxDir = path.join(standaloneNodeModules, 'styled-jsx');
 
 let styledJsxDir = null;
+
+// Strategy 1: Try require.resolve with paths (works if web-next has node_modules)
 try {
-  // Resolve from web-next context (works regardless of pnpm store layout)
   const styledJsxPath = require.resolve('styled-jsx/package.json', {
-    paths: [WEB_NEXT_DIR],
+    paths: [WEB_NEXT_DIR, ROOT_DIR],
   });
   styledJsxDir = path.dirname(styledJsxPath);
 } catch (err) {
-  console.warn(`⚠️  Could not resolve styled-jsx: ${err.message}`);
+  // Strategy 2: Find in pnpm store (.pnpm/styled-jsx@*/node_modules/styled-jsx)
+  // Fallback for pnpm workspace where modules are in .pnpm store
+  const pnpmStoreDir = path.join(ROOT_DIR, 'node_modules/.pnpm');
+  if (fs.existsSync(pnpmStoreDir)) {
+    const entries = fs.readdirSync(pnpmStoreDir);
+    for (const entry of entries) {
+      if (entry.startsWith('styled-jsx@')) {
+        const candidate = path.join(pnpmStoreDir, entry, 'node_modules/styled-jsx');
+        if (fs.existsSync(candidate)) {
+          styledJsxDir = candidate;
+          break;
+        }
+      }
+    }
+  }
 }
 
 if (styledJsxDir && fs.existsSync(styledJsxDir)) {
