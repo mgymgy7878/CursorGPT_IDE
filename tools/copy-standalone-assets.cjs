@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Copy standalone assets for Next.js production build
- * 
+ *
  * Next.js standalone mode doesn't copy static assets and public files by default.
  * This script copies them to the standalone directory for deployment.
- * 
+ *
  * Usage: node tools/copy-standalone-assets.cjs
  */
 
@@ -15,6 +15,7 @@ const WEB_NEXT_DIR = path.join(__dirname, '../apps/web-next');
 const STANDALONE_DIR = path.join(WEB_NEXT_DIR, '.next/standalone');
 const STATIC_DIR = path.join(WEB_NEXT_DIR, '.next/static');
 const PUBLIC_DIR = path.join(WEB_NEXT_DIR, 'public');
+const ROOT_DIR = path.join(__dirname, '..');
 
 /**
  * Recursively copy directory
@@ -67,6 +68,24 @@ if (fs.existsSync(PUBLIC_DIR)) {
   copyDir(PUBLIC_DIR, standalonePublicDir);
 } else {
   console.warn('⚠️  public directory not found, skipping...');
+}
+
+// Fix: Copy styled-jsx (Next.js internal dependency not auto-included in standalone)
+// https://github.com/vercel/next.js/issues/42641
+try {
+  const styledJsxPath = require.resolve('styled-jsx/package.json');
+  const styledJsxDir = path.dirname(styledJsxPath);
+  const standaloneNodeModules = path.join(STANDALONE_DIR, 'node_modules');
+  const standaloneStyledJsxDir = path.join(standaloneNodeModules, 'styled-jsx');
+
+  if (fs.existsSync(styledJsxDir)) {
+    console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir}`);
+    copyDir(styledJsxDir, standaloneStyledJsxDir);
+  } else {
+    console.warn('⚠️  styled-jsx not found, skipping...');
+  }
+} catch (err) {
+  console.warn(`⚠️  Could not resolve styled-jsx: ${err.message}`);
 }
 
 console.log('\n✨ Standalone assets copied successfully!');

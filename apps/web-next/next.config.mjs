@@ -13,6 +13,13 @@ const nextConfig = {
   experimental: {
     typedRoutes: false,
     optimizePackageImports: ["recharts"],
+    // Fix: styled-jsx is not automatically included in standalone builds
+    // https://github.com/vercel/next.js/issues/42641
+    outputFileTracingIncludes: {
+      "/**": [
+        "node_modules/styled-jsx/**/*",
+      ],
+    },
   },
   reactStrictMode: true,
   transpilePackages: [
