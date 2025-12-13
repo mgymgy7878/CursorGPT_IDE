@@ -178,30 +178,56 @@ jobs:
             exit 1
           fi
 
-      - name: Start server (standalone with fallback)
+      - name: Locate standalone server.js
         if: steps.changes.outputs.code == 'true'
+        run: |
+          set -euo pipefail
+          ROOT="apps/web-next/.next/standalone"
+          echo "STANDALONE_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+          SERVER_JS="$(find "$ROOT" -maxdepth 6 -type f -name server.js | head -n 1 || true)"
+          if [ -z "$SERVER_JS" ]; then
+            echo "❌ server.js not found under $ROOT"
+            echo "Searching for server files:"
+            find "$ROOT" -maxdepth 6 -type f -name "server.*" -print || true
+            exit 1
+          fi
+
+          echo "SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
+          echo "SERVER_DIR=$(dirname "$SERVER_JS")" >> "$GITHUB_ENV"
+          echo "✅ Found SERVER_JS=$SERVER_JS"
+          echo "✅ Found SERVER_DIR=$(dirname "$SERVER_JS")"
+
+      - name: Preflight resolve styled-jsx from server cwd
+        if: steps.changes.outputs.code == 'true'
+        working-directory: ${{ env.SERVER_DIR }}
+        run: |
+          set -euo pipefail
+          echo "[pr-smoke] Preflight: checking styled-jsx resolution from server cwd"
+          echo "[pr-smoke] Current working directory: $(pwd)"
+          echo "[pr-smoke] Resolving styled-jsx/package.json..."
+          node -e "console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
+            echo "❌ styled-jsx resolution failed"
+            echo "[pr-smoke] Checking node_modules structure:"
+            ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
+            exit 1
+          }
+
+      - name: Start standalone server
+        if: steps.changes.outputs.code == 'true'
+        working-directory: ${{ env.SERVER_DIR }}
         env:
           NODE_ENV: production
           PORT: 3003
           HOSTNAME: 127.0.0.1
         run: |
-          set -e
-          # Next.js standalone structure: .next/standalone/apps/web-next/server.js
-          if [ -f "apps/web-next/.next/standalone/apps/web-next/server.js" ]; then
-            # Standalone server must be run from its own directory for correct node_modules resolution
-            cd apps/web-next/.next/standalone/apps/web-next
-            nohup node server.js > ../../../../../pr-smoke-server.log 2>&1 &
-            echo "[pr-smoke] Started standalone server from: $(pwd)"
-          elif [ -f "apps/web-next/.next/standalone/server.js" ]; then
-            # Fallback: old standalone structure
-            cd apps/web-next/.next/standalone
-            nohup node server.js > ../../../../pr-smoke-server.log 2>&1 &
-            echo "[pr-smoke] Started standalone server (old structure) from: $(pwd)"
-          else
-            cd apps/web-next
-            nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
-            echo "[pr-smoke] Started next start fallback"
-          fi
+          set -euo pipefail
+          echo "[pr-smoke] Starting standalone server from: $(pwd)"
+          # Log to repo root (absolute path)
+          LOG_PATH="${{ github.workspace }}/pr-smoke-server.log"
+          nohup node server.js > "$LOG_PATH" 2>&1 &
+          echo "[pr-smoke] Server started in background (PID: $!)"
+          echo "[pr-smoke] Server log: $LOG_PATH"
 
       - name: Wait for health (bash, 120s)
         if: steps.changes.outputs.code == 'true'
