@@ -198,40 +198,22 @@ jobs:
           echo "✅ Found SERVER_JS=$SERVER_JS"
           echo "✅ Found SERVER_DIR=$(dirname "$SERVER_JS")"
 
-      - name: Export standalone module paths
+      - name: Export standalone module paths (absolute)
         if: steps.changes.outputs.code == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          ROOT="apps/web-next/.next/standalone"
+          ROOT="${GITHUB_WORKSPACE}/apps/web-next/.next/standalone"
+          echo "STANDALONE_ROOT=$ROOT" >> "$GITHUB_ENV"
           # Build NODE_PATH with both root and nested node_modules (if nested exists)
           NODE_PATH_VAL="$ROOT/node_modules"
           if [ -d "$ROOT/apps/web-next/node_modules" ]; then
             NODE_PATH_VAL="$NODE_PATH_VAL:$ROOT/apps/web-next/node_modules"
           fi
           echo "NODE_PATH=$NODE_PATH_VAL" >> "$GITHUB_ENV"
-          echo "✅ Exported NODE_PATH=$NODE_PATH_VAL"
+          echo "✅ Exported NODE_PATH=$NODE_PATH_VAL (absolute paths)"
 
-      - name: Preflight resolve styled-jsx under require-hook
-        if: steps.changes.outputs.code == 'true'
-        shell: bash
-        working-directory: ${{ env.SERVER_DIR }}
-        env:
-          NODE_PATH: ${{ env.NODE_PATH }}
-        run: |
-          set -euo pipefail
-          echo "[pr-smoke] Preflight: checking styled-jsx resolution under require-hook"
-          echo "[pr-smoke] Current working directory: $(pwd)"
-          echo "[pr-smoke] NODE_PATH=$NODE_PATH"
-          node -e "console.log('NODE_PATH=',process.env.NODE_PATH); console.log('globalPaths=',require('module').globalPaths)"
-          node -e "require('next/dist/server/require-hook'); console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
-            echo "❌ styled-jsx resolution failed under require-hook"
-            echo "[pr-smoke] Checking node_modules structure:"
-            ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
-            exit 1
-          }
-
-      - name: Start standalone server
+      - name: Start standalone server (with runtime preflight)
         if: steps.changes.outputs.code == 'true'
         shell: bash
         working-directory: ${{ env.SERVER_DIR }}
@@ -244,8 +226,17 @@ jobs:
           set -euo pipefail
           echo "[pr-smoke] Starting standalone server from: $(pwd)"
           echo "[pr-smoke] NODE_PATH=$NODE_PATH"
-          # Log to repo root (absolute path)
-          LOG_PATH="${{ github.workspace }}/pr-smoke-server.log"
+          # Runtime preflight: verify styled-jsx resolution under require-hook in same step as server start
+          echo "[pr-smoke] Runtime preflight: checking module resolution..."
+          node -e "console.log('NODE_PATH=',process.env.NODE_PATH); console.log('globalPaths=',require('module').globalPaths)"
+          node -e "require('next/dist/server/require-hook'); console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
+            echo "❌ styled-jsx resolution failed under require-hook (runtime preflight)"
+            echo "[pr-smoke] Checking node_modules structure:"
+            ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
+            exit 1
+          }
+          # Start server (same step, same environment)
+          LOG_PATH="${GITHUB_WORKSPACE}/pr-smoke-server.log"
           nohup node server.js > "$LOG_PATH" 2>&1 &
           echo "[pr-smoke] Server started in background (PID: $!)"
           echo "[pr-smoke] Server log: $LOG_PATH"
