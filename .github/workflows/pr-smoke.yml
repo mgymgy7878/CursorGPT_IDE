@@ -221,8 +221,12 @@ jobs:
           echo "[pr-smoke] Starting standalone server from: $(pwd)"
           # Log to repo root (absolute path)
           LOG_PATH="${{ github.workspace }}/pr-smoke-server.log"
-          # Explicitly set PORT and HOSTNAME for Next.js standalone server
-          PORT=3003 HOSTNAME=127.0.0.1 NODE_ENV=production nohup node server.js > "$LOG_PATH" 2>&1 &
+          # Add standalone node_modules to NODE_PATH so Next.js require-hook can find styled-jsx
+          # Next.js require-hook searches from pnpm store, but styled-jsx is in standalone/node_modules
+          STANDALONE_NODE_MODULES="$(pwd)/node_modules"
+          echo "[pr-smoke] NODE_PATH will include: $STANDALONE_NODE_MODULES"
+          # Explicitly set PORT, HOSTNAME, and NODE_PATH for Next.js standalone server
+          PORT=3003 HOSTNAME=127.0.0.1 NODE_ENV=production NODE_PATH="$STANDALONE_NODE_MODULES" nohup node server.js > "$LOG_PATH" 2>&1 &
           echo "[pr-smoke] Server started in background (PID: $!)"
           echo "[pr-smoke] Server log: $LOG_PATH"
           echo "[pr-smoke] Server should be listening on http://127.0.0.1:3003"
