@@ -178,45 +178,61 @@ jobs:
             exit 1
           fi
 
-      - name: Locate standalone server.js
-        if: steps.changes.outputs.code == 'true'
-        run: |
-          set -euo pipefail
-          ROOT="apps/web-next/.next/standalone"
-          echo "STANDALONE_ROOT=$ROOT" >> "$GITHUB_ENV"
-
-          SERVER_JS="$(find "$ROOT" -maxdepth 6 -type f -name server.js | head -n 1 || true)"
-          if [ -z "$SERVER_JS" ]; then
-            echo "❌ server.js not found under $ROOT"
-            echo "Searching for server files:"
-            find "$ROOT" -maxdepth 6 -type f -name "server.*" -print || true
-            exit 1
-          fi
-
-          echo "SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
-          echo "SERVER_DIR=$(dirname "$SERVER_JS")" >> "$GITHUB_ENV"
-          echo "✅ Found SERVER_JS=$SERVER_JS"
-          echo "✅ Found SERVER_DIR=$(dirname "$SERVER_JS")"
-
-      - name: Export standalone module paths (absolute)
+      - name: Isolate standalone to temp (prevent ancestor node_modules leakage)
         if: steps.changes.outputs.code == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          ROOT="${GITHUB_WORKSPACE}/apps/web-next/.next/standalone"
-          echo "STANDALONE_ROOT=$ROOT" >> "$GITHUB_ENV"
-          # Build NODE_PATH with both root and nested node_modules (if nested exists)
-          NODE_PATH_VAL="$ROOT/node_modules"
-          if [ -d "$ROOT/apps/web-next/node_modules" ]; then
-            NODE_PATH_VAL="$NODE_PATH_VAL:$ROOT/apps/web-next/node_modules"
+          SOURCE="${GITHUB_WORKSPACE}/apps/web-next/.next/standalone"
+          TARGET="${RUNNER_TEMP}/standalone-web-next"
+          
+          echo "[pr-smoke] Isolating standalone to temp directory (prevents pnpm-store next selection)"
+          echo "[pr-smoke] Source: $SOURCE"
+          echo "[pr-smoke] Target: $TARGET"
+          
+          # Clean target
+          rm -rf "$TARGET"
+          mkdir -p "$TARGET"
+          
+          # Copy standalone server tree (recursive, preserve symlinks initially)
+          echo "[pr-smoke] Copying standalone tree..."
+          cp -a "$SOURCE/." "$TARGET/"
+          
+          # Copy .next/static (server.js expects this)
+          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/.next/static" ]; then
+            mkdir -p "$TARGET/apps/web-next/.next"
+            echo "[pr-smoke] Copying .next/static..."
+            cp -a "${GITHUB_WORKSPACE}/apps/web-next/.next/static" "$TARGET/apps/web-next/.next/static"
+          fi
+          
+          # Find server.js in isolated standalone
+          SERVER_JS="$(find "$TARGET" -type f -name server.js | head -n 1)"
+          if [ -z "$SERVER_JS" ]; then
+            echo "❌ server.js not found in isolated standalone"
+            exit 1
+          fi
+          
+          SERVER_DIR="$(dirname "$SERVER_JS")"
+          echo "ISOLATED_SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
+          echo "ISOLATED_SERVER_DIR=$SERVER_DIR" >> "$GITHUB_ENV"
+          echo "ISOLATED_STANDALONE_ROOT=$TARGET" >> "$GITHUB_ENV"
+          
+          # Build NODE_PATH from isolated standalone (no ancestor node_modules)
+          NODE_PATH_VAL="$TARGET/node_modules"
+          if [ -d "$TARGET/apps/web-next/node_modules" ]; then
+            NODE_PATH_VAL="$NODE_PATH_VAL:$TARGET/apps/web-next/node_modules"
           fi
           echo "NODE_PATH=$NODE_PATH_VAL" >> "$GITHUB_ENV"
-          echo "✅ Exported NODE_PATH=$NODE_PATH_VAL (absolute paths)"
+          
+          echo "✅ Isolated standalone ready"
+          echo "✅ SERVER_JS=$SERVER_JS"
+          echo "✅ SERVER_DIR=$SERVER_DIR"
+          echo "✅ NODE_PATH=$NODE_PATH_VAL"
 
       - name: Start standalone server (with runtime preflight)
         if: steps.changes.outputs.code == 'true'
         shell: bash
-        working-directory: ${{ env.SERVER_DIR }}
+        working-directory: ${{ env.ISOLATED_SERVER_DIR }}
         env:
           PORT: "3003"
           HOSTNAME: "127.0.0.1"
@@ -224,22 +240,36 @@ jobs:
           NODE_PATH: ${{ env.NODE_PATH }}
         run: |
           set -euo pipefail
-          echo "[pr-smoke] Starting standalone server from: $(pwd)"
+          echo "[pr-smoke] Starting standalone server from isolated temp directory"
+          echo "[pr-smoke] Working directory: $(pwd)"
           echo "[pr-smoke] NODE_PATH=$NODE_PATH"
-          # Runtime preflight: verify styled-jsx resolution under require-hook in same step as server start
+          
+          # Runtime preflight: verify module resolution in isolated environment
           echo "[pr-smoke] Runtime preflight: checking module resolution..."
           node -e "console.log('NODE_PATH=',process.env.NODE_PATH); console.log('globalPaths=',require('module').globalPaths)"
+          
+          # Critical: Check which next instance is being loaded
+          # Good: .../.next/standalone/.../node_modules/next/package.json
+          # Bad: .../apps/web-next/node_modules/.pnpm/next@.../node_modules/next/package.json
+          echo "[pr-smoke] Checking which next instance is loaded..."
+          node -e "console.log('next=', require.resolve('next/package.json'))" || {
+            echo "❌ next resolution failed"
+            exit 1
+          }
+          
+          # Verify styled-jsx resolution under require-hook
           node -e "require('next/dist/server/require-hook'); console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
             echo "❌ styled-jsx resolution failed under require-hook (runtime preflight)"
             echo "[pr-smoke] Checking node_modules structure:"
             ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
             exit 1
           }
-          # Start server (same step, same environment)
+          
+          # Start server (same step, same environment, isolated from repo)
           LOG_PATH="${GITHUB_WORKSPACE}/pr-smoke-server.log"
-          # Enable NODE_DEBUG=module for detailed module resolution logging (if server fails)
-          # This shows exactly where Node.js is searching for modules
-          NODE_DEBUG=module nohup node server.js > "$LOG_PATH" 2>&1 &
+          # NODE_DEBUG=module is verbose; only enable if needed for debugging
+          # For now, keep it off to reduce log size
+          nohup node server.js > "$LOG_PATH" 2>&1 &
           echo "[pr-smoke] Server started in background (PID: $!)"
           echo "[pr-smoke] Server log: $LOG_PATH"
           echo "[pr-smoke] Server should be listening on http://127.0.0.1:3003"
@@ -257,15 +287,30 @@ jobs:
             sleep 1
           done
           echo "Health endpoint did not respond in 120s ❌"
-          echo "---- pr-smoke-server.log (tail) ----"
-          tail -n 120 pr-smoke-server.log || true
-          echo "---- styled-jsx path verification (if styled-jsx error) ----"
+          echo "---- pr-smoke-server.log (tail, last 400 lines) ----"
+          tail -n 400 pr-smoke-server.log || true
+          
+          # If styled-jsx error detected, enable NODE_DEBUG and retry once
           if grep -q "styled-jsx" pr-smoke-server.log 2>/dev/null; then
-            echo "styled-jsx error detected, checking paths:"
-            ls -la "${{ env.STANDALONE_ROOT }}/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in standalone root"
-            if [ -d "${{ env.STANDALONE_ROOT }}/apps/web-next/node_modules" ]; then
-              ls -la "${{ env.STANDALONE_ROOT }}/apps/web-next/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in nested standalone"
+            echo "---- styled-jsx error detected, enabling NODE_DEBUG and retrying ----"
+            echo "---- styled-jsx path verification ----"
+            if [ -n "${{ env.ISOLATED_STANDALONE_ROOT }}" ]; then
+              ls -la "${{ env.ISOLATED_STANDALONE_ROOT }}/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in isolated standalone root"
+              if [ -d "${{ env.ISOLATED_STANDALONE_ROOT }}/apps/web-next/node_modules" ]; then
+                ls -la "${{ env.ISOLATED_STANDALONE_ROOT }}/apps/web-next/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in nested isolated standalone"
+              fi
             fi
+            
+            # Kill existing server and restart with NODE_DEBUG
+            pkill -f "node server.js" || true
+            sleep 2
+            cd "${{ env.ISOLATED_SERVER_DIR }}"
+            PORT=3003 HOSTNAME=127.0.0.1 NODE_ENV=production NODE_PATH="${{ env.NODE_PATH }}" NODE_DEBUG=module nohup node server.js > "${GITHUB_WORKSPACE}/pr-smoke-server-debug.log" 2>&1 &
+            echo "Server restarted with NODE_DEBUG=module (PID: $!)"
+            echo "Waiting 10s for server to start..."
+            sleep 10
+            echo "---- pr-smoke-server-debug.log (tail, last 200 lines) ----"
+            tail -n 200 "${GITHUB_WORKSPACE}/pr-smoke-server-debug.log" || true
           fi
           exit 1
 
