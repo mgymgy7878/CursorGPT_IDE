@@ -193,7 +193,7 @@ jobs:
           # Clean target
           rm -rf "$TARGET"
           mkdir -p "$TARGET"
-          
+
           # Copy standalone server tree with symlink dereference (prevents broken symlinks in temp)
           # Use rsync -aL (dereference symlinks) if available, fallback to cp -aL
           echo "[pr-smoke] Copying standalone tree (dereferencing symlinks)..."
@@ -204,19 +204,8 @@ jobs:
             # cp -aL: -a = archive mode, -L = dereference symlinks (GNU cp)
             cp -aL "$SOURCE/." "$TARGET/"
           fi
-          
-          # Copy .next/static (server.js expects this) with symlink dereference
-          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/.next/static" ]; then
-            mkdir -p "$TARGET/apps/web-next/.next"
-            echo "[pr-smoke] Copying .next/static (dereferencing symlinks)..."
-            if command -v rsync >/dev/null 2>&1; then
-              rsync -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static/" "$TARGET/apps/web-next/.next/static/"
-            else
-              cp -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static" "$TARGET/apps/web-next/.next/static"
-            fi
-          fi
 
-          # Find server.js in isolated standalone
+          # Find server.js in isolated standalone first
           SERVER_JS="$(find "$TARGET" -type f -name server.js | head -n 1)"
           if [ -z "$SERVER_JS" ]; then
             echo "❌ server.js not found in isolated standalone"
@@ -224,6 +213,31 @@ jobs:
           fi
 
           SERVER_DIR="$(dirname "$SERVER_JS")"
+          APP_ROOT="$SERVER_DIR"
+          echo "[pr-smoke] Found server.js at: $SERVER_JS"
+          echo "[pr-smoke] App root (server.js directory): $APP_ROOT"
+          
+          # Copy .next/static and public to app root (next to server.js)
+          # This works for both old structure ($TARGET/server.js) and nested structure ($TARGET/apps/web-next/server.js)
+          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/.next/static" ]; then
+            mkdir -p "$APP_ROOT/.next"
+            echo "[pr-smoke] Copying .next/static to app root (dereferencing symlinks)..."
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static/" "$APP_ROOT/.next/static/" || true
+            else
+              cp -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static" "$APP_ROOT/.next/static" || true
+            fi
+          fi
+          
+          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/public" ]; then
+            echo "[pr-smoke] Copying public to app root (dereferencing symlinks)..."
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -aL "${GITHUB_WORKSPACE}/apps/web-next/public/" "$APP_ROOT/public/" || true
+            else
+              cp -aL "${GITHUB_WORKSPACE}/apps/web-next/public" "$APP_ROOT/public" || true
+            fi
+          fi
+
           echo "ISOLATED_SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
           echo "ISOLATED_SERVER_DIR=$SERVER_DIR" >> "$GITHUB_ENV"
           echo "ISOLATED_STANDALONE_ROOT=$TARGET" >> "$GITHUB_ENV"
