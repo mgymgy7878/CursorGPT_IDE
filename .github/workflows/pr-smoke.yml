@@ -216,18 +216,16 @@ jobs:
       - name: Start standalone server
         if: steps.changes.outputs.code == 'true'
         working-directory: ${{ env.SERVER_DIR }}
-        env:
-          NODE_ENV: production
-          PORT: 3003
-          HOSTNAME: 127.0.0.1
         run: |
           set -euo pipefail
           echo "[pr-smoke] Starting standalone server from: $(pwd)"
           # Log to repo root (absolute path)
           LOG_PATH="${{ github.workspace }}/pr-smoke-server.log"
-          nohup node server.js > "$LOG_PATH" 2>&1 &
+          # Explicitly set PORT and HOSTNAME for Next.js standalone server
+          PORT=3003 HOSTNAME=127.0.0.1 NODE_ENV=production nohup node server.js > "$LOG_PATH" 2>&1 &
           echo "[pr-smoke] Server started in background (PID: $!)"
           echo "[pr-smoke] Server log: $LOG_PATH"
+          echo "[pr-smoke] Server should be listening on http://127.0.0.1:3003"
 
       - name: Wait for health (bash, 120s)
         if: steps.changes.outputs.code == 'true'
