@@ -185,45 +185,56 @@ jobs:
           set -euo pipefail
           SOURCE="${GITHUB_WORKSPACE}/apps/web-next/.next/standalone"
           TARGET="${RUNNER_TEMP}/standalone-web-next"
-          
+
           echo "[pr-smoke] Isolating standalone to temp directory (prevents pnpm-store next selection)"
           echo "[pr-smoke] Source: $SOURCE"
           echo "[pr-smoke] Target: $TARGET"
-          
+
           # Clean target
           rm -rf "$TARGET"
           mkdir -p "$TARGET"
           
-          # Copy standalone server tree (recursive, preserve symlinks initially)
-          echo "[pr-smoke] Copying standalone tree..."
-          cp -a "$SOURCE/." "$TARGET/"
-          
-          # Copy .next/static (server.js expects this)
-          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/.next/static" ]; then
-            mkdir -p "$TARGET/apps/web-next/.next"
-            echo "[pr-smoke] Copying .next/static..."
-            cp -a "${GITHUB_WORKSPACE}/apps/web-next/.next/static" "$TARGET/apps/web-next/.next/static"
+          # Copy standalone server tree with symlink dereference (prevents broken symlinks in temp)
+          # Use rsync -aL (dereference symlinks) if available, fallback to cp -aL
+          echo "[pr-smoke] Copying standalone tree (dereferencing symlinks)..."
+          if command -v rsync >/dev/null 2>&1; then
+            # rsync -aL: -a = archive mode, -L = dereference symlinks
+            rsync -aL "$SOURCE/" "$TARGET/"
+          else
+            # cp -aL: -a = archive mode, -L = dereference symlinks (GNU cp)
+            cp -aL "$SOURCE/." "$TARGET/"
           fi
           
+          # Copy .next/static (server.js expects this) with symlink dereference
+          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/.next/static" ]; then
+            mkdir -p "$TARGET/apps/web-next/.next"
+            echo "[pr-smoke] Copying .next/static (dereferencing symlinks)..."
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static/" "$TARGET/apps/web-next/.next/static/"
+            else
+              cp -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static" "$TARGET/apps/web-next/.next/static"
+            fi
+          fi
+
           # Find server.js in isolated standalone
           SERVER_JS="$(find "$TARGET" -type f -name server.js | head -n 1)"
           if [ -z "$SERVER_JS" ]; then
             echo "❌ server.js not found in isolated standalone"
             exit 1
           fi
-          
+
           SERVER_DIR="$(dirname "$SERVER_JS")"
           echo "ISOLATED_SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
           echo "ISOLATED_SERVER_DIR=$SERVER_DIR" >> "$GITHUB_ENV"
           echo "ISOLATED_STANDALONE_ROOT=$TARGET" >> "$GITHUB_ENV"
-          
+
           # Build NODE_PATH from isolated standalone (no ancestor node_modules)
           NODE_PATH_VAL="$TARGET/node_modules"
           if [ -d "$TARGET/apps/web-next/node_modules" ]; then
             NODE_PATH_VAL="$NODE_PATH_VAL:$TARGET/apps/web-next/node_modules"
           fi
           echo "NODE_PATH=$NODE_PATH_VAL" >> "$GITHUB_ENV"
-          
+
           echo "✅ Isolated standalone ready"
           echo "✅ SERVER_JS=$SERVER_JS"
           echo "✅ SERVER_DIR=$SERVER_DIR"
@@ -243,11 +254,11 @@ jobs:
           echo "[pr-smoke] Starting standalone server from isolated temp directory"
           echo "[pr-smoke] Working directory: $(pwd)"
           echo "[pr-smoke] NODE_PATH=$NODE_PATH"
-          
+
           # Runtime preflight: verify module resolution in isolated environment
           echo "[pr-smoke] Runtime preflight: checking module resolution..."
           node -e "console.log('NODE_PATH=',process.env.NODE_PATH); console.log('globalPaths=',require('module').globalPaths)"
-          
+
           # Critical: Check which next instance is being loaded
           # Good: .../.next/standalone/.../node_modules/next/package.json
           # Bad: .../apps/web-next/node_modules/.pnpm/next@.../node_modules/next/package.json
@@ -256,7 +267,7 @@ jobs:
             echo "❌ next resolution failed"
             exit 1
           }
-          
+
           # Verify styled-jsx resolution under require-hook
           node -e "require('next/dist/server/require-hook'); console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
             echo "❌ styled-jsx resolution failed under require-hook (runtime preflight)"
@@ -264,7 +275,7 @@ jobs:
             ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
             exit 1
           }
-          
+
           # Start server (same step, same environment, isolated from repo)
           LOG_PATH="${GITHUB_WORKSPACE}/pr-smoke-server.log"
           # NODE_DEBUG=module is verbose; only enable if needed for debugging
@@ -289,7 +300,7 @@ jobs:
           echo "Health endpoint did not respond in 120s ❌"
           echo "---- pr-smoke-server.log (tail, last 400 lines) ----"
           tail -n 400 pr-smoke-server.log || true
-          
+
           # If styled-jsx error detected, enable NODE_DEBUG and retry once
           if grep -q "styled-jsx" pr-smoke-server.log 2>/dev/null; then
             echo "---- styled-jsx error detected, enabling NODE_DEBUG and retrying ----"
@@ -300,7 +311,7 @@ jobs:
                 ls -la "${{ env.ISOLATED_STANDALONE_ROOT }}/apps/web-next/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in nested isolated standalone"
               fi
             fi
-            
+
             # Kill existing server and restart with NODE_DEBUG
             pkill -f "node server.js" || true
             sleep 2
