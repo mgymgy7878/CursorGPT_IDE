@@ -196,13 +196,19 @@ jobs:
 
           # Copy standalone server tree with symlink dereference (prevents broken symlinks in temp)
           # Use rsync -aL (dereference symlinks) if available, fallback to cp -aL
+          # --copy-unsafe-links: copy files pointed to by symlinks even if symlink is broken
           echo "[pr-smoke] Copying standalone tree (dereferencing symlinks)..."
           if command -v rsync >/dev/null 2>&1; then
             # rsync -aL: -a = archive mode, -L = dereference symlinks
-            rsync -aL "$SOURCE/" "$TARGET/"
+            # --copy-unsafe-links: handle broken symlinks gracefully
+            rsync -aL --copy-unsafe-links "$SOURCE/" "$TARGET/" || {
+              echo "⚠️  rsync encountered some errors (broken symlinks), continuing..."
+            }
           else
             # cp -aL: -a = archive mode, -L = dereference symlinks (GNU cp)
-            cp -aL "$SOURCE/." "$TARGET/"
+            cp -aL "$SOURCE/." "$TARGET/" || {
+              echo "⚠️  cp encountered some errors (broken symlinks), continuing..."
+            }
           fi
 
           # Find server.js in isolated standalone first
@@ -216,7 +222,7 @@ jobs:
           APP_ROOT="$SERVER_DIR"
           echo "[pr-smoke] Found server.js at: $SERVER_JS"
           echo "[pr-smoke] App root (server.js directory): $APP_ROOT"
-          
+
           # Copy .next/static and public to app root (next to server.js)
           # This works for both old structure ($TARGET/server.js) and nested structure ($TARGET/apps/web-next/server.js)
           if [ -d "${GITHUB_WORKSPACE}/apps/web-next/.next/static" ]; then
@@ -228,7 +234,7 @@ jobs:
               cp -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static" "$APP_ROOT/.next/static" || true
             fi
           fi
-          
+
           if [ -d "${GITHUB_WORKSPACE}/apps/web-next/public" ]; then
             echo "[pr-smoke] Copying public to app root (dereferencing symlinks)..."
             if command -v rsync >/dev/null 2>&1; then
