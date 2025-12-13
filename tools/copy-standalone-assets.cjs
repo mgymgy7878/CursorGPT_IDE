@@ -111,19 +111,21 @@ try {
 
 if (styledJsxDir && fs.existsSync(styledJsxDir)) {
   // Copy to root standalone node_modules (for .next/standalone/server.js)
-  console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir}`);
-  copyDir(styledJsxDir, standaloneStyledJsxDir);
+  // Use fs.cpSync with dereference:true to resolve symlinks (pnpm store symlinks)
+  // This ensures CI runtime can resolve styled-jsx even if symlink target is broken
+  console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir} (dereferencing symlinks)`);
+  fs.cpSync(styledJsxDir, standaloneStyledJsxDir, { recursive: true, dereference: true });
 
   // Also copy to nested standalone node_modules (for .next/standalone/apps/web-next/server.js)
   const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
   const nestedStandaloneStyledJsxDir = path.join(nestedStandaloneNodeModules, 'styled-jsx');
-  console.log(`✅ Copying styled-jsx → ${nestedStandaloneStyledJsxDir} (nested)`);
-  copyDir(styledJsxDir, nestedStandaloneStyledJsxDir);
+  console.log(`✅ Copying styled-jsx → ${nestedStandaloneStyledJsxDir} (nested, dereferencing symlinks)`);
+  fs.cpSync(styledJsxDir, nestedStandaloneStyledJsxDir, { recursive: true, dereference: true });
 
   // Fail-fast: Verify styled-jsx was actually copied in both locations
   const targetPkgJson = path.join(standaloneStyledJsxDir, 'package.json');
   const nestedTargetPkgJson = path.join(nestedStandaloneStyledJsxDir, 'package.json');
-  
+
   if (!fs.existsSync(targetPkgJson)) {
     console.error(`❌ styled-jsx copy failed: ${targetPkgJson} not found after copy`);
     process.exit(1);
@@ -132,7 +134,7 @@ if (styledJsxDir && fs.existsSync(styledJsxDir)) {
     console.error(`❌ styled-jsx nested copy failed: ${nestedTargetPkgJson} not found after copy`);
     process.exit(1);
   }
-  
+
   console.log(`✅ Verified: styled-jsx/package.json exists in standalone (both locations)`);
   // Marker: styled-jsx copy verified (CI verification)
   console.log('[copy-standalone-assets] styled-jsx OK:', targetPkgJson);

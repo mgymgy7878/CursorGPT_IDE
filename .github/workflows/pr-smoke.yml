@@ -237,7 +237,9 @@ jobs:
           }
           # Start server (same step, same environment)
           LOG_PATH="${GITHUB_WORKSPACE}/pr-smoke-server.log"
-          nohup node server.js > "$LOG_PATH" 2>&1 &
+          # Enable NODE_DEBUG=module for detailed module resolution logging (if server fails)
+          # This shows exactly where Node.js is searching for modules
+          NODE_DEBUG=module nohup node server.js > "$LOG_PATH" 2>&1 &
           echo "[pr-smoke] Server started in background (PID: $!)"
           echo "[pr-smoke] Server log: $LOG_PATH"
           echo "[pr-smoke] Server should be listening on http://127.0.0.1:3003"
@@ -257,6 +259,14 @@ jobs:
           echo "Health endpoint did not respond in 120s ❌"
           echo "---- pr-smoke-server.log (tail) ----"
           tail -n 120 pr-smoke-server.log || true
+          echo "---- styled-jsx path verification (if styled-jsx error) ----"
+          if grep -q "styled-jsx" pr-smoke-server.log 2>/dev/null; then
+            echo "styled-jsx error detected, checking paths:"
+            ls -la "${{ env.STANDALONE_ROOT }}/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in standalone root"
+            if [ -d "${{ env.STANDALONE_ROOT }}/apps/web-next/node_modules" ]; then
+              ls -la "${{ env.STANDALONE_ROOT }}/apps/web-next/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in nested standalone"
+            fi
+          fi
           exit 1
 
       - name: Extra health poll (curl)
