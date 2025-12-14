@@ -190,12 +190,16 @@ function copyPackageToStandalone(packageName) {
 
   // Copy to root standalone node_modules
   const standalonePackageDir = path.join(standaloneNodeModules, packageName);
+  // Ensure parent directory exists (cpSync doesn't create parent dirs)
+  fs.mkdirSync(standaloneNodeModules, { recursive: true });
   console.log(`✅ Copying ${packageName} → ${standalonePackageDir} (dereferencing symlinks)`);
   fs.cpSync(packageDir, standalonePackageDir, { recursive: true, dereference: true });
 
   // Also copy to nested standalone node_modules
   const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
   const nestedStandalonePackageDir = path.join(nestedStandaloneNodeModules, packageName);
+  // Ensure parent directory exists
+  fs.mkdirSync(nestedStandaloneNodeModules, { recursive: true });
   console.log(`✅ Copying ${packageName} → ${nestedStandalonePackageDir} (nested, dereferencing symlinks)`);
   fs.cpSync(packageDir, nestedStandalonePackageDir, { recursive: true, dereference: true });
 
