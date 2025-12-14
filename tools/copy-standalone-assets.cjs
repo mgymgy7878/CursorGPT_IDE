@@ -48,6 +48,24 @@ function copyDir(src, dest) {
   }
 }
 
+/**
+ * EEXIST-proof utility functions for package copying
+ */
+
+// Ensure parent directory exists (recursive)
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+// Remove target if it exists (file/dir/symlink - handles EEXIST/broken symlinks)
+function rmIfExists(targetPath) {
+  try {
+    fs.rmSync(targetPath, { recursive: true, force: true });
+  } catch (err) {
+    // Ignore errors (file may not exist, or already removed)
+  }
+}
+
 console.log('📦 Copying standalone assets...\n');
 
 // Check if standalone build exists
@@ -111,16 +129,34 @@ try {
 
 if (styledJsxDir && fs.existsSync(styledJsxDir)) {
   // Copy to root standalone node_modules (for .next/standalone/server.js)
-  // Use fs.cpSync with dereference:true to resolve symlinks (pnpm store symlinks)
-  // This ensures CI runtime can resolve styled-jsx even if symlink target is broken
-  console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir} (dereferencing symlinks)`);
-  fs.cpSync(styledJsxDir, standaloneStyledJsxDir, { recursive: true, dereference: true });
-
-  // Also copy to nested standalone node_modules (for .next/standalone/apps/web-next/server.js)
+  // Use EEXIST-proof copyPkgDir to handle broken symlinks/empty dirs
   const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
   const nestedStandaloneStyledJsxDir = path.join(nestedStandaloneNodeModules, 'styled-jsx');
+  
+  // Ensure parent directories exist
+  ensureDir(standaloneNodeModules);
+  ensureDir(nestedStandaloneNodeModules);
+  
+  // Remove existing targets (handles broken symlinks, empty dirs)
+  rmIfExists(standaloneStyledJsxDir);
+  rmIfExists(nestedStandaloneStyledJsxDir);
+  
+  // Copy with dereference (resolve symlinks to actual files)
+  console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir} (dereferencing symlinks)`);
+  fs.cpSync(styledJsxDir, standaloneStyledJsxDir, {
+    recursive: true,
+    dereference: true,
+    force: true,
+    errorOnExist: false,
+  });
+  
   console.log(`✅ Copying styled-jsx → ${nestedStandaloneStyledJsxDir} (nested, dereferencing symlinks)`);
-  fs.cpSync(styledJsxDir, nestedStandaloneStyledJsxDir, { recursive: true, dereference: true });
+  fs.cpSync(styledJsxDir, nestedStandaloneStyledJsxDir, {
+    recursive: true,
+    dereference: true,
+    force: true,
+    errorOnExist: false,
+  });
 
   // Fail-fast: Verify styled-jsx was actually copied in both locations
   const targetPkgJson = path.join(standaloneStyledJsxDir, 'package.json');
@@ -149,18 +185,31 @@ if (styledJsxDir && fs.existsSync(styledJsxDir)) {
 // These are required for runtime but may be missing due to broken symlinks in pnpm store
 const CORE_PACKAGES = ['next', 'react', 'react-dom', 'scheduler'];
 
-/**
- * Copy a package to standalone node_modules (both root and nested)
- */
-function copyPackageToStandalone(packageName) {
-  let packageDir = null;
+// Copy package directory with EEXIST-proof handling
+function copyPkgDir(srcDir, dstDir) {
+  // 1) Ensure parent node_modules directory exists
+  ensureDir(path.dirname(dstDir));
+  // 2) Remove existing target (handles broken symlinks, empty dirs, files)
+  rmIfExists(dstDir);
+  // 3) Copy with dereference (resolve symlinks to actual files)
+  fs.cpSync(srcDir, dstDir, {
+    recursive: true,
+    dereference: true,
+    force: true,
+    errorOnExist: false,
+  });
+}
 
+/**
+ * Find package directory (require.resolve or pnpm store fallback)
+ */
+function findPackageDir(packageName) {
   // Strategy 1: Try require.resolve
   try {
     const packagePath = require.resolve(`${packageName}/package.json`, {
       paths: [WEB_NEXT_DIR, ROOT_DIR],
     });
-    packageDir = path.dirname(packagePath);
+    return path.dirname(packagePath);
   } catch (err) {
     // Strategy 2: Find in pnpm store
     const pnpmStoreDir = path.join(ROOT_DIR, 'node_modules/.pnpm');
@@ -170,13 +219,20 @@ function copyPackageToStandalone(packageName) {
         if (entry.startsWith(`${packageName}@`)) {
           const candidate = path.join(pnpmStoreDir, entry, `node_modules/${packageName}`);
           if (fs.existsSync(candidate)) {
-            packageDir = candidate;
-            break;
+            return candidate;
           }
         }
       }
     }
   }
+  return null;
+}
+
+/**
+ * Copy a package to standalone node_modules (both root and nested)
+ */
+function copyPackageToStandalone(packageName) {
+  const packageDir = findPackageDir(packageName);
 
   if (!packageDir || !fs.existsSync(packageDir)) {
     // scheduler is optional, others are critical
@@ -190,26 +246,14 @@ function copyPackageToStandalone(packageName) {
 
   // Copy to root standalone node_modules
   const standalonePackageDir = path.join(standaloneNodeModules, packageName);
-  // Ensure parent directory exists (cpSync doesn't create parent dirs)
-  fs.mkdirSync(standaloneNodeModules, { recursive: true });
-  // Remove existing target if it exists (may be broken symlink or empty dir from Next.js build)
-  if (fs.existsSync(standalonePackageDir)) {
-    fs.rmSync(standalonePackageDir, { recursive: true, force: true });
-  }
+  copyPkgDir(packageDir, standalonePackageDir);
   console.log(`✅ Copying ${packageName} → ${standalonePackageDir} (dereferencing symlinks)`);
-  fs.cpSync(packageDir, standalonePackageDir, { recursive: true, dereference: true });
 
-  // Also copy to nested standalone node_modules
+  // Copy to nested standalone node_modules
   const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
   const nestedStandalonePackageDir = path.join(nestedStandaloneNodeModules, packageName);
-  // Ensure parent directory exists
-  fs.mkdirSync(nestedStandaloneNodeModules, { recursive: true });
-  // Remove existing target if it exists
-  if (fs.existsSync(nestedStandalonePackageDir)) {
-    fs.rmSync(nestedStandalonePackageDir, { recursive: true, force: true });
-  }
+  copyPkgDir(packageDir, nestedStandalonePackageDir);
   console.log(`✅ Copying ${packageName} → ${nestedStandalonePackageDir} (nested, dereferencing symlinks)`);
-  fs.cpSync(packageDir, nestedStandalonePackageDir, { recursive: true, dereference: true });
 
   // Verify copy
   const targetPkgJson = path.join(standalonePackageDir, 'package.json');
