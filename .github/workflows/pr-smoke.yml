@@ -21,7 +21,7 @@ jobs:
         id: changes
         uses: dorny/paths-filter@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           filters: |
             docs:
               - 'docs/**'
@@ -190,6 +190,17 @@ jobs:
           echo "[pr-smoke] Source: $SOURCE"
           echo "[pr-smoke] Target: $TARGET"
 
+          # Broken symlink envanteri (kanıt): isolate kopyasından önce
+          echo "[pr-smoke] Broken symlink inventory (pre-isolate)..."
+          BROKEN_COUNT=$(find "$SOURCE" -xtype l 2>/dev/null | wc -l | tr -d ' ')
+          echo "[pr-smoke] Broken symlinks found: $BROKEN_COUNT"
+          if [ "$BROKEN_COUNT" -gt 0 ]; then
+            echo "[pr-smoke] Listing broken symlinks (first 200):"
+            find "$SOURCE" -xtype l 2>/dev/null | head -200 | while read -r link; do
+              echo "  BROKEN: $link -> $(readlink "$link" 2>/dev/null || echo 'target missing')"
+            done
+          fi
+
           # Clean target
           rm -rf "$TARGET"
           mkdir -p "$TARGET"
@@ -198,17 +209,33 @@ jobs:
           # Use rsync -aL (dereference symlinks) if available, fallback to cp -aL
           # --copy-unsafe-links: copy files pointed to by symlinks even if symlink is broken
           echo "[pr-smoke] Copying standalone tree (dereferencing symlinks)..."
+          RSYNC_EXIT=0
           if command -v rsync >/dev/null 2>&1; then
             # rsync -aL: -a = archive mode, -L = dereference symlinks
             # --copy-unsafe-links: handle broken symlinks gracefully
-            rsync -aL --copy-unsafe-links "$SOURCE/" "$TARGET/" || {
-              echo "⚠️  rsync encountered some errors (broken symlinks), continuing..."
-            }
+            rsync -aL --copy-unsafe-links "$SOURCE/" "$TARGET/" || RSYNC_EXIT=$?
+            if [ $RSYNC_EXIT -eq 23 ]; then
+              echo "⚠️  rsync exit 23 (broken symlinks detected) - treating as warning, continuing..."
+              echo "[pr-smoke] rsync 23: broken symlinks were skipped (expected with --copy-unsafe-links)"
+            elif [ $RSYNC_EXIT -ne 0 ]; then
+              echo "⚠️  rsync encountered errors (exit $RSYNC_EXIT), continuing..."
+            fi
           else
             # cp -aL: -a = archive mode, -L = dereference symlinks (GNU cp)
             cp -aL "$SOURCE/." "$TARGET/" || {
               echo "⚠️  cp encountered some errors (broken symlinks), continuing..."
             }
+          fi
+
+          # Broken symlink envanteri (kanıt): isolate kopyasından sonra
+          echo "[pr-smoke] Broken symlink inventory (post-isolate)..."
+          BROKEN_COUNT_AFTER=$(find "$TARGET" -xtype l 2>/dev/null | wc -l | tr -d ' ')
+          echo "[pr-smoke] Broken symlinks in isolated copy: $BROKEN_COUNT_AFTER"
+          if [ "$BROKEN_COUNT_AFTER" -gt 0 ]; then
+            echo "[pr-smoke] WARNING: Broken symlinks still present in isolated copy (first 200):"
+            find "$TARGET" -xtype l 2>/dev/null | head -200 | while read -r link; do
+              echo "  BROKEN: $link -> $(readlink "$link" 2>/dev/null || echo 'target missing')"
+            done
           fi
 
           # Find server.js in isolated standalone first
@@ -255,6 +282,31 @@ jobs:
           fi
           echo "NODE_PATH=$NODE_PATH_VAL" >> "$GITHUB_ENV"
 
+          # Verify critical modules exist in isolated copy (fail-fast before preflight)
+          echo "[pr-smoke] Verifying critical modules in isolated copy..."
+          NEXT_FOUND=false
+          if [ -f "$TARGET/node_modules/next/package.json" ]; then
+            NEXT_FOUND=true
+            echo "✅ next found: $TARGET/node_modules/next/package.json"
+          elif [ -f "$TARGET/apps/web-next/node_modules/next/package.json" ]; then
+            NEXT_FOUND=true
+            echo "✅ next found: $TARGET/apps/web-next/node_modules/next/package.json"
+          fi
+          if [ "$NEXT_FOUND" = false ]; then
+            echo "❌ next/package.json not found in isolated copy"
+            echo "[pr-smoke] Checking isolated structure:"
+            ls -la "$TARGET/" | head -20
+            if [ -d "$TARGET/node_modules" ]; then
+              echo "[pr-smoke] Root node_modules contents:"
+              ls -la "$TARGET/node_modules/" | head -20
+            fi
+            if [ -d "$TARGET/apps/web-next/node_modules" ]; then
+              echo "[pr-smoke] Nested node_modules contents:"
+              ls -la "$TARGET/apps/web-next/node_modules/" | head -20
+            fi
+            exit 1
+          fi
+
           echo "✅ Isolated standalone ready"
           echo "✅ SERVER_JS=$SERVER_JS"
           echo "✅ SERVER_DIR=$SERVER_DIR"
@@ -288,13 +340,55 @@ jobs:
             exit 1
           }
 
-          # Verify styled-jsx resolution under require-hook
-          node -e "require('next/dist/server/require-hook'); console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
-            echo "❌ styled-jsx resolution failed under require-hook (runtime preflight)"
-            echo "[pr-smoke] Checking node_modules structure:"
-            ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
+          # Runtime preflight: verify core packages under require-hook (same resolution path as server runtime)
+          # This catches "silent missing copy" risks that rsync 23 might have skipped
+          echo "[pr-smoke] Runtime preflight: verifying core packages under require-hook..."
+          PREFLIGHT_FAILED=0
+
+          # Load require-hook (Next.js internal module resolution)
+          node -e "require('next/dist/server/require-hook')" || {
+            echo "❌ require-hook load failed"
             exit 1
           }
+
+          # Verify styled-jsx (already checked, but keep for consistency)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
+            echo "❌ styled-jsx resolution failed under require-hook (runtime preflight)"
+            PREFLIGHT_FAILED=1
+          }
+
+          # Verify react (core dependency)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ react resolved:', require.resolve('react/package.json'))" || {
+            echo "❌ react resolution failed under require-hook (runtime preflight)"
+            PREFLIGHT_FAILED=1
+          }
+
+          # Verify react-dom (core dependency)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ react-dom resolved:', require.resolve('react-dom/package.json'))" || {
+            echo "❌ react-dom resolution failed under require-hook (runtime preflight)"
+            PREFLIGHT_FAILED=1
+          }
+
+          # Verify scheduler (React internal, may be needed)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ scheduler resolved:', require.resolve('scheduler/package.json'))" || {
+            echo "⚠️  scheduler resolution failed under require-hook (may be optional, continuing...)"
+            # scheduler is optional, don't fail on it
+          }
+
+          if [ $PREFLIGHT_FAILED -ne 0 ]; then
+            echo "[pr-smoke] Runtime preflight FAILED - core packages missing"
+            echo "[pr-smoke] Checking node_modules structure:"
+            ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
+            if [ -d "../node_modules" ]; then
+              echo "[pr-smoke] Parent node_modules:"
+              ls -la ../node_modules/ 2>/dev/null | head -20 || echo "parent node_modules not found"
+            fi
+            echo "[pr-smoke] This indicates rsync 23 may have skipped critical files"
+            echo "[pr-smoke] Job will FAIL - preflight must pass before server start"
+            exit 1
+          fi
+
+          echo "[pr-smoke] ✅ Runtime preflight PASSED - all core packages resolved"
 
           # Start server (same step, same environment, isolated from repo)
           LOG_PATH="${GITHUB_WORKSPACE}/pr-smoke-server.log"

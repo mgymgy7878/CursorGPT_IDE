@@ -145,6 +145,94 @@ if (styledJsxDir && fs.existsSync(styledJsxDir)) {
   process.exit(1);
 }
 
+// Fix: Copy core packages (next, react, react-dom) to standalone
+// These are required for runtime but may be missing due to broken symlinks in pnpm store
+const CORE_PACKAGES = ['next', 'react', 'react-dom', 'scheduler'];
+
+/**
+ * Copy a package to standalone node_modules (both root and nested)
+ */
+function copyPackageToStandalone(packageName) {
+  let packageDir = null;
+
+  // Strategy 1: Try require.resolve
+  try {
+    const packagePath = require.resolve(`${packageName}/package.json`, {
+      paths: [WEB_NEXT_DIR, ROOT_DIR],
+    });
+    packageDir = path.dirname(packagePath);
+  } catch (err) {
+    // Strategy 2: Find in pnpm store
+    const pnpmStoreDir = path.join(ROOT_DIR, 'node_modules/.pnpm');
+    if (fs.existsSync(pnpmStoreDir)) {
+      const entries = fs.readdirSync(pnpmStoreDir);
+      for (const entry of entries) {
+        if (entry.startsWith(`${packageName}@`)) {
+          const candidate = path.join(pnpmStoreDir, entry, `node_modules/${packageName}`);
+          if (fs.existsSync(candidate)) {
+            packageDir = candidate;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  if (!packageDir || !fs.existsSync(packageDir)) {
+    // scheduler is optional, others are critical
+    if (packageName === 'scheduler') {
+      console.warn(`⚠️  ${packageName} not found (optional, skipping...)`);
+      return false;
+    }
+    console.error(`❌ ${packageName} not found - this will cause server startup failures in CI`);
+    return false;
+  }
+
+  // Copy to root standalone node_modules
+  const standalonePackageDir = path.join(standaloneNodeModules, packageName);
+  console.log(`✅ Copying ${packageName} → ${standalonePackageDir} (dereferencing symlinks)`);
+  fs.cpSync(packageDir, standalonePackageDir, { recursive: true, dereference: true });
+
+  // Also copy to nested standalone node_modules
+  const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
+  const nestedStandalonePackageDir = path.join(nestedStandaloneNodeModules, packageName);
+  console.log(`✅ Copying ${packageName} → ${nestedStandalonePackageDir} (nested, dereferencing symlinks)`);
+  fs.cpSync(packageDir, nestedStandalonePackageDir, { recursive: true, dereference: true });
+
+  // Verify copy
+  const targetPkgJson = path.join(standalonePackageDir, 'package.json');
+  const nestedTargetPkgJson = path.join(nestedStandalonePackageDir, 'package.json');
+
+  if (!fs.existsSync(targetPkgJson)) {
+    console.error(`❌ ${packageName} copy failed: ${targetPkgJson} not found after copy`);
+    return false;
+  }
+  if (!fs.existsSync(nestedTargetPkgJson)) {
+    console.error(`❌ ${packageName} nested copy failed: ${nestedTargetPkgJson} not found after copy`);
+    return false;
+  }
+
+  console.log(`✅ Verified: ${packageName}/package.json exists in standalone (both locations)`);
+  console.log(`[copy-standalone-assets] ${packageName} OK:`, targetPkgJson);
+  console.log(`[copy-standalone-assets] ${packageName} OK (nested):`, nestedTargetPkgJson);
+  return true;
+}
+
+// Copy core packages
+console.log('\n📦 Copying core packages to standalone...');
+let allCorePackagesOk = true;
+for (const pkg of CORE_PACKAGES) {
+  const ok = copyPackageToStandalone(pkg);
+  if (!ok && pkg !== 'scheduler') {
+    allCorePackagesOk = false;
+  }
+}
+
+if (!allCorePackagesOk) {
+  console.error('❌ Core packages copy failed - aborting build to prevent CI failures.');
+  process.exit(1);
+}
+
 console.log('\n✨ Standalone assets copied successfully!');
 console.log('\n📝 To start standalone server:');
 console.log('   cd apps/web-next/.next/standalone/apps/web-next');
