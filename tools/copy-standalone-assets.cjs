@@ -189,23 +189,33 @@ const CORE_PACKAGES = ['next', 'react', 'react-dom', 'scheduler'];
 function copyPkgDir(srcDir, dstDir) {
   // 1) Ensure parent node_modules directory exists
   ensureDir(path.dirname(dstDir));
-  
+
   // 2) Check target existence and type before removal (CI debug marker)
   if (fs.existsSync(dstDir)) {
     try {
       const stats = fs.lstatSync(dstDir);
       const targetType = stats.isDirectory() ? 'dir' : (stats.isSymbolicLink() ? 'symlink' : 'file');
       console.log(`[copy-standalone-assets] target exists (${targetType}):`, dstDir);
+      
+      // If symlink, also log readlink target (helps debug broken symlinks)
+      if (stats.isSymbolicLink()) {
+        try {
+          const linkTarget = fs.readlinkSync(dstDir);
+          console.log(`[copy-standalone-assets] target symlink points to:`, linkTarget);
+        } catch (readlinkErr) {
+          console.log(`[copy-standalone-assets] target symlink readlink failed:`, readlinkErr.code);
+        }
+      }
     } catch (err) {
       console.log(`[copy-standalone-assets] target exists but lstat failed:`, dstDir, err.code);
     }
   } else {
     console.log(`[copy-standalone-assets] target does not exist:`, dstDir);
   }
-  
+
   // 3) Remove existing target (handles broken symlinks, empty dirs, files)
   rmIfExists(dstDir);
-  
+
   // 4) Copy with dereference (resolve symlinks to actual files)
   try {
     fs.cpSync(srcDir, dstDir, {
@@ -274,7 +284,7 @@ function copyPackageToStandalone(packageName) {
 
   // Marker: Source path found (CI debug marker)
   console.log(`[copy-standalone-assets] ${packageName} source:`, packageDir);
-  
+
   // Marker: Source package.json verification (CI debug marker)
   const sourcePkgJson = path.join(packageDir, 'package.json');
   const sourcePkgJsonExists = fs.existsSync(sourcePkgJson);
