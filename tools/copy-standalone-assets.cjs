@@ -192,6 +192,10 @@ function copyPackageToStandalone(packageName) {
   const standalonePackageDir = path.join(standaloneNodeModules, packageName);
   // Ensure parent directory exists (cpSync doesn't create parent dirs)
   fs.mkdirSync(standaloneNodeModules, { recursive: true });
+  // Remove existing target if it exists (may be broken symlink or empty dir from Next.js build)
+  if (fs.existsSync(standalonePackageDir)) {
+    fs.rmSync(standalonePackageDir, { recursive: true, force: true });
+  }
   console.log(`✅ Copying ${packageName} → ${standalonePackageDir} (dereferencing symlinks)`);
   fs.cpSync(packageDir, standalonePackageDir, { recursive: true, dereference: true });
 
@@ -200,6 +204,10 @@ function copyPackageToStandalone(packageName) {
   const nestedStandalonePackageDir = path.join(nestedStandaloneNodeModules, packageName);
   // Ensure parent directory exists
   fs.mkdirSync(nestedStandaloneNodeModules, { recursive: true });
+  // Remove existing target if it exists
+  if (fs.existsSync(nestedStandalonePackageDir)) {
+    fs.rmSync(nestedStandalonePackageDir, { recursive: true, force: true });
+  }
   console.log(`✅ Copying ${packageName} → ${nestedStandalonePackageDir} (nested, dereferencing symlinks)`);
   fs.cpSync(packageDir, nestedStandalonePackageDir, { recursive: true, dereference: true });
 
