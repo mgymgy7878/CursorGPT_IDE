@@ -132,15 +132,15 @@ if (styledJsxDir && fs.existsSync(styledJsxDir)) {
   // Use EEXIST-proof copyPkgDir to handle broken symlinks/empty dirs
   const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
   const nestedStandaloneStyledJsxDir = path.join(nestedStandaloneNodeModules, 'styled-jsx');
-  
+
   // Ensure parent directories exist
   ensureDir(standaloneNodeModules);
   ensureDir(nestedStandaloneNodeModules);
-  
+
   // Remove existing targets (handles broken symlinks, empty dirs)
   rmIfExists(standaloneStyledJsxDir);
   rmIfExists(nestedStandaloneStyledJsxDir);
-  
+
   // Copy with dereference (resolve symlinks to actual files)
   console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir} (dereferencing symlinks)`);
   fs.cpSync(styledJsxDir, standaloneStyledJsxDir, {
@@ -149,7 +149,7 @@ if (styledJsxDir && fs.existsSync(styledJsxDir)) {
     force: true,
     errorOnExist: false,
   });
-  
+
   console.log(`✅ Copying styled-jsx → ${nestedStandaloneStyledJsxDir} (nested, dereferencing symlinks)`);
   fs.cpSync(styledJsxDir, nestedStandaloneStyledJsxDir, {
     recursive: true,
@@ -244,14 +244,21 @@ function copyPackageToStandalone(packageName) {
     return false;
   }
 
+  // Marker: Source path found (CI debug marker)
+  console.log(`[copy-standalone-assets] ${packageName} source:`, packageDir);
+
   // Copy to root standalone node_modules
   const standalonePackageDir = path.join(standaloneNodeModules, packageName);
+  // Marker: Target path (root) - CI debug marker
+  console.log(`[copy-standalone-assets] ${packageName} target (root):`, standalonePackageDir);
   copyPkgDir(packageDir, standalonePackageDir);
   console.log(`✅ Copying ${packageName} → ${standalonePackageDir} (dereferencing symlinks)`);
 
   // Copy to nested standalone node_modules
   const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
   const nestedStandalonePackageDir = path.join(nestedStandaloneNodeModules, packageName);
+  // Marker: Target path (nested) - CI debug marker
+  console.log(`[copy-standalone-assets] ${packageName} target (nested):`, nestedStandalonePackageDir);
   copyPkgDir(packageDir, nestedStandalonePackageDir);
   console.log(`✅ Copying ${packageName} → ${nestedStandalonePackageDir} (nested, dereferencing symlinks)`);
 
