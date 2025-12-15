@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type ConfirmModalProps = {
   isOpen: boolean;
@@ -24,6 +24,73 @@ export default function ConfirmModal({
   variant = "info",
   isLoading = false
 }: ConfirmModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  // Focus trap: modal açılınca focus modal içine kilitlenir
+  useEffect(() => {
+    if (isOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement;
+      // İlk focusable element'e focus ver
+      const firstFocusable = modalRef.current?.querySelector(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      ) as HTMLElement;
+      firstFocusable?.focus();
+    } else {
+      // Modal kapandığında önceki element'e geri dön
+      previousActiveElement.current?.focus();
+    }
+  }, [isOpen]);
+
+  // ESC ile kapatma
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isLoading) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, isLoading, onClose]);
+
+  // Focus trap: TAB ile modal içinde kal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      const focusableElements = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      ) as NodeListOf<HTMLElement>;
+
+      if (!focusableElements.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (e.shiftKey) {
+        // Shift+Tab: geriye doğru
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        // Tab: ileriye doğru
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleTab);
+    return () => document.removeEventListener('keydown', handleTab);
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const variantStyles = {
@@ -53,13 +120,20 @@ export default function ConfirmModal({
       />
       
       {/* Modal */}
-      <div className={`relative rounded-2xl border p-6 max-w-md w-full mx-4 ${variantStyles[variant]}`}>
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+        className={`relative rounded-2xl border p-6 max-w-md w-full mx-4 ${variantStyles[variant]}`}
+      >
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">{iconStyles[variant]}</span>
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <span className="text-2xl" aria-hidden="true">{iconStyles[variant]}</span>
+          <h2 id="modal-title" className="text-lg font-semibold">{title}</h2>
         </div>
         
-        <p className="text-sm text-neutral-300 mb-6 leading-relaxed">
+        <p id="modal-description" className="text-sm text-neutral-300 mb-6 leading-relaxed">
           {message}
         </p>
         

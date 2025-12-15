@@ -196,7 +196,7 @@ function copyPkgDir(srcDir, dstDir) {
       const stats = fs.lstatSync(dstDir);
       const targetType = stats.isDirectory() ? 'dir' : (stats.isSymbolicLink() ? 'symlink' : 'file');
       console.log(`[copy-standalone-assets] target exists (${targetType}):`, dstDir);
-      
+
       // If symlink, also log readlink target (helps debug broken symlinks)
       if (stats.isSymbolicLink()) {
         try {
