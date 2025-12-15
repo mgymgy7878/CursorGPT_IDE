@@ -19,7 +19,7 @@ export function Skeleton({
   ...props
 }: SkeletonProps) {
   const baseClasses = 'animate-pulse bg-neutral-800 rounded';
-  
+
   const variantClasses = {
     text: 'h-4',
     circular: 'rounded-full',

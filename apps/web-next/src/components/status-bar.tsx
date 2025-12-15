@@ -37,16 +37,16 @@ export default function StatusBar() {
   // WS durumunu belirle (state önceliği: error > reconnecting > stale > paused > connected)
   const getWSStatus = (): "connected" | "paused" | "reconnecting" | "stale" | "error" => {
     if (!wsOk) return "error"
-    
+
     // TODO: paused/reconnecting state'leri store'dan al
     // Şimdilik: reconnecting state'i yok, sadece connected/error/stale var
-    
+
     // ÖNEMLİ: Reconnecting iken stale gösterme (state önceliği)
     // if (isReconnecting) return "reconnecting"
-    
+
     // Stale kontrolü: WS connected ama mesaj gelmiyorsa stale
     if (wsStalenessMs && wsStalenessMs > 5000) return "stale"
-    
+
     return "connected"
   }
 

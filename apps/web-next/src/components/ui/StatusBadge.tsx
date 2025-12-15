@@ -25,9 +25,9 @@ export function StatusBadge({ status, label, className, icon }: StatusBadgeProps
     info: "bg-status-info/15 text-status-info",
     neutral: "bg-status-neutral/15 text-status-neutral",
   };
-  
+
   const classes = [base, map[status], className].filter(Boolean).join(' ');
-  
+
   return (
     <span className={classes} aria-label={label}>
       {icon && <span className="text-xs">{icon}</span>}
@@ -46,7 +46,7 @@ export function WSStatusBadge({ status, stalenessMs, className }: WSStatusBadgeP
   };
 
   const config = statusMap[status];
-  const ariaLabel = stalenessMs 
+  const ariaLabel = stalenessMs
     ? `${config.label}, son mesaj ${Math.floor(stalenessMs / 1000)} saniye önce`
     : config.label;
 
