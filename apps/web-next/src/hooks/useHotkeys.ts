@@ -29,7 +29,24 @@ export function useHotkeys(
   }, [handler, ...deps]);
 
   useEffect(() => {
+    // SSR guard: window yoksa (server-side) hiçbir şey yapma
+    if (typeof window === 'undefined') return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Typing guard: input/textarea/select veya contenteditable içindeyken ignore
+      const target = e.target as HTMLElement;
+      if (target) {
+        const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
+        const isContentEditable = target.isContentEditable === true;
+        const isMonacoEditor = target.closest('.monaco-editor') !== null;
+        const hasHotkeysOff = target.closest('[data-hotkeys="off"]') !== null;
+
+        // Input/textarea/select veya contenteditable içindeyken ignore (yazı yazarken tetikleme kapansın)
+        if (isInput || isContentEditable || isMonacoEditor || hasHotkeysOff) {
+          return;
+        }
+      }
+
       if (matchesKeys(e, keys)) {
         e.preventDefault();
         handlerRef.current(e);
