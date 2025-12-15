@@ -1,6 +1,6 @@
 # Component Interfaces & TypeScript Contracts
 
-**Amaç:** Spark Trading UI bileşenleri için TypeScript arayüzleri ve veri sözleşmeleri  
+**Amaç:** Spark Trading UI bileşenleri için TypeScript arayüzleri ve veri sözleşmeleri
 **Kullanım:** Bu dosya `types/` dizininde gerçek type definition'lara dönüştürülecek
 
 ---
@@ -19,16 +19,16 @@ export type StatusType = 'ok' | 'warn' | 'error' | 'offline' | 'unknown';
 export interface StatusPillProps {
   /** Görünen etiket (örn: "Env", "Feed") */
   label: string;
-  
+
   /** Durumun değeri (örn: "Mock", "Healthy") */
   value: string;
-  
+
   /** Renk ve görsel durum */
   status: StatusType;
-  
+
   /** Screen reader için ek açıklama (opsiyonel) */
   srHint?: string;
-  
+
   /** Test için data-testid override */
   testId?: string;
 }
@@ -49,31 +49,31 @@ export interface StatusPillProps {
 export interface MetricCardProps {
   /** Kart başlığı */
   title: string;
-  
+
   /** Ana değer (sayı veya string) */
   value: string | number;
-  
+
   /** Alt başlık veya açıklama */
   subtitle?: string;
-  
+
   /** Sol üst ikonu */
   icon?: React.ReactNode;
-  
+
   /** Trend bilgisi (pozitif/negatif yön) */
   trend?: {
     value: number;  // Yüzde değeri (örn: 2.5)
     label: string;  // Açıklama (örn: "24 saat")
   };
-  
+
   /** Canlı veri göstergesi (yeşil pulse dot) */
   isLive?: boolean;
-  
+
   /** Kart alt kısmındaki aksiyon alanı */
   actions?: React.ReactNode;
-  
+
   /** Loading skeleton göster */
   isLoading?: boolean;
-  
+
   /** Error durumu */
   error?: string;
 }
@@ -100,39 +100,39 @@ export interface MetricCardProps {
 export interface StrategyCardProps {
   /** Unique ID */
   id: string;
-  
+
   /** Strateji adı */
   name: string;
-  
+
   /** Tag'ler (kripto, bist, hisse, scalping, grid vb.) */
   tags: StrategyTag[];
-  
+
   /** Performans yüzdesi */
   perfPct: number;
-  
+
   /** Son çalıştırma tarihi (ISO 8601 veya formatted) */
   lastRunDate: string;
-  
+
   /** Düzenle callback */
   onEdit: (id: string) => void;
-  
+
   /** Çalıştır callback */
   onRun: (id: string) => void;
-  
+
   /** Disabled durumu */
   disabled?: boolean;
-  
+
   /** Açıklama metni (hover tooltip) */
   description?: string;
 }
 
-export type StrategyTag = 
-  | 'kripto' 
-  | 'bist' 
-  | 'hisse' 
-  | 'scalping' 
-  | 'grid' 
-  | 'spot' 
+export type StrategyTag =
+  | 'kripto'
+  | 'bist'
+  | 'hisse'
+  | 'scalping'
+  | 'grid'
+  | 'spot'
   | 'swing';
 
 // Kullanım örneği:
@@ -159,25 +159,25 @@ export type StrategyTag =
 export interface RunningStrategy {
   /** Unique ID */
   id: string;
-  
+
   /** Strateji adı */
   name: string;
-  
+
   /** Çalışma durumu */
   status: StrategyStatus;
-  
+
   /** Kar/Zarar (USD) */
   pnlUSD: number;
-  
+
   /** Toplam işlem sayısı */
   trades: number;
-  
+
   /** Sermaye (USD) */
   capitalUSD: number;
-  
+
   /** Başlangıç zamanı (formatted veya ISO) */
   startedAt: string;
-  
+
   /** Son güncelleme timestamp (staleness kontrolü için) */
   lastUpdateMs?: number;
 }
@@ -187,16 +187,16 @@ export type StrategyStatus = 'running' | 'paused' | 'stopped';
 export interface RunningStrategyTableProps {
   /** Stratejiler listesi */
   strategies: RunningStrategy[];
-  
+
   /** Duraklat/Devam toggle */
   onTogglePause: (id: string) => void;
-  
+
   /** Durdur */
   onStop: (id: string) => void;
-  
+
   /** Loading durumu */
   isLoading?: boolean;
-  
+
   /** WebSocket bağlantı durumu */
   wsConnected?: boolean;
 }
@@ -222,13 +222,13 @@ export interface RunningStrategyTableProps {
 export interface ThemeToggleProps {
   /** Şu anki tema */
   currentTheme: 'light' | 'dark';
-  
+
   /** Tema değiştirme callback */
   onThemeChange: (theme: 'light' | 'dark') => void;
-  
+
   /** Dropdown veya switch modu */
   variant?: 'dropdown' | 'switch';
-  
+
   /** Label göster/gizle */
   showLabel?: boolean;
 }
@@ -241,6 +241,77 @@ export interface ThemeToggleProps {
 //   showLabel
 // />
 ```
+
+---
+
+## ♿ Accessibility Patterns
+
+### Tooltip Pattern (WCAG 2.2 AA Compliant)
+
+**Kullanım:** Tablo hücrelerinde veya metriklerde ek açıklama için tooltip
+
+**Pattern:**
+```typescript
+import { toDomId } from '@/lib/ui';
+
+// Dinamik ID üretimi (strategy.id gibi değişken değerler için)
+const tooltipId = `tt-${metricName}-${toDomId(itemId)}`;
+
+// JSX kullanımı
+<span
+  title="Açıklama metni (görsel tooltip)"
+  aria-describedby={tooltipId}
+  className="cursor-help focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--warn)] focus-visible:outline-offset-1 rounded"
+  tabIndex={0}
+>
+  {value}
+</span>
+<span id={tooltipId} role="tooltip" className="sr-only">
+  {metricName}: Açıklama metni (screen reader için)
+</span>
+```
+
+**Kurallar:**
+- ✅ `toDomId()` helper'ı kullan (geçersiz karakterleri temizler: boşluk, `:`, `/`, vb.)
+- ✅ `aria-describedby` ile tooltip'e bağla
+- ✅ Tooltip element'i `role="tooltip"` ve `sr-only` class'ı ile gizle
+- ✅ `title` attribute'u görsel tooltip için (hover)
+- ✅ `tabIndex={0}` ile klavye erişilebilirliği
+- ✅ `focus-visible:outline` ile focus göstergesi
+
+**Örnek (RunningStrategiesDenseTable):**
+```typescript
+// Win Rate 30d tooltip
+const tooltipId = `tt-winrate-30d-${toDomId(strategy.id)}`;
+
+<span
+  title="Son 30 günlük kazanma oranı"
+  aria-describedby={tooltipId}
+  className="cursor-help focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--warn)] focus-visible:outline-offset-1 rounded"
+  tabIndex={0}
+>
+  {formatBacktestPercent(normalizePercent(strategy.winrate_30d))}
+</span>
+<span id={tooltipId} role="tooltip" className="sr-only">
+  Win Rate 30d: Son 30 günlük kazanma oranı
+</span>
+```
+
+**E2E Test Pattern:**
+```typescript
+// aria-describedby hedeflerinin DOM'da mevcut olduğunu kontrol et
+const describedBy = await element.getAttribute('aria-describedby');
+const ids = describedBy?.split(/\s+/).filter(Boolean) || [];
+
+for (const id of ids) {
+  const targetElement = page.locator(`#${id}`);
+  await expect(targetElement).toHaveCount(1);
+  const role = await targetElement.getAttribute('role');
+  expect(role).toBe('tooltip');
+}
+```
+
+**Referans:** `apps/web-next/src/lib/ui.ts` → `toDomId()` helper
 
 ---
 
@@ -259,14 +330,14 @@ export interface HomeDashboardResponse {
     pnl: number;
     status: StrategyStatus;
   }[];
-  
+
   marketData: {
     symbol: string;
     price: string;
     changePct: number;
     lastUpdateSec: number;
   }[];
-  
+
   systemStatus: {
     env: string;
     feed: StatusType;
@@ -286,7 +357,7 @@ export interface HomeDashboardResponse {
  */
 export interface RunningStrategiesResponse {
   strategies: RunningStrategy[];
-  
+
   /** Toplam istatistikler */
   summary?: {
     totalPnlUSD: number;
@@ -313,14 +384,14 @@ export interface PortfolioResponse {
     lastSyncSec: number;
     rateLimit: string;  // örn: "1200/1200"
   };
-  
+
   totals: {
     pnl24hUSD: number;
     totalUSD: number;
     freeUSD: number;
     lockedUSD: number;
   };
-  
+
   positions: Position[];
 }
 
@@ -331,10 +402,10 @@ export interface Position {
   currentPrice: number;
   pnlUSD: number;
   pnlPct: number;
-  
+
   /** Pozisyon yönü */
   side?: 'long' | 'short';
-  
+
   /** Leverage (futures için) */
   leverage?: number;
 }
@@ -351,10 +422,10 @@ export interface Position {
  */
 export interface StrategiesListResponse {
   strategies: StrategyCardData[];
-  
+
   /** Toplam sayı (pagination için) */
   total: number;
-  
+
   /** Filtre seçenekleri */
   filters?: {
     markets: string[];
@@ -390,7 +461,7 @@ export interface ApiKeysResponse {
     isValid: boolean;
     lastTestedAt?: string;
   };
-  
+
   openai?: {
     apiKey: string;  // Masked: "sk-...ABC"
     hasSecret: boolean;
@@ -431,7 +502,7 @@ export interface ApiKeysTestResponse {
 export interface StrategyGenerateRequest {
   model: 'gpt-4' | 'gpt-3.5-turbo';
   prompt: string;
-  
+
   /** Backtest parametreleri */
   backtestConfig?: {
     symbol: string;
@@ -464,7 +535,7 @@ export interface StrategyGenerateResponse {
 /**
  * WebSocket mesajları (ws://localhost:4001/portfolio)
  */
-export type PortfolioWSMessage = 
+export type PortfolioWSMessage =
   | { type: 'position_update'; data: Position }
   | { type: 'pnl_update'; data: { totalPnl: number; change: number } }
   | { type: 'connection_status'; data: { connected: boolean; exchange: string } };
@@ -478,7 +549,7 @@ export type PortfolioWSMessage =
 /**
  * WebSocket mesajları (ws://localhost:4001/strategies)
  */
-export type StrategyWSMessage = 
+export type StrategyWSMessage =
   | { type: 'status_change'; data: { id: string; status: StrategyStatus } }
   | { type: 'pnl_update'; data: { id: string; pnl: number; trades: number } }
   | { type: 'error'; data: { id: string; message: string } };
@@ -528,7 +599,7 @@ export const BinanceApiKeySchema = z.object({
   apiKey: z.string()
     .min(64, 'Binance API Key 64 karakter olmalıdır')
     .regex(/^[A-Za-z0-9]+$/, 'Sadece alfanumerik karakterler'),
-  
+
   secretKey: z.string()
     .min(64, 'Secret Key 64 karakter olmalıdır')
     .regex(/^[A-Za-z0-9]+$/, 'Sadece alfanumerik karakterler'),
@@ -553,16 +624,16 @@ import { z } from 'zod';
 
 export const StrategyPromptSchema = z.object({
   model: z.enum(['gpt-4', 'gpt-3.5-turbo']),
-  
+
   prompt: z.string()
     .min(20, 'Prompt en az 20 karakter olmalıdır')
     .max(2000, 'Prompt maksimum 2000 karakter olabilir'),
-  
+
   symbol: z.string()
     .regex(/^[A-Z]+USDT$/, 'Geçerli bir sembol giriniz (örn: BTCUSDT)'),
-  
+
   interval: z.enum(['1m', '5m', '15m', '1h', '4h', '1d']),
-  
+
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
 });
@@ -647,14 +718,14 @@ function usePortfolioStream() {
 
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:4001/portfolio');
-    
+
     ws.onmessage = (event) => {
       const msg: PortfolioWSMessage = JSON.parse(event.data);
-      
+
       if (msg.type === 'position_update') {
         setData(prev => ({
           ...prev!,
-          positions: prev!.positions.map(p => 
+          positions: prev!.positions.map(p =>
             p.symbol === msg.data.symbol ? msg.data : p
           ),
         }));
@@ -687,7 +758,7 @@ function usePortfolioStream() {
 
 ---
 
-**Maintainer:** Spark Trading Team  
-**Son güncelleme:** 2025-10-27  
+**Maintainer:** Spark Trading Team
+**Son güncelleme:** 2025-10-27
 **İlgili Dosyalar:** `UI_RECONSTRUCTION_PLAN.md`, `CI_USAGE.md`
 
