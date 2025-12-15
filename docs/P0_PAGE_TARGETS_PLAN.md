@@ -156,6 +156,6 @@ git checkout -B ui/p0-page-targets-strategy-lab
 
 ---
 
-**Son Güncelleme:** 2025-01-29  
+**Son Güncelleme:** 2025-01-29
 **Durum:** P0-Global tamamlandı, P0-Page Targets hazır
 
