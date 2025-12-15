@@ -6,12 +6,28 @@ import StatusPills from '@/components/layout/StatusPills';
 import Metric from '@/components/ui/Metric';
 import LiveMarketCard from '@/components/marketdata/LiveMarketCard';
 import ErrorBudgetBadge from '@/components/ops/ErrorBudgetBadge';
+import { Skeleton, EmptyState, ErrorState } from '@/components/ui/states';
 import { formatDuration } from '@/lib/format';
 import { t } from '@/lib/i18n';
 import { useMarketStore } from '@/stores/marketStore';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+type PanelState = 'loading' | 'empty' | 'error' | 'data';
 
 export default function DashboardPage() {
+  // Dev toggle: ?state=loading|empty|error (GIF çekmek ve regression test için)
+  const getDevState = (): PanelState | null => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get('state');
+    if (state === 'loading' || state === 'empty' || state === 'error' || state === 'data') {
+      return state;
+    }
+    return null;
+  };
+  
+  const devState = getDevState();
+  
   // Get WS status from market store
   const wsStatus = useMarketStore(s => s.status);
   
@@ -22,6 +38,31 @@ export default function DashboardPage() {
   const p95Ms = 58;
   const stalenessMs = 0;
 
+  // Dev toggle: Panel state'i query param'dan al veya normal akıştan belirle
+  const [panelState, setPanelState] = useState<PanelState>('data');
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [hasData, setHasData] = useState(false);
+
+  useEffect(() => {
+    if (devState) {
+      // Dev toggle aktif: query param'dan state'i al
+      setPanelState(devState);
+      setIsLoading(devState === 'loading');
+      setHasError(devState === 'error');
+      setHasData(devState === 'data');
+    } else {
+      // Normal akış: gerçek data durumuna göre belirle
+      // TODO: Gerçek API çağrıları burada yapılacak
+      setTimeout(() => {
+        setIsLoading(false);
+        setHasError(false);
+        setHasData(true); // Şimdilik mock data var
+        setPanelState('data');
+      }, 1000);
+    }
+  }, [devState]);
+
   const handleCreateStrategy = () => {
     window.location.href = '/strategy-lab';
   };
@@ -29,6 +70,16 @@ export default function DashboardPage() {
   const handleCreateAlert = () => {
     // TODO: Open alert creation modal
     console.log('Create alert');
+  };
+
+  const handleRetry = () => {
+    setIsLoading(true);
+    setHasError(false);
+    setTimeout(() => {
+      setIsLoading(false);
+      setHasData(true);
+      setPanelState('data');
+    }, 1000);
   };
 
   return (
@@ -76,16 +127,52 @@ export default function DashboardPage() {
 
           {/* Cards row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Alarm Drafts Card */}
+            {/* Alarm Drafts Card - UIStates Kit kullanımı */}
             <div className="rounded-2xl bg-card/60 p-4 min-h-[200px]">
               <div className="text-sm font-medium mb-2">{t('dashboard.alarmDrafts')}</div>
-              <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+              {isLoading ? (
+                <Skeleton lines={3} className="mt-2" />
+              ) : hasError ? (
+                <ErrorState
+                  message="Alarm taslakları yüklenirken bir hata oluştu"
+                  onRetry={handleRetry}
+                  className="py-4"
+                />
+              ) : !hasData ? (
+                <EmptyState
+                  title="Henüz alarm taslağı yok"
+                  description="Yeni bir alarm oluşturmak için butona tıklayın"
+                  actionLabel="Alarm Oluştur"
+                  onAction={handleCreateAlert}
+                  className="py-4"
+                />
+              ) : (
+                <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+              )}
             </div>
 
-            {/* Canary Tests Card */}
+            {/* Canary Tests Card - UIStates Kit kullanımı */}
             <div className="rounded-2xl bg-card/60 p-4 min-h-[200px]">
               <div className="text-sm font-medium mb-2">{t('dashboard.canaryTests')}</div>
-              <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+              {isLoading ? (
+                <Skeleton lines={3} className="mt-2" />
+              ) : hasError ? (
+                <ErrorState
+                  message="Canary testleri yüklenirken bir hata oluştu"
+                  onRetry={handleRetry}
+                  className="py-4"
+                />
+              ) : !hasData ? (
+                <EmptyState
+                  title="Henüz canary testi yok"
+                  description="Yeni bir canary testi oluşturmak için butona tıklayın"
+                  actionLabel="Test Oluştur"
+                  onAction={() => console.log('Create canary test')}
+                  className="py-4"
+                />
+              ) : (
+                <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
+              )}
             </div>
           </div>
 
