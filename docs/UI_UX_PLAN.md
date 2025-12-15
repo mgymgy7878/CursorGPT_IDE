@@ -1,98 +1,134 @@
-# Spark Trading Platform — UI/UX İyileştirme Planı
+# Spark Trading Platform — UI/UX Planı ve Uygulama Talimatları
 
-> Standart: NN/g Heuristics + WCAG 2.2 (AA)
-> Kapsam: Mevcut ve planlanan sayfalar; bileşen kütüphanesi; kabul kriterleri.
+## 0) Amaç
+Spark platformunda mevcut ve planlanan sayfalar için; erişilebilirlik (WCAG 2.2 AA), kullanılabilirlik (NN/g heuristics), tutarlı tasarım sistemi ve veri görselleştirme standartlarını tanımlamak.
 
-## 🎯 Amaç
+Bu doküman "tasarım niyeti + uygulama talimatı + test/kabul kriteri" olarak kullanılmalıdır.
 
-Kullanıcı deneyimini ölçülebilir şekilde güçlendirmek; erişilebilir, tutarlı ve hızlı bir arayüz standardı sağlamak.
+## 1) Tasarım İlkeleri (Kısa)
+### 1.1 Sistem Durumu Görünürlüğü (NN/g)
+- Yükleme, hata, boş durum, güncellendi/yenileniyor, bağlantı koptu gibi durumlar *her zaman* görünür olmalı.
+- "Sessiz bekleme" yok: skeleton/spinner/toast/inline status zorunlu.
 
----
+### 1.2 Erişilebilirlik (WCAG 2.2 AA)
+- Kontrast: metin/arka plan ≥ 4.5:1
+- Klavye ile tam gezilebilirlik (TAB/Shift+TAB/Enter/Escape)
+- Focus halkası net, asla "outline: none" ile kör edilmez
+- Form alanlarında label + aria-describedby + hata mesajı ilişkisi
 
-## 1) Stratejik Hedefler (Kısa)
+### 1.3 Tutarlılık ve Dil
+- UI'da TR/EN karışımı minimize edilir: menü ve temel sayfa başlıkları tek dil standardına bağlanır.
+- Terminoloji sözlüğü (ileride docs/GLOSSARY.md) ile aynı kelimeler aynı anlamda kullanılır.
 
-- **Sistem durumu görünürlüğü:** skeleton/loading + boş durumlar
-- **Formlarda inline validasyon** ve alan-bazlı hata mesajları
-- **Kontrast AA** (≥4.5:1) ve klavye ile tam gezinim
-- **Sol menüde aktif sayfa vurgusu** + gerekirse breadcrumb
+### 1.4 Veri Görselleştirme
+- Grafiklerde: başlık + açıklama + eksen etiketleri + birim zorunlu
+- Tooltip'te değer + birim + bağlam (örn. "24s değişim", "USD", "%")
+- Tablo: zebra pattern, thead>th[scope], sıralama ikonları, sabit header (gerekli yerlerde)
 
----
+## 2) Global UI Standartları (Uygulama Kuralları)
 
-## 2) Sayfa Bazlı İş Listesi (Özet)
+### 2.1 Yükleme / Skeleton / Empty State
+- Her kritik panel için:
+  - loading → skeleton
+  - error → açıklayıcı hata + "Tekrar dene"
+  - empty → "Henüz veri yok" + net CTA (örn. "Strateji Oluştur")
 
-### 🏠 Ana Sayfa
+### 2.2 Bildirimler (Toast) ve Inline Geri Bildirim
+- Kısa işlemler: toast (başarılı/uyarı/hata)
+- Form hataları: *inline* (alana yakın), genel toast tek başına yeterli sayılmaz
+- Uzun işlemler (backtest/optimize): progress / status panel + son log satırları
 
-- [ ] Ticker/strateji panellerinde skeleton
-- [ ] WS bağlantı durumu göstergesi (header)
-- [ ] Menüde aktif sayfa highlight
+### 2.3 Butonlar
+- Primary / Secondary / Destructive ayrımı sabit
+- Icon-only butonlarda aria-label zorunlu
+- Disabled durumda: tooltip ile "neden disabled" açıklaması önerilir
 
-### 🧪 Strategy Lab
+### 2.4 Formlar
+- Zorunlu alanlar yıldız (*) ile
+- Submit sırasında: disabled + spinner
+- Hata mesajı dili: "Ne yanlış + nasıl düzeltilir"
+- Alan bazlı validasyon: realtime (blur/change) + submit guard
 
-- [ ] Kaydet/Backtest: spinner + başarı/toast
-- [ ] Monaco hata satırında inline açıklama
-- [ ] Kısayollar: `Ctrl+Enter` (backtest), `Ctrl+Shift+O` (optimize)
+### 2.5 Tablo & Grafik
+- Tablo: zebra + sticky header + numeric kolonlar tabular-nums
+- Kolon başlıklarında sıralama göstergesi
+- Grafik: başlık, eksen, birim, tooltip standardı
 
-### 📋 Stratejilerim
+### 2.6 Klavye ve Focus
+- Modal açılınca focus modal içine kilitlenir, ESC ile kapanır
+- Menü / dropdown: ok tuşları + Enter ile seçim
+- Focus ring: görünür ve kontrastlı
 
-- [ ] Sayfalama/sonsuz kaydırma
-- [ ] Sil/Düzenle için onay modalı
+## 3) Sayfa Bazlı İş Listesi (D1–D3 Sonrası)
 
-### 🏃 Çalışan Stratejiler
+### 3.1 Ana Sayfa (Dashboard)
+- [ ] Ticker ve strateji panellerinde skeleton loading
+- [ ] Sol menüde aktif sayfa vurgusu + (opsiyon) breadcrumb
+- [ ] Üst çubukta WS bağlantı durumu (connected/paused/reconnecting + staleness)
 
-- [ ] Sparkline boyutu + tooltip
-- [ ] Pause/Resume ikon+metin; durum rozeti
+### 3.2 Strategy Lab
+- [ ] Kaydet/Backtest/Optimize için spinner + toast
+- [ ] Kod editör hataları için inline açıklama paneli (hata → öneri)
+- [ ] "Run" sonrası son log'lar & status paneli (son 10 satır)
+- [ ] Kısayollar:
+  - Ctrl+Enter: Backtest
+  - Ctrl+Shift+O: Optimize
+  - Esc: Modal/Panel kapat
 
-### 💼 Portföy
+### 3.3 Stratejilerim
+- [ ] Sayfalama veya sonsuz kaydırma
+- [ ] Silme/Düzenle için onay diyaloğu (destructive confirm)
+- [ ] Boş durum: "Henüz stratejin yok" + CTA
 
-- [ ] Sabit thead, zebra satırlar; sıralama ikonları
-- [ ] Periyodik güncelleme satırında kısa vurgu animasyonu
+### 3.4 Çalışan Stratejiler
+- [ ] Sparkline daha büyük + tooltip (PnL, DD, winrate gibi temel özet)
+- [ ] Pause/Resume butonları net ikon + metin
+- [ ] Durum rozeti: running/paused/error + son olay zamanı
 
-### ⚙️ Ayarlar
+### 3.5 Portföy
+- [ ] Tablo header sabitleme
+- [ ] Zebra desen + sıralama ikonları
+- [ ] Periyodik güncellenen satırda animasyon vurgusu (soft highlight)
 
-- [ ] Tüm inputlara label + aria-describedby
-- [ ] Tema/dil seçimi TAB ile gezilebilir; Kaydet altında spinner
+### 3.6 Ayarlar
+- [ ] Form alanları: label + aria-describedby
+- [ ] Tema/dil seçimi TAB ile gezilebilir
+- [ ] Kaydet butonu altında spinner + başarı/uyarı durumu
 
----
+### 3.7 Alerts (Planlanan)
+- [ ] Boş durum + CTA
+- [ ] Yeni alarm formu: inline doğrulama + onay
 
-## 3) Bileşen Kuralları
+### 3.8 Market Analysis (Planlanan)
+- [ ] Dashboard grid düzeni sadeleştirme
+- [ ] Grafiklerde başlık/açıklama/eksen/birim zorunlu
+- [ ] Tooltip standardı (renkli değer + birim)
 
-### Butonlar
+## 4) Test ve Kabul Kriterleri (Definition of Done)
 
-- Birincil/ikincil hiyerarşi
-- Her zaman anlamlı metin/aria-label
-- Belirgin focus halkası (`ring-2 ring-blue-500`)
+### 4.1 Erişilebilirlik
+- WCAG AA kontrast: ≥ 4.5:1
+- Klavye erişilebilirlik: tüm interaktif öğelere TAB ile erişim
+- Modal/focus yönetimi: ESC kapanır, focus trap çalışır
 
-### Formlar
+### 4.2 Form Validasyon
+- 5/5 hatalı senaryo yakalanmalı (zorunlu alan, format, limit, vb.)
+- Hata mesajları alanın yanında görünür olmalı
 
-- Zorunlu alan işareti (`*`)
-- Gerçek zamanlı validasyon
-- Submit sırasında disabled+spinner
+### 4.3 Performans & Algılanan Hız
+- P95 içerik görünümü < 3s (skeleton ile belirsizlik yok)
+- Ağ/WS kopma senaryosunda kullanıcı "ne oldu?" sorusuna 1 sn içinde cevap almalı (status bar + mesaj)
 
-### Tablo & Grafik
+### 4.4 Veri Görselleştirme
+- Grafik: başlık + eksen + birim + tooltip zorunlu
+- Tablo: thead/th scope + zebra + numeric kolon format standardı
 
-- `thead>th[scope]` + zebra
-- Grafiklerde başlık, eksen etiketleri ve birim
+## 5) Uygulama Notları (Kod Tarafı İçin Pratik Kurallar)
+- "Sistem durumu" bileşenleri tek yerden: StatusBadge/TopStatusBar üzerinden yönet
+- Loading/empty/error durumları için ortak UI helper'ları (ileride: `ui/states.ts`)
+- Metrik formatlama tek helper'dan (yüzde/para/ratio) — dağınık toFixed yok
 
----
-
-## 4) Test & Kabul Kriterleri
-
-- [ ] **WCAG AA kontrast:** tüm metinler ≥4.5:1
-- [ ] **Klavye erişimi:** tüm interaktif öğeler TAB ile ulaşılabilir
-- [ ] **Form hataları:** 5/5 senaryo alan altında yakalanır (inline)
-- [ ] **Yükleme P95 <3s:** skeleton gösterimi mevcut
-- [ ] **Boş durum:** en az 1 örnek/sayfa
-
----
-
-## 5) Kaynaklar
-
-- [NN/g 10 Heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)
-- [WCAG 2.2](https://www.w3.org/WAI/WCAG22/quickref/)
-- Data viz en iyi pratikler
-
----
-
-## 6) Sonraki Adım
-
-Bu planın görevleri issue/PR'lara bölünür; her PR kabul kriterlerini referans alır.
+## 6) Kaynaklar (Referans)
+- NN/g Usability Heuristics (genel prensip)
+- WCAG 2.2 Quick Reference (AA kriterleri)
+- Data visualization best practices (grafik etiketleme/birim/okunabilirlik)
