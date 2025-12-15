@@ -45,7 +45,7 @@ export default function DashboardPage({
   const stalenessMs = 0;
 
   // Dev toggle: Panel state'i query param'dan al veya normal akıştan belirle
-  const [panelState, setPanelState] = useState<PanelState>('data');
+  const [panelState, setPanelState] = useState<DevState>('data');
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [hasData, setHasData] = useState(false);
