@@ -18,7 +18,7 @@ type DevState = 'loading' | 'empty' | 'error' | 'data';
 function resolveDevState(searchParams?: { state?: string }): DevState | null {
   // Production'da dev toggle pasif
   if (process.env.NODE_ENV === 'production') return null;
-  
+
   const state = searchParams?.state;
   if (state === 'loading' || state === 'empty' || state === 'error' || state === 'data') {
     return state;
