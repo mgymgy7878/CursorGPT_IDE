@@ -12,25 +12,31 @@ import { t } from '@/lib/i18n';
 import { useMarketStore } from '@/stores/marketStore';
 import React, { useState, useEffect } from 'react';
 
-type PanelState = 'loading' | 'empty' | 'error' | 'data';
+type DevState = 'loading' | 'empty' | 'error' | 'data';
 
-export default function DashboardPage() {
+// SSR-safe dev state resolver (production'da otomatik pasif)
+function resolveDevState(searchParams?: { state?: string }): DevState | null {
+  // Production'da dev toggle pasif
+  if (process.env.NODE_ENV === 'production') return null;
+  
+  const state = searchParams?.state;
+  if (state === 'loading' || state === 'empty' || state === 'error' || state === 'data') {
+    return state;
+  }
+  return null;
+}
+
+export default function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: { state?: string };
+}) {
   // Dev toggle: ?state=loading|empty|error (GIF çekmek ve regression test için)
-  const getDevState = (): PanelState | null => {
-    if (typeof window === 'undefined') return null;
-    const params = new URLSearchParams(window.location.search);
-    const state = params.get('state');
-    if (state === 'loading' || state === 'empty' || state === 'error' || state === 'data') {
-      return state;
-    }
-    return null;
-  };
-  
-  const devState = getDevState();
-  
+  const devState = resolveDevState(searchParams);
+
   // Get WS status from market store
   const wsStatus = useMarketStore(s => s.status);
-  
+
   const env = 'Mock';
   const feed = wsStatus === 'healthy' ? 'Healthy' : wsStatus === 'degraded' ? 'Degraded' : 'Down';
   const broker = 'Offline';
