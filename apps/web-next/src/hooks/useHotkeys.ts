@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type KeyCombo = string; // Örnek: "ctrl+enter", "ctrl+shift+o", "escape"
 
 /**
  * Minimal hotkeys hook for Strategy Lab and Running Strategies.
- * 
+ *
  * @param keys - Key combination string (örn: "ctrl+enter", "ctrl+shift+o", "escape")
  * @param handler - Handler function
  * @param deps - Dependency array (handler'ın bağımlı olduğu değerler)
- * 
+ *
  * @example
  * useHotkeys('ctrl+enter', () => runBacktest(), [runBacktest]);
  * useHotkeys('ctrl+shift+o', () => runOptimize(), [runOptimize]);
@@ -43,14 +43,14 @@ export function useHotkeys(
 
 /**
  * Key combination string'i parse edip keyboard event ile eşleştir.
- * 
+ *
  * @param e - KeyboardEvent
  * @param combo - Key combination string (örn: "ctrl+enter", "ctrl+shift+o")
  * @returns true if matches
  */
 function matchesKeys(e: KeyboardEvent, combo: string): boolean {
   const parts = combo.toLowerCase().split('+').map(s => s.trim());
-  
+
   // Modifier keys kontrolü
   const needsCtrl = parts.includes('ctrl') || parts.includes('control');
   const needsShift = parts.includes('shift');
@@ -63,7 +63,7 @@ function matchesKeys(e: KeyboardEvent, combo: string): boolean {
   if (needsMeta && !e.metaKey) return false;
 
   // Ana tuş kontrolü (modifier'lar hariç)
-  const mainKey = parts.find(p => 
+  const mainKey = parts.find(p =>
     !['ctrl', 'control', 'shift', 'alt', 'meta', 'cmd'].includes(p)
   );
 
