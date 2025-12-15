@@ -65,3 +65,21 @@ TopStatusBar'da WSStatusBadge'in staleness durumlarını test etmek için:
 - [ ] Loading/empty/error: Tüm state'ler görünür ve anlaşılır
 - [ ] Dev toggle: Query param ile state kontrolü çalışıyor
 
+## TAB Order Beklenen Sırası (Regression Test Standardı)
+
+Dashboard sayfasında TAB ile gezinim sırası:
+
+1. **TopStatusBar**: API badge → WSStatusBadge → Engine badge → Guard Validate link
+2. **PageHeader**: Create Strategy butonu → Create Alert butonu
+3. **Ana içerik**: 
+   - P95 Metric → Staleness Metric
+   - Alarm Drafts paneli (CTA butonu varsa)
+   - Canary Tests paneli (CTA butonu varsa)
+   - Live Market Cards (interaktif öğeler)
+4. **Sidebar**: Last Alarm Status → Last Canary Test
+5. **ErrorState retry butonları**: Hata durumunda "Tekrar dene" butonları
+
+**Shift+TAB**: Geriye doğru aynı sıra (ters yön)
+
+**Not:** Bu sıra, regresyon testlerinde standardize edilmiş referans olarak kullanılır. Değişiklik yapıldığında bu liste güncellenmelidir.
+
