@@ -64,13 +64,20 @@ export default function ConfirmModal({
       if (e.key !== 'Tab') return;
 
       const focusableElements = modalRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
       ) as NodeListOf<HTMLElement>;
 
       if (!focusableElements.length) return;
 
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
+
+      // Edge case: Tek element varsa döngü yapma
+      if (focusableElements.length === 1) {
+        e.preventDefault();
+        firstElement.focus();
+        return;
+      }
 
       if (e.shiftKey) {
         // Shift+Tab: geriye doğru
@@ -114,11 +121,11 @@ export default function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div
         ref={modalRef}
@@ -132,11 +139,11 @@ export default function ConfirmModal({
           <span className="text-2xl" aria-hidden="true">{iconStyles[variant]}</span>
           <h2 id="modal-title" className="text-lg font-semibold">{title}</h2>
         </div>
-        
+
         <p id="modal-description" className="text-sm text-neutral-300 mb-6 leading-relaxed">
           {message}
         </p>
-        
+
         <div className="flex gap-3 justify-end">
           <button
             onClick={onClose}

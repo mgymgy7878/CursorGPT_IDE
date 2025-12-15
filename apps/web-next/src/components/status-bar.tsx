@@ -13,16 +13,16 @@ export default function StatusBar() {
   const apiOk = !error && !!data
   const wsOk = useWsHeartbeat()
   const { ok: engineOk } = useEngineHealth()
-  
+
   // WS staleness tracking (örnek: son mesaj zamanı)
   const [wsStalenessMs, setWsStalenessMs] = useState<number | undefined>(undefined)
-  
+
   useEffect(() => {
     if (!wsOk) {
       setWsStalenessMs(undefined)
       return
     }
-    
+
     // Staleness tracking: her 1 saniyede bir güncelle
     const interval = setInterval(() => {
       // TODO: Gerçek WS son mesaj zamanını store'dan al
@@ -30,18 +30,26 @@ export default function StatusBar() {
       const mockStaleness = Math.random() * 10000 // 0-10s arası
       setWsStalenessMs(mockStaleness > 5000 ? mockStaleness : undefined)
     }, 1000)
-    
+
     return () => clearInterval(interval)
   }, [wsOk])
-  
-  // WS durumunu belirle
+
+  // WS durumunu belirle (state önceliği: error > reconnecting > stale > paused > connected)
   const getWSStatus = (): "connected" | "paused" | "reconnecting" | "stale" | "error" => {
     if (!wsOk) return "error"
-    if (wsStalenessMs && wsStalenessMs > 5000) return "stale"
+    
     // TODO: paused/reconnecting state'leri store'dan al
+    // Şimdilik: reconnecting state'i yok, sadece connected/error/stale var
+    
+    // ÖNEMLİ: Reconnecting iken stale gösterme (state önceliği)
+    // if (isReconnecting) return "reconnecting"
+    
+    // Stale kontrolü: WS connected ama mesaj gelmiyorsa stale
+    if (wsStalenessMs && wsStalenessMs > 5000) return "stale"
+    
     return "connected"
   }
-  
+
   return (
     <div className="w-full border-b bg-zinc-950/40 backdrop-blur px-4 py-2 text-sm flex items-center gap-4">
       <div className="flex items-center gap-2">
@@ -57,9 +65,9 @@ export default function StatusBar() {
         <span>Engine</span>
       </div>
       <div className="ml-auto">
-        <Link 
-          className="underline hover:no-underline text-zinc-400 hover:text-zinc-200" 
-          href={process.env.NEXT_PUBLIC_GUARD_VALIDATE_URL || '#'} 
+        <Link
+          className="underline hover:no-underline text-zinc-400 hover:text-zinc-200"
+          href={process.env.NEXT_PUBLIC_GUARD_VALIDATE_URL || '#'}
           target="_blank"
         >
           Guard Validate
