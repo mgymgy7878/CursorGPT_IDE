@@ -45,7 +45,7 @@ Kanıt dokümanları eklendi mi?
 - [ ] Linter temiz (`pnpm lint`)
 - [ ] Bundle size kontrol edildi (< 250KB target)
 - [ ] **PR Smoke CI geçti** (`pr-smoke.yml` workflow)
-  - ❌ **CI fail oldu mu?** → [RCA Decision Tree](docs/CI/PR_SMOKE_RCA_DECISION_TREE.md) + [FigJam Diyagram](https://www.figma.com/make/f2XWaKovyFbvyKMjpJ5qwv/AI-Trading-App?node-id=0-1&t=lXNUBjllEELmcCm3-1) ile 1-2 dakikada sınıflandır
+  - ❌ **CI fail oldu mu?** → [RCA Decision Tree](docs/CI/PR_SMOKE_RCA_DECISION_TREE.md) + [FigJam Diyagram](https://www.figma.com/board/MKkDKEbZ1LmG33JbKQftm4/CI-PR-Smoke-Standalone-Boot-RCA-Decision-Tree?node-id=0-1) ile 1-2 dakikada sınıflandır
     > **Not:** FigJam linkini almak için: FigJam'de diyagram sayfasını aç → Share → Copy link (view erişimi yeterli). `<FIGJAM_LINKINIZ>` placeholder'ını gerçek link ile değiştirin.
 
 ## Güvenlik ve Risk

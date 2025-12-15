@@ -12,7 +12,7 @@ Links: PR-#XXX
 
 PR Smoke CI fail'lerini **1-2 dakika içinde** doğru dala düşürmek için interaktif karar ağacı rehberi.
 
-**FigJam Diyagram:** [CI PR Smoke Standalone Boot RCA Decision Tree](https://www.figma.com/make/f2XWaKovyFbvyKMjpJ5qwv/AI-Trading-App?node-id=0-1&t=lXNUBjllEELmcCm3-1)
+**FigJam Diyagram:** [CI PR Smoke Standalone Boot RCA Decision Tree](https://www.figma.com/board/MKkDKEbZ1LmG33JbKQftm4/CI-PR-Smoke-Standalone-Boot-RCA-Decision-Tree?node-id=0-1)
 
 > **Not:** FigJam linkini almak için: FigJam'de diyagram sayfasını aç → Share → Copy link (view erişimi yeterli). Yukarıdaki `<FIGJAM_LINKINIZ>` placeholder'ını gerçek link ile değiştirin.
 
@@ -257,7 +257,7 @@ gh pr checks 33 --repo mgymgy7878/CursorGPT_IDE
 **Kırmızı check varsa:**
 
 - [RCA Decision Tree](docs/CI/PR_SMOKE_RCA_DECISION_TREE.md) ile fail'i sınıflandır
-- [FigJam Diyagram](https://www.figma.com/make/f2XWaKovyFbvyKMjpJ5qwv/AI-Trading-App?node-id=0-1&t=lXNUBjllEELmcCm3-1) ile görsel rehberlik al
+- [FigJam Diyagram](https://www.figma.com/board/MKkDKEbZ1LmG33JbKQftm4/CI-PR-Smoke-Standalone-Boot-RCA-Decision-Tree?node-id=0-1) ile görsel rehberlik al
 
 ---
 
