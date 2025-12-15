@@ -156,6 +156,25 @@ git checkout -B ui/p0-page-targets-strategy-lab
 
 ---
 
-**Son Güncelleme:** 2025-01-29
-**Durum:** P0-Global tamamlandı, P0-Page Targets hazır
+## 📐 P0 Evidence Pattern
+
+Dashboard'da oturan kanıt/QA deseni, Strategy Lab ve Running Strategies için de aynı şekilde kullanılacak.
+
+**Pattern Dokümantasyonu:** [P0 Evidence Pattern](docs/P0_EVIDENCE_PATTERN.md)
+
+**Standart Dosyalar:**
+- `evidence/ui/p0/<page>/README.md` - Dev toggle + TAB order standardı
+- `evidence/ui/p0/<page>/MANUAL_TEST_RUNBOOK.md` - Screenshot/GIF talimatları
+
+**Required Artifacts (Her PR):**
+- 6 screenshots (states + key UI)
+- 1 GIF (interaction flow, 10-15 saniye)
+- 3-line test summary (TAB/ESC/Contrast)
+
+**Branching:** One-branch-one-PR per page, base depends on previous if needed
+
+---
+
+**Son Güncelleme:** 2025-01-29  
+**Durum:** P0-Global tamamlandı, P0-Page Targets hazır, Evidence Pattern dokümante edildi
 
