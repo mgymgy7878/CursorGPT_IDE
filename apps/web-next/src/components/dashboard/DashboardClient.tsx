@@ -53,12 +53,11 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
 
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-6 py-6 bg-neutral-950">
-      {/* Debug guard: default state sanity-check (yalnızca dev'de görünür) */}
-      {process.env.NODE_ENV !== 'production' && (
-        <div data-testid="dashboard-state" className="sr-only" aria-hidden="true">
-          {panelState}
-        </div>
-      )}
+      {/* Debug guard: default state sanity-check (her zaman DOM'da, sr-only ile gizli, screenshot'a etkisi yok) */}
+      {/* Production-safe: Guard her zaman DOM'da dursun (ileride prod build üzerinden test çalıştırılırsa false negative olmaz) */}
+      <div data-testid="dashboard-state" className="sr-only" aria-hidden="true">
+        {panelState}
+      </div>
       <PageHeader
         title={
           <div className="flex items-center gap-2">

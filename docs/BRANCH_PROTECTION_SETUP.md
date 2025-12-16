@@ -22,19 +22,20 @@ Branch protection rules ile `ui-visual-regression` check'ini required yaparak:
 - `playwright-report`
 - `test-results`
 
-**Adım 3:** Kontrollü fail testi (kanıt için):
+**Adım 3:** Kontrollü fail testi (en güçlü kanıt):
 ```typescript
 // Geçici olarak bir spec'e ekle
 test('test - kontrollü fail', async ({ page }) => {
   expect(1).toBe(2); // Fail üret
 });
 ```
-- Push → Workflow fail olsun
-- Artifact'ler yine gelsin (asıl hedef bu)
-- Sonra revert
+- Push → Workflow kırmızı olmalı **ama artifact'ler yine gelmeli** (`if: always()` bunu garanti ediyor)
+- Sonra hemen revert
 
-**Adım 4:** playwright-report indir → zip'i aç → `index.html`'i tarayıcıda aç
-- Diff yoksa bile rapor var mı? Buna bak.
+**Adım 4:** İndirip açma testi:
+- `playwright-report` zip → `index.html` aç
+- Diff, trace linkleri, step logları görünüyor mu?
+- `test-results` zip → screenshot/video dosyaları var mı? (sadece failure durumunda olmalı)
 
 ---
 
