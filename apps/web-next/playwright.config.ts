@@ -22,7 +22,11 @@ export default defineConfig({
   launchOptions: {
     args: ['--force-color-profile=srgb'],
   },
-  reporter: 'list',
+  // HTML reporter: trace/video/screenshot'ları playwright-report/data/ içine kopyalar (artifact olarak sadece playwright-report yeterli)
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+  ],
   // Golden Master screenshot testleri için
   expect: {
     toHaveScreenshot: {
