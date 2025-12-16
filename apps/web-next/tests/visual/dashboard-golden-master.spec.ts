@@ -122,7 +122,7 @@ test.describe('Dashboard Golden Master', () => {
 
     // UI Parity: Portföy Özeti = 3 stat kutusu assert'i
     const portfolioSummary = page.locator('[data-testid="portfolio-summary"]');
-    const statCards = portfolioSummary.locator('[class*="StatCard"], [class*="stat-card"]');
+    const statCards = portfolioSummary.locator('[data-testid="stat-card"]');
     const statCardCount = await statCards.count();
     if (statCardCount !== 3) {
       throw new Error(`UI Parity: Portföy Özeti 3 stat kutusu olmalı, şu an ${statCardCount} adet bulundu`);
