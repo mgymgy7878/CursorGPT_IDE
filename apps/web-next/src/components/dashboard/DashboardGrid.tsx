@@ -65,6 +65,7 @@ export default function DashboardGrid() {
           <StatCard
             label="Günlük PnL"
             value={portfolioData.dailyPnL.value}
+            delta={{ value: portfolioData.dailyPnL.value, isPositive: portfolioData.dailyPnL.isPositive }}
             className="border-0 bg-transparent p-0"
           />
           <StatCard
