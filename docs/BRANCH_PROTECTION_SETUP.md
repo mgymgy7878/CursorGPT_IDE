@@ -22,20 +22,27 @@ Branch protection rules ile `ui-visual-regression` check'ini required yaparak:
 - `playwright-report`
 - `test-results`
 
-**Adım 3:** Kontrollü fail testi (en güçlü kanıt):
+**Adım 3:** Kontrollü fail testi (en güçlü kanıt - "Artifacts gerçekten always mi?"):
 ```typescript
 // Geçici olarak bir spec'e ekle
 test('test - kontrollü fail', async ({ page }) => {
   expect(1).toBe(2); // Fail üret
 });
 ```
-- Push → Workflow kırmızı olmalı **ama artifact'ler yine gelmeli** (`if: always()` bunu garanti ediyor)
+- Push → Actions kırmızı olsun
+- Run sayfasında Artifacts bölümünde:
+  - `playwright-report` mutlaka gelsin (`if: always()` garantisi)
+  - `test-results` da gelsin (`if: failure()` - failure durumunda)
 - Sonra hemen revert
 
-**Adım 4:** İndirip açma testi:
+**Adım 4:** İndirip açma testi (HTML report'un "tek başına yeterli" olduğunu doğrula):
 - `playwright-report` zip → `index.html` aç
-- Diff, trace linkleri, step logları görünüyor mu?
-- `test-results` zip → screenshot/video dosyaları var mı? (sadece failure durumunda olmalı)
+- HTML report içinde şunlar görünüyor mu?
+  - Failure adımları (step logları)
+  - Screenshot (failure anında)
+  - Trace "View trace" bağlantısı (çalışıyor mu?)
+- **Kritik:** Playwright HTML reporter trace/video/screenshot'ları `playwright-report/data/` içine kopyalar; çoğu ekip sadece report'u upload ederek yaşar.
+- Eğer trace bağlantıları çalışmıyorsa: `test-results`'ı `if: failure()` bırak ama Playwright reporter ayarını sabitlemek gerekir (çoğu projede zaten OK).
 
 ---
 
