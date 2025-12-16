@@ -60,6 +60,7 @@ jobs:
           name: playwright-report
           path: apps/web-next/playwright-report/
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload test results (on failure)
         if: failure()

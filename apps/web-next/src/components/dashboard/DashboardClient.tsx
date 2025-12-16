@@ -1,0 +1,125 @@
+'use client';
+
+import PageHeader from '@/components/layout/PageHeader';
+import StatusPills from '@/components/layout/StatusPills';
+import ErrorBudgetBadge from '@/components/ops/ErrorBudgetBadge';
+import { EmptyState, ErrorState } from '@/components/ui/states';
+import DashboardGrid from '@/components/dashboard/DashboardGrid';
+import { t } from '@/lib/i18n';
+import { useMarketStore } from '@/stores/marketStore';
+import React, { useState, useEffect } from 'react';
+
+export type DevState = 'loading' | 'empty' | 'error' | 'data';
+
+interface DashboardClientProps {
+  devState: DevState | null;
+}
+
+export default function DashboardClient({ devState }: DashboardClientProps) {
+  // Get WS status from market store
+  const wsStatus = useMarketStore(s => s.status);
+
+  const env = 'Mock';
+  const feed = wsStatus === 'healthy' ? 'Healthy' : wsStatus === 'degraded' ? 'Degraded' : 'Down';
+  const broker = 'Offline';
+
+  const p95Ms = 58;
+  const stalenessMs = 0;
+
+  // Dev toggle: Panel state'i prop'tan al veya normal akıştan belirle
+  // Default state: her zaman 'data' (deterministic fixture data, Figma parity)
+  // Loading/empty/error sadece ?state=loading|empty|error query param ile tetiklenir
+  const [panelState, setPanelState] = useState<DevState>(devState || 'data');
+  const [isLoading, setIsLoading] = useState(devState === 'loading');
+  const [hasError, setHasError] = useState(devState === 'error');
+  const [hasData, setHasData] = useState(devState !== 'loading' && devState !== 'empty' && devState !== 'error');
+
+  useEffect(() => {
+    if (devState) {
+      // Dev toggle aktif: prop'tan state'i al (?state=loading|empty|error)
+      setPanelState(devState);
+      setIsLoading(devState === 'loading');
+      setHasError(devState === 'error');
+      setHasData(devState === 'data');
+    } else {
+      // Normal akış: default = data (deterministic fixture, Figma parity)
+      // Executor kapalı olsa bile fixture data gösterilir
+      setIsLoading(false);
+      setHasError(false);
+      setHasData(true);
+      setPanelState('data');
+    }
+  }, [devState]);
+
+  const handleCreateStrategy = () => {
+    window.location.href = '/strategy-lab';
+  };
+
+  const handleCreateAlert = () => {
+    // TODO: Open alert creation modal
+    console.log('Create alert');
+  };
+
+  const handleRetry = () => {
+    setIsLoading(true);
+    setHasError(false);
+    setTimeout(() => {
+      setIsLoading(false);
+      setHasData(true);
+      setPanelState('data');
+    }, 1000);
+  };
+
+  return (
+    <div className="w-full max-w-screen-2xl mx-auto px-6 py-6 bg-neutral-950">
+      <PageHeader
+        title={
+          <div className="flex items-center gap-2">
+            Spark Trading
+            <ErrorBudgetBadge />
+          </div>
+        }
+        subtitle="Dashboard"
+        chips={[
+          { label: `${t('dashboard.target')}: 1200 ms`, tone: 'muted' },
+          { label: `${t('dashboard.threshold')}: 30 sn`, tone: 'muted' },
+        ]}
+        actions={[
+          { label: t('actions.createStrategy'), onClick: handleCreateStrategy },
+          { label: t('actions.createAlert'), variant: 'ghost', onClick: handleCreateAlert },
+        ]}
+      />
+
+      <div className="mb-4">
+        <StatusPills env={env} feed={feed} broker={broker} />
+      </div>
+
+      {/* Main content - Dashboard Grid (Figma Parity) */}
+      <div className="mt-6">
+        {isLoading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="p-4 rounded-lg border border-neutral-800 bg-neutral-900/80 animate-pulse">
+                <div className="h-4 bg-neutral-800 rounded w-1/3 mb-3"></div>
+                <div className="h-8 bg-neutral-800 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : hasError ? (
+          <ErrorState
+            message="Dashboard verileri yüklenirken bir hata oluştu"
+            onRetry={handleRetry}
+          />
+        ) : !hasData ? (
+          <EmptyState
+            title="Henüz dashboard verisi yok"
+            description="Veriler yüklendiğinde burada görünecek"
+          />
+        ) : (
+          <DashboardGrid />
+        )}
+      </div>
+    </div>
+  );
+}
+
