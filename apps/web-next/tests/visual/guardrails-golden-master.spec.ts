@@ -10,7 +10,7 @@ test.use({
   timezoneId: 'Europe/Istanbul',
 });
 
-test.describe('Guardrails (Risk / Koruma) Golden Master', () => {
+test.describe('Risk / Koruma (Guardrails) Golden Master', () => {
   test.beforeEach(async ({ page }) => {
     await page.addStyleTag({
       content: `

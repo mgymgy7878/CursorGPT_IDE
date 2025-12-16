@@ -48,7 +48,8 @@ jobs:
         run: pnpm --filter web-next exec playwright install --with-deps
 
       - name: Run visual regression (golden master)
-        run: powershell -File apps/web-next/scripts/ci-visual-regression.ps1
+        shell: pwsh
+        run: ./apps/web-next/scripts/ci-visual-regression.ps1
         continue-on-error: false
 
       - name: Upload Playwright report (on failure)
