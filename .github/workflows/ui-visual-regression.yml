@@ -47,8 +47,9 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm --filter web-next exec playwright install --with-deps
 
-      - name: Run visual regression (golden master)
+      - name: UI visual regression (Playwright)
         shell: pwsh
+        working-directory: ./
         run: ./apps/web-next/scripts/ci-visual-regression.ps1
         continue-on-error: false
 

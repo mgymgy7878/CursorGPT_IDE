@@ -4,7 +4,8 @@ export default defineConfig({
   testDir: './tests',
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3003',
-    trace: 'on', // Her test için trace (CI'da debug için)
+    // Trace: env var ile kontrol edilebilir (default: on-first-retry, CI'da PW_TRACE=1 ile full trace)
+    trace: process.env.PW_TRACE === '1' ? 'on' : 'on-first-retry',
     headless: true,
     // Deterministik test ortamı (Golden Master için)
     viewport: { width: 1440, height: 900 },
@@ -15,6 +16,8 @@ export default defineConfig({
     // Deterministik render için
     deviceScaleFactor: 1,
   },
+  // Deterministiklik için: Windows runner'da render yarışlarını azalt
+  workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   // Golden Master screenshot testleri için
   expect: {

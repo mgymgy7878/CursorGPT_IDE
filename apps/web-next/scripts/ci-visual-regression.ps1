@@ -9,6 +9,7 @@
 #   3. Snapshot farkı varsa exit 1 (PR kırmızı)
 
 $ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
 
 Write-Host "🔍 Visual Regression Test - CI Pipeline" -ForegroundColor Cyan
 
@@ -87,19 +88,24 @@ if (-not $serverReady) {
 }
 
 # Golden Master testlerini çalıştır (tüm visual testler)
-# PowerShell wildcard sorununu önlemek için Get-ChildItem kullan
+# PowerShell wildcard sorununu önlemek için Get-ChildItem + argument array kullan
 Write-Host "📸 Running Golden Master tests..." -ForegroundColor Yellow
 try {
-    $testFiles = Get-ChildItem -Path "apps/web-next/tests/visual" -Filter "*.spec.ts" -Recurse | Select-Object -ExpandProperty FullName
+    $testFiles = Get-ChildItem -Path "apps/web-next/tests/visual" -Filter "*.spec.ts" -Recurse | ForEach-Object { $_.FullName }
+    
     if ($testFiles.Count -eq 0) {
         Write-Host "❌ No test files found in tests/visual/" -ForegroundColor Red
-        exit 1
+        throw "No visual spec files found."
     }
     
-    # Test dosyalarını tırnak içinde çalıştır (wildcard sorununu önler)
-    $testFilesQuoted = $testFiles | ForEach-Object { "`"$_`"" }
-    $testCommand = "pnpm --filter web-next exec playwright test $($testFilesQuoted -join ' ')"
-    Invoke-Expression $testCommand
+    # Argument array ile güvenli çalıştırma (Invoke-Expression yerine)
+    $args = @("--filter", "web-next", "exec", "playwright", "test") + $testFiles
+    & pnpm @args
+    
+    if ($LASTEXITCODE -ne 0) {
+        throw "Playwright tests failed with exit code $LASTEXITCODE"
+    }
+    
     $testFailed = $false
 } catch {
     Write-Host "❌ Test execution failed: $($_.Exception.Message)" -ForegroundColor Red
