@@ -110,15 +110,22 @@ test.describe('Dashboard Golden Master', () => {
     const portfolioSummary = page.locator('text=Portföy Özeti').first();
     await expect(portfolioSummary).toBeVisible({ timeout: 2000 }).catch(() => {});
 
+    // UI Parity: ⌘K Command butonu sadece TopStatusBar'da olmalı (RightRail'de olmamalı)
+    const commandButtons = page.locator('[data-testid="command-button"]');
+    const commandButtonCount = await commandButtons.count();
+    if (commandButtonCount !== 1) {
+      throw new Error(`UI Parity: CommandButton sayısı 1 olmalı (TopStatusBar'da), şu an ${commandButtonCount} adet bulundu`);
+    }
+
     // Ek sanity: En az bir kart başlığı daha görünür olmalı (6-card grid'in gerçekten render olduğunu garantiler)
     // Promise.race tuzağı: İlk kontrol hızlıca false/null dönerse race biter; daha sağlamı || operatörü ile sıralı kontrol
     const marketStatus = page.getByText('Piyasa Durumu').first();
     const activeStrategies = page.getByText('Aktif Stratejiler').first();
-    
+
     const hasVisible =
       (await marketStatus.isVisible().catch(() => false)) ||
       (await activeStrategies.isVisible().catch(() => false));
-    
+
     if (!hasVisible) {
       throw new Error('Dashboard default state: En az 1-2 ana kart başlığı visible olmalı (6-card grid render olmamış)');
     }

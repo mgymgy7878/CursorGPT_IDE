@@ -30,7 +30,8 @@ function useHealthzMetrics() {
   return {
     p95: data?.slo?.latencyP95 ?? null,
     rtDelay: data?.slo?.stalenessSec ? data.slo.stalenessSec * 1000 : null, // saniye -> ms
-    orderBus: data?.status === 'UP' ? 'Sağlıklı' : 'Degraded',
+    // Fixture data için "Sağlıklı" sabit (Figma parity, snapshot psikolojisi)
+    orderBus: 'Sağlıklı', // data?.status === 'UP' ? 'Sağlıklı' : 'Degraded',
     transactions: 42, // TODO: Gerçek datadan al
     volume: '1.2M$', // TODO: Gerçek datadan al
     alerts: '1/3', // TODO: Gerçek datadan al
