@@ -74,6 +74,12 @@ Minimum required checks:
 **Mevcut ayar:**
 - `if: always()` - Her zaman upload (test fail olsa da report gelsin)
 - `retention-days: 3` - 3 gün sonra otomatik silinir (repo tarafında birikim yok)
+- `compression-level: 6` - Upload hızı optimize edildi
+
+**Playwright trace/video/screenshot ayarları:**
+- `trace: on-first-retry` (default) - Sadece retry'da trace üretilir (artifact boyutu küçük)
+- `video: only-on-failure` (önerilen) - Sadece fail durumunda video kaydedilir
+- `screenshot: only-on-failure` (önerilen) - Sadece fail durumunda screenshot alınır
 
 **Alternatif (iki katman):**
 ```yaml
@@ -96,7 +102,7 @@ Minimum required checks:
     retention-days: 7
 ```
 
-**Öneri:** Mevcut `if: always()` + `retention-days: 3` yeterli (basit ve etkili).
+**Öneri:** Mevcut `if: always()` + `retention-days: 3` + `compression-level: 6` yeterli (basit ve etkili). Video/screenshot'ları `only-on-failure` modunda tutarak artifact boyutunu daha da düşürebilirsin.
 
 ---
 
