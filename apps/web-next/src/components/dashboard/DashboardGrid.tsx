@@ -54,7 +54,7 @@ export default function DashboardGrid() {
       {/* Top Left: Portfolio Summary - Figma parity: 3 küçük stat kutusu */}
       <Surface variant="card" className="p-4">
         <div className="text-sm font-medium text-neutral-200 mb-3">Portföy Özeti</div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3" data-testid="portfolio-summary">
           <StatCard
             label="Toplam Varlık"
             value={portfolioData.totalAssets}
@@ -62,10 +62,11 @@ export default function DashboardGrid() {
             sublabel={portfolioData.dailyPnLLabel}
             className="border-0 bg-transparent p-0"
           />
+          {/* Günlük PnL: delta göstermeyip sublabel ("Last 24h") göstermek daha doğru (delta duplikasyonu yok) */}
           <StatCard
             label="Günlük PnL"
             value={portfolioData.dailyPnL.value}
-            delta={{ value: portfolioData.dailyPnL.value, isPositive: portfolioData.dailyPnL.isPositive }}
+            sublabel={portfolioData.dailyPnLLabel}
             className="border-0 bg-transparent p-0"
           />
           <StatCard

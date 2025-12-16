@@ -116,6 +116,43 @@ test.describe('Dashboard Golden Master', () => {
     if (commandButtonCount !== 1) {
       throw new Error(`UI Parity: CommandButton sayısı 1 olmalı (TopStatusBar'da), şu an ${commandButtonCount} adet bulundu`);
     }
+    // UI Parity: 1440px viewport'ta CommandButton "⌘K Commands" tam etiket görünmeli
+    const commandButton = commandButtons.first();
+    await expect(commandButton).toHaveText('⌘K Commands', { timeout: 2000 });
+
+    // UI Parity: Portföy Özeti = 3 stat kutusu assert'i
+    const portfolioSummary = page.locator('[data-testid="portfolio-summary"]');
+    const statCards = portfolioSummary.locator('[class*="StatCard"], [class*="stat-card"]');
+    const statCardCount = await statCards.count();
+    if (statCardCount !== 3) {
+      throw new Error(`UI Parity: Portföy Özeti 3 stat kutusu olmalı, şu an ${statCardCount} adet bulundu`);
+    }
+
+    // StatCard overlap guard: 3 kutunun boundingBox()'larını alıp birbirleriyle kesişmiyor mu diye kontrol
+    const boxes = await Promise.all([
+      statCards.nth(0).boundingBox(),
+      statCards.nth(1).boundingBox(),
+      statCards.nth(2).boundingBox(),
+    ]);
+    
+    // Çakışma kontrolü: herhangi iki kutu birbiriyle kesişiyor mu?
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const box1 = boxes[i];
+        const box2 = boxes[j];
+        if (box1 && box2) {
+          const overlaps = !(
+            box1.x + box1.width < box2.x ||
+            box2.x + box2.width < box1.x ||
+            box1.y + box1.height < box2.y ||
+            box2.y + box2.height < box1.y
+          );
+          if (overlaps) {
+            throw new Error(`UI Parity: StatCard overlap detected - boxes ${i} and ${j} are overlapping`);
+          }
+        }
+      }
+    }
 
     // Ek sanity: En az bir kart başlığı daha görünür olmalı (6-card grid'in gerçekten render olduğunu garantiler)
     // Promise.race tuzağı: İlk kontrol hızlıca false/null dönerse race biter; daha sağlamı || operatörü ile sıralı kontrol
