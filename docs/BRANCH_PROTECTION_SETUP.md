@@ -79,7 +79,8 @@ Minimum required checks:
 ## 3) Artifact Upload Optimizasyonu
 
 **Mevcut ayar:**
-- `if: always()` - Her zaman upload (test fail olsa da report gelsin)
+- `playwright-report`: `if: always()` - Her zaman upload (test fail olsa da report gelsin)
+- `test-results`: `if: failure()` - Sadece failure durumunda upload (depolama tasarrufu)
 - `retention-days: 3` - 3 gün sonra otomatik silinir (repo tarafında birikim yok)
 - `compression-level: 6` - Upload hızı optimize edildi
 
@@ -87,6 +88,10 @@ Minimum required checks:
 - `trace: on-first-retry` (default) - Sadece retry'da trace üretilir (artifact boyutu küçük)
 - `video: only-on-failure` (önerilen) - Sadece fail durumunda video kaydedilir
 - `screenshot: only-on-failure` (önerilen) - Sadece fail durumunda screenshot alınır
+
+**HTML Reporter ayarları:**
+- `reporter: ['html', { outputFolder: 'playwright-report' }]` - Trace/video/screenshot'ları `playwright-report/data/` içine kopyalar
+- Bu sayede artifact olarak sadece `playwright-report` yeterli (HTML report içinde trace bağlantıları çalışır)
 
 **Alternatif (iki katman):**
 ```yaml
