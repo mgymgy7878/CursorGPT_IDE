@@ -7,7 +7,7 @@ import { EmptyState, ErrorState } from '@/components/ui/states';
 import DashboardGrid from '@/components/dashboard/DashboardGrid';
 import { t } from '@/lib/i18n';
 import { useMarketStore } from '@/stores/marketStore';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 export type DevState = 'loading' | 'empty' | 'error' | 'data';
 
@@ -26,30 +26,16 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
   const p95Ms = 58;
   const stalenessMs = 0;
 
-  // Dev toggle: Panel state'i prop'tan al veya normal akıştan belirle
+  // Tek kaynak: devState ?? 'data' (derived state, ilk render'da flicker yok)
   // Default state: her zaman 'data' (deterministic fixture data, Figma parity)
   // Loading/empty/error sadece ?state=loading|empty|error query param ile tetiklenir
-  const [panelState, setPanelState] = useState<DevState>(devState || 'data');
-  const [isLoading, setIsLoading] = useState(devState === 'loading');
-  const [hasError, setHasError] = useState(devState === 'error');
-  const [hasData, setHasData] = useState(devState !== 'loading' && devState !== 'empty' && devState !== 'error');
+  const panelState: DevState = devState ?? 'data';
 
-  useEffect(() => {
-    if (devState) {
-      // Dev toggle aktif: prop'tan state'i al (?state=loading|empty|error)
-      setPanelState(devState);
-      setIsLoading(devState === 'loading');
-      setHasError(devState === 'error');
-      setHasData(devState === 'data');
-    } else {
-      // Normal akış: default = data (deterministic fixture, Figma parity)
-      // Executor kapalı olsa bile fixture data gösterilir
-      setIsLoading(false);
-      setHasError(false);
-      setHasData(true);
-      setPanelState('data');
-    }
-  }, [devState]);
+  // Derived state (panelState'ten türetilir, useEffect yok)
+  const isLoading = panelState === 'loading';
+  const hasError = panelState === 'error';
+  const isEmpty = panelState === 'empty';
+  const hasData = panelState === 'data';
 
   const handleCreateStrategy = () => {
     window.location.href = '/strategy-lab';
@@ -61,13 +47,8 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
   };
 
   const handleRetry = () => {
-    setIsLoading(true);
-    setHasError(false);
-    setTimeout(() => {
-      setIsLoading(false);
-      setHasData(true);
-      setPanelState('data');
-    }, 1000);
+    // Retry: sayfayı yenile (state query param olmadan, default = data)
+    window.location.href = '/dashboard';
   };
 
   return (
@@ -110,7 +91,7 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
             message="Dashboard verileri yüklenirken bir hata oluştu"
             onRetry={handleRetry}
           />
-        ) : !hasData ? (
+        ) : isEmpty ? (
           <EmptyState
             title="Henüz dashboard verisi yok"
             description="Veriler yüklendiğinde burada görünecek"
