@@ -16,6 +16,7 @@ import { useHeartbeat } from '@/hooks/useHeartbeat'
 import { useWsHeartbeat } from '@/hooks/useWsHeartbeat'
 import { useEngineHealth } from '@/hooks/useEngineHealth'
 import { WSStatusBadge } from '@/components/ui/StatusBadge'
+import { CommandButton } from '@/components/layout/CommandButton'
 import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 
@@ -84,40 +85,42 @@ export default function StatusBar() {
       {/* Ortada: Status indicators + Metrics */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Status Indicators */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <StatusDot ok={apiOk} />
           <span className="text-xs text-neutral-300">API</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <StatusDot ok={wsOk} />
           <span className="text-xs text-neutral-300">WS</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <StatusDot ok={engineOk} />
           <span className="text-xs text-neutral-300">Executor</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <StatusDot ok={devOk} />
           <span className="text-xs text-neutral-300">DEV</span>
         </div>
 
         {/* Divider */}
-        <div className="w-px h-4 bg-neutral-700" />
+        <div className="w-px h-4 bg-neutral-700 shrink-0" />
 
-        {/* Performance Metrics */}
-        {metrics.p95 !== null && (
-          <span className="text-xs text-neutral-400 tabular-nums">
-            P95: {metrics.p95}ms
+        {/* Performance Metrics - Center section with truncate protection */}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          {metrics.p95 !== null && (
+            <span className="text-xs text-neutral-400 tabular-nums whitespace-nowrap shrink-0">
+              P95: {metrics.p95}ms
+            </span>
+          )}
+          {metrics.rtDelay !== null && (
+            <span className="text-xs text-neutral-400 tabular-nums whitespace-nowrap shrink-0">
+              RT Delay: {metrics.rtDelay}ms
+            </span>
+          )}
+          <span className="text-xs text-neutral-400 whitespace-nowrap shrink-0">
+            OrderBus: {metrics.orderBus}
           </span>
-        )}
-        {metrics.rtDelay !== null && (
-          <span className="text-xs text-neutral-400 tabular-nums">
-            RT Delay: {metrics.rtDelay}ms
-          </span>
-        )}
-        <span className="text-xs text-neutral-400">
-          OrderBus: {metrics.orderBus}
-        </span>
+        </div>
       </div>
 
       {/* Sağ: Metrikler + İkonlar */}
@@ -128,8 +131,9 @@ export default function StatusBar() {
           <span>Uyarılar: {metrics.alerts}</span>
         </div>
 
-        {/* Sağ köşe: Bildirim + Kullanıcı (placeholder) */}
+        {/* Sağ köşe: Commands + Bildirim + Kullanıcı */}
         <div className="flex items-center gap-2">
+          <CommandButton />
           <button
             className="w-6 h-6 flex items-center justify-center rounded hover:bg-neutral-800 transition-colors"
             aria-label="Bildirimler"

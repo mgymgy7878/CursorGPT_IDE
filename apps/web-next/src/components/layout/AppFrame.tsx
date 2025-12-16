@@ -82,16 +82,16 @@ function RightRailCopilotSkeleton() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="px-4 py-3 border-b border-neutral-800">
-        <div className="space-y-2">
-          <button className="w-full px-3 py-2 text-xs bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-lg transition-colors text-left">
+      {/* Quick Actions - Chip/Segmented style (Figma parity: rounded-full, inline wrap) */}
+      <div className="px-4 py-2 border-b border-neutral-800">
+        <div className="flex flex-wrap gap-2">
+          <button className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-full transition-colors">
             Portföy riskini analiz et
           </button>
-          <button className="w-full px-3 py-2 text-xs bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-lg transition-colors text-left">
+          <button className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-full transition-colors">
             Çalışan stratejileri özetle
           </button>
-          <button className="w-full px-3 py-2 text-xs bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-lg transition-colors text-left">
+          <button className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-full transition-colors">
             Bugün için işlem önerisi
           </button>
         </div>
@@ -119,7 +119,7 @@ function RightRailCopilotSkeleton() {
             disabled
           />
           <button
-            className="px-4 py-2 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+            className="px-3 py-2 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 shrink-0"
             disabled
           >
             Gönder
