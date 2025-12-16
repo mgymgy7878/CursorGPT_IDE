@@ -91,21 +91,22 @@ if (-not $serverReady) {
 # PowerShell wildcard sorununu önlemek için Get-ChildItem + argument array kullan
 Write-Host "📸 Running Golden Master tests..." -ForegroundColor Yellow
 try {
-    $testFiles = Get-ChildItem -Path "apps/web-next/tests/visual" -Filter "*.spec.ts" -Recurse | ForEach-Object { $_.FullName }
-    
+    # Tam deterministik: array garantisi + sıralama (log/teşhis tutarlı)
+    $testFiles = @(Get-ChildItem -Path "apps/web-next/tests/visual" -Filter "*.spec.ts" -Recurse | Sort-Object FullName | ForEach-Object { $_.FullName })
+
     if ($testFiles.Count -eq 0) {
         Write-Host "❌ No test files found in tests/visual/" -ForegroundColor Red
         throw "No visual spec files found."
     }
-    
+
     # Argument array ile güvenli çalıştırma (Invoke-Expression yerine)
     $args = @("--filter", "web-next", "exec", "playwright", "test") + $testFiles
     & pnpm @args
-    
+
     if ($LASTEXITCODE -ne 0) {
         throw "Playwright tests failed with exit code $LASTEXITCODE"
     }
-    
+
     $testFailed = $false
 } catch {
     Write-Host "❌ Test execution failed: $($_.Exception.Message)" -ForegroundColor Red

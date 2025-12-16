@@ -82,16 +82,16 @@ function RightRailCopilotSkeleton() {
         </div>
       </div>
 
-      {/* Quick Actions - Chip/Segmented style (Figma parity: rounded-full, inline wrap) */}
+      {/* Quick Actions - Chip/Segmented style (Figma parity: daha ince border/opacity, daha düşük doluluk) */}
       <div className="px-4 py-2 border-b border-neutral-800">
-        <div className="flex flex-wrap gap-2">
-          <button className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-full transition-colors">
+        <div className="flex flex-wrap gap-1.5">
+          <button className="px-2.5 py-1 text-xs bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/20 text-blue-300/90 rounded-full transition-colors leading-tight">
             Portföy riskini analiz et
           </button>
-          <button className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-full transition-colors">
+          <button className="px-2.5 py-1 text-xs bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/20 text-blue-300/90 rounded-full transition-colors leading-tight">
             Çalışan stratejileri özetle
           </button>
-          <button className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-full transition-colors">
+          <button className="px-2.5 py-1 text-xs bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/20 text-blue-300/90 rounded-full transition-colors leading-tight">
             Bugün için işlem önerisi
           </button>
         </div>
