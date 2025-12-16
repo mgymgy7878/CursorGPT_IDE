@@ -18,6 +18,10 @@ export default defineConfig({
   },
   // Deterministiklik için: Windows runner'da render yarışlarını azalt
   workers: process.env.CI ? 1 : undefined,
+  // Deterministik renk profili (snap drift'ini azaltır)
+  launchOptions: {
+    args: ['--force-color-profile=srgb'],
+  },
   reporter: 'list',
   // Golden Master screenshot testleri için
   expect: {
