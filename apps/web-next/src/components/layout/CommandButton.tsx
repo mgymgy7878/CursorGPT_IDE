@@ -4,7 +4,9 @@ import React from "react";
 export function CommandButton() {
   // data-testid: visual test'te "komut butonu sayısı = 1" assert'i için
   return (
-    <button className="rounded-full px-2.5 py-1 bg-neutral-800/60 hover:bg-neutral-700/60 border border-neutral-700/50 text-neutral-300 text-xs font-medium transition-colors">
+    <button
+      data-testid="command-button"
+      className="rounded-full px-2.5 py-1 bg-neutral-800/60 hover:bg-neutral-700/60 border border-neutral-700/50 text-neutral-300 text-xs font-medium transition-colors">
       ⌘K
     </button>
   );
