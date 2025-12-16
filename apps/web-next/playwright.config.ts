@@ -18,6 +18,8 @@ export default defineConfig({
   },
   // Deterministiklik için: Windows runner'da render yarışlarını azalt
   workers: process.env.CI ? 1 : undefined,
+  // CI'da retry=1: fail olduğunda trace kesin oluşsun (on-first-retry ile birlikte)
+  retries: process.env.CI ? 1 : 0,
   // Deterministik renk profili (snap drift'ini azaltır)
   launchOptions: {
     args: ['--force-color-profile=srgb'],

@@ -53,12 +53,11 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
 
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-6 py-6 bg-neutral-950">
-      {/* Debug guard: default state sanity-check (her zaman DOM'da, sr-only ile gizli, screenshot'a etkisi yok) */}
+      {/* Debug guard: default state sanity-check (her zaman DOM'da, hidden ile tamamen görünmez, screenshot'a etkisi yok) */}
       {/* Production-safe: Guard her zaman DOM'da dursun (ileride prod build üzerinden test çalıştırılırsa false negative olmaz) */}
       {/* data-state attribute: metin render/padding vb. hiç umrun olmaz, toHaveAttribute ile "kurşungeçirmez" test */}
-      <div data-testid="dashboard-state" data-state={panelState} className="sr-only" aria-hidden="true">
-        {panelState}
-      </div>
+      {/* hidden: text render/font load tartışmasını tamamen kapatır, görsel etkisizlik kanıtı */}
+      <div data-testid="dashboard-state" data-state={panelState} hidden aria-hidden="true" />
       <PageHeader
         title={
           <div className="flex items-center gap-2">

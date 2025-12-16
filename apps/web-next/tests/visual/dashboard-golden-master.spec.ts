@@ -102,8 +102,8 @@ test.describe('Dashboard Golden Master', () => {
     // "Kurşungeçirmez" test: data-state attribute ile metin render/padding vb. hiç umrun olmaz
     const stateElement = page.locator('[data-testid="dashboard-state"]');
     await expect(stateElement).toHaveAttribute('data-state', 'data', { timeout: 2000 });
-    // Fallback: text content kontrolü (ekstra güvenlik)
-    await expect(stateElement).toHaveText('data', { timeout: 2000 });
+    // Görsel etkisizlik kanıtı: guard gerçekten görünmez olmalı (hidden attribute)
+    await expect(stateElement).toBeHidden();
 
     // Visual assertion: 6-card grid görünmeli (Portföy Özeti, Piyasa Durumu, vb.)
     // En az 1-2 ana başlık visible olmalı (yanlışlıkla default'u loading'e çeviren PR'ı snapshot'a bulaştırmadan patlatır)
@@ -111,14 +111,15 @@ test.describe('Dashboard Golden Master', () => {
     await expect(portfolioSummary).toBeVisible({ timeout: 2000 }).catch(() => {});
 
     // Ek sanity: En az bir kart başlığı daha görünür olmalı (6-card grid'in gerçekten render olduğunu garantiler)
-    const marketStatus = page.locator('text=Piyasa Durumu').first();
-    const activeStrategies = page.locator('text=Aktif Stratejiler').first();
-    const hasVisibleCard = await Promise.race([
-      marketStatus.isVisible().then(v => v ? 'market' : null),
-      activeStrategies.isVisible().then(v => v ? 'strategies' : null),
-    ]).catch(() => null);
+    // Promise.race tuzağı: İlk kontrol hızlıca false/null dönerse race biter; daha sağlamı || operatörü ile sıralı kontrol
+    const marketStatus = page.getByText('Piyasa Durumu').first();
+    const activeStrategies = page.getByText('Aktif Stratejiler').first();
     
-    if (!hasVisibleCard) {
+    const hasVisible =
+      (await marketStatus.isVisible().catch(() => false)) ||
+      (await activeStrategies.isVisible().catch(() => false));
+    
+    if (!hasVisible) {
       throw new Error('Dashboard default state: En az 1-2 ana kart başlığı visible olmalı (6-card grid render olmamış)');
     }
 
