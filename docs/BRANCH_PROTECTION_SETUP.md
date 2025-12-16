@@ -1,6 +1,6 @@
 # Branch Protection Setup - UI Visual Regression Gate
 
-**Durum:** Drift gate'i PR merge'e bağlama rehberi  
+**Durum:** Drift gate'i PR merge'e bağlama rehberi
 **Hedef:** `ui-visual-regression` check'ini required yaparak tasarım drift'ini "yanlışlıkla" main'e sızmasını engellemek
 
 ---
@@ -42,7 +42,7 @@ test('test - kontrollü fail', async ({ page }) => {
 
 **GitHub Repo Settings → Branches → Branch protection rules**
 
-### 2.1 Main Branch Protection
+### 2.1 Main Branch Protection (Trading Risk Gate Mantığı)
 
 1. **Branch name pattern:** `main`
 2. **Require a pull request before merging:**
@@ -50,11 +50,14 @@ test('test - kontrollü fail', async ({ page }) => {
    - ✅ Dismiss stale pull request approvals when new commits are pushed
 3. **Require status checks to pass before merging:**
    - ✅ Require branches to be up to date before merging
-   - ✅ **Status checks:**
-     - `ui-visual-regression` (required)
-     - Diğer check'ler (lint, typecheck, vb.)
+   - ✅ **Status checks (minimum):**
+     - `ui-visual-regression` (required - drift gate)
+     - `lint` (code quality)
+     - `typecheck` (type safety)
 4. **Require conversation resolution before merging:** (opsiyonel)
-5. **Do not allow bypassing the above settings:** (opsiyonel, güvenlik için)
+5. **Do not allow bypassing the above settings:** ✅ **Açık** (ekip disiplini için)
+
+**Kural:** Default güvenli, override kanıtla. Snapshot güncellemesi "bilinçli ritüel" olur; drift sızamaz.
 
 ### 2.2 Required Check Listesi
 
@@ -148,6 +151,6 @@ Minimum required checks:
 
 ---
 
-**Son Güncelleme:** 2024-12-16  
+**Son Güncelleme:** 2024-12-16
 **Bakım:** Branch protection rules değiştiğinde bu dokümanı güncelle
 

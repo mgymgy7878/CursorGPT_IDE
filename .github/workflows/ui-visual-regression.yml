@@ -60,6 +60,7 @@ jobs:
           name: playwright-report
           path: apps/web-next/playwright-report
           retention-days: 3
+          compression-level: 6
           if-no-files-found: ignore
 
       - name: Upload test results
@@ -69,5 +70,6 @@ jobs:
           name: test-results
           path: apps/web-next/test-results
           retention-days: 3
+          compression-level: 6
           if-no-files-found: ignore
 

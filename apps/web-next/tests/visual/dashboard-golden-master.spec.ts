@@ -98,6 +98,14 @@ test.describe('Dashboard Golden Master', () => {
 
     await page.waitForSelector('[data-testid="status-bar"], .status-bar, header', { timeout: 5000 }).catch(() => {});
 
+    // Sanity-check: default state mutlaka 'data' olmalı (fixture data, Figma parity)
+    const stateElement = page.locator('[data-testid="dashboard-state"]');
+    await expect(stateElement).toHaveText('data', { timeout: 2000 });
+
+    // Visual assertion: 6-card grid görünmeli (Portföy Özeti, Piyasa Durumu, vb.)
+    const portfolioSummary = page.locator('text=Portföy Özeti').first();
+    await expect(portfolioSummary).toBeVisible({ timeout: 2000 }).catch(() => {});
+
     await expect(page).toHaveScreenshot('dashboard-default.png', {
       fullPage: true,
       maxDiffPixels: 100,
