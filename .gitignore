@@ -71,6 +71,10 @@ CursorGPT_IDE/
 *.tgz
 evidence/
 .evidence/
+# Evidence klasöründe sadece MD dosyalarını serbest bırak (README, runbook, checklist)
+!evidence/**/README.md
+!evidence/**/MANUAL_TEST_RUNBOOK.md
+!evidence/**/REGRESSION_CHECKLIST.md
 
 # local/dev junk
 .dev/

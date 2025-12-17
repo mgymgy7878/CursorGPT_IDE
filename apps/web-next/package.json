@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev -p 3003",
+		"dev:dashboard": "next dev -p 3003 --hostname 127.0.0.1",
 		"ws:dev": "tsx scripts/dev-ws.ts",
 		"dev:auto": "node scripts/dev-auto.mjs",
 		"dev:unix": "sh ./scripts/predev.sh && rm -rf .next && WATCHPACK_POLLING=true WATCHPACK_POLLING_INTERVAL=2000 NEXT_WEBPACK_USEPERSISTENTCACHE=false next dev -p 3003 -H 0.0.0.0",

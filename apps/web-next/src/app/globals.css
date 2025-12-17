@@ -2,8 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design Tokens - Figma Parity */
+@import url('../styles/tokens.css');
+
 /* Proje teması */
-:root { 
+:root {
   color-scheme: dark;
   --surface: 222 20% 8%;
   --card: 222 17% 12%;
@@ -12,33 +15,33 @@
   --danger: 0 90% 58%;
 }
 
-html, body { 
-  height: 100%; 
-  background-color: #000000; 
-  color: #ffffff; 
+html, body {
+  height: 100%;
+  background-color: #000000;
+  color: #ffffff;
   overflow: hidden; /* Prevent page-level scroll */
   scrollbar-gutter: stable; /* Prevent layout shift */
 }
 
 /* App Shell - tek scroll prensibi */
-#__next, body > div#root { 
-  min-height: 100%; 
+#__next, body > div#root {
+  min-height: 100%;
   height: 100%;
 }
 
-.app-content { 
-  overflow-y: auto; 
-  -webkit-overflow-scrolling: touch; 
+.app-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   height: 100%;
 }
 
 /* Tabular numbers & monospace */
-.tabular { 
-  font-variant-numeric: tabular-nums; 
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
-.mono { 
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace; 
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;
 }
 
 /* Compact numeric text (no letter-spacing, tabular) */
@@ -76,17 +79,17 @@ main > * { position: relative; z-index: var(--z-page); }
 
 .space-section { padding-block: var(--space-6); }
 
-body { 
+body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
 /* Layout fixes */
-* { 
+* {
   min-width: 0; /* grid shrink fix */
 }
 
-.card-grid { 
-  @apply grid gap-6 xl:grid-cols-3 md:grid-cols-2 grid-cols-1; 
+.card-grid {
+  @apply grid gap-6 xl:grid-cols-3 md:grid-cols-2 grid-cols-1;
 }
 
 /* Custom utility classes */
@@ -115,8 +118,8 @@ body {
 }
 
 /* Link styling */
-a { 
-  text-decoration: none; 
+a {
+  text-decoration: none;
 }
 
 a:hover {
