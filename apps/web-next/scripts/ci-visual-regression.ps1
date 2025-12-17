@@ -99,11 +99,24 @@ try {
         throw "No visual spec files found."
     }
 
+    # Flaky test koruması: --fail-on-flaky-tests (eğer Playwright sürümü destekliyorsa)
+    # Sürüm uyumsuzluğu tuzağı: bilinmeyen flag Playwright CLI'da patlar, gate'i yanlışlıkla sürekli kırabilir
+    # Dinamik tespit: Playwright CLI'da flag var mı kontrol et
+    Write-Host "🔍 Checking Playwright --fail-on-flaky-tests support..." -ForegroundColor Yellow
+    $playwrightHelp = & pnpm --filter web-next exec playwright test --help 2>&1 | Out-String
+    $hasFlakyFlag = $playwrightHelp -match "--fail-on-flaky-tests"
+    
+    $baseArgs = @("--filter", "web-next", "exec", "playwright", "test")
+    if ($hasFlakyFlag) {
+        Write-Host "✅ Playwright --fail-on-flaky-tests flag'i destekleniyor, ekleniyor..." -ForegroundColor Green
+        $baseArgs += "--fail-on-flaky-tests"
+    } else {
+        Write-Host "⚠️  Playwright --fail-on-flaky-tests flag'i desteklenmiyor, atlanıyor..." -ForegroundColor Yellow
+    }
+    
     # Argument array ile güvenli çalıştırma (Invoke-Expression yerine)
-# Flaky test koruması: --fail-on-flaky-tests (eğer Playwright sürümü destekliyorsa)
-# Not: Bu flag bazı Playwright sürümlerinde yok; yoksa sessizce ignore edilir
-$args = @("--filter", "web-next", "exec", "playwright", "test", "--fail-on-flaky-tests") + $testFiles
-& pnpm @args
+    $args = $baseArgs + $testFiles
+    & pnpm @args
 
     if ($LASTEXITCODE -ne 0) {
         throw "Playwright tests failed with exit code $LASTEXITCODE"
