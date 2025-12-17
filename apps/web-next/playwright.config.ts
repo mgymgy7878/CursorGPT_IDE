@@ -18,7 +18,8 @@ export default defineConfig({
   },
   
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3003',
+    // baseURL: webServer ile hizalı (deterministiklik ve okunabilirlik için 127.0.0.1 kullanıyoruz)
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3003',
     // Trace garantisi: retry olmadığı için 'retain-on-failure' kullanıyoruz (fail'de trace var)
     trace: process.env.PW_TRACE === '1' ? 'on' : 'retain-on-failure',
     headless: true,
