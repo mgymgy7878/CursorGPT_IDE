@@ -2,10 +2,13 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  // CI retry stratejisi: flaky test'lerin retry'da geçip yeşil kalmasını engellemek için retries: 0
+  // Trace garantisi için: trace: 'retain-on-failure' (fail'de trace var, retry yok)
+  retries: process.env.CI ? 0 : 0, // Retry yok: "ya sağlam geçer, ya kanıt bırakıp patlar" mantığı
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3003',
-    // Trace: env var ile kontrol edilebilir (default: on-first-retry, CI'da PW_TRACE=1 ile full trace)
-    trace: process.env.PW_TRACE === '1' ? 'on' : 'on-first-retry',
+    // Trace garantisi: retry olmadığı için 'retain-on-failure' kullanıyoruz (fail'de trace var)
+    trace: process.env.PW_TRACE === '1' ? 'on' : 'retain-on-failure',
     headless: true,
     // Deterministik test ortamı (Golden Master için)
     viewport: { width: 1440, height: 900 },
@@ -18,8 +21,6 @@ export default defineConfig({
   },
   // Deterministiklik için: Windows runner'da render yarışlarını azalt
   workers: process.env.CI ? 1 : undefined,
-  // CI'da retry=1: fail olduğunda trace kesin oluşsun (on-first-retry ile birlikte)
-  retries: process.env.CI ? 1 : 0,
   // Deterministik renk profili (snap drift'ini azaltır)
   launchOptions: {
     args: ['--force-color-profile=srgb'],
