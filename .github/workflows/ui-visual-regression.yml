@@ -57,6 +57,8 @@ jobs:
             ${{ runner.os }}-nextjs-
 
       - name: Build web-next (CI cache)
+        shell: pwsh
+        working-directory: ./
         run: pnpm --filter web-next build
         # Build fail olursa Playwright'ın webServer katmanına gelmeden, daha temiz log + daha hızlı geri bildirim
 
