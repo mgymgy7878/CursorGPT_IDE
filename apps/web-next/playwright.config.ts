@@ -7,11 +7,11 @@ export default defineConfig({
   retries: process.env.CI ? 0 : 0, // Retry yok: "ya sağlam geçer, ya kanıt bırakıp patlar" mantığı
 
   // Playwright webServer: dev server'ı otomatik kaldır (ERR_CONNECTION_REFUSED sınıfını kapatır)
-  // CI'da daha deterministik: next build && next start (HMR/derleme zamanlaması drift'ini azaltır)
+  // CI'da: workflow'da ayrı step olarak build yapılıyor (cache + temiz log), burada sadece start
   // Local'de: dev:dashboard script'ini kullan (tek kaynak prensibi)
   webServer: {
     command: process.env.CI
-      ? 'pnpm --filter web-next build && pnpm --filter web-next start -- --port 3003 --hostname 127.0.0.1'
+      ? 'pnpm --filter web-next start -- --port 3003 --hostname 127.0.0.1'
       : 'pnpm --filter web-next dev:dashboard',
     port: 3003,
     reuseExistingServer: !process.env.CI, // CI'da her zaman yeni server, local'de mevcut varsa kullan
