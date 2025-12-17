@@ -5,6 +5,18 @@ export default defineConfig({
   // CI retry stratejisi: flaky test'lerin retry'da geçip yeşil kalmasını engellemek için retries: 0
   // Trace garantisi için: trace: 'retain-on-failure' (fail'de trace var, retry yok)
   retries: process.env.CI ? 0 : 0, // Retry yok: "ya sağlam geçer, ya kanıt bırakıp patlar" mantığı
+  
+  // Playwright webServer: dev server'ı otomatik kaldır (ERR_CONNECTION_REFUSED sınıfını kapatır)
+  // Monorepo pnpm --filter web-next dev -- --port 3003 komutunu otomatik çalıştırır
+  webServer: {
+    command: 'pnpm --filter web-next dev -- --port 3003 --hostname 127.0.0.1',
+    port: 3003,
+    reuseExistingServer: !process.env.CI, // CI'da her zaman yeni server, local'de mevcut varsa kullan
+    timeout: 120 * 1000, // 120 saniye timeout (dev server başlatma süresi)
+    stdout: 'ignore', // CI'da log gürültüsünü azalt
+    stderr: 'pipe', // Hataları göster
+  },
+  
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3003',
     // Trace garantisi: retry olmadığı için 'retain-on-failure' kullanıyoruz (fail'de trace var)
