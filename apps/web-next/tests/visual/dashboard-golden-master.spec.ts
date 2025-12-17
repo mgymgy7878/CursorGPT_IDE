@@ -112,6 +112,12 @@ test.describe('Dashboard Golden Master', () => {
 
     // Font hazır olana kadar bekle (determinism: font geç yüklendi, ölçü değişti gibi şakalara açık değil)
     await page.evaluate(() => (document as any).fonts?.ready).catch(() => {});
+    // Ek determinism: document.fonts.status === 'loaded' olana kadar bekle
+    // Bazı ortamlarda "ready resolve oldu ama layout daha oturmadı" gibi nadir driftleri azaltır
+    await page.waitForFunction(
+      () => (document as any).fonts?.status === 'loaded' || !(document as any).fonts,
+      { timeout: 5000 }
+    ).catch(() => {});
 
     // UI Parity: ⌘K Command butonu sadece TopStatusBar'da olmalı (RightRail'de olmamalı)
     const commandButtons = page.locator('[data-testid="command-button"]');
@@ -119,10 +125,19 @@ test.describe('Dashboard Golden Master', () => {
     if (commandButtonCount !== 1) {
       throw new Error(`UI Parity: CommandButton sayısı 1 olmalı (TopStatusBar'da), şu an ${commandButtonCount} adet bulundu`);
     }
-    // UI Parity: 1440px viewport'ta CommandButton "⌘K Commands" tam etiket görünmeli (whitespace-safe)
+    // UI Parity: 1440px viewport'ta CommandButton "⌘K Commands" tam etiket görünmeli
+    // CSS responsive'da iki label var (sm:hidden + hidden sm:inline); Playwright'in text assertion'ları
+    // bazen gizli span'i de hesaba katabildiği için, "gerçekten ekranda ne görünüyor?"u kilitliyoruz
     const commandButton = commandButtons.first();
     await expect(commandButton).toBeVisible({ timeout: 2000 });
-    // toContainText: whitespace/ikon span'i gelirse de kırılmaz
+    
+    // 1440px'te: "⌘K Commands" span'i visible, "⌘K" span'i hidden olmalı
+    const fullLabelSpan = commandButton.locator('span.hidden.sm\\:inline');
+    const compactLabelSpan = commandButton.locator('span.sm\\:hidden');
+    await expect(fullLabelSpan).toBeVisible({ timeout: 2000 });
+    await expect(compactLabelSpan).toBeHidden({ timeout: 2000 });
+    
+    // Ek koruma: toContainText (whitespace/ikon span'i gelirse de kırılmaz)
     await expect(commandButton).toContainText('⌘K Commands', { timeout: 2000 });
 
     // UI Parity: Portföy Özeti = 3 stat kutusu assert'i
@@ -145,7 +160,7 @@ test.describe('Dashboard Golden Master', () => {
       }
       boxes.push(box);
     }
-    
+
     // Çakışma kontrolü: herhangi iki kutu birbiriyle kesişiyor mu?
     for (let i = 0; i < boxes.length; i++) {
       for (let j = i + 1; j < boxes.length; j++) {
@@ -155,14 +170,16 @@ test.describe('Dashboard Golden Master', () => {
         if (!box1 || !box2) {
           throw new Error(`UI Parity: StatCard ${i} veya ${j} boundingBox() null`);
         }
+        // Epsilon toleransı: Windows/Chromium subpixel rounding yüzünden "yanlış alarm" ihtimalini düşürür
+        const EPSILON = 1; // 1px tolerans (subpixel rounding için)
         const overlaps = !(
-          box1.x + box1.width < box2.x ||
-          box2.x + box2.width < box1.x ||
-          box1.y + box1.height < box2.y ||
-          box2.y + box2.height < box1.y
+          box1.x + box1.width < box2.x - EPSILON ||
+          box2.x + box2.width < box1.x - EPSILON ||
+          box1.y + box1.height < box2.y - EPSILON ||
+          box2.y + box2.height < box1.y - EPSILON
         );
         if (overlaps) {
-          throw new Error(`UI Parity: StatCard overlap detected - boxes ${i} and ${j} are overlapping`);
+          throw new Error(`UI Parity: StatCard overlap detected - boxes ${i} and ${j} are overlapping (epsilon: ${EPSILON}px)`);
         }
       }
     }

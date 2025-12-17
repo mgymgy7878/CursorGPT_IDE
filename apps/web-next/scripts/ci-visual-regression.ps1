@@ -100,8 +100,10 @@ try {
     }
 
     # Argument array ile güvenli çalıştırma (Invoke-Expression yerine)
-    $args = @("--filter", "web-next", "exec", "playwright", "test") + $testFiles
-    & pnpm @args
+# Flaky test koruması: --fail-on-flaky-tests (eğer Playwright sürümü destekliyorsa)
+# Not: Bu flag bazı Playwright sürümlerinde yok; yoksa sessizce ignore edilir
+$args = @("--filter", "web-next", "exec", "playwright", "test", "--fail-on-flaky-tests") + $testFiles
+& pnpm @args
 
     if ($LASTEXITCODE -ne 0) {
         throw "Playwright tests failed with exit code $LASTEXITCODE"
