@@ -110,15 +110,20 @@ test.describe('Dashboard Golden Master', () => {
     const portfolioSummary = page.locator('text=Portföy Özeti').first();
     await expect(portfolioSummary).toBeVisible({ timeout: 2000 }).catch(() => {});
 
+    // Font hazır olana kadar bekle (determinism: font geç yüklendi, ölçü değişti gibi şakalara açık değil)
+    await page.evaluate(() => (document as any).fonts?.ready).catch(() => {});
+
     // UI Parity: ⌘K Command butonu sadece TopStatusBar'da olmalı (RightRail'de olmamalı)
     const commandButtons = page.locator('[data-testid="command-button"]');
     const commandButtonCount = await commandButtons.count();
     if (commandButtonCount !== 1) {
       throw new Error(`UI Parity: CommandButton sayısı 1 olmalı (TopStatusBar'da), şu an ${commandButtonCount} adet bulundu`);
     }
-    // UI Parity: 1440px viewport'ta CommandButton "⌘K Commands" tam etiket görünmeli
+    // UI Parity: 1440px viewport'ta CommandButton "⌘K Commands" tam etiket görünmeli (whitespace-safe)
     const commandButton = commandButtons.first();
-    await expect(commandButton).toHaveText('⌘K Commands', { timeout: 2000 });
+    await expect(commandButton).toBeVisible({ timeout: 2000 });
+    // toContainText: whitespace/ikon span'i gelirse de kırılmaz
+    await expect(commandButton).toContainText('⌘K Commands', { timeout: 2000 });
 
     // UI Parity: Portföy Özeti = 3 stat kutusu assert'i
     const portfolioSummary = page.locator('[data-testid="portfolio-summary"]');
@@ -129,27 +134,35 @@ test.describe('Dashboard Golden Master', () => {
     }
 
     // StatCard overlap guard: 3 kutunun boundingBox()'larını alıp birbirleriyle kesişmiyor mu diye kontrol
-    const boxes = await Promise.all([
-      statCards.nth(0).boundingBox(),
-      statCards.nth(1).boundingBox(),
-      statCards.nth(2).boundingBox(),
-    ]);
+    // boundingBox() null koruması: element görünür değil / render yarışı / font hazır değil → null dönebilir
+    const boxes: Array<{ x: number; y: number; width: number; height: number } | null> = [];
+    for (let i = 0; i < 3; i++) {
+      // Önce görünürlük assert'i (null koruması)
+      await expect(statCards.nth(i)).toBeVisible({ timeout: 2000 });
+      const box = await statCards.nth(i).boundingBox();
+      if (!box) {
+        throw new Error(`UI Parity: StatCard ${i} boundingBox() null döndü (element görünür değil / render yarışı)`);
+      }
+      boxes.push(box);
+    }
     
     // Çakışma kontrolü: herhangi iki kutu birbiriyle kesişiyor mu?
     for (let i = 0; i < boxes.length; i++) {
       for (let j = i + 1; j < boxes.length; j++) {
         const box1 = boxes[i];
         const box2 = boxes[j];
-        if (box1 && box2) {
-          const overlaps = !(
-            box1.x + box1.width < box2.x ||
-            box2.x + box2.width < box1.x ||
-            box1.y + box1.height < box2.y ||
-            box2.y + box2.height < box1.y
-          );
-          if (overlaps) {
-            throw new Error(`UI Parity: StatCard overlap detected - boxes ${i} and ${j} are overlapping`);
-          }
+        // Null kontrolü (yukarıda zaten kontrol edildi ama TypeScript için)
+        if (!box1 || !box2) {
+          throw new Error(`UI Parity: StatCard ${i} veya ${j} boundingBox() null`);
+        }
+        const overlaps = !(
+          box1.x + box1.width < box2.x ||
+          box2.x + box2.width < box1.x ||
+          box1.y + box1.height < box2.y ||
+          box2.y + box2.height < box1.y
+        );
+        if (overlaps) {
+          throw new Error(`UI Parity: StatCard overlap detected - boxes ${i} and ${j} are overlapping`);
         }
       }
     }

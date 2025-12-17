@@ -9,7 +9,7 @@ export function CommandButton({ variant = 'full' }: CommandButtonProps) {
   // data-testid: visual test'te "komut butonu sayısı = 1" assert'i için
   // variant: 1440px viewport'ta "full" (⌘K Commands), dar ekranda "compact" (⌘K)
   const label = variant === 'full' ? '⌘K Commands' : '⌘K';
-  
+
   return (
     <button
       data-testid="command-button"

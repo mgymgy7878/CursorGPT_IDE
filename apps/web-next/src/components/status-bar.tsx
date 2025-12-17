@@ -134,7 +134,7 @@ export default function StatusBar() {
 
         {/* Sağ köşe: Commands + Bildirim + Kullanıcı */}
         <div className="flex items-center gap-2">
-          <CommandButton variant="full" />
+          <CommandButton />
           <button
             className="w-6 h-6 flex items-center justify-center rounded hover:bg-neutral-800 transition-colors"
             aria-label="Bildirimler"
