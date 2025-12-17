@@ -100,10 +100,12 @@ test.describe('Dashboard Golden Master', () => {
 
     // Sanity-check: default state mutlaka 'data' olmalı (fixture data, Figma parity)
     // "Kurşungeçirmez" test: data-state attribute ile metin render/padding vb. hiç umrun olmaz
+    // Yanlış-pozitif riskini kapat: toBeHidden() bazı durumlarda DOM'dan düşmüş elementte de "hidden" sayılabildiği için
+    // üçlü kontrol: "hem var, hem doğru state, hem görünmez"
     const stateElement = page.locator('[data-testid="dashboard-state"]');
-    await expect(stateElement).toHaveAttribute('data-state', 'data', { timeout: 2000 });
-    // Görsel etkisizlik kanıtı: guard gerçekten görünmez olmalı (hidden attribute)
-    await expect(stateElement).toBeHidden();
+    await expect(stateElement).toHaveCount(1, { timeout: 2000 }); // Varlık kanıtı
+    await expect(stateElement).toHaveAttribute('data-state', 'data', { timeout: 2000 }); // State kanıtı
+    await expect(stateElement).toBeHidden(); // Görsel etkisizlik kanıtı
 
     // Visual assertion: 6-card grid görünmeli (Portföy Özeti, Piyasa Durumu, vb.)
     // En az 1-2 ana başlık visible olmalı (yanlışlıkla default'u loading'e çeviren PR'ı snapshot'a bulaştırmadan patlatır)
@@ -111,13 +113,15 @@ test.describe('Dashboard Golden Master', () => {
     await expect(portfolioSummary).toBeVisible({ timeout: 2000 }).catch(() => {});
 
     // Font hazır olana kadar bekle (determinism: font geç yüklendi, ölçü değişti gibi şakalara açık değil)
-    await page.evaluate(() => (document as any).fonts?.ready).catch(() => {});
-    // Ek determinism: document.fonts.status === 'loaded' olana kadar bekle
-    // Bazı ortamlarda "ready resolve oldu ama layout daha oturmadı" gibi nadir driftleri azaltır
-    await page.waitForFunction(
-      () => (document as any).fonts?.status === 'loaded' || !(document as any).fonts,
-      { timeout: 5000 }
-    ).catch(() => {});
+    // En sağlam form: tek parça, deterministik versiyon
+    await page.evaluate(async () => {
+      // @ts-ignore
+      if (document.fonts?.ready) await document.fonts.ready;
+    }).catch(() => {});
+    await page.waitForFunction(() => {
+      // @ts-ignore
+      return !document.fonts || document.fonts.status === 'loaded';
+    }, { timeout: 5000 }).catch(() => {});
 
     // UI Parity: ⌘K Command butonu sadece TopStatusBar'da olmalı (RightRail'de olmamalı)
     const commandButtons = page.locator('[data-testid="command-button"]');
@@ -130,13 +134,14 @@ test.describe('Dashboard Golden Master', () => {
     // bazen gizli span'i de hesaba katabildiği için, "gerçekten ekranda ne görünüyor?"u kilitliyoruz
     const commandButton = commandButtons.first();
     await expect(commandButton).toBeVisible({ timeout: 2000 });
-    
+
     // 1440px'te: "⌘K Commands" span'i visible, "⌘K" span'i hidden olmalı
-    const fullLabelSpan = commandButton.locator('span.hidden.sm\\:inline');
-    const compactLabelSpan = commandButton.locator('span.sm\\:hidden');
+    // data-testid kullanımı: class bağımlılığını azaltır (Tailwind class sırası/merge değişince kırılmaz)
+    const fullLabelSpan = commandButton.locator('[data-testid="command-label-full"]');
+    const compactLabelSpan = commandButton.locator('[data-testid="command-label-compact"]');
     await expect(fullLabelSpan).toBeVisible({ timeout: 2000 });
     await expect(compactLabelSpan).toBeHidden({ timeout: 2000 });
-    
+
     // Ek koruma: toContainText (whitespace/ikon span'i gelirse de kırılmaz)
     await expect(commandButton).toContainText('⌘K Commands', { timeout: 2000 });
 
