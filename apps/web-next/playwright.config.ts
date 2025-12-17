@@ -15,8 +15,8 @@ export default defineConfig({
       : 'pnpm --filter web-next dev:dashboard',
     port: 3003,
     reuseExistingServer: !process.env.CI, // CI'da her zaman yeni server, local'de mevcut varsa kullan
-    timeout: 180_000, // 180 saniye timeout (ilk derleme uzun olabiliyor, CI build için yeterli süre)
-    stdout: 'ignore', // CI'da log gürültüsünü azalt
+    timeout: 300_000, // 300 saniye timeout (ilk build + cache yok günlerinde yeterli süre)
+    stdout: process.env.CI ? 'pipe' : 'ignore', // CI'da build hataları stdout'a düşüyor, log kanıtı kaybolmasın
     stderr: 'pipe', // Hataları göster
   },
 
