@@ -2,10 +2,16 @@
 
 [![UI/UX Guide](https://img.shields.io/badge/UI%2FUX-Guide-blue)](docs/UI_UX_GUIDE.md)
 
-## Quick Links / Docs
+## Docs
+
+- [**UI & UX Planı**](docs/UI_UX_PLAN.md) — UI/UX iyileştirme planı ve uygulama talimatları (skeleton/loading, inline validasyon, WCAG AA kontrast ≥4.5:1, klavye erişilebilirlik, aktif menü + breadcrumb)
+- [**Features**](docs/FEATURES.md) — Mevcut yetenekler ve planlanan geliştirmeler
+- [**Roadmap**](docs/ROADMAP.md) — 4 Sprint planı
+- [**Metrics & Canary**](docs/METRICS_CANARY.md) — Metrikler ve canary test eşikleri
+
+## Quick Links
 
 - [**UI/UX Guide**](docs/UI_UX_GUIDE.md) — UI standartları, erişilebilirlik kuralları, bileşen standartları ve 2 haftalık uygulama planı
-- [Docs/UI & UX Planı](docs/UI_UX_PLAN.md)
 - **Raporlar**: [2025-01-14 Detaylı Proje Analizi](docs/reports/PROJE_ANALIZ_2025_01_14_DETAYLI_TAM_RAPOR.md)
 
 ### GREEN Receipt (v1.6-p1)
