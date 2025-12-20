@@ -1,185 +1,154 @@
-# Spark Trading Platform — UI/UX Planı ve Uygulama Talimatları
+# Spark Trading Platform — UI/UX Planı + Figma Parity Talimatı
 
-> Bu doküman, Spark'ın dashboard + strategy lab + market data + portföy + copilot deneyimini **tek bir tasarım standardına** bağlamak için hazırlanmıştır.
-> Odak: NN/g heuristics + WCAG 2.2 AA erişilebilirlik + veri görselleştirme pratikleri.
+**Amaç:** Spark UI'ının Figma prototipi ile görsel/etkileşimsel pariteye (≥%95) ulaşması ve ürün standardının (erişilebilirlik, tutarlılık, geri bildirim, veri görselleştirme) kalıcı hale getirilmesi.
 
----
+## 1) Kapsam ve Tanım
+Bu doküman tüm sayfalar için:
+- **Figma Parity**: tipografi, spacing, renk/token, layout, ikonografi, component davranışı
+- **Erişilebilirlik (WCAG 2.2 AA)**: klavye erişimi, odak halkası, kontrast, aria etiketleri
+- **NN/g Heuristics**: sistem durumu görünürlüğü, hata önleme, tutarlılık, kullanıcı kontrolü
+- **Veri Görselleştirme**: eksen/legend/birim netliği, tooltip standardı, okunabilir tablolar
+- **Performans**: skeleton/loading, render-throttle, virtualization (gerekirse)
 
-## 1) Tasarım İlkeleri (kısa, uygulanabilir)
+## 2) "Golden Master" Kuralları (Figma Parity Çerçevesi)
+**Golden Master:** TopStatusBar + 3-panel layout (Sidebar / Main / Copilot) görsel dili referanstır.
 
-### 1.1 Sistem Durumu Görünürlüğü (P0)
-- **Her veri paneli**: `loading | ready | stale | error | empty` durumlarından birini göstermeli.
-- **Realtime akış**: üst şeritte ve ilgili kartta "Connected / Stale / Paused" net olmalı.
-- Uzun süren işlemler: *spinner + ilerleme metni + (varsa) tahmini süre*.
+### 2.1 Parity Checklist (her sayfa için zorunlu)
+- **Tipografi:** varsayılan body metin standardı: `text-[13px] font-medium leading-none` (veya mevcut design token karşılığı)
+- **Spacing:** kart iç padding, gap ve pill boyutları design token'lara bağlı olmalı
+- **Renkler:** status renkleri (ok/uyarı/hata) tek kaynaktan gelmeli (token)
+- **Layout:** 3-section düzen bozulmayacak; overflow taşmaları engellenecek
+- **İkonografi:** ikon seti tek kaynak (SparkMark / lucide setinden seçilenler)
+- **Interaktivite:** hover/focus/active durumları tutarlı
 
-### 1.2 Tutarlılık (P0)
-- Dil: Menü + başlıklar + butonlar **tek dil** (TR). İngilizce terimler yalnızca teknik isimlerde.
-- Aksiyon hiyerarşisi: aynı eylem her sayfada aynı ad/ikon/konum.
+### 2.2 Kanıt (evidence) üretimi
+Her parity düzeltmesi sonrası:
+- "Önce/Sonra" ekran görüntüsü (gerekirse)
+- Kısa not: hangi fark kapatıldı (3–5 madde)
+- (Varsa) ilgili component path'i
 
-### 1.3 Kullanıcı Kontrolü (P0)
-- Kritik aksiyonlar (sil, deploy, canlı mod, risk artışı): **onay diyaloğu** + geri dönüş yolu.
-- "Pause/Resume" her yerde aynı semantik.
+## 3) Global UI Standartları (Component Kuralları)
+### 3.1 Buton Standardı
+- **Primary**: tek bir ana renk + net focus ring
+- **Secondary**: nötr ton + hover ayrımı
+- **Destructive**: kırmızı ton + onay gerektiren eylemler
+- **A11y**: ikon-only butonlarda `aria-label` zorunlu
 
-### 1.4 Hata Önleme + Hata Mesajı Kalitesi (P0)
-- Formlarda **inline validasyon** (alan altı) + üstte kısa özet.
-- Hata metni: "Ne oldu / Neden / Ne yapmalıyım?" formatı.
+### 3.2 Form Standardı
+- Label + `aria-describedby` zorunlu
+- Zorunlu alan `*` ile işaretlenir
+- **Inline validasyon** (alanın hemen altında mesaj)
+- Submit sırasında: disabled + spinner + geri bildirim
+- Hata dili: kısa, yönlendirici, alan bazlı
 
----
+### 3.3 Toast / Modal Standardı
+- Toast: bilgi / başarı / uyarı / hata seviyeleri
+- Modal: sadece kritik ve geri dönüşsüz aksiyonlarda
+- "Emergency exit": İptal/Geri al her kritik akışta görünür
 
-## 2) Erişilebilirlik Standardı (WCAG 2.2 AA hedefi)
+### 3.4 Tablo Standardı
+- `thead > th[scope="col"]` zorunlu
+- Zebra satır deseni + hover row
+- Sıralama ikonu ve erişilebilir etiketler
+- Büyük listelerde: pagination veya virtualization
 
-### 2.1 Klavye ile Tam Kullanım (P0)
-- Tüm interaktif öğeler TAB ile erişilebilir.
-- Focus ring görünür (özellikle dark theme).
-- Modal açılınca focus modal içine "trap", kapanınca eski yere geri.
+### 3.5 Grafik Standardı (Backtest/Market)
+- Başlık + kısa açıklama
+- Eksen etiketleri + birim
+- Tooltip: değer + birim + zaman damgası
+- Renk semantiği: yeşil(+), kırmızı(-), sarı(uyarı)
+- Küçük sparkline'lar: tooltip zorunlu
 
-### 2.2 Kontrast ve Tipografi (P0)
-- Metin/arka plan kontrastı AA seviyesinde hedeflenir.
-- Sayısal metriklerde `tabular-nums` kullanılır (zıplama engeli).
+## 4) Sistem Durumu Görünürlüğü (P0)
+Tüm ana sayfalarda:
+- **Skeleton / loading state** (en az 1 örnek)
+- WS/API/Executor bağlantı durumu üst çubukta görünür
+- Veri yenilenince satır/metric "soft highlight" (hafif animasyon) ile anlaşılır
 
-### 2.3 Semantik HTML (P0)
-- Tablolar: `thead > th[scope="col"]`, satır başlıkları gerekiyorsa `scope="row"`.
-- Icon-only butonlar: `aria-label` zorunlu.
+## 5) Sayfa Bazlı İş Listesi (Öncelikli Backlog)
+Aşağıdaki maddeler parity + kullanılabilirlik için "minimum set"tir.
 
----
+### 5.1 Ana Sayfa (Dashboard)
+- [ ] Ticker ve strateji panellerinde skeleton loading
+- [ ] Sol menü: aktif sayfa highlight + tutarlı ikon/metin
+- [ ] Üst çubuk: WS bağlantı durumu (Connected/Degraded/Down)
+- [ ] Kartlarda taşma koruması (`overflow-hidden`, uzun metin clamp)
+- [ ] Figma ile kart padding/gap/tipografi birebir
 
-## 3) UI Bileşen Standardı (Design System Kuralları)
+### 5.2 Piyasa Verileri (Market Data)
+- [ ] Tab/filtre alanları klavye ile gezilebilir
+- [ ] Grafik tooltip standardı (birim + zaman)
+- [ ] Empty state: "Veri yok / bağlantı yok" + CTA (yenile)
+- [ ] Parity: layout ve kart stilleri
 
-### 3.1 Butonlar
-- Primary: tek ana eylem (örn. "Strateji Oluştur")
-- Secondary: ikincil eylemler
-- Destructive: kırmızı, her zaman onay ister (silme gibi)
-- Disabled: hem görsel hem erişilebilir (`aria-disabled`)
+### 5.3 Strateji Laboratuvarı (Strategy Lab)
+- [ ] Kaydet/Backtest/Optimize: spinner + başarı/toast
+- [ ] Kod editör hataları: inline açıklama paneli
+- [ ] "Run" sonrası son loglar & status paneli
+- [ ] Kısayollar: Ctrl+Enter (backtest), Ctrl+Shift+O (optimize)
+- [ ] Param-diff + risk rozetleri (planlanan flow'a hazırlık)
 
-### 3.2 Formlar
-- Label zorunlu, `aria-describedby` ile yardım/hata metni bağlanır.
-- Zorunlu alan: `*` + kısa açıklama (örn. "Risk % zorunlu").
-- Submit anında: buton disable + spinner.
+### 5.4 Stratejilerim
+- [ ] Sayfalama veya sonsuz kaydırma
+- [ ] Sil/Düzenle: onay diyaloğu + geri alma (mümkünse)
+- [ ] Boş durum mesajı + "Strateji oluştur" CTA
 
-### 3.3 Kartlar (StatCard, PanelCard)
-- Kartlar "kompakt mod" destekler:
-  - Padding küçülür, metrikler taşmaz, overflow güvenli.
-- Delta işareti: değer zaten `+/-` içeriyorsa tekrar eklenmez.
+### 5.5 Çalışan Stratejiler
+- [ ] Sparkline boyutu artır + tooltip
+- [ ] Pause/Resume: ikon + metin (anlam net)
+- [ ] Durum rozeti: running/paused/error
+- [ ] Satır güncellemede soft highlight
+- [ ] Risk/Exposure mini özetleri (tek satır)
 
-### 3.4 Tablo ve Liste
-- 20+ satırda: zebra + hover highlight.
-- Büyük listelerde: sayfalama veya sanallaştırma (virtualization) P1.
+### 5.6 Portföy
+- [ ] Tablo header sabit (sticky)
+- [ ] Zebra + sıralama ikonları
+- [ ] Kontrast kontrol (AA ≥ 4.5:1)
+- [ ] Güncellenen satırlarda soft highlight
 
-### 3.5 Grafikler
-- Her grafikte: Başlık + birim + tooltip.
-- Tooltip: değer + birim + (varsa) yüzde/ratio ayrımı net.
+### 5.7 Uyarılar (Alerts) — Planlanan
+- [ ] Empty state: "Henüz alarm yok" + CTA
+- [ ] Yeni alarm formu: inline doğrulama + onay
+- [ ] Alarm liste: filtre/sıralama
 
----
+### 5.8 Risk / Koruma
+- [ ] Risk limit bar'lar: açıklama + birim
+- [ ] Kill switch vb. kritik aksiyon: modal + net geri bildirim
+- [ ] Durum kartları parity ve okunabilirlik
 
-## 4) Sayfa Bazlı Backlog (P0/P1)
+### 5.9 Denetim / Loglar
+- [ ] Filtre + arama + export
+- [ ] Tablo standardı + erişilebilirlik
+- [ ] "Son olaylar" görünümü (en kritik 20 kayıt)
 
-### 4.1 Ana Sayfa (Dashboard)
-**P0**
-- Skeleton loading (Portföy özeti, piyasa durumu, risk durumu).
-- Sol menüde aktif sayfa vurgusu.
-- Üst şeritte WS bağlantı durumu (Connected/Paused/Stale).
-**P1**
-- Kartlarda "last updated" + kısa stale nedeni.
+### 5.10 Ayarlar
+- [ ] Tüm alanlar label + aria-describedby
+- [ ] Tema/dil seçimi TAB ile gezilebilir
+- [ ] Kaydet sırasında disabled + spinner + toast
+- [ ] Hatalı input senaryoları (en az 5) yakalanmalı
 
-### 4.2 Strategy Lab
-**P0**
-- Kaydet/Backtest için spinner + toast (başarılı/başarısız).
-- Editör hataları: kod alanına yakın, anlaşılır açıklama.
-- Run sonrası "son loglar" paneli.
-**P1**
-- Kısayollar: Ctrl+Enter Backtest, Ctrl+Shift+O Optimize.
+## 6) Erişilebilirlik (WCAG 2.2) — Kontrol Listesi
+- [ ] Tüm interaktif öğeler TAB ile erişilebilir
+- [ ] Focus ring görünür ve tutarlı
+- [ ] Kontrast: metin/arkaplan ≥ 4.5:1
+- [ ] `aria-label` / `aria-describedby` eksiksiz
+- [ ] Motion: yoğun animasyonlar "reduced motion" ile kısılabilir
 
-### 4.3 Stratejilerim
-**P0**
-- Silme/Düzenle için onay modalı.
-**P1**
-- Sayfalama veya sonsuz kaydırma.
+## 7) Test & Kabul Kriterleri (Definition of Done)
+**Her sayfa için:**
+- Parity: Figma'ya görsel olarak %95+ (tipografi/spacing/layout)
+- A11y: klavye gezilebilirlik + odak görünürlüğü PASS
+- Skeleton/empty state: en az 1 örnek PASS
+- Form/hata: inline validasyon PASS
+- Grafik/tablo: başlık/etiket/birim PASS
 
-### 4.4 Çalışan Stratejiler
-**P0**
-- Pause/Resume net ikon + metin + durum rozeti.
-**P1**
-- Sparkline büyütme + tooltip.
+## 8) Uygulama Sırası (Önerilen)
+1) Dashboard (Ana Sayfa) + Global tokens
+2) Strategy Lab
+3) Running Strategies
+4) Portfolio
+5) Settings
+6) Alerts + Risk/Protection + Logs
 
-### 4.5 Portföy
-**P0**
-- Tablo header fix (sticky) + zebra desen.
-**P1**
-- Kolon sıralama + güncellenen satır animasyon vurgusu.
-
-### 4.6 Ayarlar
-**P0**
-- Label + aria-describedby + inline validasyon.
-- Tema/dil seçimi TAB ile gezilebilir.
-- Kaydet sırasında spinner.
-
-### 4.7 Alerts (Planlanan)
-**P0**
-- "Boş durum" ekranı + CTA (Yeni alarm oluştur).
-- Yeni alarm formu: doğrulama + onay.
-
-### 4.8 Market Analysis / Market Data
-**P0**
-- Dashboard grid düzeni responsive (dar ekranda kırılma temiz).
-- Grafiklerde başlık/açıklama/eksen etiketleri zorunlu.
-**P1**
-- Karmaşıklık kontrolü: aynı ekranda aşırı grafik yok.
-
----
-
-## 5) Durum Modeli (UI State Contract)
-
-Her panel/kart şu state'lerden birine bağlanmalı:
-
-- `loading`: skeleton
-- `ready`: veri render
-- `stale`: veri var ama güncel değil (staleness badge + "yeniden bağlanıyor…")
-- `paused`: kullanıcı pause etmiş (ikon + "Paused")
-- `error`: hata mesajı + retry CTA
-- `empty`: boş durum + "nasıl doldururum" açıklaması
-
----
-
-## 6) Kabul Kriterleri (DoD)
-
-**Erişilebilirlik**
-- Kontrast: AA hedefi
-- Klavye: tüm interaktif öğeler TAB ile erişilebilir
-- Focus ring: görünür ve tutarlı
-
-**UX**
-- Form validasyonları: en az 5 hatalı senaryo yakalanır
-- Her sayfada en az 1 skeleton veya empty state örneği bulunur
-
-**Performans**
-- P95 algılanan yükleme < 3s (skeleton ile)
-- Büyük listelerde re-render kontrolü (memo/rafBatch)
-
----
-
-## 7) QA Checklist (kopyala-yapıştır)
-
-- [ ] Dashboard: WS Connected/Paused/Stale net görünüyor
-- [ ] Dashboard: kartlarda skeleton state var
-- [ ] Strategy Lab: Run sırasında spinner + toast var
-- [ ] Strategy Lab: hata mesajı editöre yakın
-- [ ] Stratejilerim: silme onaylı
-- [ ] Çalışan Stratejiler: durum rozeti doğru (running/paused/error)
-- [ ] Portföy: zebra + sticky header
-- [ ] Ayarlar: label + inline validation + keyboard erişimi
-- [ ] Icon-only butonlar aria-label içeriyor
-- [ ] Tab ile gezince focus kaybolmuyor / görünür
-
----
-
-## 8) Notlar (Uygulama Rehberi)
-
-- CSS: dark modda scrollbar/focus/kontrast regress olmasın.
-- Grid: `auto-fit/minmax` yaklaşımı dar ekranlarda 2→1 kolona düşmeli.
-- StatCard: overflow güvenliği + delta sign "double sign" koruması zorunlu.
-
----
-
-## 9) Kaynaklar
-- NN/g Heuristics, WCAG 2.2 QuickRef, Tableau Data Viz best practices
-- Spark iç dokümanları: `docs/FEATURES.md`, `docs/ROADMAP.md`
+--- 
+**Not:** Bu plan, parity rehberi ve UX araştırması çıktılarının "tek kaynak doküman" halidir. Gerektiğinde görevler UX Test Runner'a da işlenebilir.
