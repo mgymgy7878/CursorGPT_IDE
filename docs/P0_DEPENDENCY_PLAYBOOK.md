@@ -150,6 +150,6 @@ useHotkeys('escape', () => closeModal(), [closeModal]);
 
 ---
 
-**Son Güncelleme:** 2025-01-29  
+**Son Güncelleme:** 2025-01-29
 **Durum:** PR #35/#36 merge bekleniyor, ön hazırlık yapıldı
 

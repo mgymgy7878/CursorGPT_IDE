@@ -197,7 +197,7 @@ evidence/ui/p0/strategy-lab/
 
 ---
 
-**Son Güncelleme:** 2025-01-29  
-**Durum:** Hazır, blocking dependencies bekleniyor  
+**Son Güncelleme:** 2025-01-29
+**Durum:** Hazır, blocking dependencies bekleniyor
 **Pattern:** [P0 Evidence Pattern](docs/P0_EVIDENCE_PATTERN.md)
 

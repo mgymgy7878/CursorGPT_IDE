@@ -38,11 +38,11 @@ test.describe('Settings Golden Master', () => {
     await page.goto(`${BASE_URL}/settings`);
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('[data-testid="status-bar"], .status-bar, header', { timeout: 5000 }).catch(() => {});
-    
+
     // Deterministic: Click "Göster" button to reveal secret input
     const showButton = page.locator('button:has-text("Göster")').first();
     const buttonExists = await showButton.count() > 0;
-    
+
     if (buttonExists) {
       await showButton.click();
       // Wait for input type to change (password -> text)
@@ -51,7 +51,7 @@ test.describe('Settings Golden Master', () => {
       const input = page.locator('input[type="text"]').first();
       await expect(input).toBeVisible({ timeout: 1000 }).catch(() => {});
     }
-    
+
     await expect(page).toHaveScreenshot('settings-secret-revealed.png', {
       fullPage: true,
       maxDiffPixels: 100,

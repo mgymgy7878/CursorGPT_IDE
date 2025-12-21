@@ -1,50 +1,45 @@
-import './globals.css'
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import ThemeToggle from "@/components/theme/ThemeToggle";
-import Toaster from "@/components/toast/Toaster";
-import ErrorSink from "@/components/core/ErrorSink";
-import CommandPalette from "@/components/ui/CommandPalette";
-import FloatingActions from "@/components/layout/FloatingActions";
-import ChunkGuard from "@/components/ChunkGuard";
-import MarketProvider from "@/providers/MarketProvider";
-import StatusBar from "@/components/status-bar";
-import LeftNav from "@/components/left-nav";
-import "@/styles/theme.css";
+import "./globals.css";
+import type { ReactNode } from "react";
+import nextDynamic from "next/dynamic";
+
+// DİKKAT: Fallback mod - compile hang durumunda kullanılır
+const MINIMAL = process.env.SPARK_MINIMAL_LAYOUT === "1";
+
+// UX-only components: Client-side, SSR kapalı (root compile'ı hafifletir)
+const CommandPalette = nextDynamic(
+  () => import("@/components/ui/CommandPalette"),
+  { ssr: false }
+);
+const Toaster = nextDynamic(() => import("@/components/toast/Toaster"), {
+  ssr: false,
+});
 
 export const metadata = {
-  title: 'Spark Trading',
-  description: 'Trading platform UI',
-}
+  title: "Spark Trading",
+  description: "Trading platform UI",
+};
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
+  // Fallback: Minimal mode (compile hang durumunda)
+  if (MINIMAL) {
+    return (
+      <html lang="tr" suppressHydrationWarning>
+        <body>{children}</body>
+      </html>
+    );
+  }
+
+  // Normal: Ince kabuk - sadece UX eklentileri (client-only, dynamic)
+  // suppressHydrationWarning: theme/SSR mismatch gürültüsünü azaltır
   return (
-    <html lang="tr" className="h-full">
-      <body className="h-full bg-surface text-neutral-100 overflow-hidden">
-        <ThemeProvider>
-          <MarketProvider>
-            <div className="h-full flex flex-col">
-              <StatusBar />
-              <div className="flex flex-1 overflow-hidden">
-                <LeftNav />
-                <main className="flex-1 overflow-auto">
-                  {children}
-                </main>
-              </div>
-            </div>
-            <ChunkGuard />
-            <Toaster />
-            <ErrorSink />
-            <CommandPalette />
-            <FloatingActions />
-          </MarketProvider>
-        </ThemeProvider>
+    <html lang="tr" suppressHydrationWarning>
+      <body>
+        {children}
+        <CommandPalette />
+        <Toaster />
       </body>
     </html>
-  )
+  );
 }

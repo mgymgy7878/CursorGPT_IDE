@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Health check endpoint with SLO metrics
  * GET /api/healthz
- * 
+ *
  * Checks:
  * - UI service status
  * - Executor service connectivity
@@ -23,21 +23,21 @@ const metrics = {
 function trackRequest(duration: number, isError: boolean) {
   metrics.total++;
   if (isError) metrics.errors++;
-  
+
   metrics.requests.push(duration);
-  
+
   // Keep only last 100 requests
   if (metrics.requests.length > 100) {
     metrics.requests.shift();
   }
-  
+
   metrics.lastCheck = Date.now();
 }
 
 // Calculate P95 latency
 function calculateP95(): number | null {
   if (metrics.requests.length === 0) return null;
-  
+
   const sorted = [...metrics.requests].sort((a, b) => a - b);
   const index = Math.floor(sorted.length * 0.95);
   return sorted[index] || sorted[sorted.length - 1];
@@ -67,22 +67,22 @@ export async function GET(request: Request) {
 
   try {
     const executorUrl = process.env.NEXT_PUBLIC_EXECUTOR_URL || 'http://127.0.0.1:4001';
-    
+
     // Check executor health
     let executorStatus = 'DOWN';
     let executorError: string | null = null;
     let executorLatency: number | null = null;
-    
+
     try {
       const execStart = Date.now();
-      const executorCheck = await fetch(`${executorUrl}/health`, {
+      const executorCheck = await fetch(`${executorUrl}/healthz`, {
         signal: AbortSignal.timeout(1200),
         headers: { 'Accept': 'application/json' }
       });
-      
+
       executorLatency = Date.now() - execStart;
       executorStatus = executorCheck.ok ? 'UP' : 'DEGRADED';
-      
+
       if (!executorCheck.ok) {
         isError = true;
       }
@@ -93,10 +93,10 @@ export async function GET(request: Request) {
 
     const overallStatus = executorStatus === 'UP' ? 'UP' : 'DEGRADED';
     const requestDuration = Date.now() - checkStart;
-    
+
     // Track this request
     trackRequest(requestDuration, isError);
-    
+
     // Calculate SLO metrics
     // Check venue staleness
     const venues = {
@@ -107,11 +107,11 @@ export async function GET(request: Request) {
     // Try to get real venue staleness
     try {
       const { getBISTStaleness } = await import('@/lib/marketdata/bist');
-      
+
       // BTCTurk staleness (from WS - mock for now)
       venues.btcturk.stalenessSec = 0;
       venues.btcturk.status = 'MOCK';
-      
+
       // BIST staleness
       venues.bist.stalenessSec = getBISTStaleness();
       venues.bist.status = venues.bist.stalenessSec < 30 ? 'MOCK' : 'STALE';
@@ -149,8 +149,9 @@ export async function GET(request: Request) {
         }
     } as const;
 
-    // UI mode: her durumda 200 döndür (ops health 503 davranışı korunur)
-    const httpStatus = uiMode ? 200 : (overallStatus === 'UP' ? 200 : 503);
+    // Liveness: UI service is up, always return 200
+    // Readiness info is in body.services.executor.status
+    const httpStatus = 200;
     return Response.json(body, {
       status: httpStatus,
       headers: {
@@ -174,7 +175,8 @@ export async function GET(request: Request) {
       }
     };
 
-    const httpStatus = uiMode ? 200 : 503;
+    // Liveness: UI service is up, always return 200
+    const httpStatus = 200;
     return Response.json(body, {
       status: httpStatus,
       headers: {

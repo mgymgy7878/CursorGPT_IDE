@@ -175,6 +175,6 @@ Dashboard'da oturan kanıt/QA deseni, Strategy Lab ve Running Strategies için d
 
 ---
 
-**Son Güncelleme:** 2025-01-29  
+**Son Güncelleme:** 2025-01-29
 **Durum:** P0-Global tamamlandı, P0-Page Targets hazır, Evidence Pattern dokümante edildi
 

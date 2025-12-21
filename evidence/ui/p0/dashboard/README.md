@@ -71,7 +71,7 @@ Dashboard sayfasında TAB ile gezinim sırası:
 
 1. **TopStatusBar**: API badge → WSStatusBadge → Engine badge → Guard Validate link
 2. **PageHeader**: Create Strategy butonu → Create Alert butonu
-3. **Ana içerik**: 
+3. **Ana içerik**:
    - P95 Metric → Staleness Metric
    - Alarm Drafts paneli (CTA butonu varsa)
    - Canary Tests paneli (CTA butonu varsa)

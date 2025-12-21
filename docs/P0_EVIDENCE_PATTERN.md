@@ -184,6 +184,6 @@ Her yeni P0 sayfası için:
 
 ---
 
-**Son Güncelleme:** 2025-01-29  
+**Son Güncelleme:** 2025-01-29
 **Durum:** Dashboard'da oturdu, Strategy Lab ve Running Strategies için uygulanacak
 

@@ -40,6 +40,32 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': 'warn',
       'prefer-const': 'error',
+      // Shell Anayasası: Shell component'leri sadece AppFrame'de import edilmeli
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/components/status-bar',
+              message: 'Shell sadece AppFrame\'de. StatusBar\'ı doğrudan import etme, AppFrame kullan.',
+            },
+            {
+              name: '@/components/left-nav',
+              message: 'Shell sadece AppFrame\'de. LeftNav\'ı doğrudan import etme, AppFrame kullan.',
+            },
+            {
+              name: '@/components/layout/AppFrame',
+              message: 'AppFrame sadece root layout\'ta kullanılır. Sayfa layout\'larında kullanma.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['@/components/status-bar', '@/components/left-nav'],
+              message: 'Shell component\'leri sadece AppFrame\'de import edilmeli.',
+            },
+          ],
+        },
+      ],
       // Token-only v1: Tailwind arbitrary values ([]) yasak
       'regex/invalid': [
         'error',

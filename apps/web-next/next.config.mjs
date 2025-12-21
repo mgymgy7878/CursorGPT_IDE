@@ -48,9 +48,10 @@ const nextConfig = {
     const csp = [
       "default-src 'self'",
       "base-uri 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      // script/style will be governed by middleware nonce/report-only
       "connect-src 'self' http: https: ws: wss:",
       "frame-ancestors 'none'",
     ].join("; ");

@@ -153,13 +153,13 @@ export function OptimisticPositionsTable() {
                 <div className="font-medium strategy-name">{position.asset}</div>
               </td>
               <td className="py-3 px-2 text-right text-sm num-tight">{position.amount}</td>
-              <td className="py-3 px-2 text-right text-sm num-tight">{formatCurrency(position.price, 'tr-TR', 'USD')}</td>
+              <td className="py-3 px-2 text-right text-sm num-tight">{formatCurrency(position.price, 'USD')}</td>
               <td
                 className={`py-3 px-2 text-right text-sm num-tight ${
                   position.pnl >= 0 ? "text-green-400" : "text-red-400"
                 }`}
               >
-                {position.pnl >= 0 ? '+' : ''}{formatCurrency(position.pnl, 'tr-TR', 'USD')}
+                {position.pnl >= 0 ? '+' : ''}{formatCurrency(position.pnl, 'USD')}
               </td>
               <td
                 className={`py-3 px-2 text-right text-sm num-tight ${

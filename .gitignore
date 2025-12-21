@@ -76,6 +76,17 @@ evidence/
 !evidence/**/MANUAL_TEST_RUNBOOK.md
 !evidence/**/REGRESSION_CHECKLIST.md
 
+# Playwright test results (commit edilmez)
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Golden Master snapshots (COMMIT EDİLMELİ - drift yakalama için)
+# apps/web-next/tests/visual/dashboard-golden-master.spec.ts snapshot'ları commit edilir
+!**/tests/**/*-actual.png
+!**/tests/**/*-expected.png
+!**/tests/**/*-diff.png
+
 # local/dev junk
 .dev/
 *.pid

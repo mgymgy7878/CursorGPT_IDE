@@ -16,6 +16,7 @@ import {
   formatBacktestPercent,
   formatBacktestNumber,
 } from "@/lib/backtest/formatBacktestMetric";
+import { formatNumber } from "@/lib/format";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -146,9 +147,9 @@ function StrategyTableRow({ strategy }: StrategyTableRowProps) {
       {/* Entry → Fiyat */}
       <div className="text-[var(--fg-muted)] tabular-nums text-[11px]">
         <span className="text-[10px]">{t("table.entry")}</span>{" "}
-        {entryPrice.toLocaleString("tr-TR")} →{" "}
+        {formatNumber(entryPrice)} →{" "}
         <span className="text-white">
-          {currentPrice.toLocaleString("tr-TR")}
+          {formatNumber(currentPrice)}
         </span>
       </div>
 

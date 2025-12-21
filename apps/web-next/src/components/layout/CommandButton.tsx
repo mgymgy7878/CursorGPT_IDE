@@ -11,7 +11,7 @@ export function CommandButton({ variant }: CommandButtonProps) {
   // Bu, "yanlış yerde yanlış variant" riskini sıfırlar
   // variant prop'u hala destekleniyor (backward compatibility)
   const useResponsive = variant === undefined;
-  
+
   return (
     <button
       data-testid="command-button"

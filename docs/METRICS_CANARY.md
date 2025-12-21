@@ -23,16 +23,16 @@
 
 ```powershell
 $ports=3003,3004
-function R($p){ 
+function R($p){
   $u="http://127.0.0.1:$p/api/public/metrics"
-  try{ Invoke-RestMethod $u -TimeoutSec 5 }catch{ $null } 
+  try{ Invoke-RestMethod $u -TimeoutSec 5 }catch{ $null }
 }
 
 $port=$null
 $m1=$null
-foreach($p in $ports){ 
+foreach($p in $ports){
   $m1=R $p
-  if($m1){ $port=$p; break } 
+  if($m1){ $port=$p; break }
 }
 
 if(-not $m1){ "endpoint down"; exit 1 }
@@ -47,10 +47,10 @@ $stale=[double]$m2.gauges.spark_ws_staleness_seconds
 "msgs_total delta: $delta"
 "staleness s: $stale"
 
-if(($delta -ge 1) -and ($stale -lt 4)){ 
-  "SMOKE: PASS" 
-} else { 
-  "SMOKE: ATTENTION" 
+if(($delta -ge 1) -and ($stale -lt 4)){
+  "SMOKE: PASS"
+} else {
+  "SMOKE: ATTENTION"
 }
 ```
 
@@ -94,7 +94,7 @@ groups:
           severity: warning
         annotations:
           summary: "WS staleness too high"
-          
+
       - alert: WSDisconnected
         expr: increase(spark_ws_btcturk_reconnects_total[5m]) > 3
         labels:

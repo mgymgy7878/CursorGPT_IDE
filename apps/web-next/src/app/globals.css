@@ -2,8 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Spark dark scrollbar (Chrome/Edge + Firefox) */
+.spark-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.spark-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.spark-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spark-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
 /* Design Tokens - Figma Parity */
-@import url('../styles/tokens.css');
+@import '../styles/tokens.css';
 
 /* Proje teması */
 :root {
@@ -17,16 +38,18 @@
 
 html, body {
   height: 100%;
-  background-color: #000000;
+  background-color: #0a0a0a; /* Slightly lighter than pure black for better contrast */
   color: #ffffff;
   overflow: hidden; /* Prevent page-level scroll */
   scrollbar-gutter: stable; /* Prevent layout shift */
 }
 
 /* App Shell - tek scroll prensibi */
+/* P0: Explicit dark background to prevent white leak */
 #__next, body > div#root {
   min-height: 100%;
   height: 100%;
+  background-color: #0a0a0a;
 }
 
 .app-content {
@@ -88,6 +111,50 @@ body {
   min-width: 0; /* grid shrink fix */
 }
 
+/* Scroll & Overflow Guards */
+main {
+  overflow-x: hidden; /* Prevent page-level horizontal scroll */
+}
+
+/* Thin/overlay scrollbar for LeftNav and RightRail */
+aside::-webkit-scrollbar,
+main::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+aside::-webkit-scrollbar-track,
+main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+aside::-webkit-scrollbar-thumb,
+main::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+aside::-webkit-scrollbar-thumb:hover,
+main::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox scrollbar */
+aside,
+main {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Z-index hierarchy */
+:root {
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-overlay: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
 .card-grid {
   @apply grid gap-6 xl:grid-cols-3 md:grid-cols-2 grid-cols-1;
 }
@@ -145,6 +212,48 @@ a:hover {
 .chart-wrapper, .table-wrapper {
   overflow-x: auto;
   overflow-y: visible;
+}
+
+/* Dashboard container-query: ana grid için */
+.dash-root {
+  container-type: inline-size;
+  container-name: dash;
+}
+
+/* Top row: Figma oranı (Portfolio Summary daha geniş - 1.35fr 1fr) */
+.dash-top-row {
+  display: grid;
+  gap: 20px; /* gap-5 */
+  grid-template-columns: 1fr;
+}
+
+@container dash (min-width: 920px) {
+  .dash-top-row {
+    grid-template-columns: 1.35fr 1fr;
+  }
+}
+
+/* Portfolio Summary container-query: kart genişliğine göre 3/2/1 */
+.portfolio-cq {
+  container-type: inline-size;
+}
+
+.portfolio-grid {
+  display: grid;
+  gap: 12px; /* gap-3 */
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@container (min-width: 560px) {
+  .portfolio-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 420px) and (max-width: 559px) {
+  .portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* Focus visibility for keyboard navigation */

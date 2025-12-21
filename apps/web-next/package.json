@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev -p 3003",
+		"dev": "next dev -p 3003 -H 127.0.0.1",
 		"dev:dashboard": "next dev -p 3003 --hostname 127.0.0.1",
 		"ws:dev": "tsx scripts/dev-ws.ts",
 		"dev:auto": "node scripts/dev-auto.mjs",
