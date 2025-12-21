@@ -1,154 +1,175 @@
-# Spark Trading Platform — UI/UX Planı + Figma Parity Talimatı
+# UI & UX Planı — Spark Trading Platform (Golden Master + WCAG + Heuristics)
 
-**Amaç:** Spark UI'ının Figma prototipi ile görsel/etkileşimsel pariteye (≥%95) ulaşması ve ürün standardının (erişilebilirlik, tutarlılık, geri bildirim, veri görselleştirme) kalıcı hale getirilmesi.
+Bu plan; mevcut "UI/UX İyileştirme" dokümanındaki hedefleri ve sayfa bazlı iş listesini birleştirir, ayrıca yapılan UX heuristics/erişilebilirlik analizindeki bulguları backlog'a çevirir.
 
-## 1) Kapsam ve Tanım
-Bu doküman tüm sayfalar için:
-- **Figma Parity**: tipografi, spacing, renk/token, layout, ikonografi, component davranışı
-- **Erişilebilirlik (WCAG 2.2 AA)**: klavye erişimi, odak halkası, kontrast, aria etiketleri
-- **NN/g Heuristics**: sistem durumu görünürlüğü, hata önleme, tutarlılık, kullanıcı kontrolü
-- **Veri Görselleştirme**: eksen/legend/birim netliği, tooltip standardı, okunabilir tablolar
-- **Performans**: skeleton/loading, render-throttle, virtualization (gerekirse)
+---
 
-## 2) "Golden Master" Kuralları (Figma Parity Çerçevesi)
-**Golden Master:** TopStatusBar + 3-panel layout (Sidebar / Main / Copilot) görsel dili referanstır.
+## 0) Amaç
 
-### 2.1 Parity Checklist (her sayfa için zorunlu)
-- **Tipografi:** varsayılan body metin standardı: `text-[13px] font-medium leading-none` (veya mevcut design token karşılığı)
-- **Spacing:** kart iç padding, gap ve pill boyutları design token'lara bağlı olmalı
-- **Renkler:** status renkleri (ok/uyarı/hata) tek kaynaktan gelmeli (token)
-- **Layout:** 3-section düzen bozulmayacak; overflow taşmaları engellenecek
-- **İkonografi:** ikon seti tek kaynak (SparkMark / lucide setinden seçilenler)
-- **Interaktivite:** hover/focus/active durumları tutarlı
+1. Kullanıcı deneyimini NN/g heuristics prensipleriyle hizalamak
+2. WCAG 2.2 AA seviyesine yaklaşmak (kontrast, klavye erişimi, aria)
+3. Veri görselleştirmeyi "trader aklına" uygun, net ve düşük sürtünmeli hale getirmek
+4. Golden Master (Figma) parity'yi "ölçülebilir checklist"e dönüştürmek
 
-### 2.2 Kanıt (evidence) üretimi
-Her parity düzeltmesi sonrası:
-- "Önce/Sonra" ekran görüntüsü (gerekirse)
-- Kısa not: hangi fark kapatıldı (3–5 madde)
-- (Varsa) ilgili component path'i
+---
 
-## 3) Global UI Standartları (Component Kuralları)
-### 3.1 Buton Standardı
-- **Primary**: tek bir ana renk + net focus ring
-- **Secondary**: nötr ton + hover ayrımı
-- **Destructive**: kırmızı ton + onay gerektiren eylemler
-- **A11y**: ikon-only butonlarda `aria-label` zorunlu
+## 1) Ürün Seviyesi UX İlkeleri (Kısa)
 
-### 3.2 Form Standardı
-- Label + `aria-describedby` zorunlu
-- Zorunlu alan `*` ile işaretlenir
-- **Inline validasyon** (alanın hemen altında mesaj)
-- Submit sırasında: disabled + spinner + geri bildirim
-- Hata dili: kısa, yönlendirici, alan bazlı
+- **Sistem durumu her zaman görünür olmalı** (loading, bağlantı, hata, canary)
+- **Kullanıcı kontrolü:** kritik eylemlerde geri alma / onay / iptal
+- **Tutarlılık:** TR terminoloji + tek design token seti
+- **Erişilebilirlik:** klavye ile tam gezinim + focus ring + aria-label
+- **Performans algısı:** skeleton/loading + küçük gecikmeleri maskele
 
-### 3.3 Toast / Modal Standardı
-- Toast: bilgi / başarı / uyarı / hata seviyeleri
-- Modal: sadece kritik ve geri dönüşsüz aksiyonlarda
-- "Emergency exit": İptal/Geri al her kritik akışta görünür
+---
 
-### 3.4 Tablo Standardı
-- `thead > th[scope="col"]` zorunlu
-- Zebra satır deseni + hover row
-- Sıralama ikonu ve erişilebilir etiketler
-- Büyük listelerde: pagination veya virtualization
+## 2) Golden Master Parity Kuralları (Figma Referans)
 
-### 3.5 Grafik Standardı (Backtest/Market)
-- Başlık + kısa açıklama
-- Eksen etiketleri + birim
-- Tooltip: değer + birim + zaman damgası
-- Renk semantiği: yeşil(+), kırmızı(-), sarı(uyarı)
-- Küçük sparkline'lar: tooltip zorunlu
+### 2.1 Rails Davranışı (P0 — Kritik)
 
-## 4) Sistem Durumu Görünürlüğü (P0)
-Tüm ana sayfalarda:
-- **Skeleton / loading state** (en az 1 örnek)
-- WS/API/Executor bağlantı durumu üst çubukta görünür
-- Veri yenilenince satır/metric "soft highlight" (hafif animasyon) ile anlaşılır
+#### Sol Sidebar
+- ✅ Collapsed/expanded tutarlı
+- ✅ Aktif sayfa vurgusu net
+- ✅ Icon-only mode + accent colors
 
-## 5) Sayfa Bazlı İş Listesi (Öncelikli Backlog)
-Aşağıdaki maddeler parity + kullanılabilirlik için "minimum set"tir.
+#### Sağ Rail (Copilot)
+- **P0:** Panel kapalıyken bile sağ kenarda **icon dock** görünür olmalı
+  - Dock: en az 3–5 ikon (Copilot, Shield/Risk, Alerts, Metrics vb.) + tooltip
+  - Panel açılınca dock sabit kalır, panel dock'un soluna genişler
+- ✅ SparkAvatar + subtitle + Model pill
+- ✅ Soft dividers (border-white/10)
 
-### 5.1 Ana Sayfa (Dashboard)
-- [ ] Ticker ve strateji panellerinde skeleton loading
-- [ ] Sol menü: aktif sayfa highlight + tutarlı ikon/metin
-- [ ] Üst çubuk: WS bağlantı durumu (Connected/Degraded/Down)
-- [ ] Kartlarda taşma koruması (`overflow-hidden`, uzun metin clamp)
-- [ ] Figma ile kart padding/gap/tipografi birebir
+### 2.2 MarketData Etkileşimi (P0 — Kritik)
 
-### 5.2 Piyasa Verileri (Market Data)
-- [ ] Tab/filtre alanları klavye ile gezilebilir
-- [ ] Grafik tooltip standardı (birim + zaman)
-- [ ] Empty state: "Veri yok / bağlantı yok" + CTA (yenile)
-- [ ] Parity: layout ve kart stilleri
+- **P0:** Seçili enstrüman için sayfa içinde bir **"Chart Preview"** alanı (mini/embedded) göster
+- **P0:** Enstrümana tıklayınca grafik açılır (seçili sembol değişir, chart güncellenir)
+- ✅ "Tam Ekran" ayrı mod olarak çalışır (query param ile)
+- ✅ Mini Grafik (sparkline) kolonu
+- ✅ RSI / Signal kolonları
 
-### 5.3 Strateji Laboratuvarı (Strategy Lab)
-- [ ] Kaydet/Backtest/Optimize: spinner + başarı/toast
-- [ ] Kod editör hataları: inline açıklama paneli
-- [ ] "Run" sonrası son loglar & status paneli
-- [ ] Kısayollar: Ctrl+Enter (backtest), Ctrl+Shift+O (optimize)
-- [ ] Param-diff + risk rozetleri (planlanan flow'a hazırlık)
+---
 
-### 5.4 Stratejilerim
-- [ ] Sayfalama veya sonsuz kaydırma
-- [ ] Sil/Düzenle: onay diyaloğu + geri alma (mümkünse)
-- [ ] Boş durum mesajı + "Strateji oluştur" CTA
+## 3) Bileşen Kuralları
 
-### 5.5 Çalışan Stratejiler
-- [ ] Sparkline boyutu artır + tooltip
-- [ ] Pause/Resume: ikon + metin (anlam net)
-- [ ] Durum rozeti: running/paused/error
-- [ ] Satır güncellemede soft highlight
-- [ ] Risk/Exposure mini özetleri (tek satır)
+### Butonlar
+- Primary/Secondary ayrımı net
+- Focus ring görünür
+- İkon-only butonlarda aria-label zorunlu
 
-### 5.6 Portföy
-- [ ] Tablo header sabit (sticky)
-- [ ] Zebra + sıralama ikonları
-- [ ] Kontrast kontrol (AA ≥ 4.5:1)
-- [ ] Güncellenen satırlarda soft highlight
+### Formlar
+- Label + aria-describedby zorunlu
+- Inline validasyon (alan bazlı)
+- Submit sırasında disabled + spinner
 
-### 5.7 Uyarılar (Alerts) — Planlanan
-- [ ] Empty state: "Henüz alarm yok" + CTA
-- [ ] Yeni alarm formu: inline doğrulama + onay
-- [ ] Alarm liste: filtre/sıralama
+### Tablo & Grafik
+- Tablolar: thead + th[scope] + zebra pattern
+- Grafik: başlık + eksen etiketleri + birimler + tooltip (birim dahil)
 
-### 5.8 Risk / Koruma
-- [ ] Risk limit bar'lar: açıklama + birim
-- [ ] Kill switch vb. kritik aksiyon: modal + net geri bildirim
-- [ ] Durum kartları parity ve okunabilirlik
+---
 
-### 5.9 Denetim / Loglar
-- [ ] Filtre + arama + export
-- [ ] Tablo standardı + erişilebilirlik
-- [ ] "Son olaylar" görünümü (en kritik 20 kayıt)
+## 4) Sayfa Bazlı Backlog (D1–D3 sonrası)
 
-### 5.10 Ayarlar
-- [ ] Tüm alanlar label + aria-describedby
-- [ ] Tema/dil seçimi TAB ile gezilebilir
-- [ ] Kaydet sırasında disabled + spinner + toast
-- [ ] Hatalı input senaryoları (en az 5) yakalanmalı
+**Öncelik:** P0 (kritik), P1 (önemli), P2 (iyileştirme)
 
-## 6) Erişilebilirlik (WCAG 2.2) — Kontrol Listesi
-- [ ] Tüm interaktif öğeler TAB ile erişilebilir
-- [ ] Focus ring görünür ve tutarlı
-- [ ] Kontrast: metin/arkaplan ≥ 4.5:1
-- [ ] `aria-label` / `aria-describedby` eksiksiz
-- [ ] Motion: yoğun animasyonlar "reduced motion" ile kısılabilir
+### Ana Sayfa / Dashboard
+| Öncelik | İş |
+|---------|-----|
+| P0 | Skeleton loading (ticker/strateji panelleri) |
+| P1 | Menüde aktif sayfa işaretleme + breadcrumb (opsiyon) |
+| P1 | WS bağlantı durumu üst çubukta görünür |
 
-## 7) Test & Kabul Kriterleri (Definition of Done)
-**Her sayfa için:**
-- Parity: Figma'ya görsel olarak %95+ (tipografi/spacing/layout)
-- A11y: klavye gezilebilirlik + odak görünürlüğü PASS
-- Skeleton/empty state: en az 1 örnek PASS
-- Form/hata: inline validasyon PASS
-- Grafik/tablo: başlık/etiket/birim PASS
+### MarketData
+| Öncelik | İş |
+|---------|-----|
+| **P0** | Seçili enstrüman chart preview (embedded) |
+| **P0** | Row click → chart aç (sembol seçimi) |
+| P1 | Sinyal rozetlerinin açıklaması (tooltip) |
+| P1 | Filtre + arama erişilebilirliği (klavye, aria) |
 
-## 8) Uygulama Sırası (Önerilen)
-1) Dashboard (Ana Sayfa) + Global tokens
-2) Strategy Lab
-3) Running Strategies
-4) Portfolio
-5) Settings
-6) Alerts + Risk/Protection + Logs
+### Strategy Lab
+| Öncelik | İş |
+|---------|-----|
+| P0 | Run/Backtest işlemlerinde spinner + başarı/toast |
+| P0 | Kod hataları için inline açıklama |
+| P1 | Son loglar & status paneli |
+| P1 | Kısayollar (Ctrl+Enter backtest, Ctrl+Shift+O optimize) |
 
---- 
-**Not:** Bu plan, parity rehberi ve UX araştırması çıktılarının "tek kaynak doküman" halidir. Gerektiğinde görevler UX Test Runner'a da işlenebilir.
+### Stratejilerim
+| Öncelik | İş |
+|---------|-----|
+| P1 | Sayfalama / sonsuz kaydırma |
+| P0 | Silme/düzenleme onay modalı |
+
+### Çalışan Stratejiler
+| Öncelik | İş |
+|---------|-----|
+| P1 | Sparkline büyüt + tooltip |
+| P1 | Pause/Resume ikon+metin |
+| P0 | Durum rozeti (running/paused/error) |
+
+### Portföy
+| Öncelik | İş |
+|---------|-----|
+| P1 | Tablo header fix + zebra |
+| P1 | Kolon sıralama ikonları |
+| P2 | Periyodik güncellenen satırda animasyon vurgusu |
+
+### Ayarlar
+| Öncelik | İş |
+|---------|-----|
+| P0 | Label + aria-describedby |
+| P1 | Tema/dil seçiminde TAB ile gezilebilirlik |
+| P1 | Kaydet butonunda spinner |
+
+### Alerts (Planlanan)
+| Öncelik | İş |
+|---------|-----|
+| P1 | Boş durum + CTA |
+| P0 | Yeni alarm formunda doğrulama + onay |
+
+### Market Analysis (Planlanan)
+| Öncelik | İş |
+|---------|-----|
+| P1 | Grid düzeni optimize |
+| P0 | Grafiklerde başlık/açıklama/eksen etiketleri zorunlu |
+
+---
+
+## 5) Test ve Kabul Kriterleri
+
+| Kriter | Hedef |
+|--------|-------|
+| WCAG AA kontrast | ≥ 4.5:1 |
+| Klavye erişimi | Tüm interaktif öğelere TAB ile erişim |
+| Form validasyonları | 5/5 hatalı senaryonun yakalanması |
+| Yükleme süresi (algı) | P95 < 3s, skeleton gösterimi |
+| Golden Master parity | Rails + MarketData etkileşimi PASS |
+
+---
+
+## 6) Uygulama Notları (Yakın Sprint)
+
+UI parity değişiklikleri küçük PR'lara bölünmeli:
+
+### PR-1: RightRail Icon Dock
+- Panel kapalıyken sağ kenarda icon dock görünür
+- Ikonlar: Copilot, Risk/Shield, Alerts, Metrics
+- Tooltip on hover
+- Click → panel açılır
+
+### PR-2: MarketData Embedded Chart
+- Sayfa üstünde chart preview alanı
+- Row click → selectedSymbol state güncelle
+- Chart component (TechnicalOverview) embedded render
+- "Tam Ekran" modu query param ile ayrı
+
+### PR-3: Skeleton & Form Validation
+- Dashboard kartlarına skeleton loading
+- Settings/StrategyLab form validation
+- Spinner on submit
+
+---
+
+## KAYNAK NOTU
+
+Bu dosya, UI/UX iyileştirme talimatları ve sayfa bazlı iş listesini temel alır; ayrıca UX heuristics/erişilebilirlik bulgularını backlog'a dönüştürür.

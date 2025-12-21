@@ -1,87 +1,52 @@
 # Spark Trading Platform
 
-[![UI/UX Guide](https://img.shields.io/badge/UI%2FUX-Guide-blue)](docs/UI_UX_GUIDE.md)
+AI destekli, çoklu borsa (Binance/BTCTurk/BIST) entegrasyonuna sahip, strateji üreten ve risk kontrollü çalışan trading platformu.
 
-## Docs
+## Hızlı Durum
+- **D1 (Export + Error Pages + Audit):** PASS
+- **D2 (BTCTurk WS + Pause/Resume + Metrics):** SMOKE geçildi (ticker akışı, staleness, pause/resume)
+- **UI (Figma Golden Master):** Dashboard/MarketData temel parity tamam; kalanlar docs/UI_UX_PLAN.md backlog'da.
 
-- [**UI & UX Planı**](docs/UI_UX_PLAN.md) — UI/UX iyileştirme planı ve uygulama talimatları (skeleton/loading, inline validasyon, WCAG AA kontrast ≥4.5:1, klavye erişilebilirlik, aktif menü + breadcrumb)
-- [**Features**](docs/FEATURES.md) — Mevcut yetenekler ve planlanan geliştirmeler
-- [**Roadmap**](docs/ROADMAP.md) — 4 Sprint planı
-- [**Metrics & Canary**](docs/METRICS_CANARY.md) — Metrikler ve canary test eşikleri
+## Belgeler
+- [Docs/Features](docs/FEATURES.md)
+- [Docs/Architecture](docs/ARCHITECTURE.md)
+- [Docs/Roadmap](docs/ROADMAP.md)
+- [Docs/API](docs/API.md)
+- [Docs/Metrics & Canary](docs/METRICS_CANARY.md)
+- [Docs/UI & UX Planı](docs/UI_UX_PLAN.md)
 
-## Quick Links
-
-- [**UI/UX Guide**](docs/UI_UX_GUIDE.md) — UI standartları, erişilebilirlik kuralları, bileşen standartları ve 2 haftalık uygulama planı
-- **Raporlar**: [2025-01-14 Detaylı Proje Analizi](docs/reports/PROJE_ANALIZ_2025_01_14_DETAYLI_TAM_RAPOR.md)
-
-### GREEN Receipt (v1.6-p1)
-
-- **Streams Service**: `services/streams/` - WebSocket streams with Prometheus metrics
-- **Alert Rules**: `rules/streams.yml` - Prometheus alert rules for streams monitoring
-- **Grafana Dashboard**: `grafana-dashboard.json` - Import ready dashboard with 3 panels
-- **CI Metrics Guard**: `.github/workflows/metrics-guard.yml` - Automated metrics validation
-- **Health Check**: `scripts/health-check.sh` - Multi-service health validation
-
-### Services
-
-- **Web**: Next.js frontend (port 3003)
-- **Executor**: Trading engine (port 4001)
-- **Streams**: WebSocket data feeds (port 4001)
-- **Marketdata**: Market data orchestrator
-
-### Monitoring
-
-- **Prometheus**: Metrics collection and alerting
-- **Grafana**: Dashboards and visualization
-- **Health Checks**: Automated service validation
-
-### Development
-
+## Çalıştırma (lokal)
 ```bash
-# Start all services
-pnpm -w install
-pnpm -w build
-pnpm -w dev
-
-# Health check
-./scripts/health-check.sh
-
-# Metrics validation
-curl http://127.0.0.1:4001/metrics | grep ws_msgs_total
+pnpm -w --filter web-next dev
+# prod:
+pnpm -w --filter web-next build
+pnpm -w --filter web-next start
 ```
 
-### Admin Configuration (v1.4.3+)
+## Audit / Smoke
+- **D1 Audit:** `powershell -NoProfile -ExecutionPolicy Bypass -File .\audit_d1.ps1`
+- **D2 Smoke:** bkz. docs/METRICS_CANARY.md
 
-Backtest write operations require admin authentication:
-
-```bash
-# 1. Generate admin token
-openssl rand -hex 32
-
-# 2. Set environment variable
-export ADMIN_TOKEN="your-generated-token"
-
-# 3. Start executor
-pnpm --filter @spark/executor dev
-
-# 4. Enable UI admin features
-export NEXT_PUBLIC_ADMIN_ENABLED=true
-pnpm --filter @spark/web-next dev
-
-# 5. Set token in browser
-localStorage.setItem("admin-token", "your-generated-token")
+## Proje Yapısı
+```
+apps/
+  web-next/          # Next.js 14 Ana UI
+  executor/          # Python strateji çalıştırıcı
+packages/
+  shared-types/      # TypeScript shared tipler
+  ui/                # Paylaşılan UI bileşenleri
+docs/                # Dokümantasyon
+scripts/             # Otomasyon & yardımcı scriptler
 ```
 
-**Security Notes:**
+## Teknoloji Stack
+- **Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS, Zustand
+- **Backend:** Node.js, Python (executor)
+- **Real-time:** WebSocket (Binance, BTCTurk)
+- **Observability:** Custom metrics endpoint, Prometheus-ready
 
-- Never commit `ADMIN_TOKEN` to git
-- Use strong tokens (≥32 bytes random)
-- Rotate tokens regularly
-- Audit logs: `logs/audit/backtest_*.log`
+## Katkıda Bulunma
+Bkz. [CONTRIBUTING.md](CONTRIBUTING.md)
 
-### Production Deployment
-
-- **Docker Compose**: Multi-service orchestration
-- **Nginx**: Reverse proxy with `/streams/metrics` route
-- **Prometheus**: Scrape config for all services
-- **Grafana**: Dashboard import from `grafana-dashboard.json`
+## Lisans
+Proprietary - Tüm hakları saklıdır.
