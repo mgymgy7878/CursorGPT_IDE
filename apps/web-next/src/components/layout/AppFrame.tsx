@@ -189,45 +189,83 @@ export default function AppFrame({ children }: AppFrameProps) {
 }
 
 /**
- * RightRailDock - Panel kapalıyken görünen icon dock (Figma Parity P0)
+ * RightRailDock - Panel kapalıyken görünen icon dock (Figma Parity P1)
  *
  * İkonlar: Copilot, Risk/Shield, Alerts, Metrics
- * Hover: tooltip göster
- * Click: panel aç
+ * A11y: tooltip, aria-label, keyboard navigation, focus ring
+ * Keyboard: Enter/Space ile panel aç, Tab ile navigate
  */
 interface RightRailDockProps {
   onOpenPanel: () => void;
+  activeTab?: 'copilot' | 'risk' | 'alerts' | 'metrics';
 }
 
-function RightRailDock({ onOpenPanel }: RightRailDockProps) {
+function RightRailDock({ onOpenPanel, activeTab = 'copilot' }: RightRailDockProps) {
   const dockItems = [
-    { icon: IconSpark, label: 'Copilot', color: 'text-emerald-400' },
-    { icon: IconShield, label: 'Risk / Koruma', color: 'text-amber-400' },
-    { icon: IconBell, label: 'Uyarılar', color: 'text-yellow-400' },
-    { icon: IconBarChart, label: 'Metrikler', color: 'text-blue-400' },
+    { id: 'copilot', icon: IconSpark, label: 'Copilot', shortcut: 'C', color: 'text-emerald-400', hoverBg: 'hover:bg-emerald-500/10' },
+    { id: 'risk', icon: IconShield, label: 'Risk / Koruma', shortcut: 'R', color: 'text-amber-400', hoverBg: 'hover:bg-amber-500/10' },
+    { id: 'alerts', icon: IconBell, label: 'Uyarılar', shortcut: 'A', color: 'text-yellow-400', hoverBg: 'hover:bg-yellow-500/10' },
+    { id: 'metrics', icon: IconBarChart, label: 'Metrikler', shortcut: 'M', color: 'text-blue-400', hoverBg: 'hover:bg-blue-500/10' },
   ];
 
+  // Keyboard handler - Enter/Space opens panel
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onOpenPanel();
+    }
+  };
+
   return (
-    <div className="h-full flex flex-col items-center py-3 bg-neutral-950 border-l border-white/6">
-      {dockItems.map((item, idx) => {
+    <div
+      className="h-full flex flex-col items-center py-3 bg-neutral-950 border-l border-white/6"
+      role="toolbar"
+      aria-label="Panel kısayolları"
+    >
+      {dockItems.map((item) => {
         const Icon = item.icon;
+        const isActive = activeTab === item.id;
+
         return (
           <button
-            key={idx}
+            key={item.id}
             onClick={onOpenPanel}
-            className="w-10 h-10 mb-1 flex items-center justify-center rounded-lg hover:bg-white/8 transition-colors group"
-            title={item.label}
-            aria-label={item.label}
+            onKeyDown={handleKeyDown}
+            className={cn(
+              "w-10 h-10 mb-1 flex items-center justify-center rounded-lg transition-all duration-150 group relative",
+              // Focus ring for keyboard navigation
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 focus-visible:ring-blue-500",
+              // Hover state with colored background
+              item.hoverBg,
+              // Active state
+              isActive && "bg-white/5 ring-1 ring-white/10"
+            )}
+            title={`${item.label} (${item.shortcut})`}
+            aria-label={`${item.label} panelini aç`}
+            aria-pressed={isActive}
+            tabIndex={0}
           >
             <Icon
               size={20}
               strokeWidth={1.8}
               className={cn(
-                "transition-colors",
+                "transition-all duration-150",
                 item.color,
-                "opacity-60 group-hover:opacity-100"
+                isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100 group-focus-visible:opacity-100"
               )}
             />
+            {/* Tooltip - custom positioning */}
+            <span
+              className={cn(
+                "absolute right-full mr-2 px-2 py-1 text-[11px] font-medium rounded bg-neutral-800 border border-white/10 text-white whitespace-nowrap",
+                "opacity-0 pointer-events-none transition-opacity duration-150",
+                "group-hover:opacity-100 group-focus-visible:opacity-100"
+              )}
+              role="tooltip"
+            >
+              {item.label}
+              <span className="ml-1.5 text-white/40 font-mono">{item.shortcut}</span>
+            </span>
           </button>
         );
       })}

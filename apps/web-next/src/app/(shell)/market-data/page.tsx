@@ -47,17 +47,36 @@ export default function MarketData() {
     }
     if (urlSymbol) {
       setSelectedSymbol(urlSymbol);
+    } else if (!urlSymbol && selectedSymbol) {
+      // İlk yüklemede URL'de symbol yoksa, default symbol'ü URL'e yaz
+      updateUrlWithSymbol(selectedSymbol);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlView, urlSymbol]);
 
-  // State değiştiğinde URL'i güncelle
+  // Symbol'ü URL'de güncelle (view modundan bağımsız)
+  const updateUrlWithSymbol = (symbol: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (symbol) {
+      params.set('symbol', symbol);
+    } else {
+      params.delete('symbol');
+    }
+    const queryString = params.toString();
+    const newUrl = queryString ? `/market-data?${queryString}` : '/market-data';
+    router.replace(newUrl, { scroll: false });
+  };
+
+  // State değiştiğinde URL'i güncelle (view + symbol)
   const updateUrl = (view: 'table' | 'full', symbol: string | null) => {
     const params = new URLSearchParams();
+    // Symbol her zaman URL'de tutulacak
+    if (symbol) {
+      params.set('symbol', symbol);
+    }
+    // Full view ise view parametresi ekle
     if (view === 'full') {
       params.set('view', 'full');
-      if (symbol) {
-        params.set('symbol', symbol);
-      }
     }
     const queryString = params.toString();
     const newUrl = queryString ? `/market-data?${queryString}` : '/market-data';
@@ -81,23 +100,29 @@ export default function MarketData() {
 
   const handleBackToTable = () => {
     setViewMode('table');
-    setSelectedSymbol(null);
-    updateUrl('table', null);
+    // Symbol korunur - sadece view modu değişir
+    updateUrl('table', selectedSymbol);
   };
 
   const handleToggleView = (view: 'miniChart' | 'table' | 'full') => {
     if (view === 'miniChart') {
       setShowMiniChart(true);
       setViewMode('table');
-      updateUrl('table', null);
+      updateUrl('table', selectedSymbol);
     } else if (view === 'table') {
       setShowMiniChart(false);
       setViewMode('table');
-      updateUrl('table', null);
+      updateUrl('table', selectedSymbol);
     } else {
       setViewMode('full');
       updateUrl('full', selectedSymbol);
     }
+  };
+
+  // Row click handler - symbol seç ve URL'i güncelle
+  const handleRowClick = (symbol: string) => {
+    setSelectedSymbol(symbol);
+    updateUrlWithSymbol(symbol);
   };
 
   // Generate mock chart data based on symbol
@@ -237,7 +262,7 @@ export default function MarketData() {
                   <MarketDataTable
                     showSparkline={showMiniChart}
                     onViewChart={handleViewChart}
-                    onRowClick={(symbol) => setSelectedSymbol(symbol)}
+                    onRowClick={handleRowClick}
                     selectedSymbol={selectedSymbol}
                   />
                 )}
