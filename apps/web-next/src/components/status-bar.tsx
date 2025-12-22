@@ -160,26 +160,26 @@ export default function StatusBar() {
           {/* Action Buttons - Dashboard'da gizli (Figma parity: terminal tarzı minimal bar) */}
           {!isDashboard && (
             <>
-              {/* Divider */}
-              <div className="w-px h-4 bg-white/10 shrink-0" />
+          {/* Divider */}
+          <div className="w-px h-4 bg-white/10 shrink-0" />
 
-              {/* Action Buttons - Figma pill style (subtle hover, consistent typography) */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => window.location.href = '/strategy-lab'}
-                  className="rounded-full bg-white/5 hover:bg-white/8 border border-white/10 px-3 py-[3px] text-[13px] font-medium text-white/90 transition-colors h-8 whitespace-nowrap leading-none"
-                  aria-label="Strateji Oluştur"
-                >
-                  Strateji Oluştur
-                </button>
-                <button
-                  onClick={() => console.log('Create alert')}
-                  className="rounded-full bg-white/5 hover:bg-white/8 border border-white/10 px-3 py-[3px] text-[13px] font-medium text-white/80 transition-colors h-8 whitespace-nowrap leading-none"
-                  aria-label="Uyarı Oluştur"
-                >
-                  Uyarı Oluştur
-                </button>
-              </div>
+          {/* Action Buttons - Figma pill style (subtle hover, consistent typography) */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => window.location.href = '/strategy-lab'}
+              className="rounded-full bg-white/5 hover:bg-white/8 border border-white/10 px-3 py-[3px] text-[13px] font-medium text-white/90 transition-colors h-8 whitespace-nowrap leading-none"
+              aria-label="Strateji Oluştur"
+            >
+              Strateji Oluştur
+            </button>
+            <button
+              onClick={() => console.log('Create alert')}
+              className="rounded-full bg-white/5 hover:bg-white/8 border border-white/10 px-3 py-[3px] text-[13px] font-medium text-white/80 transition-colors h-8 whitespace-nowrap leading-none"
+              aria-label="Uyarı Oluştur"
+            >
+              Uyarı Oluştur
+            </button>
+          </div>
             </>
           )}
 

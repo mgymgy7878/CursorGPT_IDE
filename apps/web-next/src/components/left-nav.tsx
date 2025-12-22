@@ -68,14 +68,14 @@ export default function LeftNav({ collapsed = false }: LeftNavProps) {
         collapsed ? "px-1" : "px-2"
       )}>
         <div className="flex flex-col gap-0.5">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+        {navItems.map((item) => {
+          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
             const Icon = item.icon
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
                 className={cn(
                   // Base: rounded-md for pill-like feel
                   "rounded-md flex items-center transition-all duration-150 select-none group",
@@ -106,11 +106,11 @@ export default function LeftNav({ collapsed = false }: LeftNavProps) {
                     isActive ? "text-white" : "text-white/60 group-hover:text-white/80"
                   )}>
                     {item.label}
-                  </span>
+              </span>
                 )}
-              </Link>
-            )
-          })}
+            </Link>
+          )
+        })}
         </div>
       </nav>
 

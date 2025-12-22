@@ -234,14 +234,14 @@ export default function MarketDataTable({
                 {/* Actions */}
                 <DataTableCell className="text-right py-3">
                   <div onClick={(e) => e.stopPropagation()}>
-                    <RowActions>
+                  <RowActions>
                       <RowActionButton
                         icon={<IconBarChart size={14} strokeWidth={1.8} />}
                         label="View chart"
                         onClick={() => onViewChart?.(row.symbol)}
                       />
-                      <RowActionButton icon="⚙️" label="Settings" />
-                    </RowActions>
+                    <RowActionButton icon="⚙️" label="Settings" />
+                  </RowActions>
                   </div>
                 </DataTableCell>
               </DataTableRow>

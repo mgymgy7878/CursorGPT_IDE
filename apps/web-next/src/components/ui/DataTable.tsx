@@ -44,10 +44,10 @@ export function DataTableRow({
   return (
     <tr
       className={cn(
-        'border-b border-neutral-800',
-        hover && 'hover:bg-neutral-900/30 transition-colors',
+      'border-b border-neutral-800',
+      hover && 'hover:bg-neutral-900/30 transition-colors',
         onClick && 'cursor-pointer',
-        className
+      className
       )}
       onClick={onClick}
     >

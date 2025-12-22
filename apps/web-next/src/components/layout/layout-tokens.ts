@@ -9,13 +9,13 @@
 export const TOPBAR_HEIGHT = 56;  // px - TopStatusBar yüksekliği
 
 // ========== SIDEBAR ==========
-export const SIDEBAR_EXPANDED = 248;
-export const SIDEBAR_COLLAPSED = 72;
+export const SIDEBAR_EXPANDED = 240;  // px - hover/focus/pinned modda tam genişlik
+export const SIDEBAR_COLLAPSED = 64;  // px - default ikon genişliği (hover overlay için)
 
 // ========== RIGHT RAIL ==========
-export const RIGHT_RAIL_OPEN = 420;
-export const RIGHT_RAIL_CLOSED = 0;
-export const RIGHT_RAIL_DOCK = 56;  // px - kapalıyken icon dock genişliği
+export const RIGHT_RAIL_EXPANDED = 420;  // px - hover/focus/pinned modda tam genişlik
+export const RIGHT_RAIL_COLLAPSED = 56;  // px - default dock genişliği (hover overlay için)
+export const RIGHT_RAIL_DOCK = 56;  // px - kapalıyken icon dock genişliği (alias)
 
 // ========== HANDLE (Figma Pill Style) ==========
 export const HANDLE_WIDTH = 28;  // px - narrower for pill look

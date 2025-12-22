@@ -44,6 +44,32 @@ html, body {
   scrollbar-gutter: stable; /* Prevent layout shift */
 }
 
+/* Hover overlay panels - sadece desktop'ta (hover: hover) */
+@media (hover: hover) and (pointer: fine) {
+  /* Hover genişleme aktif */
+  .group\/leftnav:hover .group-hover\/leftnav\:opacity-100,
+  .group\/rightrail:hover .group-hover\/rightrail\:opacity-100 {
+    /* Tailwind class'ları zaten tanımlı */
+  }
+}
+
+/* Touch cihazlarda hover yok - sadece toggle/pin çalışır */
+@media (hover: none) {
+  .group\/leftnav .group-hover\/leftnav\:opacity-100,
+  .group\/rightrail .group-hover\/rightrail\:opacity-100 {
+    /* Touch'ta hover genişleme yok */
+  }
+}
+
+/* Reduced motion desteği */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all,
+  .transition-opacity,
+  .transition-transform {
+    transition-duration: 50ms !important;
+  }
+}
+
 /* App Shell - tek scroll prensibi */
 /* P0: Explicit dark background to prevent white leak */
 #__next, body > div#root {

@@ -26,8 +26,8 @@ import { useDeferredLocalStorageState } from '@/hooks/useDeferredLocalStorageSta
 import {
   SIDEBAR_EXPANDED,
   SIDEBAR_COLLAPSED,
-  RIGHT_RAIL_OPEN,
-  RIGHT_RAIL_CLOSED,
+  RIGHT_RAIL_EXPANDED,
+  RIGHT_RAIL_COLLAPSED,
   RIGHT_RAIL_DOCK,
   PANEL_TRANSITION_MS,
   LS_SIDEBAR_COLLAPSED,
@@ -116,10 +116,14 @@ export default function AppFrame({ children }: AppFrameProps) {
     DEFAULT_RIGHT_RAIL_OPEN
   );
 
+  // Pinned mod: layout shift kabul edilir, normal genişlik
+  // Unpinned mod: overlay hover/focus genişleme
+  const sidebarPinned = !sidebarCollapsed;
+  const rightRailPinned = rightOpen;
+
   // CSS variable değerleri
-  const sidebarWidth = sidebarCollapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
-  // RightRail: Açıkken full width, kapalıyken dock width
-  const railWidth = rightOpen ? RIGHT_RAIL_OPEN : RIGHT_RAIL_DOCK;
+  const sidebarWidth = sidebarPinned ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED;
+  const railWidth = rightRailPinned ? RIGHT_RAIL_EXPANDED : RIGHT_RAIL_COLLAPSED;
 
   return (
     <div
@@ -128,33 +132,66 @@ export default function AppFrame({ children }: AppFrameProps) {
         // CSS variables for layout
         '--sidebar-w': `${sidebarWidth}px`,
         '--rail-w': `${railWidth}px`,
+        '--sidebar-expanded-w': `${SIDEBAR_EXPANDED}px`,
+        '--rail-expanded-w': `${RIGHT_RAIL_EXPANDED}px`,
         '--transition-duration': `${PANEL_TRANSITION_MS}ms`,
       } as React.CSSProperties}
     >
       {/* TopStatusBar */}
       <StatusBar />
 
-      {/* Main Layout: Sidebar + Handle + Main + Handle + RightRail */}
-      <div className="flex flex-1 overflow-hidden min-h-0">
-        {/* LeftNav - Global Navigation */}
+      {/* Main Layout: Sidebar (overlay) + Main + RightRail (overlay) */}
+      <div className="flex flex-1 overflow-hidden min-h-0 relative">
+        {/* LeftNav - Overlay Hover/Focus Genişleme */}
         <div
-          className="shrink-0 overflow-hidden bg-neutral-950"
+          className={cn(
+            "shrink-0 relative z-40",
+            // Pinned mod: normal genişlik, layout shift var
+            sidebarPinned && "overflow-hidden",
+            // Unpinned mod: overlay, hover/focus ile genişler
+            !sidebarPinned && "overflow-hidden group/leftnav"
+          )}
           style={{
-            width: 'var(--sidebar-w)',
-            transition: `width var(--transition-duration) ease-out`,
+            width: `${sidebarWidth}px`,
+            transition: sidebarPinned ? `width var(--transition-duration) ease-out` : 'none',
           }}
         >
-          <LeftNav collapsed={sidebarCollapsed} />
+          {/* Overlay panel (unpinned modda hover/focus ile görünür) */}
+          <div
+            className={cn(
+              "absolute top-0 left-0 h-full bg-neutral-950 border-r border-white/6",
+              // Pinned mod: her zaman görünür
+              sidebarPinned && "relative opacity-100 pointer-events-auto translate-x-0",
+              // Unpinned mod: hover/focus ile genişler
+              !sidebarPinned && cn(
+                "opacity-0 pointer-events-none translate-x-[-8px]",
+                "transition-all duration-200 ease-out",
+                "group-hover/leftnav:opacity-100 group-hover/leftnav:pointer-events-auto group-hover/leftnav:translate-x-0",
+                "focus-within:opacity-100 focus-within:pointer-events-auto focus-within:translate-x-0"
+              )
+            )}
+            style={{
+              width: `${SIDEBAR_EXPANDED}px`,
+            }}
+          >
+            <LeftNav collapsed={false} />
+          </div>
+          {/* Collapsed ikon görünümü (unpinned modda) */}
+          {!sidebarPinned && (
+            <div className="relative z-10">
+              <LeftNav collapsed={true} />
+            </div>
+          )}
         </div>
 
         {/* Sol Divider + Handle */}
         <DividerWithHandle
           side="left"
-          isOpen={!sidebarCollapsed}
+          isOpen={sidebarPinned}
           onToggle={() => setSidebarCollapsed(v => !v)}
         />
 
-        {/* Main Content Area - Golden Master: h-full zinciri için overflow-hidden */}
+        {/* Main Content Area - Sabit genişlik (layout shift yok) */}
         <main className="flex-1 min-w-0 min-h-0 overflow-hidden bg-neutral-950">
           <div className="h-full min-h-0">
             {children}
@@ -164,23 +201,50 @@ export default function AppFrame({ children }: AppFrameProps) {
         {/* Sağ Divider + Handle */}
         <DividerWithHandle
           side="right"
-          isOpen={rightOpen}
+          isOpen={rightRailPinned}
           onToggle={() => setRightOpen(v => !v)}
-          showDivider={rightOpen}
+          showDivider={rightRailPinned}
         />
 
-        {/* RightRail - Copilot Panel veya Icon Dock */}
+        {/* RightRail - Overlay Hover/Focus Genişleme */}
         <div
-          className="shrink-0 overflow-hidden bg-neutral-950"
+          className={cn(
+            "shrink-0 relative z-40",
+            // Pinned mod: normal genişlik
+            rightRailPinned && "overflow-hidden",
+            // Unpinned mod: overlay, hover/focus ile genişler
+            !rightRailPinned && "overflow-hidden group/rightrail"
+          )}
           style={{
-            width: 'var(--rail-w)',
-            transition: `width var(--transition-duration) ease-out`,
+            width: `${railWidth}px`,
+            transition: rightRailPinned ? `width var(--transition-duration) ease-out` : 'none',
           }}
         >
-          {rightOpen ? (
-            rightRail || <RightRailCopilotSkeleton />
-          ) : (
-            <RightRailDock onOpenPanel={() => setRightOpen(true)} />
+          {/* Overlay panel (unpinned modda hover/focus ile görünür) */}
+          <div
+            className={cn(
+              "absolute top-0 right-0 h-full bg-neutral-950 border-l border-white/6",
+              // Pinned mod: her zaman görünür
+              rightRailPinned && "relative opacity-100 pointer-events-auto translate-x-0",
+              // Unpinned mod: hover/focus ile genişler
+              !rightRailPinned && cn(
+                "opacity-0 pointer-events-none translate-x-[8px]",
+                "transition-all duration-200 ease-out",
+                "group-hover/rightrail:opacity-100 group-hover/rightrail:pointer-events-auto group-hover/rightrail:translate-x-0",
+                "focus-within:opacity-100 focus-within:pointer-events-auto focus-within:translate-x-0"
+              )
+            )}
+            style={{
+              width: `${RIGHT_RAIL_EXPANDED}px`,
+            }}
+          >
+            {rightRail || <RightRailCopilotSkeleton />}
+          </div>
+          {/* Dock (unpinned modda) */}
+          {!rightRailPinned && (
+            <div className="relative z-10">
+              <RightRailDock onOpenPanel={() => setRightOpen(true)} />
+            </div>
           )}
         </div>
       </div>

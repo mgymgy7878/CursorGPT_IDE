@@ -1,7 +1,7 @@
 # Dev Reset Script for web-next
 # Solves: MIME type errors, .next cache corruption, port conflicts
 #
-# Usage: 
+# Usage:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\dev-reset-web-next.ps1
 # Or via npm script:
 #   pnpm dev:web-next:reset
