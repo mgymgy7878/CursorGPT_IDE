@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ApiForm } from "@/components/settings/SecretInput";
@@ -44,116 +45,115 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
-      <div className="mt-6">
-        <Tabs defaultValue="exchange">
-          <TabsList>
-            <TabsTrigger value="exchange">Borsa API</TabsTrigger>
-            <TabsTrigger value="ai">AI / Copilot</TabsTrigger>
-            <TabsTrigger value="about">Hakkında / Lisanslar</TabsTrigger>
-          </TabsList>
+      
+      <Tabs defaultValue="exchange">
+        <TabsList>
+          <TabsTrigger value="exchange">Borsa API</TabsTrigger>
+          <TabsTrigger value="ai">AI / Copilot</TabsTrigger>
+          <TabsTrigger value="about">Hakkında / Lisanslar</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="exchange">
-            <div className="space-y-6 mt-4">
-              <ApiForm
-                title="Binance"
-                fields={[
-                  { name: "API Key", envKey: "BINANCE_API_KEY" },
-                  { name: "Secret Key", envKey: "BINANCE_SECRET_KEY" }
-                ]}
-                onSave={(values) => handleSave("Binance", values)}
-                onTest={(values) => handleTest("Binance", values)}
-              />
+        <TabsContent value="exchange">
+          <div className="space-y-6 mt-4">
+            <ApiForm
+              title="Binance"
+              fields={[
+                { name: "API Key", envKey: "BINANCE_API_KEY" },
+                { name: "Secret Key", envKey: "BINANCE_SECRET_KEY" }
+              ]}
+              onSave={(values) => handleSave("Binance", values)}
+              onTest={(values) => handleTest("Binance", values)}
+            />
 
-              <ApiForm
-                title="BTCTurk"
-                fields={[
-                  { name: "API Key", envKey: "BTCTURK_API_KEY" },
-                  { name: "Secret Key", envKey: "BTCTURK_SECRET_KEY" }
-                ]}
-                onSave={(values) => handleSave("BTCTurk", values)}
-                onTest={(values) => handleTest("BTCTurk", values)}
-              />
-            </div>
-          </TabsContent>
+            <ApiForm
+              title="BTCTurk"
+              fields={[
+                { name: "API Key", envKey: "BTCTURK_API_KEY" },
+                { name: "Secret Key", envKey: "BTCTURK_SECRET_KEY" }
+              ]}
+              onSave={(values) => handleSave("BTCTurk", values)}
+              onTest={(values) => handleTest("BTCTurk", values)}
+            />
+          </div>
+        </TabsContent>
 
-          <TabsContent value="ai">
-            <div className="space-y-6 mt-4">
-              <ApiForm
-                title="OpenAI"
-                fields={[
-                  { name: "API Key", envKey: "OPENAI_API_KEY" }
-                ]}
-                onSave={(values) => handleSave("OpenAI", values)}
-                onTest={(values) => handleTest("OpenAI", values)}
-              />
+        <TabsContent value="ai">
+          <div className="space-y-6 mt-4">
+            <ApiForm
+              title="OpenAI"
+              fields={[
+                { name: "API Key", envKey: "OPENAI_API_KEY" }
+              ]}
+              onSave={(values) => handleSave("OpenAI", values)}
+              onTest={(values) => handleTest("OpenAI", values)}
+            />
 
-              <ApiForm
-                title="Anthropic"
-                fields={[
-                  { name: "API Key", envKey: "ANTHROPIC_API_KEY" }
-                ]}
-                onSave={(values) => handleSave("Anthropic", values)}
-                onTest={(values) => handleTest("Anthropic", values)}
-              />
-            </div>
-          </TabsContent>
+            <ApiForm
+              title="Anthropic"
+              fields={[
+                { name: "API Key", envKey: "ANTHROPIC_API_KEY" }
+              ]}
+              onSave={(values) => handleSave("Anthropic", values)}
+              onTest={(values) => handleTest("Anthropic", values)}
+            />
+          </div>
+        </TabsContent>
 
-          <TabsContent value="about">
-            <div className="space-y-6 mt-4">
-              <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-6">
-                <h3 className="text-lg font-semibold text-neutral-200 mb-4">Açık Kaynak Lisansları</h3>
+        <TabsContent value="about">
+          <div className="space-y-6 mt-4">
+            <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-6">
+              <h3 className="text-lg font-semibold text-neutral-200 mb-4">Açık Kaynak Lisansları</h3>
 
-                <div className="space-y-4">
-                  {/* PATCH: Trademark disclaimer */}
-                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 mb-4">
-                    <p className="text-xs font-medium text-amber-400">
-                      ⚠️ Bu ürün TradingView ile ilişkili değildir ve TradingView tarafından onaylanmamıştır.
-                    </p>
+              <div className="space-y-4">
+                {/* PATCH: Trademark disclaimer */}
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 mb-4">
+                  <p className="text-xs font-medium text-amber-400">
+                    ⚠️ Bu ürün TradingView ile ilişkili değildir ve TradingView tarafından onaylanmamıştır.
+                  </p>
+                </div>
+
+                <div className="border-b border-white/10 pb-4">
+                  <h4 className="text-sm font-medium text-neutral-300 mb-2">TradingView Lightweight Charts</h4>
+                  <p className="text-xs text-neutral-400 mb-2">
+                    Bu uygulama, grafik görselleştirmeleri için TradingView Lightweight Charts kütüphanesini kullanmaktadır.
+                  </p>
+                  <p className="text-xs text-neutral-400 mb-2">
+                    Lightweight Charts, TradingView tarafından geliştirilmiş açık kaynaklı bir grafik kütüphanesidir.
+                  </p>
+                  <div className="mt-3">
+                    <a
+                      href="https://www.tradingview.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-400 hover:text-blue-300 underline"
+                    >
+                      TradingView Web Sitesi →
+                    </a>
                   </div>
-
-                  <div className="border-b border-white/10 pb-4">
-                    <h4 className="text-sm font-medium text-neutral-300 mb-2">TradingView Lightweight Charts</h4>
-                    <p className="text-xs text-neutral-400 mb-2">
-                      Bu uygulama, grafik görselleştirmeleri için TradingView Lightweight Charts kütüphanesini kullanmaktadır.
-                    </p>
-                    <p className="text-xs text-neutral-400 mb-2">
-                      Lightweight Charts, TradingView tarafından geliştirilmiş açık kaynaklı bir grafik kütüphanesidir.
-                    </p>
-                    <div className="mt-3">
-                      <a
-                        href="https://www.tradingview.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-400 hover:text-blue-300 underline"
-                      >
-                        TradingView Web Sitesi →
-                      </a>
-                    </div>
-                    <div className="mt-2">
-                      <a
-                        href="https://github.com/tradingview/lightweight-charts"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-400 hover:text-blue-300 underline"
-                      >
-                        GitHub Repository →
-                      </a>
-                    </div>
+                  <div className="mt-2">
+                    <a
+                      href="https://github.com/tradingview/lightweight-charts"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-400 hover:text-blue-300 underline"
+                    >
+                      GitHub Repository →
+                    </a>
                   </div>
+                </div>
 
-                  <div className="border-b border-white/10 pb-4">
-                    <h4 className="text-sm font-medium text-neutral-300 mb-2">Lisans Bilgisi</h4>
-                    <p className="text-xs text-neutral-400">
-                      Lightweight Charts, Apache License 2.0 altında lisanslanmıştır.
-                      Detaylı lisans metni için GitHub repository'sine bakabilirsiniz.
-                    </p>
-                  </div>
+                <div className="border-b border-white/10 pb-4">
+                  <h4 className="text-sm font-medium text-neutral-300 mb-2">Lisans Bilgisi</h4>
+                  <p className="text-xs text-neutral-400">
+                    Lightweight Charts, Apache License 2.0 altında lisanslanmıştır.
+                    Detaylı lisans metni için GitHub repository'sine bakabilirsiniz.
+                  </p>
                 </div>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
