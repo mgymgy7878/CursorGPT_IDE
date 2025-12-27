@@ -42,9 +42,9 @@ export default function Settings() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 min-h-screen bg-neutral-950">
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
         <Tabs defaultValue="exchange">
           <TabsList>
             <TabsTrigger value="exchange">Borsa API</TabsTrigger>
@@ -53,7 +53,7 @@ export default function Settings() {
           </TabsList>
 
           <TabsContent value="exchange">
-            <div className="space-y-6">
+            <div className="space-y-6 mt-4">
               <ApiForm
                 title="Binance"
                 fields={[
@@ -77,7 +77,7 @@ export default function Settings() {
           </TabsContent>
 
           <TabsContent value="ai">
-            <div className="space-y-6">
+            <div className="space-y-6 mt-4">
               <ApiForm
                 title="OpenAI"
                 fields={[
@@ -99,7 +99,7 @@ export default function Settings() {
           </TabsContent>
 
           <TabsContent value="about">
-            <div className="space-y-6">
+            <div className="space-y-6 mt-4">
               <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-6">
                 <h3 className="text-lg font-semibold text-neutral-200 mb-4">Açık Kaynak Lisansları</h3>
 
