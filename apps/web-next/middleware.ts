@@ -69,8 +69,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   // Asset'leri ve static dosyaları middleware'den tamamen dışarıda bırak
+  // Guard: /_next/* tüm alt path'leri (static, image, webpack-hmr, chunks, css, js vb) bypass et
   matcher: [
-    '/((?!_next/static|_next/image|_next/webpack-hmr|favicon.ico|robots.txt|sitemap.xml|api/healthz|api/public).*)',
+    '/((?!_next|favicon.ico|robots.txt|sitemap.xml|api/healthz|api/public).*)',
   ],
 };
 

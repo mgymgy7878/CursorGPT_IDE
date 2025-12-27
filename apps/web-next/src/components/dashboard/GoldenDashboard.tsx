@@ -82,9 +82,9 @@ export default function GoldenDashboard() {
   }, []);
 
   return (
-    <div 
+    <div
       className="dashboard-container relative flex flex-col"
-      style={{ 
+      style={{
         backgroundColor: '#050608',
         height: '100%',
         minHeight: 0
@@ -99,7 +99,7 @@ export default function GoldenDashboard() {
       />
 
       {/* 3 SATIRLI GRID: Explicit 2-kolon (7fr/5fr) + 3 satır - breakpoint'e az bağımlı */}
-      <div 
+      <div
         className="dashboard-grid relative z-10 grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-3 grid-rows-[1.0fr_1.15fr_0.85fr] flex-1 min-h-0"
         style={{ height: '100%', minHeight: 0 }}
       >
