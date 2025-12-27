@@ -15,13 +15,16 @@ interface StrategiesPageClientProps {
 
 export default function StrategiesPageClient({ initialTab }: StrategiesPageClientProps) {
   const router = useRouter();
-  
+
   // Normalize tab - ensure it's always 'list' or 'lab'
   const normalizedTab = useMemo(() => (initialTab === 'lab' ? 'lab' : 'list'), [initialTab]);
-  
+
   const [activeTab, setActiveTab] = useState<StrategyTab>(normalizedTab);
   const [labActiveStep, setLabActiveStep] = useState<'ai' | 'backtest' | 'optimize' | 'best-of'>('ai');
   const [labState, setLabState] = useState<StrategyLabState>('default');
+
+  // DEBUG: Render/mount kanıtı (dev'de görünsün)
+  const showDebug = process.env.NODE_ENV !== 'production';
 
   // Sync activeTab with initialTab prop changes (e.g., URL navigation)
   useEffect(() => {
@@ -36,9 +39,15 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
   };
 
   return (
-    <div>
+    <div className="relative z-10 text-white">
+      {/* DEBUG PILL: Mount kanıtı - görünür olmalı */}
+      {showDebug && (
+        <div className="fixed left-3 top-3 z-[9999] rounded bg-black/90 px-3 py-2 text-xs text-white ring-1 ring-white/20 shadow-lg">
+          strategies-page-client mounted · tab={activeTab}
+        </div>
+      )}
       {/* Tabs */}
-      <div className="sticky top-0 z-40 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800">
+      <div className="sticky top-0 z-40 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800 relative">
         <div className="px-4 py-3">
           <div className="flex items-center gap-2">
             <button
@@ -68,7 +77,7 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
       </div>
 
       {/* Tab Content - Always render something, never return null */}
-      <div>
+      <div className="relative z-10">
         {activeTab === 'list' && <MyStrategiesPage />}
 
         {activeTab === 'lab' && (
@@ -82,7 +91,7 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
             </div>
           </>
         )}
-        
+
         {/* Fallback: Should never reach here, but just in case */}
         {activeTab !== 'list' && activeTab !== 'lab' && (
           <div className="p-6">

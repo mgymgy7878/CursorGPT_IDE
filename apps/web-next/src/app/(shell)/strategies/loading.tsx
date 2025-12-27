@@ -8,7 +8,7 @@ export default function StrategiesLoading() {
           <div className="h-9 w-20 rounded bg-white/10 animate-pulse" />
         </div>
       </div>
-      
+
       {/* Skeleton for content */}
       <div className="space-y-4">
         <div className="h-6 w-40 rounded bg-white/10 animate-pulse" />
