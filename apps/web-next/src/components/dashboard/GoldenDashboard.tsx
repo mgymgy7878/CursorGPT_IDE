@@ -25,7 +25,7 @@ import {
 
 export default function GoldenDashboard() {
   return (
-    <div className="relative bg-[#050608] min-h-screen flex flex-col px-6 py-3">
+    <div className="relative bg-[#050608] h-full flex flex-col">
       {/* Figma parity: Hafif radial vinyet atmosfer efekti */}
       <div
         className="pointer-events-none absolute inset-0 z-0"
