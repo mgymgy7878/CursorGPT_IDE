@@ -1,9 +1,20 @@
 export default function StrategiesLoading() {
   return (
-    <div className="min-h-screen grid place-items-center bg-black">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-        <p className="text-neutral-400">Stratejiler yükleniyor...</p>
+    <div className="p-6">
+      {/* Skeleton for tabs */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 pb-3 border-b border-neutral-800">
+          <div className="h-9 w-20 rounded bg-white/10 animate-pulse" />
+          <div className="h-9 w-20 rounded bg-white/10 animate-pulse" />
+        </div>
+      </div>
+      
+      {/* Skeleton for content */}
+      <div className="space-y-4">
+        <div className="h-6 w-40 rounded bg-white/10 animate-pulse" />
+        <div className="h-24 rounded bg-white/5 animate-pulse" />
+        <div className="h-24 rounded bg-white/5 animate-pulse" />
+        <div className="h-24 rounded bg-white/5 animate-pulse" />
       </div>
     </div>
   );
