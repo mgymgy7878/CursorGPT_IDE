@@ -37,6 +37,9 @@ interface AlertsPageContentProps {
   onEnable: (id: string, enabled: boolean) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
+  /** UI-1: Compact mode - show only first 3 items + "Show all" button */
+  compact?: boolean;
+  onShowAll?: () => void;
 }
 
 export default function AlertsPageContent({
@@ -46,6 +49,8 @@ export default function AlertsPageContent({
   onEnable,
   onDelete,
   onEdit,
+  compact = false,
+  onShowAll,
 }: AlertsPageContentProps) {
   const [searchValue, setSearchValue] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
@@ -67,6 +72,10 @@ export default function AlertsPageContent({
     }
     return true;
   });
+
+  // UI-1: Compact mode - show only first 3
+  const displayItems = compact ? filteredItems.slice(0, 3) : filteredItems;
+  const hasMore = compact && filteredItems.length > 3;
 
   const filterChips = [
     { id: 'all', label: `Tümü (${totalAlerts})`, active: typeFilter === null, onClick: () => setTypeFilter(null) },
@@ -151,7 +160,7 @@ export default function AlertsPageContent({
               </tr>
             </thead>
             <tbody>
-              {filteredItems.length === 0 ? (
+              {displayItems.length === 0 ? (
                 <>
                   {/* Example Template Cards */}
                   <tr>
@@ -205,7 +214,7 @@ export default function AlertsPageContent({
                   </tr>
                 </>
               ) : (
-                filteredItems.map((item) => (
+                displayItems.map((item) => (
                   <tr key={item.id} className="border-b border-neutral-900 hover:bg-neutral-900/30">
                     <td className="py-3 px-4 font-semibold text-neutral-200">{item.symbol}</td>
                     <td className="py-3 px-4 text-neutral-300">{item.strategy}</td>
@@ -258,6 +267,17 @@ export default function AlertsPageContent({
               )}
             </tbody>
           </table>
+          {/* UI-1: Compact mode - "Tümünü gör" button */}
+          {hasMore && (
+            <div className="px-4 py-3 border-t border-neutral-800 flex items-center justify-center">
+              <button
+                onClick={onShowAll || (() => {/* TODO: Expand to full view */})}
+                className="text-sm text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Tümünü gör ({filteredItems.length - 3} daha)
+              </button>
+            </div>
+          )}
         </div>
       </Surface>
     </div>

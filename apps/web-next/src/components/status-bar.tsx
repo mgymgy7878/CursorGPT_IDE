@@ -37,6 +37,30 @@ function useHealthzMetrics() {
   }
 }
 
+// Breadcrumb mapping for pathnames
+function getBreadcrumb(pathname: string | null): string | null {
+  if (!pathname) return null
+  
+  const routes: Record<string, string> = {
+    '/dashboard': 'Dashboard',
+    '/strategies': 'Stratejiler',
+    '/running': 'Çalışan Stratejiler',
+    '/market-data': 'Piyasa Verileri',
+    '/control': 'Operasyon Merkezi',
+    '/settings': 'Ayarlar',
+  }
+  
+  // Check exact match first
+  if (routes[pathname]) return routes[pathname]
+  
+  // Check prefix matches (e.g., /control with tabs)
+  if (pathname.startsWith('/control')) return 'Operasyon Merkezi'
+  if (pathname.startsWith('/strategies')) return 'Stratejiler'
+  if (pathname.startsWith('/market-data')) return 'Piyasa Verileri'
+  
+  return null
+}
+
 export default function StatusBar() {
   const pathname = usePathname()
   const { data, error, isLoading } = useHeartbeat()
@@ -46,6 +70,7 @@ export default function StatusBar() {
   const { ok: webNextOk } = useWebNextHealth()
   const { ok: executorOk, latencyMs: executorLatencyMs } = useExecutorHealth()
   const metrics = useHealthzMetrics()
+  const breadcrumb = getBreadcrumb(pathname)
 
   // Dashboard'da TopStatusBar minimal olsun (Figma parity: terminal tarzı)
   const isDashboard = pathname === '/dashboard' || pathname === '/'
@@ -74,7 +99,7 @@ export default function StatusBar() {
     <div className="sticky top-0 z-50 border-b border-white/10 bg-[#0B0F14]/80 backdrop-blur">
       <div className="mx-auto flex h-12 items-center gap-3 px-3">
 
-        {/* LEFT: Brand + Canary (shrink-0) */}
+        {/* LEFT: Brand + Canary + Breadcrumb (shrink-0) */}
         <div className="flex shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-[3px] text-[13px] font-medium text-white/90 border border-white/10 leading-none">
             <SparkMark />
@@ -83,6 +108,13 @@ export default function StatusBar() {
           <div className="rounded-full bg-emerald-500/15 px-2 py-[3px] text-[13px] font-medium text-emerald-200 border border-emerald-400/30 leading-none">
             Canary
           </div>
+          {/* UI-1: Breadcrumb (replaces page H1) */}
+          {breadcrumb && !isDashboard && (
+            <>
+              <span className="text-white/30 text-[11px]">/</span>
+              <span className="text-[11px] text-white/70 font-medium">{breadcrumb}</span>
+            </>
+          )}
         </div>
 
         {/* MIDDLE: Health indicators + Metrics (flex-1, overflow-safe with edge fade) */}

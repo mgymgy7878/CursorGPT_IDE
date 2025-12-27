@@ -216,9 +216,11 @@ export default function ControlPage() {
 
   return (
     <div className="space-y-3">
+      {/* UI-1: H1 sr-only (breadcrumb StatusBar'da, tab bar yeter) */}
       <PageHeader
         title="Operasyon Merkezi"
         subtitle="Risk yönetimi, uyarılar, denetim ve release kontrolü"
+        className="sr-only"
       />
 
       {/* Tabs */}
@@ -253,6 +255,11 @@ export default function ControlPage() {
             items={alertItems}
             loading={alertsLoading}
             {...alertHandlers}
+            compact={true}
+            onShowAll={() => {
+              // TODO: Open full alerts page or modal
+              router.push('/control?tab=alerts&view=all');
+            }}
           />
         )}
 

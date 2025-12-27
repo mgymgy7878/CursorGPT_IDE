@@ -42,7 +42,12 @@ export default function Settings() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
+      {/* UI-1: H1 sr-only (tab bar yeter, breadcrumb StatusBar'da) */}
+      <PageHeader 
+        title="Ayarlar" 
+        subtitle="API anahtarları ve bağlantı ayarları"
+        className="sr-only" 
+      />
 
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-neutral-800">

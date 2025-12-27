@@ -19,6 +19,74 @@ import { cardHeader, badgeVariant } from '@/styles/uiTokens';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatPercent } from '@/lib/format';
 
+// UI-1: Collapsible Risk Parameters component (varsayılan kapalı)
+function CollapsibleRiskParams() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Surface variant="card" className="p-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between mb-0 text-left"
+      >
+        <div className={cn(cardHeader, "mb-0")}>
+          Risk Parametreleri
+        </div>
+        <span className="text-neutral-400 text-sm">
+          {isOpen ? '▼' : '▶'}
+        </span>
+      </button>
+      {isOpen && (
+        <div className="mt-4 grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Max Daily Drawdown (%)
+            </label>
+            <input
+              type="number"
+              defaultValue="5.0"
+              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Max Leverage
+            </label>
+            <input
+              type="number"
+              defaultValue="20"
+              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Max Position Size (USDT)
+            </label>
+            <input
+              type="number"
+              defaultValue="10000"
+              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Allowed Markets
+            </label>
+            <select
+              defaultValue="all"
+              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Markets</option>
+              <option value="crypto">Crypto Only</option>
+              <option value="stocks">Stocks Only</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </Surface>
+  );
+}
+
 interface RiskMetrics {
   currentExposure: number;
   maxDD24h: number;
@@ -291,11 +359,8 @@ export default function RiskProtectionPage() {
         </div>
       </Surface>
 
-      {/* Risk Parametreleri */}
-      <Surface variant="card" className="p-4">
-        <div className={cn(cardHeader, "mb-4")}>
-          Risk Parametreleri
-        </div>
+      {/* Risk Parametreleri - UI-1: Collapsible (varsayılan kapalı) */}
+      <CollapsibleRiskParams />
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-2">

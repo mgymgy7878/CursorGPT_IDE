@@ -86,8 +86,10 @@ export default function MyStrategiesPage() {
 
   return (
     <div className="space-y-3">
+      {/* UI-1: H1 sr-only (özet satırı + filtre barı zaten başlık gibi) */}
       <CompactPageHeader
         title="Stratejilerim"
+        className="sr-only"
       />
 
       {/* PATCH R: Metric Ribbon - tek satır, wrap yok, yatay scroll */}
