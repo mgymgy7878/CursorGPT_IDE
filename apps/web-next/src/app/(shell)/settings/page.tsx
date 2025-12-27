@@ -42,9 +42,9 @@ export default function Settings() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 min-h-screen bg-neutral-950">
+    <div className="space-y-6">
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
-      <div className="mt-6 space-y-6">
+      <div className="mt-6">
         <Tabs defaultValue="exchange">
           <TabsList>
             <TabsTrigger value="exchange">Borsa API</TabsTrigger>
