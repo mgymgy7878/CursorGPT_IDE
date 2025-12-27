@@ -41,7 +41,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
 
       {/* Tabs */}
@@ -82,9 +82,9 @@ export default function Settings() {
       </div>
 
       {/* Tab Content */}
-      <div className="mt-6">
+      <div className="mt-3">
         {activeTab === 'exchange' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <ApiForm
               title="Binance"
               fields={[
@@ -108,7 +108,7 @@ export default function Settings() {
         )}
 
         {activeTab === 'ai' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <ApiForm
               title="OpenAI"
               fields={[
@@ -130,11 +130,11 @@ export default function Settings() {
         )}
 
         {activeTab === 'about' && (
-          <div className="space-y-6">
-            <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-6">
-              <h3 className="text-lg font-semibold text-neutral-200 mb-4">Açık Kaynak Lisansları</h3>
+          <div className="space-y-4">
+            <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-4">
+              <h3 className="text-base font-semibold text-neutral-200 mb-3">Açık Kaynak Lisansları</h3>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 mb-4">
                   <p className="text-xs font-medium text-amber-400">
                     ⚠️ Bu ürün TradingView ile ilişkili değildir ve TradingView tarafından onaylanmamıştır.

@@ -99,32 +99,27 @@ export default function RiskProtectionPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <PageHeader
-        title="Risk & Koruma"
-        subtitle="Global risk parametreleri ve acil durum kontrolleri"
-      />
-
-      {/* Risk Level Indicator - PATCH P: Compact py + radius vars */}
+    <div className="space-y-3">
+      {/* Risk Level Indicator - UI-1: Compact density - mb-3, padding küçültüldü */}
       <div
-        className="mb-6 border-amber-500/30 bg-amber-500/5 rounded-lg"
+        className="mb-3 border-amber-500/30 bg-amber-500/5 rounded-lg"
         style={{
           padding: 'var(--card-pad, 12px)',
           borderRadius: 'var(--card-radius, 12px)',
           borderWidth: 'var(--card-border-w, 1px)',
         }}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">▲</span>
+        <div className="flex items-center gap-2 py-2">
+          <span className="text-lg">▲</span>
           <div>
-            <div className="text-sm text-neutral-400 mb-1">Risk Level</div>
-            <div className="text-xl font-semibold text-amber-400">Medium</div>
+            <div className="text-xs text-neutral-400 mb-0.5">Risk Level</div>
+            <div className="text-base font-semibold text-amber-400">Medium</div>
           </div>
         </div>
       </div>
 
-      {/* Key Metrics - PATCH P: MetricTile standardı */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {/* Key Metrics - UI-1: Compact density - mb-3, gap-3 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
         <StatCard
           label="Current Exposure"
           value={`${metrics.currentExposure}%`}
@@ -147,22 +142,22 @@ export default function RiskProtectionPage() {
         />
       </div>
 
-      {/* Global Kill Switch - PATCH P: Header padding azaltıldı */}
+      {/* Global Kill Switch - UI-1: Compact density - mb-3 */}
       <div
-        className="mb-6 border-red-500/30 bg-red-500/5 rounded-lg"
+        className="mb-3 border-red-500/30 bg-red-500/5 rounded-lg"
         style={{
           padding: 'var(--card-pad, 12px)',
           borderRadius: 'var(--card-radius, 12px)',
           borderWidth: 'var(--card-border-w, 1px)',
         }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⚡</span>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚡</span>
             <div>
-              <div className="text-lg font-semibold text-neutral-200">Global Kill Switch</div>
+              <div className="text-base font-semibold text-neutral-200">Global Kill Switch</div>
               <div className={cn(
-                "text-sm",
+                "text-xs",
                 killSwitchActive ? 'text-red-400' : 'text-emerald-400'
               )}>
                 {killSwitchActive ? 'System Blocked' : 'System Normal'}
@@ -172,7 +167,7 @@ export default function RiskProtectionPage() {
           <button
             onClick={handleKillSwitchToggle}
             className={cn(
-              "px-6 py-3 rounded-lg font-semibold text-white transition-colors",
+              "px-4 py-2 text-sm rounded-lg font-semibold text-white transition-colors",
               killSwitchActive
                 ? "bg-neutral-700 hover:bg-neutral-600"
                 : "bg-red-600 hover:bg-red-700"
@@ -267,7 +262,7 @@ export default function RiskProtectionPage() {
       )}
 
       {/* Aktif Risk Uyarıları */}
-      <Surface variant="card" className="p-4 mb-6">
+      <Surface variant="card" className="p-4 mb-3">
         <div className={cn(cardHeader, "mb-3")}>
           Aktif Risk Uyarıları
         </div>

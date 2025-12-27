@@ -90,7 +90,7 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
               currentStep={labActiveStep}
               onStepClick={(step) => setLabActiveStep(step)}
             />
-            <div className="px-4 py-6">
+            <div className="px-4 py-3">
               <StrategyLabContent activeTab={labActiveStep} state={labState} />
             </div>
           </>
@@ -98,7 +98,7 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
 
         {/* Fallback: Should never reach here, but just in case */}
         {activeTab !== 'list' && activeTab !== 'lab' && (
-          <div className="p-6">
+          <div className="p-3">
             <div className="text-sm text-neutral-400">Geçersiz tab: {activeTab}</div>
           </div>
         )}

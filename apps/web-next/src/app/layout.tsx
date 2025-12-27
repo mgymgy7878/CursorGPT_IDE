@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   // suppressHydrationWarning: theme/SSR mismatch gürültüsünü azaltır
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body>
+      <body className="overflow-hidden">
         {children}
         <CommandPalette />
         <Toaster />

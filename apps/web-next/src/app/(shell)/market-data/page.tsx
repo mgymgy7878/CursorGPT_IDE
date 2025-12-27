@@ -173,7 +173,7 @@ export default function MarketData() {
 
   return (
     <div className={cn("h-full", viewMode === 'full' ? "overflow-hidden h-screen w-screen" : "overflow-y-auto")}>
-      <div className={cn(viewMode === 'full' ? "h-full w-full p-0" : "container mx-auto px-4 py-4")}>
+      <div className={cn(viewMode === 'full' ? "h-full w-full p-0" : "container mx-auto px-4 py-3")}>
         {/* List View Header */}
         {viewMode === 'list' && (
           <>

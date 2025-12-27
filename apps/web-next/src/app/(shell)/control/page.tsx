@@ -215,14 +215,14 @@ export default function ControlPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-4">
+    <div className="space-y-3">
       <PageHeader
         title="Operasyon Merkezi"
         subtitle="Risk yönetimi, uyarılar, denetim ve release kontrolü"
       />
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 mb-6 border-b border-neutral-800">
+      <div className="flex items-center gap-2 mb-3 border-b border-neutral-800">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -299,7 +299,7 @@ export default function ControlPage() {
         )}
 
         {activeTab === 'canary' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Release Gate Panel */}
             <Surface variant="card" className="p-4">
               <div className={cn(cardHeader, 'mb-4')}>Release Gate Durumu</div>

@@ -30,13 +30,13 @@ export function CompactPageHeader({
   return (
     <header
       className={cn(
-        "flex items-center justify-between gap-3 py-4",
+        "flex items-center justify-between gap-3 py-2",
         className
       )}
     >
       {/* Sol: Başlık + opsiyonel subtitle */}
       <div className="flex items-baseline gap-3 min-w-0 flex-1">
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em] leading-none text-neutral-200 truncate">
+        <h1 className="text-lg font-semibold tracking-[-0.02em] leading-none text-neutral-200 truncate">
           {title}
         </h1>
         {subtitle && (
