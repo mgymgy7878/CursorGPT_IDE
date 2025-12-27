@@ -40,7 +40,7 @@ function useHealthzMetrics() {
 // Breadcrumb mapping for pathnames
 function getBreadcrumb(pathname: string | null): string | null {
   if (!pathname) return null
-  
+
   const routes: Record<string, string> = {
     '/dashboard': 'Dashboard',
     '/strategies': 'Stratejiler',
@@ -49,15 +49,15 @@ function getBreadcrumb(pathname: string | null): string | null {
     '/control': 'Operasyon Merkezi',
     '/settings': 'Ayarlar',
   }
-  
+
   // Check exact match first
   if (routes[pathname]) return routes[pathname]
-  
+
   // Check prefix matches (e.g., /control with tabs)
   if (pathname.startsWith('/control')) return 'Operasyon Merkezi'
   if (pathname.startsWith('/strategies')) return 'Stratejiler'
   if (pathname.startsWith('/market-data')) return 'Piyasa Verileri'
-  
+
   return null
 }
 

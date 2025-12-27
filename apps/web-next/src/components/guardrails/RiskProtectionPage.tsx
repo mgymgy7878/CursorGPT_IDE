@@ -361,52 +361,6 @@ export default function RiskProtectionPage() {
 
       {/* Risk Parametreleri - UI-1: Collapsible (varsayılan kapalı) */}
       <CollapsibleRiskParams />
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Max Daily Drawdown (%)
-            </label>
-            <input
-              type="number"
-              defaultValue="5.0"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Max Leverage
-            </label>
-            <input
-              type="number"
-              defaultValue="20"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Max Position Size (USDT)
-            </label>
-            <input
-              type="number"
-              defaultValue="10000"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Allowed Markets
-            </label>
-            <select
-              defaultValue="all"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Markets</option>
-              <option value="crypto">Crypto Only</option>
-              <option value="stocks">Stocks Only</option>
-            </select>
-          </div>
-        </div>
-      </Surface>
     </div>
   );
 }

@@ -43,10 +43,10 @@ export default function Settings() {
   return (
     <div className="space-y-4">
       {/* UI-1: H1 sr-only (tab bar yeter, breadcrumb StatusBar'da) */}
-      <PageHeader 
-        title="Ayarlar" 
+      <PageHeader
+        title="Ayarlar"
         subtitle="API anahtarları ve bağlantı ayarları"
-        className="sr-only" 
+        className="sr-only"
       />
 
       {/* Tabs */}
