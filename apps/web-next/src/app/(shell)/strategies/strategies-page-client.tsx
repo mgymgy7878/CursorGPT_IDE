@@ -77,8 +77,12 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
       </div>
 
       {/* Tab Content - Always render something, never return null */}
-      <div className="relative z-10">
-        {activeTab === 'list' && <MyStrategiesPage />}
+      <div className="relative z-10 min-h-[200px]">
+        {activeTab === 'list' && (
+          <div className="text-white">
+            <MyStrategiesPage />
+          </div>
+        )}
 
         {activeTab === 'lab' && (
           <>

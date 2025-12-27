@@ -85,7 +85,7 @@ export default function MyStrategiesPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-4">
+    <div className="px-4 py-4">
       <CompactPageHeader
         title="Stratejilerim"
       />
