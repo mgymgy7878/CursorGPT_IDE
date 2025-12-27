@@ -42,7 +42,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="p-6">
+    <div className="container mx-auto px-4 py-6">
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
       <div className="mt-6">
         <Tabs defaultValue="exchange">
