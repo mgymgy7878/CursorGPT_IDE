@@ -13,6 +13,7 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import {
   IconWallet,
   IconActivity,
@@ -24,9 +25,65 @@ import {
 } from '../ui/LocalIcons';
 
 export default function GoldenDashboard() {
+  // Temporary fix: Inject critical CSS if not loaded
+  useEffect(() => {
+    const styleId = 'dashboard-critical-css';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        .dashboard-container {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          min-height: 0;
+          background-color: #050608;
+        }
+        .dashboard-grid {
+          position: relative;
+          z-index: 10;
+          display: grid;
+          grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+          gap: 12px;
+          grid-template-rows: 1fr 1.15fr 0.85fr;
+          flex: 1;
+          min-height: 0;
+          height: 100%;
+        }
+        .dashboard-card {
+          min-height: 0;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          background-color: #111318;
+          border-radius: 8px;
+          border: 1px solid #16181d;
+          padding: 10px;
+          gap: 8px;
+        }
+        .dashboard-card-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-shrink: 0;
+        }
+        .dashboard-card-title {
+          font-weight: 500;
+          color: #e5e7eb;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   return (
     <div 
-      className="relative flex flex-col"
+      className="dashboard-container relative flex flex-col"
       style={{ 
         backgroundColor: '#050608',
         height: '100%',
@@ -43,15 +100,15 @@ export default function GoldenDashboard() {
 
       {/* 3 SATIRLI GRID: Explicit 2-kolon (7fr/5fr) + 3 satır - breakpoint'e az bağımlı */}
       <div 
-        className="relative z-10 grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-3 grid-rows-[1.0fr_1.15fr_0.85fr] flex-1 min-h-0"
+        className="dashboard-grid relative z-10 grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-3 grid-rows-[1.0fr_1.15fr_0.85fr] flex-1 min-h-0"
         style={{ height: '100%', minHeight: 0 }}
       >
 
         {/* ============ SATIR 1: Portföy + Piyasa ============ */}
 
         {/* Sol: Portföy Özeti */}
-        <article className="min-h-0 overflow-hidden flex flex-col bg-[#111318] rounded-lg border border-[#16181d] p-2.5 gap-2">
-          <header className="flex items-center justify-between shrink-0">
+        <article className="dashboard-card min-h-0 overflow-hidden flex flex-col bg-[#111318] rounded-lg border border-[#16181d] p-2.5 gap-2">
+          <header className="dashboard-card-header flex items-center justify-between shrink-0">
             <h3 className="font-medium text-[#e5e7eb] text-xs flex items-center gap-2">
               <IconWallet className="w-3.5 h-3.5 text-[#9ca3af]" />
               Portföy Özeti
