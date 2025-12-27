@@ -35,7 +35,7 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
 
   // Golden Master v1.0: Normal container structure (AppFrame handles height)
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col" style={{ height: '100%', minHeight: 0 }}>
       {/* Debug state marker */}
       <div data-testid="dashboard-state" data-state={panelState} hidden aria-hidden="true" />
 
