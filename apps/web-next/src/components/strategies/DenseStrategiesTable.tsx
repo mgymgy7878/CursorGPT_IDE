@@ -147,7 +147,8 @@ export default function DenseStrategiesTable({
                   )}
                   {row.winRate30d !== undefined && (
                     <DataTableCell className="text-right tabular-nums">
-                      <MonoNumber value={formatPercent(row.winRate30d / 100)} className="text-sm text-neutral-300" />
+                      {/* UI-1: Yüzde 2 decimal standardı */}
+                      <MonoNumber value={formatPercent(row.winRate30d / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} className="text-sm text-neutral-300" />
                     </DataTableCell>
                   )}
                   {row.sharpe30d !== undefined && (

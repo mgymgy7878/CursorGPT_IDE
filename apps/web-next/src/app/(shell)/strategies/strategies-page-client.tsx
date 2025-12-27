@@ -33,6 +33,11 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
     }
   }, [normalizedTab, activeTab]);
 
+  // UI-1: Document title (SEO + browser tabs)
+  useEffect(() => {
+    document.title = 'Stratejiler — Spark Trading';
+  }, []);
+
   const handleTabChange = (newTab: StrategyTab) => {
     setActiveTab(newTab);
     router.push(`/strategies?tab=${newTab}`, { scroll: false });

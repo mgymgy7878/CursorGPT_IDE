@@ -1,7 +1,13 @@
 import { Suspense } from 'react';
 import DashboardWrapper from '@/components/dashboard/DashboardWrapper';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Dashboard — Spark Trading',
+  description: 'Portföy özeti, piyasa durumu ve aktif stratejiler',
+};
 
 // SSR-safe dev state resolver (production'da otomatik pasif)
 function resolveDevState(state?: string | null): 'loading' | 'empty' | 'error' | 'data' | null {

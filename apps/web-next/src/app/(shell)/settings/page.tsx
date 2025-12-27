@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ApiForm } from "@/components/settings/SecretInput";
 import { toast } from "@/components/toast/Toaster";
@@ -13,6 +13,11 @@ type SettingsTab = 'exchange' | 'ai' | 'about';
  */
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('exchange');
+
+  // UI-1: Document title (SEO + browser tabs)
+  useEffect(() => {
+    document.title = 'Ayarlar — Spark Trading';
+  }, []);
 
   const handleSave = async (provider: string, values: Record<string, string>) => {
     console.log(`Saving ${provider}:`, values);

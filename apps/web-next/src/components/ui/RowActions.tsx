@@ -33,10 +33,11 @@ export function RowActionButton({ onClick, icon, label, variant = 'default', cla
     <button
       onClick={onClick}
       className={cn(
-        'px-2 py-1 text-xs rounded border transition-colors',
+        // UI-1: Daha ince stroke, daha düşük kontrast (trading-grade)
+        'px-1.5 py-0.5 text-[11px] rounded border transition-colors',
         variant === 'danger'
-          ? 'border-red-700 text-red-300 hover:bg-red-900/20'
-          : 'border-neutral-700 text-neutral-300 hover:bg-neutral-800',
+          ? 'border-red-700/50 text-red-400/70 hover:bg-red-900/20 hover:text-red-300 hover:border-red-700'
+          : 'border-neutral-700/50 text-neutral-400/70 hover:bg-neutral-800/50 hover:text-neutral-300 hover:border-neutral-600',
         className
       )}
       aria-label={label}

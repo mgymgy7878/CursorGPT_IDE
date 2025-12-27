@@ -108,11 +108,11 @@ export default function StatusBar() {
           <div className="rounded-full bg-emerald-500/15 px-2 py-[3px] text-[13px] font-medium text-emerald-200 border border-emerald-400/30 leading-none">
             Canary
           </div>
-          {/* UI-1: Breadcrumb (replaces page H1) */}
+          {/* UI-1: Breadcrumb (replaces page H1) - kontrast azaltıldı (secondary text) */}
           {breadcrumb && !isDashboard && (
             <>
-              <span className="text-white/30 text-[11px]">/</span>
-              <span className="text-[11px] text-white/70 font-medium">{breadcrumb}</span>
+              <span className="text-white/20 text-[10px]">/</span>
+              <span className="text-[10px] text-white/50 font-normal">{breadcrumb}</span>
             </>
           )}
         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import MarketDataTable from '@/components/marketdata/MarketDataTable';
 import { EmptyState } from '@/components/ui/states';
 import { CompactPageHeader } from '@/components/core/CompactPageHeader';
@@ -34,6 +34,12 @@ import { cn } from '@/lib/utils';
 export default function MarketData() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  // UI-1: Document title (SEO + browser tabs)
+  useEffect(() => {
+    document.title = 'Piyasa Verileri — Spark Trading';
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [hasData, setHasData] = useState(true);
@@ -236,12 +242,12 @@ export default function MarketData() {
           </>
         )}
 
-        {/* Workspace View Header */}
+        {/* Workspace View Header - UI-1: "Tabloya Dön" sticky (solda) */}
         {viewMode === 'workspace' && (
           <div className="mb-4 flex items-center justify-between">
             <button
               onClick={handleBackToList}
-              className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium text-neutral-400 hover:text-neutral-200 hover:bg-white/5 transition-colors"
+              className="sticky left-0 z-10 flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium text-neutral-400 hover:text-neutral-200 hover:bg-white/5 transition-colors bg-neutral-950/95 backdrop-blur-sm"
             >
               ← Tabloya Dön
             </button>

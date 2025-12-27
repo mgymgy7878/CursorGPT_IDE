@@ -19,9 +19,17 @@ import { cardHeader, badgeVariant } from '@/styles/uiTokens';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatPercent } from '@/lib/format';
 
-// UI-1: Collapsible Risk Parameters component (varsayılan kapalı)
+// UI-1: Collapsible Risk Parameters component (varsayılan kapalı) + ops-safe form
 function CollapsibleRiskParams() {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [values, setValues] = useState({
+    maxDrawdown: '5.0',
+    maxLeverage: '20',
+    maxPositionSize: '10000',
+    allowedMarkets: 'all',
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   return (
     <Surface variant="card" className="p-4">
@@ -29,58 +37,145 @@ function CollapsibleRiskParams() {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between mb-0 text-left"
       >
-        <div className={cn(cardHeader, "mb-0")}>
-          Risk Parametreleri
+        <div className="flex items-center gap-2">
+          <div className={cn(cardHeader, "mb-0")}>
+            Risk Parametreleri
+          </div>
+          {hasUnsavedChanges && (
+            <span className="text-[10px] font-medium text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+              Unsaved
+            </span>
+          )}
         </div>
         <span className="text-neutral-400 text-sm">
           {isOpen ? '▼' : '▶'}
         </span>
       </button>
       {isOpen && (
-        <div className="mt-4 grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Max Daily Drawdown (%)
-            </label>
-            <input
-              type="number"
-              defaultValue="5.0"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        <div className="mt-4 space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-2">
+                Max Daily Drawdown (%)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={values.maxDrawdown}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setValues({ ...values, maxDrawdown: val });
+                  setHasUnsavedChanges(true);
+                  if (val && (parseFloat(val) < 0 || parseFloat(val) > 100)) {
+                    setErrors({ ...errors, maxDrawdown: '0-100 arası olmalı' });
+                  } else {
+                    const { maxDrawdown, ...rest } = errors;
+                    setErrors(rest);
+                  }
+                }}
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg bg-neutral-800 border text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                  errors.maxDrawdown ? "border-red-500/50" : "border-neutral-700"
+                )}
+              />
+              {errors.maxDrawdown && (
+                <div className="text-[10px] text-red-400 mt-1">{errors.maxDrawdown}</div>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-2">
+                Max Leverage
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={values.maxLeverage}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setValues({ ...values, maxLeverage: val });
+                  setHasUnsavedChanges(true);
+                  if (val && (parseInt(val) < 1 || parseInt(val) > 100)) {
+                    setErrors({ ...errors, maxLeverage: '1-100 arası olmalı' });
+                  } else {
+                    const { maxLeverage, ...rest } = errors;
+                    setErrors(rest);
+                  }
+                }}
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg bg-neutral-800 border text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                  errors.maxLeverage ? "border-red-500/50" : "border-neutral-700"
+                )}
+              />
+              {errors.maxLeverage && (
+                <div className="text-[10px] text-red-400 mt-1">{errors.maxLeverage}</div>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-2">
+                Max Position Size (USDT)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="100"
+                value={values.maxPositionSize}
+                onChange={(e) => {
+                  setValues({ ...values, maxPositionSize: e.target.value });
+                  setHasUnsavedChanges(true);
+                }}
+                className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-2">
+                Allowed Markets
+              </label>
+              <select
+                value={values.allowedMarkets}
+                onChange={(e) => {
+                  setValues({ ...values, allowedMarkets: e.target.value });
+                  setHasUnsavedChanges(true);
+                }}
+                className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Markets</option>
+                <option value="crypto">Crypto Only</option>
+                <option value="stocks">Stocks Only</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Max Leverage
-            </label>
-            <input
-              type="number"
-              defaultValue="20"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Max Position Size (USDT)
-            </label>
-            <input
-              type="number"
-              defaultValue="10000"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Allowed Markets
-            </label>
-            <select
-              defaultValue="all"
-              className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Markets</option>
-              <option value="crypto">Crypto Only</option>
-              <option value="stocks">Stocks Only</option>
-            </select>
-          </div>
+          {/* UI-1: Ops-safe form - Save button */}
+          {hasUnsavedChanges && (
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-800">
+              <button
+                onClick={() => {
+                  setHasUnsavedChanges(false);
+                  // TODO: API call to save
+                }}
+                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              >
+                Kaydet
+              </button>
+              <button
+                onClick={() => {
+                  setValues({
+                    maxDrawdown: '5.0',
+                    maxLeverage: '20',
+                    maxPositionSize: '10000',
+                    allowedMarkets: 'all',
+                  });
+                  setHasUnsavedChanges(false);
+                  setErrors({});
+                }}
+                className="px-3 py-1.5 text-sm font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg border border-neutral-700 transition-colors"
+              >
+                İptal
+              </button>
+            </div>
+          )}
         </div>
       )}
     </Surface>
@@ -158,13 +253,55 @@ export default function RiskProtectionPage() {
   };
 
   // Mock alerts
-  const alerts: RiskAlert[] = [
+  const rawAlerts: RiskAlert[] = [
     { id: '1', message: 'Total exposure exceeded 80% safe limit on Binance Futures.', timestamp: '12m ago' },
     { id: '2', message: 'Total exposure exceeded 80% safe limit on Binance Futures.', timestamp: '12m ago' },
     { id: '3', message: 'Total exposure exceeded 80% safe limit on Binance Futures.', timestamp: '12m ago' },
     { id: '4', message: 'Total exposure exceeded 80% safe limit on Binance Futures.', timestamp: '12m ago' },
     { id: '5', message: 'Total exposure exceeded 80% safe limit on Binance Futures.', timestamp: '12m ago' },
   ];
+
+  // UI-1: Alert grouping - aynı type + market + rule için gruplama
+  type GroupedAlert = {
+    key: string;
+    title: string;
+    message: string;
+    count: number;
+    lastTriggered: string;
+    trend: string;
+    alerts: RiskAlert[];
+  };
+
+  const groupedAlerts = useMemo(() => {
+    const groups = new Map<string, GroupedAlert>();
+    
+    rawAlerts.forEach((alert) => {
+      // Gruplama key'i: message içeriğine göre (gerçek uygulamada type+market+rule)
+      const key = alert.message;
+      
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          title: 'High Exposure Detected',
+          message: alert.message,
+          count: 0,
+          lastTriggered: alert.timestamp,
+          trend: 'Son 10 dk: 5 tetiklenme',
+          alerts: [],
+        });
+      }
+      
+      const group = groups.get(key)!;
+      group.count++;
+      group.alerts.push(alert);
+      // En son tetiklenme zamanını güncelle
+      if (alert.timestamp < group.lastTriggered) {
+        group.lastTriggered = alert.timestamp;
+      }
+    });
+    
+    return Array.from(groups.values());
+  }, [rawAlerts]);
 
   return (
     <div className="space-y-3">
@@ -329,29 +466,52 @@ export default function RiskProtectionPage() {
         </div>
       )}
 
-      {/* Aktif Risk Uyarıları */}
+      {/* Aktif Risk Uyarıları - UI-1: Gruplama (toplu olay) */}
       <Surface variant="card" className="p-4 mb-3">
         <div className={cn(cardHeader, "mb-3")}>
           Aktif Risk Uyarıları
         </div>
         <div className="text-xs text-neutral-400 mb-3">Real-time monitoring</div>
         <div className="space-y-2">
-          {alerts.map((alert) => (
+          {groupedAlerts.map((group) => (
             <div
-              key={alert.id}
+              key={group.key}
               className="p-3 rounded-lg bg-red-500/10 border border-red-500/20"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-red-300 mb-1">
-                    High Exposure Detected
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="text-sm font-medium text-red-300">
+                      {group.title}
+                    </div>
+                    {group.count > 1 && (
+                      <span className="text-xs font-medium text-red-400 bg-red-500/20 px-1.5 py-0.5 rounded">
+                        (x{group.count})
+                      </span>
+                    )}
                   </div>
-                  <div className="text-xs text-neutral-400">
-                    {alert.message}
+                  <div className="text-xs text-neutral-400 mb-1.5">
+                    {group.message}
+                  </div>
+                  <div className="text-[10px] text-neutral-500">
+                    {group.trend} · Son: {group.lastTriggered}
                   </div>
                 </div>
-                <div className="text-xs text-neutral-500 shrink-0">
-                  {alert.timestamp}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => {/* TODO: Acknowledge */}}
+                    className="px-2 py-1 text-[10px] font-medium text-neutral-300 hover:text-white bg-neutral-800/50 hover:bg-neutral-700 rounded border border-neutral-700 transition-colors"
+                    title="Onayla"
+                  >
+                    ✓ Onayla
+                  </button>
+                  <button
+                    onClick={() => {/* TODO: Snooze 10m */}}
+                    className="px-2 py-1 text-[10px] font-medium text-neutral-300 hover:text-white bg-neutral-800/50 hover:bg-neutral-700 rounded border border-neutral-700 transition-colors"
+                    title="10 dk ertele"
+                  >
+                    ⏰ 10m
+                  </button>
                 </div>
               </div>
             </div>

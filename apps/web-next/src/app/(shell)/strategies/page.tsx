@@ -1,4 +1,10 @@
 import StrategiesPageClient from "./strategies-page-client";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Stratejiler — Spark Trading',
+  description: 'Strateji listesi ve laboratuvar',
+};
 
 interface StrategiesPageProps {
   searchParams: Promise<{ tab?: string }>;

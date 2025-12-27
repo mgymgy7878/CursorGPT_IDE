@@ -11,7 +11,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import RiskProtectionPage from '@/components/guardrails/RiskProtectionPage';
 import AlertsPageContent, { AlertItem } from '@/components/alerts/AlertsPageContent';
 import AuditTable from '@/components/audit/AuditTable';
@@ -61,9 +61,15 @@ type ControlTab = 'risk' | 'alerts' | 'audit' | 'canary';
 export default function ControlPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<ControlTab>(
     (searchParams?.get('tab') as ControlTab) || 'risk'
   );
+
+  // UI-1: Document title (SEO + browser tabs)
+  useEffect(() => {
+    document.title = 'Operasyon Merkezi — Spark Trading';
+  }, []);
 
   // Alerts state
   const [alertItems, setAlertItems] = useState<AlertItem[]>([]);
