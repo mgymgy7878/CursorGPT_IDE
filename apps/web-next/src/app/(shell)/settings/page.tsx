@@ -1,20 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ApiForm } from "@/components/settings/SecretInput";
 import { toast } from "@/components/toast/Toaster";
+import { cn } from "@/lib/utils";
+
+type SettingsTab = 'exchange' | 'ai' | 'about';
 
 /**
  * Settings Page - AppFrame shell içinde
- * NOT: (shell) route grubunda olduğumuz için AppShell kullanmıyoruz
  */
 export default function Settings() {
-  const handleSave = async (provider: string, values: Record<string, string>) => {
-    // This would call /api/settings/save with encrypted values
-    console.log(`Saving ${provider}:`, values);
+  const [activeTab, setActiveTab] = useState<SettingsTab>('exchange');
 
+  const handleSave = async (provider: string, values: Record<string, string>) => {
+    console.log(`Saving ${provider}:`, values);
     toast({
       type: "success",
       title: "Ayarlar Kaydedildi",
@@ -23,16 +24,13 @@ export default function Settings() {
   };
 
   const handleTest = async (provider: string, values: Record<string, string>) => {
-    // This would call /api/settings/test to verify credentials
     console.log(`Testing ${provider}:`, values);
-
     toast({
       type: "info",
       title: "Bağlantı Test Ediliyor",
       description: `${provider} bağlantısı kontrol ediliyor...`
     });
 
-    // Simulate test
     setTimeout(() => {
       toast({
         type: "success",
@@ -46,15 +44,47 @@ export default function Settings() {
     <div className="space-y-6">
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
       
-      <Tabs defaultValue="exchange">
-        <TabsList>
-          <TabsTrigger value="exchange">Borsa API</TabsTrigger>
-          <TabsTrigger value="ai">AI / Copilot</TabsTrigger>
-          <TabsTrigger value="about">Hakkında / Lisanslar</TabsTrigger>
-        </TabsList>
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-neutral-800">
+        <button
+          onClick={() => setActiveTab('exchange')}
+          className={cn(
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            activeTab === 'exchange'
+              ? 'border-blue-500 text-blue-400'
+              : 'border-transparent text-neutral-400 hover:text-neutral-300'
+          )}
+        >
+          Borsa API
+        </button>
+        <button
+          onClick={() => setActiveTab('ai')}
+          className={cn(
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            activeTab === 'ai'
+              ? 'border-blue-500 text-blue-400'
+              : 'border-transparent text-neutral-400 hover:text-neutral-300'
+          )}
+        >
+          AI / Copilot
+        </button>
+        <button
+          onClick={() => setActiveTab('about')}
+          className={cn(
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            activeTab === 'about'
+              ? 'border-blue-500 text-blue-400'
+              : 'border-transparent text-neutral-400 hover:text-neutral-300'
+          )}
+        >
+          Hakkında / Lisanslar
+        </button>
+      </div>
 
-        <TabsContent value="exchange">
-          <div className="space-y-6 mt-4">
+      {/* Tab Content */}
+      <div className="mt-6">
+        {activeTab === 'exchange' && (
+          <div className="space-y-6">
             <ApiForm
               title="Binance"
               fields={[
@@ -75,10 +105,10 @@ export default function Settings() {
               onTest={(values) => handleTest("BTCTurk", values)}
             />
           </div>
-        </TabsContent>
+        )}
 
-        <TabsContent value="ai">
-          <div className="space-y-6 mt-4">
+        {activeTab === 'ai' && (
+          <div className="space-y-6">
             <ApiForm
               title="OpenAI"
               fields={[
@@ -97,15 +127,14 @@ export default function Settings() {
               onTest={(values) => handleTest("Anthropic", values)}
             />
           </div>
-        </TabsContent>
+        )}
 
-        <TabsContent value="about">
-          <div className="space-y-6 mt-4">
+        {activeTab === 'about' && (
+          <div className="space-y-6">
             <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-6">
               <h3 className="text-lg font-semibold text-neutral-200 mb-4">Açık Kaynak Lisansları</h3>
 
               <div className="space-y-4">
-                {/* PATCH: Trademark disclaimer */}
                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 mb-4">
                   <p className="text-xs font-medium text-amber-400">
                     ⚠️ Bu ürün TradingView ile ilişkili değildir ve TradingView tarafından onaylanmamıştır.
@@ -122,7 +151,7 @@ export default function Settings() {
                   </p>
                   <div className="mt-3">
                     <a
-                      href="https://www.tradingview.com"
+                      href="https://www.tradingView.com"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-blue-400 hover:text-blue-300 underline"
@@ -152,8 +181,8 @@ export default function Settings() {
               </div>
             </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 }
