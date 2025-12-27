@@ -11,7 +11,7 @@ import { MetricRibbon } from '@/components/ui/MetricRibbon';
 import { FilterBar } from '@/components/ui/FilterBar';
 import DenseStrategiesTable from '@/components/strategies/DenseStrategiesTable';
 import { StrategyRow } from '@/components/strategies/DenseStrategiesTable';
-import { PageHeader } from '@/components/common/PageHeader';
+import { CompactPageHeader } from '@/components/core/CompactPageHeader';
 
 // Deterministic mock data (fixture)
 const MOCK_STRATEGIES: StrategyRow[] = [
@@ -85,19 +85,18 @@ export default function MyStrategiesPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <PageHeader
+    <div className="container mx-auto px-4 py-4">
+      <CompactPageHeader
         title="Stratejilerim"
-        subtitle="Trading stratejilerinizi yönetin ve performanslarını takip edin"
       />
 
-      {/* Metric Ribbon */}
-      <div className="mb-4">
-        <MetricRibbon items={MOCK_METRICS} />
+      {/* PATCH R: Metric Ribbon - tek satır, wrap yok, yatay scroll */}
+      <div className="mb-4 overflow-x-auto" style={{ height: 'var(--summary-strip-py, 10px) * 2 + 20px' }}>
+        <MetricRibbon items={MOCK_METRICS} className="whitespace-nowrap" />
       </div>
 
-      {/* Filter Bar */}
-      <div className="mb-4">
+      {/* PATCH R: Filter Bar - height token */}
+      <div className="mb-4" style={{ height: 'var(--filters-h, 36px)' }}>
         <FilterBar
           chips={filterChips}
           searchPlaceholder="Strateji ara..."

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import ErrorSink from "@/components/core/ErrorSink";
-import FloatingActions from "@/components/layout/FloatingActions";
+// FloatingActions removed - Copilot dock launcher in AppFrame (PATCH A)
 import ChunkGuard from "@/components/ChunkGuard";
 import AppFrame from "@/components/layout/AppFrame";
 import { RightRailProvider } from "@/components/layout/RightRailContext";
@@ -23,7 +23,7 @@ export default function ShellLayout({ children }: { children: ReactNode }) {
       </RightRailProvider>
       <ChunkGuard />
       <ErrorSink />
-      <FloatingActions />
+      {/* FloatingActions removed - Copilot dock launcher in AppFrame (PATCH A) */}
     </ThemeProvider>
   );
 }

@@ -8,8 +8,8 @@ const QueueSummaryCard = dynamic(()=>import("@/components/backtest/QueueSummaryC
 
 export default function BacktestEnginePage(){
   return (
-    <main className="p-6 space-y-6">
-      <h1 className="text-3xl font-semibold">Backtest Engine</h1>
+    <main className="p-6 space-y-4">
+      <h1 className="text-xl font-semibold">Backtest Engine</h1>
       <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <JobCreator />
         <QueueSummaryCard />

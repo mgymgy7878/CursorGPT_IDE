@@ -31,7 +31,17 @@ export function StatCard({ label, value, delta, sublabel, className }: StatCardP
   }
 
   return (
-    <div className={cn('min-w-0 w-full rounded-lg border border-neutral-800 bg-neutral-950/30 p-3 overflow-hidden', className)} data-testid="stat-card">
+    <div
+      className={cn('min-w-0 w-full border bg-neutral-950/30 overflow-hidden', className)}
+      style={{
+        height: 'var(--metric-tile-h, 64px)',
+        padding: 'var(--metric-tile-pad, 12px)',
+        borderRadius: 'var(--card-radius, 12px)',
+        borderWidth: 'var(--card-border-w, 1px)',
+        borderColor: 'rgb(38 38 38)',
+      }}
+      data-testid="stat-card"
+    >
       {/* Label: 11-12px Figma parity - truncate ile uzun etiketler kırpılır */}
       <div className="text-[11px] leading-tight text-neutral-400 mb-1 truncate">{label}</div>
       {/* Value: 20-24px Figma parity - clamp() ile responsive font size + overflow-safe */}

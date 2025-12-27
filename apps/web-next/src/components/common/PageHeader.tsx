@@ -43,30 +43,34 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "mb-6",
-        !noPadding && `px-[${PAGE_PAD_X}px] pt-[${PAGE_PAD_TOP}px]`,
+        "mb-2",
         className
       )}
       style={!noPadding ? {
-        paddingLeft: `${PAGE_PAD_X}px`,
-        paddingRight: `${PAGE_PAD_X}px`,
-        paddingTop: `${PAGE_PAD_TOP}px`,
+        paddingTop: 'var(--page-header-py, 10px)',
+        paddingBottom: 'var(--page-header-py, 10px)',
       } : undefined}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          {/* Figma parity: text-2xl font-semibold leading-tight */}
-          <h1 className="text-2xl font-semibold text-neutral-200 leading-tight truncate">
+          {/* PATCH Q: Token-based h1 size + glance'da subtitle gizle */}
+          <h1
+            className="font-semibold text-neutral-200 leading-none truncate"
+            style={{ fontSize: 'var(--h1-size, 18px)' }}
+          >
             {title}
           </h1>
           {subtitle && (
-            <p className="text-sm text-neutral-400 mt-1 leading-relaxed">
+            <p
+              className="text-neutral-400 mt-0.5 leading-relaxed glance-hide-subtitle"
+              style={{ fontSize: 'var(--h2-size, 14px)' }}
+            >
               {subtitle}
             </p>
           )}
           {/* Badges veya chips */}
           {(badges || chips) && (
-            <div className="flex flex-wrap items-center gap-2 mt-3">
+            <div className="flex flex-wrap items-center gap-2 mt-1.5">
               {badges ?? chips}
             </div>
           )}

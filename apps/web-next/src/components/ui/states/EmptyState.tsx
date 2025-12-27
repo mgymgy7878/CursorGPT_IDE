@@ -22,7 +22,13 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center p-10 text-center ${className}`}
+      className={`flex flex-col items-center justify-center text-center ${className}`}
+      style={{
+        paddingTop: 'var(--empty-state-py, 24px)',
+        paddingBottom: 'var(--empty-state-py, 24px)',
+        paddingLeft: 'var(--card-pad, 12px)',
+        paddingRight: 'var(--card-pad, 12px)',
+      }}
       role="status"
       aria-live="polite"
     >

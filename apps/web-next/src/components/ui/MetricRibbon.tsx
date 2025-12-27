@@ -28,10 +28,16 @@ export function MetricRibbon({ items, className }: MetricRibbonProps) {
   return (
     <div
       className={cn(
-        'grid gap-2 px-4 py-3 bg-neutral-900/50 border border-neutral-800 rounded-lg',
+        'grid gap-2 px-4 bg-neutral-900/50 border border-neutral-800 rounded-lg',
         '[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]',
         className
       )}
+      style={{
+        paddingTop: 'var(--summary-strip-py, 10px)',
+        paddingBottom: 'var(--summary-strip-py, 10px)',
+        borderRadius: 'var(--card-radius, 12px)',
+        borderWidth: 'var(--card-border-w, 1px)',
+      }}
     >
       {items.map((item, index) => (
         <div key={index} className="min-w-0 overflow-hidden flex items-baseline gap-2">

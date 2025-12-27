@@ -24,7 +24,7 @@
 }
 
 /* Design Tokens - Figma Parity */
-@import '../styles/tokens.css';
+@import "../styles/tokens.css";
 
 /* Proje teması */
 :root {
@@ -34,32 +34,218 @@
   --success: 142 70% 45%;
   --warn: 38 92% 50%;
   --danger: 0 90% 58%;
+  --topbar-h: 56px; /* TopStatusBar yüksekliği - overlay positioning için */
+  --app-bg: #0a0a0a; /* App background - viewport fill için */
 }
 
-html, body {
+/* PATCH K: Density Mode CSS Variables */
+[data-density="ultra"] {
+  --card-pad: 12px;
+  --control-h: 36px;
+  --table-row-py: 8px;
+  --table-head-py: 8px;
+  --header-gap: 8px;
+  --section-gap: 12px;
+  /* PATCH L: Shell & Scroll Discipline */
+  --page-px: 12px;
+  --page-py: 10px;
+  --shell-gap: 12px;
+  --card-gap: 12px;
+  --page-header-py: 10px;
+  --rail-w-right: 360px;
+  /* PATCH O: Component Density Tokens v2 */
+  --card-radius: 12px;
+  --card-border-w: 1px;
+  --metric-tile-h: 64px;
+  --metric-tile-pad: 12px;
+  --summary-strip-py: 10px;
+  --chip-h: 28px;
+  --chip-px: 10px;
+  --empty-state-py: 24px;
+  --hero-number-size: 24px;
+}
+
+[data-density="compact"] {
+  --card-pad: 16px;
+  --control-h: 40px;
+  --table-row-py: 12px;
+  --table-head-py: 12px;
+  --header-gap: 12px;
+  --section-gap: 16px;
+  /* PATCH L: Shell & Scroll Discipline */
+  --page-px: 16px;
+  --page-py: 14px;
+  --shell-gap: 16px;
+  --card-gap: 16px;
+  --page-header-py: 14px;
+  --rail-w-right: 380px;
+  /* PATCH O: Component Density Tokens v2 */
+  --card-radius: 14px;
+  --card-border-w: 1px;
+  --metric-tile-h: 72px;
+  --metric-tile-pad: 16px;
+  --summary-strip-py: 12px;
+  --chip-h: 32px;
+  --chip-px: 12px;
+  --empty-state-py: 32px;
+  --hero-number-size: 28px;
+}
+
+[data-density="comfort"] {
+  --card-pad: 20px;
+  --control-h: 44px;
+  --table-row-py: 16px;
+  --table-head-py: 16px;
+  --header-gap: 16px;
+  --section-gap: 20px;
+  /* PATCH L: Shell & Scroll Discipline */
+  --page-px: 20px;
+  --page-py: 18px;
+  --shell-gap: 20px;
+  --card-gap: 20px;
+  --page-header-py: 18px;
+  --rail-w-right: 400px;
+  /* PATCH O: Component Density Tokens v2 */
+  --card-radius: 16px;
+  --card-border-w: 1px;
+  --metric-tile-h: 80px;
+  --metric-tile-pad: 20px;
+  --summary-strip-py: 14px;
+  --chip-h: 36px;
+  --chip-px: 14px;
+  --empty-state-py: 40px;
+  --hero-number-size: 32px;
+}
+
+/* PATCH O: Short Viewport Override (innerHeight < 820) */
+[data-viewport="short"] {
+  --page-py: calc(var(--page-py, 10px) - 2px);
+  --card-pad: calc(var(--card-pad, 12px) - 2px);
+  --metric-tile-h: calc(var(--metric-tile-h, 64px) - 4px);
+  --summary-strip-py: calc(var(--summary-strip-py, 10px) - 2px);
+}
+
+/* PATCH Q: GLANCE Tokens (At-a-Glance layout) */
+[data-density="ultra"] {
+  --h1-size: 18px;
+  --h2-size: 14px;
+  --card-title-mb: 8px;
+  --row-h: 40px;
+  --row-py: 6px;
+  --cell-px: 12px;
+  --toolbar-h: 40px;
+  --filters-h: 36px;
+  --glance-zoom: 0.96;
+}
+
+[data-density="compact"] {
+  --h1-size: 20px;
+  --h2-size: 16px;
+  --card-title-mb: 10px;
+  --row-h: 44px;
+  --row-py: 8px;
+  --cell-px: 16px;
+  --toolbar-h: 44px;
+  --filters-h: 40px;
+  --glance-zoom: 0.98;
+}
+
+[data-density="comfort"] {
+  --h1-size: 22px;
+  --h2-size: 18px;
+  --card-title-mb: 12px;
+  --row-h: 48px;
+  --row-py: 10px;
+  --cell-px: 20px;
+  --toolbar-h: 48px;
+  --filters-h: 44px;
+  --glance-zoom: 1;
+}
+
+/* PATCH Q: Short + Glance Override (innerHeight < 860) */
+[data-viewport="short"][data-glance="1"] {
+  --page-py: calc(var(--page-py, 10px) - 4px);
+  --card-pad: calc(var(--card-pad, 12px) - 4px);
+  --metric-tile-h: calc(var(--metric-tile-h, 64px) - 8px);
+  --summary-strip-py: calc(var(--summary-strip-py, 10px) - 4px);
+  --row-h: calc(var(--row-h, 40px) - 4px);
+  --row-py: calc(var(--row-py, 6px) - 2px);
+  --cell-px: calc(var(--cell-px, 12px) - 2px);
+  --toolbar-h: calc(var(--toolbar-h, 40px) - 4px);
+  --filters-h: calc(var(--filters-h, 36px) - 4px);
+  --h1-size: calc(var(--h1-size, 18px) - 2px);
+  --h2-size: calc(var(--h2-size, 14px) - 1px);
+  --card-title-mb: calc(var(--card-title-mb, 8px) - 2px);
+}
+
+/* PATCH Q: Glance zoom fallback (sadece main content'te, short+glance'da) */
+[data-viewport="short"][data-glance="1"] main {
+  zoom: var(--glance-zoom, 0.96);
+}
+
+/* PATCH R: Glance'da subtitle gizle */
+[data-glance="1"] .glance-hide-subtitle {
+  display: none;
+}
+
+/* PATCH S: Glance hero number (SSR-safe) */
+.glance-hero-number {
+  font-size: var(--hero-number-size, 24px);
+}
+
+[data-glance="1"] .glance-hero-number {
+  font-size: calc(var(--hero-number-size, 24px) - 2px);
+}
+
+/* PATCH S: Glance textarea minHeight (SSR-safe) */
+.glance-textarea {
+  min-height: 160px;
+}
+
+[data-viewport="short"] .glance-textarea {
+  min-height: 104px;
+}
+
+[data-viewport="short"][data-glance="1"] .glance-textarea {
+  min-height: 88px;
+}
+
+/* PATCH S: Glance kill switch grid (SSR-safe) */
+.glance-kill-switch-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+[data-glance="1"] .glance-kill-switch-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* PATCH V: Table row glass hover (Figma parity) */
+.table-row-hover {
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.table-row-hover:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html,
+body {
   height: 100%;
-  background-color: #0a0a0a; /* Slightly lighter than pure black for better contrast */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-bg, #0a0a0a);
   color: #ffffff;
   overflow: hidden; /* Prevent page-level scroll */
   scrollbar-gutter: stable; /* Prevent layout shift */
 }
 
-/* Hover overlay panels - sadece desktop'ta (hover: hover) */
-@media (hover: hover) and (pointer: fine) {
-  /* Hover genişleme aktif */
-  .group\/leftnav:hover .group-hover\/leftnav\:opacity-100,
-  .group\/rightrail:hover .group-hover\/rightrail\:opacity-100 {
-    /* Tailwind class'ları zaten tanımlı */
-  }
-}
-
-/* Touch cihazlarda hover yok - sadece toggle/pin çalışır */
-@media (hover: none) {
-  .group\/leftnav .group-hover\/leftnav\:opacity-100,
-  .group\/rightrail .group-hover\/rightrail\:opacity-100 {
-    /* Touch'ta hover genişleme yok */
-  }
-}
+/* Hover overlay panels - Tailwind group-hover ile çalışır */
+/* Media query filtresi kaldırıldı: Tailwind'in group-hover'ı zaten
+   dokunmatik cihazlarda otomatik olarak çalışmaz (hover yoksa tetiklenmez) */
 
 /* Reduced motion desteği */
 @media (prefers-reduced-motion: reduce) {
@@ -72,10 +258,15 @@ html, body {
 
 /* App Shell - tek scroll prensibi */
 /* P0: Explicit dark background to prevent white leak */
-#__next, body > div#root {
+#__next,
+body > div#root {
   min-height: 100%;
   height: 100%;
-  background-color: #0a0a0a;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-bg, #0a0a0a);
+  overflow: hidden;
 }
 
 .app-content {
@@ -90,7 +281,8 @@ html, body {
 }
 
 .mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
 }
 
 /* Compact numeric text (no letter-spacing, tabular) */
@@ -121,15 +313,36 @@ html, body {
   --radius-lg: 1rem;
 }
 
-.cmdk-overlay { z-index: var(--z-overlay) !important; }
-.ops-drawer { z-index: var(--z-drawer); }
-header { z-index: var(--z-header); }
-main > * { position: relative; z-index: var(--z-page); }
+.cmdk-overlay {
+  z-index: var(--z-overlay) !important;
+}
+.ops-drawer {
+  z-index: var(--z-drawer);
+}
+header {
+  z-index: var(--z-header);
+}
+main > * {
+  position: relative;
+  z-index: var(--z-page);
+}
 
-.space-section { padding-block: var(--space-6); }
+.space-section {
+  padding-block: var(--space-6);
+}
 
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    sans-serif;
 }
 
 /* Layout fixes */
@@ -221,7 +434,9 @@ a:hover {
 
 /* Animation safety */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -229,13 +444,16 @@ a:hover {
 }
 
 /* Word break for long strings */
-.strategy-name, .trace-id, .long-text {
+.strategy-name,
+.trace-id,
+.long-text {
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
 /* Chart and table overflow protection */
-.chart-wrapper, .table-wrapper {
+.chart-wrapper,
+.table-wrapper {
   overflow-x: auto;
   overflow-y: visible;
 }
@@ -288,7 +506,20 @@ a:hover {
   outline-offset: 2px;
 }
 
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid #1b7fff;
   outline-offset: 2px;
+}
+
+/* PATCH: TradingView attribution/logo gizleme (trademark riski) */
+/* PATCH: Geniş selector'lar kaldırıldı - chart canvas'larını gizliyordu */
+/* SADECE attribution link'ini hedefle (canvas'a dokunma) */
+/* Resmi layout.attributionLogo: false genelde yeterli, bu CSS sadece ek güvenlik */
+div[class*="tv-lightweight-charts"] a[href*="tradingview.com"],
+div[class*="tv-lightweight-charts"] a[href*="tradingview"] {
+  display: none !important;
 }

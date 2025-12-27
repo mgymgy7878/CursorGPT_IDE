@@ -4,10 +4,21 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MarketDataTable from '@/components/marketdata/MarketDataTable';
 import { EmptyState } from '@/components/ui/states';
-import { PageHeader } from '@/components/common/PageHeader';
-import { FilterBar } from '@/components/ui/FilterBar';
+import { CompactPageHeader } from '@/components/core/CompactPageHeader';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Input } from '@/components/ui/Input';
 import { Surface } from '@/components/ui/Surface';
+import dynamic from 'next/dynamic';
 import TechnicalOverview from '@/components/charts/TechnicalOverview';
+import { IconSearch } from '@/components/ui/LocalIcons';
+import { LS_RIGHT_RAIL_OPEN } from '@/components/layout/layout-tokens';
+import { formatPriceUsd, formatCompactUsd, formatSignedPct } from '@/lib/format';
+
+// Dynamic import for MarketChartWorkspace (SSR-safe)
+const MarketChartWorkspace = dynamic(
+  () => import('@/components/market/MarketChartWorkspace'),
+  { ssr: false }
+);
 import { cn } from '@/lib/utils';
 
 /**
@@ -30,100 +41,105 @@ export default function MarketData() {
   const [marketFilter, setMarketFilter] = useState<string | null>(null);
 
   // URL'den state'i oku
-  const urlView = searchParams.get('view');
+  const urlView = searchParams.get('view') || 'list';
   const urlSymbol = searchParams.get('symbol');
 
-  // View mode: 'table' (default) or 'full'
-  const [viewMode, setViewMode] = useState<'table' | 'full'>(urlView === 'full' ? 'full' : 'table');
-  // Mini Grafik toggle (only for table mode)
+  // View mode: 'list' (default), 'workspace', or 'full'
+  const viewMode = urlView === 'workspace' ? 'workspace' : urlView === 'full' ? 'full' : 'list';
+  // Mini Grafik toggle (only for list mode)
   const [showMiniChart, setShowMiniChart] = useState(true);
-  // Selected symbol for chart view (default: first symbol)
-  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(urlSymbol || 'BTC/USDT');
-
-  // URL'i state'e senkronize et (initial load)
-  useEffect(() => {
-    if (urlView === 'full') {
-      setViewMode('full');
-    }
-    if (urlSymbol) {
-      setSelectedSymbol(urlSymbol);
-    } else if (!urlSymbol && selectedSymbol) {
-      // İlk yüklemede URL'de symbol yoksa, default symbol'ü URL'e yaz
-      updateUrlWithSymbol(selectedSymbol);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlView, urlSymbol]);
-
-  // Symbol'ü URL'de güncelle (view modundan bağımsız)
-  const updateUrlWithSymbol = (symbol: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (symbol) {
-      params.set('symbol', symbol);
-    } else {
-      params.delete('symbol');
-    }
-    const queryString = params.toString();
-    const newUrl = queryString ? `/market-data?${queryString}` : '/market-data';
-    router.replace(newUrl, { scroll: false });
+  // Selected symbol for chart view (normalize BTC%2FUSDT -> BTC/USDT)
+  const normalizeSymbol = (sym: string | null) => {
+    if (!sym) return null;
+    return sym.replace(/%2F/g, '/').replace(/%2f/g, '/');
   };
+  const selectedSymbol = normalizeSymbol(urlSymbol) || 'BTC/USDT';
 
-  // State değiştiğinde URL'i güncelle (view + symbol)
-  const updateUrl = (view: 'table' | 'full', symbol: string | null) => {
+  // PATCH X: MarketData'da Copilot panelini varsayılan açık yap (desktop genişlikte)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Desktop genişlik kontrolü (>= 1024px)
+    const isDesktop = window.innerWidth >= 1024;
+    if (!isDesktop) return;
+
+    // MarketData sayfasında Copilot panelini varsayılan açık yap
+    const currentState = localStorage.getItem(LS_RIGHT_RAIL_OPEN);
+    // Eğer daha önce kullanıcı tarafından kapatılmadıysa (null veya 'true'), açık yap
+    if (currentState === null || currentState === 'true') {
+      localStorage.setItem(LS_RIGHT_RAIL_OPEN, 'true');
+    }
+  }, []);
+
+  // URL'i güncelle (view + symbol)
+  const updateUrl = (view: 'list' | 'workspace' | 'full', symbol: string | null) => {
     const params = new URLSearchParams();
     // Symbol her zaman URL'de tutulacak
     if (symbol) {
       params.set('symbol', symbol);
     }
-    // Full view ise view parametresi ekle
-    if (view === 'full') {
-      params.set('view', 'full');
+    // View parametresi (list default, eklenmez)
+    if (view !== 'list') {
+      params.set('view', view);
     }
     const queryString = params.toString();
     const newUrl = queryString ? `/market-data?${queryString}` : '/market-data';
     router.replace(newUrl, { scroll: false });
   };
 
-  const filterChips = [
-    { id: 'crypto', label: 'Kripto', active: marketFilter === 'crypto', onClick: () => setMarketFilter(marketFilter === 'crypto' ? null : 'crypto') },
-    { id: 'bist', label: 'BIST', active: marketFilter === 'bist', onClick: () => setMarketFilter(marketFilter === 'bist' ? null : 'bist') },
-    { id: 'stock', label: 'Hisse', active: marketFilter === 'stock', onClick: () => setMarketFilter(marketFilter === 'stock' ? null : 'stock') },
-    { id: 'forex', label: 'Forex', active: marketFilter === 'forex', onClick: () => setMarketFilter(marketFilter === 'forex' ? null : 'forex') },
-    { id: 'commodity', label: 'Emtia', active: marketFilter === 'commodity', onClick: () => setMarketFilter(marketFilter === 'commodity' ? null : 'commodity') },
-    { id: 'futures', label: 'Vadeli', active: marketFilter === 'futures', onClick: () => setMarketFilter(marketFilter === 'futures' ? null : 'futures') },
+  // Category options for segmented control (Figma parity)
+  const categoryOptions = [
+    { value: 'crypto', label: 'Kripto' },
+    { value: 'bist', label: 'BIST' },
+    { value: 'stock', label: 'Hisse' },
+    { value: 'forex', label: 'Forex' },
+    { value: 'commodity', label: 'Emtia' },
+    { value: 'futures', label: 'Vadeli' },
   ];
 
+  // Row click handler - workspace'e geç
+  const handleRowClick = (symbol: string) => {
+    updateUrl('workspace', symbol);
+  };
+
+  // Chart icon click handler - workspace'e geç
   const handleViewChart = (symbol: string) => {
-    setSelectedSymbol(symbol);
-    setViewMode('full');
-    updateUrl('full', symbol);
+    updateUrl('workspace', symbol);
   };
 
-  const handleBackToTable = () => {
-    setViewMode('table');
-    // Symbol korunur - sadece view modu değişir
-    updateUrl('table', selectedSymbol);
+  // Back to list
+  const handleBackToList = () => {
+    updateUrl('list', selectedSymbol);
   };
 
-  const handleToggleView = (view: 'miniChart' | 'table' | 'full') => {
-    if (view === 'miniChart') {
-      setShowMiniChart(true);
-      setViewMode('table');
-      updateUrl('table', selectedSymbol);
-    } else if (view === 'table') {
-      setShowMiniChart(false);
-      setViewMode('table');
-      updateUrl('table', selectedSymbol);
+  // Toggle view buttons
+  const handleToggleView = (view: 'list' | 'full') => {
+    if (view === 'list') {
+      updateUrl('list', selectedSymbol);
     } else {
-      setViewMode('full');
-      updateUrl('full', selectedSymbol);
+      // Full screen requires symbol
+      if (!selectedSymbol) {
+        // Default to first symbol if none selected
+        updateUrl('full', 'BTC/USDT');
+      } else {
+        updateUrl('full', selectedSymbol);
+      }
     }
   };
 
-  // Row click handler - symbol seç ve URL'i güncelle
-  const handleRowClick = (symbol: string) => {
-    setSelectedSymbol(symbol);
-    updateUrlWithSymbol(symbol);
-  };
+  // ESC key handler for fullscreen exit
+  useEffect(() => {
+    if (viewMode !== 'full') return;
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        updateUrl('workspace', selectedSymbol);
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [viewMode, selectedSymbol]);
 
   // Generate mock chart data based on symbol
   const generateChartData = (symbol: string) => {
@@ -139,85 +155,235 @@ export default function MarketData() {
     }));
   };
 
+  // Get market data for selected symbol (from mock data)
+  const getMarketDataForSymbol = (symbol: string | null) => {
+    if (!symbol) return null;
+    // Mock data from MarketDataTable
+    const MOCK_DATA = [
+      { symbol: 'BTC/USDT', price: 42150.00, change: 1.2, changeAbs: 1024.50, volume: 1250000000, rsi: 67, signal: 'BUY', high: 43245, low: 41200 },
+      { symbol: 'ETH/USDT', price: 2250.00, change: -0.5, changeAbs: -11.25, volume: 850000000, rsi: 58, signal: 'BUY', high: 2280, low: 2200 },
+      { symbol: 'SOL/USDT', price: 98.50, change: 5.2, changeAbs: 4.88, volume: 320000000, rsi: 72, signal: 'STRONG BUY', high: 102, low: 94 },
+      { symbol: 'BNB/USDT', price: 315.75, change: 0.8, changeAbs: 2.52, volume: 180000000, rsi: 55, signal: 'HOLD', high: 320, low: 310 },
+      { symbol: 'ADA/USDT', price: 0.485, change: -2.1, changeAbs: -0.0102, volume: 95000000, rsi: 45, signal: 'HOLD', high: 0.50, low: 0.47 },
+    ];
+    return MOCK_DATA.find(d => d.symbol === symbol) || null;
+  };
+
+  const marketData = getMarketDataForSymbol(selectedSymbol);
+
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="container mx-auto px-4 py-4">
-        {/* Header - Figma style: separate buttons */}
-        <div className="flex items-center justify-between mb-4">
-          <PageHeader
-            title="Piyasa Verileri"
-            subtitle="Realtime feed & history modules"
-            className="mb-0"
-          />
-          {/* Action buttons: Tam Ekran | Mini Grafik (Figma style - 2 separate buttons) */}
-          <div className="flex items-center gap-2">
+    <div className={cn("h-full", viewMode === 'full' ? "overflow-hidden h-screen w-screen" : "overflow-y-auto")}>
+      <div className={cn(viewMode === 'full' ? "h-full w-full p-0" : "container mx-auto px-4 py-4")}>
+        {/* List View Header */}
+        {viewMode === 'list' && (
+          <>
+            {/* PATCH: Figma Parity Header - flex-wrap ile çakışma önleme (P0) */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Sol: Başlık + Arama */}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <h1 className="text-[22px] font-semibold tracking-[-0.02em] leading-none text-neutral-200 shrink-0">
+                    Piyasa Verileri
+                  </h1>
+                  <div className="flex-1 min-w-[220px] max-w-[520px] min-w-0 relative">
+                    {/* PATCH V: Search input with left icon */}
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <IconSearch size={14} className="text-neutral-400" />
+                    </div>
+                    <Input
+                      type="text"
+                      placeholder="Sembol ara..."
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      className="h-[var(--control-h,36px)] text-xs pl-9 w-full"
+                    />
+                  </div>
+                </div>
+
+                {/* Sağ: View Toggle (Primary/Secondary Button) - ml-auto ile dar alanda alta düşer */}
+                <div className="ml-auto flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => handleToggleView('list')}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors h-9",
+                      "bg-blue-600 hover:bg-blue-700 text-white"
+                    )}
+                  >
+                    {showMiniChart ? 'Mini Grafik' : 'Tablo'}
+                  </button>
+                  <button
+                    onClick={() => handleToggleView('full')}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors h-9",
+                      "bg-[#111318] border border-white/10 text-[#9CA3AF] hover:text-[#E5E7EB] hover:bg-white/5"
+                    )}
+                  >
+                    Tam Ekran
+                  </button>
+                </div>
+              </div>
+
+              {/* PATCH U: Kategori Selector (Segmented Pill) - Figma parity: beyaz pill aktif */}
+              <div className="flex items-center gap-2">
+                <SegmentedControl
+                  options={categoryOptions}
+                  value={marketFilter || 'crypto'}
+                  onChange={(v) => setMarketFilter(v === 'crypto' ? null : v)}
+                  size="md"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Workspace View Header */}
+        {viewMode === 'workspace' && (
+          <div className="mb-4 flex items-center justify-between">
+            <button
+              onClick={handleBackToList}
+              className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium text-neutral-400 hover:text-neutral-200 hover:bg-white/5 transition-colors"
+            >
+              ← Tabloya Dön
+            </button>
             <button
               onClick={() => handleToggleView('full')}
               className={cn(
-                "px-3 py-1.5 text-[11px] font-medium rounded-md border transition-colors",
-                viewMode === 'full'
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                  : "bg-white/5 text-neutral-300 border-white/10 hover:bg-white/8 hover:text-white"
+                "px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors h-9",
+                "bg-[#111318] border border-white/10 text-[#9CA3AF] hover:text-[#E5E7EB] hover:bg-white/5"
               )}
             >
               Tam Ekran
             </button>
-            <button
-              onClick={() => handleToggleView(showMiniChart ? 'table' : 'miniChart')}
-              className={cn(
-                "px-3 py-1.5 text-[11px] font-medium rounded-md border transition-colors",
-                showMiniChart && viewMode === 'table'
-                  ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                  : "bg-white/5 text-neutral-300 border-white/10 hover:bg-white/8 hover:text-white"
-              )}
-            >
-              Mini Grafik
-            </button>
           </div>
-        </div>
+        )}
 
-        {/* Full Chart View */}
-        {viewMode === 'full' ? (
-          <div className="space-y-4">
-            {/* Back button */}
-            <button
-              onClick={handleBackToTable}
-              className="flex items-center gap-2 text-[12px] text-neutral-400 hover:text-neutral-200 transition-colors"
-            >
-              ← Tabloya Dön
-            </button>
-
+        {/* Workspace View: Büyük grafik + detay kartları */}
+        {viewMode === 'workspace' ? (
+          <div className="h-full flex flex-col gap-4">
             {selectedSymbol ? (
-              /* Chart with selected symbol */
-              <Surface variant="card" className="p-4">
-                {/* Chart header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-full text-[12px] font-semibold bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
-                      {selectedSymbol}
-                    </span>
-                    <span className="text-[11px] text-neutral-500">1D · Trend Follower v1</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-neutral-500 px-2 py-1 rounded bg-white/5 border border-white/10">
-                      Mock Data
-                    </span>
-                  </div>
+              <>
+                {/* Chart Area */}
+                <div className="flex-1 min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0b0d10]">
+                  <MarketChartWorkspace
+                    symbol={selectedSymbol}
+                    timeframe="1D"
+                    onTimeframeChange={(tf: string) => {
+                      console.log('Timeframe changed:', tf);
+                    }}
+                    onClose={handleBackToList}
+                  />
                 </div>
 
-                {/* Chart area */}
-                <div className="h-[400px] bg-neutral-900/50 rounded-lg border border-white/5">
-                  <TechnicalOverview data={generateChartData(selectedSymbol)} />
-                </div>
+                {/* Detay Kartları (2 satırlık grid) */}
+                {marketData && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Satır 1: Price, Change%, High/Low, Volume */}
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">Last Price</div>
+                        <div className="text-[18px] font-semibold text-neutral-200">{formatPriceUsd(marketData.price)}</div>
+                      </div>
+                    </Surface>
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">24h Change</div>
+                        <div className={cn(
+                          "text-[18px] font-semibold",
+                          marketData.change >= 0 ? "text-emerald-400" : "text-red-400"
+                        )}>
+                          {formatSignedPct(marketData.change, { input: 'pct' })}
+                        </div>
+                      </div>
+                    </Surface>
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">24h High / Low</div>
+                        <div className="text-[14px] font-medium text-neutral-300">
+                          {formatPriceUsd(marketData.high)} / {formatPriceUsd(marketData.low)}
+                        </div>
+                      </div>
+                    </Surface>
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">Volume</div>
+                        <div className="text-[14px] font-medium text-neutral-300">{formatCompactUsd(marketData.volume)}</div>
+                      </div>
+                    </Surface>
 
-                {/* Chart footer info */}
-                <div className="mt-4 flex items-center justify-between text-[10px] text-neutral-500">
-                  <span>TradingView entegrasyonu yakında...</span>
-                  <span>Win: 68% · R:R 1:2.5 · Regime: Trend</span>
+                    {/* Satır 2: RSI, Signal, Regime, Volatility */}
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">RSI (14)</div>
+                        <div className={cn(
+                          "text-[18px] font-semibold",
+                          marketData.rsi > 70 ? "text-red-400" :
+                          marketData.rsi < 30 ? "text-emerald-400" :
+                          "text-neutral-200"
+                        )}>
+                          {marketData.rsi}
+                        </div>
+                      </div>
+                    </Surface>
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">Signal</div>
+                        <div className={cn(
+                          "text-[14px] font-medium",
+                          marketData.signal === 'BUY' || marketData.signal === 'STRONG BUY' ? "text-emerald-400" :
+                          marketData.signal === 'SELL' ? "text-red-400" :
+                          "text-amber-400"
+                        )}>
+                          {marketData.signal}
+                        </div>
+                      </div>
+                    </Surface>
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">Regime</div>
+                        <div className="text-[14px] font-medium text-neutral-300">Trend</div>
+                      </div>
+                    </Surface>
+                    <Surface variant="card" className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] text-neutral-500">Volatility</div>
+                        <div className="text-[14px] font-medium text-neutral-300">High</div>
+                      </div>
+                    </Surface>
+                  </div>
+                )}
+              </>
+            ) : (
+              <Surface variant="card" className="p-6">
+                <div className="flex flex-col items-center justify-center h-[400px] text-center">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mb-4">
+                    <span className="text-2xl">📈</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-neutral-200 mb-2">
+                    Sembol Seçin
+                  </h3>
+                  <p className="text-sm text-neutral-500 max-w-md">
+                    Tablodaki bir sembolün grafik butonuna tıklayarak workspace görünümüne geçin.
+                  </p>
                 </div>
               </Surface>
+            )}
+          </div>
+        ) : viewMode === 'full' ? (
+          /* Fullscreen Chart View - AppFrame chrome gizlenecek */
+          <div className="h-screen w-screen flex flex-col overflow-hidden p-0">
+            {selectedSymbol ? (
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <MarketChartWorkspace
+                  symbol={selectedSymbol}
+                  timeframe="1D"
+                  onTimeframeChange={(tf: string) => {
+                    console.log('Timeframe changed:', tf);
+                  }}
+                  onClose={() => updateUrl('workspace', selectedSymbol)}
+                  isFullscreen={true}
+                />
+              </div>
             ) : (
-              /* Empty state - no symbol selected */
               <Surface variant="card" className="p-6">
                 <div className="flex flex-col items-center justify-center h-[400px] text-center">
                   <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mb-4">
@@ -235,20 +401,10 @@ export default function MarketData() {
           </div>
         ) : (
           <>
-            {/* Filter Bar */}
-            <div className="mb-4">
-              <FilterBar
-                chips={filterChips}
-                searchPlaceholder="Sembol ara..."
-                searchValue={searchValue}
-                onSearchChange={setSearchValue}
-              />
-            </div>
-
-            {/* Main content: Table + Chart Preview (2 columns on lg+) */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
+            {/* Main content: Table (full-width when preview closed) - Figma parity: rounded-2xl, px-5 py-4 */}
+            <div className="w-full">
               {/* Market Data Table */}
-              <Surface variant="card" className="overflow-hidden">
+              <Surface variant="card" className="overflow-hidden w-full rounded-2xl border border-white/10 bg-[#0b0d10] px-5 py-4">
                 {loading ? (
                   <MarketDataTable loading={true} />
                 ) : !hasData ? (
@@ -268,8 +424,8 @@ export default function MarketData() {
                 )}
               </Surface>
 
-              {/* Embedded Chart Preview (Figma Parity P0) */}
-              <Surface variant="card" className="p-3 hidden lg:flex flex-col">
+              {/* Embedded Chart Preview (Figma Parity P0) - Default kapalı */}
+              <Surface variant="card" className="p-3 hidden flex-col">
                 {/* Preview header */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -309,10 +465,12 @@ export default function MarketData() {
           </>
         )}
 
-        {/* Footer hint */}
-        <div className="mt-4 text-center text-[10px] text-neutral-500">
-          Piyasa analizi için sağdaki SPARK COPILOT'u kullanın
-        </div>
+        {/* Footer hint - sadece list view'da */}
+        {viewMode === 'list' && (
+          <div className="mt-4 text-center text-[10px] text-neutral-500">
+            Piyasa analizi için sağdaki SPARK COPILOT'u kullanın
+          </div>
+        )}
       </div>
     </div>
   );

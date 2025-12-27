@@ -23,16 +23,31 @@ export function Sparkline({ data, width = 80, height = 24, className, isPositive
     return <div style={{ width, height }} className={className} />;
   }
 
+  const padding = 2;
+  const chartWidth = width - padding * 2;
+  const chartHeight = height - padding * 2;
+
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
 
-  // Normalize points to SVG coordinates
-  const points = data.map((value, index) => {
-    const x = (index / (data.length - 1)) * width;
-    const y = height - ((value - min) / range) * (height - 4) - 2; // 2px padding top/bottom
-    return `${x},${y}`;
+  // Padding for better visualization (8% of range)
+  const paddingRatio = 0.08;
+  const paddedMin = min - range * paddingRatio;
+  const paddedMax = max + range * paddingRatio;
+  const paddedRange = paddedMax - paddedMin || 1;
+
+  // Build SVG path (smoother than polyline)
+  const pathData = data.map((value, index) => {
+    const x = padding + (index / (data.length - 1)) * chartWidth;
+    const y = padding + chartHeight - ((value - paddedMin) / paddedRange) * chartHeight;
+    return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
   }).join(' ');
+
+  // Last point coordinates for circle marker
+  const lastIndex = data.length - 1;
+  const lastX = padding + (lastIndex / (data.length - 1)) * chartWidth;
+  const lastY = padding + chartHeight - ((data[lastIndex] - paddedMin) / paddedRange) * chartHeight;
 
   // Trend color: use isPositive prop if provided, otherwise compare first and last values
   const trend = isPositive !== undefined
@@ -48,13 +63,41 @@ export function Sparkline({ data, width = 80, height = 24, className, isPositive
       viewBox={`0 0 ${width} ${height}`}
       className={className}
     >
-      <polyline
-        points={points}
+      {/* Minimal area fill gradient (Figma parity: very subtle) */}
+      <defs>
+        <linearGradient id={`sparkline-gradient-${trend ? 'green' : 'red'}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.08" />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Optional area fill (very subtle) */}
+      <path
+        d={`${pathData} L ${lastX} ${padding + chartHeight} L ${padding} ${padding + chartHeight} Z`}
+        fill={`url(#sparkline-gradient-${trend ? 'green' : 'red'})`}
+        opacity="0.5"
+      />
+
+      {/* Sparkline path - thin stroke (Figma parity: 1.5px) */}
+      <path
+        d={pathData}
         fill="none"
         stroke={strokeColor}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        opacity="0.9"
+      />
+
+      {/* Last point marker (Figma parity - small dot) */}
+      <circle
+        cx={lastX}
+        cy={lastY}
+        r="2"
+        fill={strokeColor}
+        stroke="var(--app-bg, #0a0a0a)"
+        strokeWidth="1"
+        opacity="0.95"
       />
     </svg>
   );

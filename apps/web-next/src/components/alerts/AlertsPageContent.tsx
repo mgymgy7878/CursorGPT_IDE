@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { FilterBar } from '@/components/ui/FilterBar';
 import { Surface } from '@/components/ui/Surface';
+import { StatCard } from '@/components/ui/StatCard';
 import { cardHeader, badgeVariant } from '@/styles/uiTokens';
 import { cn } from '@/lib/utils';
 
@@ -82,24 +83,12 @@ export default function AlertsPageContent({
         subtitle="Fiyat, P&L ve risk seviyeleri için bildirim ayarları"
       />
 
-      {/* Summary Stats - Figma parity */}
+      {/* Summary Stats - PATCH P: MetricTile standardı */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Toplam Uyarı</div>
-          <div className="text-2xl font-semibold text-neutral-200">{totalAlerts}</div>
-        </Surface>
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Aktif</div>
-          <div className="text-2xl font-semibold text-emerald-400">{activeAlerts}</div>
-        </Surface>
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Bugün Tetiklenen</div>
-          <div className="text-2xl font-semibold text-amber-400">{triggeredToday}</div>
-        </Surface>
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Beklemede</div>
-          <div className="text-2xl font-semibold text-neutral-400">{pendingAlerts}</div>
-        </Surface>
+        <StatCard label="Toplam Uyarı" value={totalAlerts} />
+        <StatCard label="Aktif" value={activeAlerts} />
+        <StatCard label="Bugün Tetiklenen" value={triggeredToday} />
+        <StatCard label="Beklemede" value={pendingAlerts} />
       </div>
 
       {/* Actions Row */}
@@ -111,7 +100,8 @@ export default function AlertsPageContent({
         </div>
         <button
           onClick={() => {/* TODO: Create alert modal */}}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white flex items-center gap-2"
+          className="px-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white flex items-center gap-2"
+          style={{ height: 'var(--control-h, 36px)' }}
         >
           <span>+</span>
           <span>Yeni Uyarı Oluştur</span>
@@ -162,23 +152,58 @@ export default function AlertsPageContent({
             </thead>
             <tbody>
               {filteredItems.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12">
-                    <div className="text-center space-y-3">
-                      <div className="text-4xl mb-2">🔔</div>
-                      <div className="text-lg font-medium text-neutral-200">Henüz alert yok</div>
-                      <div className="text-sm text-neutral-400 max-w-md mx-auto">
-                        Fiyat, P&L veya risk seviyeleri için bildirim oluşturarak başlayın
+                <>
+                  {/* Example Template Cards */}
+                  <tr>
+                    <td colSpan={8} className="py-6">
+                      <div className="grid md:grid-cols-3 gap-3 mb-6">
+                        <div className="p-4 rounded-lg border border-neutral-700 bg-neutral-900/30 opacity-60">
+                          <div className="text-sm font-medium text-neutral-300 mb-1">RSI {'>'} 70</div>
+                          <div className="text-xs text-neutral-500">Fiyat: RSI aşırı alım seviyesi</div>
+                          <div className="mt-2 text-xs text-neutral-600">Örnek şablon (devre dışı)</div>
+                        </div>
+                        <div className="p-4 rounded-lg border border-neutral-700 bg-neutral-900/30 opacity-60">
+                          <div className="text-sm font-medium text-neutral-300 mb-1">PnL Günlük -%X</div>
+                          <div className="text-xs text-neutral-500">Risk: Günlük zarar limiti</div>
+                          <div className="mt-2 text-xs text-neutral-600">Örnek şablon (devre dışı)</div>
+                        </div>
+                        <div className="p-4 rounded-lg border border-neutral-700 bg-neutral-900/30 opacity-60">
+                          <div className="text-sm font-medium text-neutral-300 mb-1">WS Disconnect</div>
+                          <div className="text-xs text-neutral-500">Sistem: WebSocket bağlantı kesildi</div>
+                          <div className="mt-2 text-xs text-neutral-600">Örnek şablon (devre dışı)</div>
+                        </div>
                       </div>
-                      <a
-                        href="/technical-analysis"
-                        className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm text-white mt-2"
-                      >
-                        Technical Analysis → Hızlı Uyarı
-                      </a>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={8} className="py-12">
+                      <div className="text-center space-y-3">
+                        <div className="text-4xl mb-2">🔔</div>
+                        <div className="text-lg font-medium text-neutral-200">Henüz alert yok</div>
+                        <div className="text-sm text-neutral-400 max-w-md mx-auto">
+                          Fiyat, P&L veya risk seviyeleri için bildirim oluşturarak başlayın
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2 justify-center items-center mt-4">
+                          <button
+                            onClick={() => {/* TODO: Create alert modal */}}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm text-white transition-colors"
+                          >
+                            + Yeni Uyarı Oluştur
+                          </button>
+                          <a
+                            href="/technical-analysis"
+                            className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded-lg text-sm text-neutral-200 transition-colors"
+                          >
+                            Technical Analysis → Hızlı Uyarı
+                          </a>
+                        </div>
+                        <div className="text-xs text-neutral-500 mt-3 max-w-md mx-auto">
+                          Uyarılar executor + risk gate'den tetiklenir. Aktif uyarılar burada görünecek.
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </>
               ) : (
                 filteredItems.map((item) => (
                   <tr key={item.id} className="border-b border-neutral-900 hover:bg-neutral-900/30">

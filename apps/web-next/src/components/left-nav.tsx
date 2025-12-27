@@ -32,6 +32,7 @@ import type { ComponentType, SVGProps } from 'react'
 type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number }>;
 
 // Figma'daki menü yapısı - Her item'e accent renk
+// PATCH: Sadeleştirilmiş menü (≤ 10 item)
 const navItems: {
   label: string;
   href: string;
@@ -41,16 +42,10 @@ const navItems: {
 }[] = [
   { label: 'Ana Sayfa', href: '/dashboard', icon: IconHome, accent: 'text-sky-400', bgAccent: 'bg-sky-500/10' },
   { label: 'Piyasa Verileri', href: '/market-data', icon: IconBarChart, accent: 'text-emerald-400', bgAccent: 'bg-emerald-500/10' },
-  { label: 'Strateji Laboratuvarı', href: '/strategy-lab', icon: IconFlask, accent: 'text-violet-400', bgAccent: 'bg-violet-500/10' },
   { label: 'Stratejilerim', href: '/strategies', icon: IconFolder, accent: 'text-blue-400', bgAccent: 'bg-blue-500/10' },
   { label: 'Çalışan Stratejiler', href: '/running', icon: IconPlay, accent: 'text-green-400', bgAccent: 'bg-green-500/10' },
-  { label: 'Portföy', href: '/portfolio', icon: IconBriefcase, accent: 'text-amber-400', bgAccent: 'bg-amber-500/10' },
-  { label: 'Uyarılar', href: '/alerts', icon: IconBell, accent: 'text-yellow-400', bgAccent: 'bg-yellow-500/10' },
-  { label: 'Denetim / Loglar', href: '/audit', icon: IconClipboard, accent: 'text-slate-400', bgAccent: 'bg-slate-500/10' },
-  { label: 'Risk / Koruma', href: '/guardrails', icon: IconLock, accent: 'text-orange-400', bgAccent: 'bg-orange-500/10' },
-  { label: 'UX Test Runner', href: '/canary', icon: IconTestTube, accent: 'text-pink-400', bgAccent: 'bg-pink-500/10' },
+  { label: 'Operasyon Merkezi', href: '/control', icon: IconLock, accent: 'text-orange-400', bgAccent: 'bg-orange-500/10' },
   { label: 'Ayarlar', href: '/settings', icon: IconSettings, accent: 'text-neutral-400', bgAccent: 'bg-neutral-500/10' },
-  { label: 'Karar Geçmişi', href: '/history', icon: IconHistory, accent: 'text-cyan-400', bgAccent: 'bg-cyan-500/10' },
 ]
 
 interface LeftNavProps {

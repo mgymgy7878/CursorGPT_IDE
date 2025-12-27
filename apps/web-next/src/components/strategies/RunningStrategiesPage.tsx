@@ -92,13 +92,13 @@ export default function RunningStrategiesPage() {
         subtitle="Aktif stratejileri görüntüle ve yönet"
       />
 
-      {/* Metric Ribbon */}
-      <div className="mb-4">
-        <MetricRibbon items={MOCK_METRICS} />
+      {/* PATCH R: Metric Ribbon - tek satır, wrap yok, yatay scroll */}
+      <div className="mb-4 overflow-x-auto" style={{ height: 'var(--summary-strip-py, 10px) * 2 + 20px' }}>
+        <MetricRibbon items={MOCK_METRICS} className="whitespace-nowrap" />
       </div>
 
-      {/* Filter Bar */}
-      <div className="mb-4">
+      {/* PATCH R: Filter Bar - height token */}
+      <div className="mb-4" style={{ height: 'var(--filters-h, 36px)' }}>
         <FilterBar
           chips={filterChips}
           searchPlaceholder="Strateji ara..."

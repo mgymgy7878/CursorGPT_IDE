@@ -122,8 +122,11 @@ export default function DashboardGrid() {
         <MiniList title="Piyasa Durumu" items={marketData} />
       </div>
 
-      {/* Rest of the grid: Middle and Bottom rows */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
+      {/* PATCH R: Rest of the grid - section gap token */}
+      <div
+        className="grid grid-cols-1 lg:grid-cols-2 mt-5"
+        style={{ gap: 'var(--section-gap, 12px)' }}
+      >
 
         {/* Middle Left: Active Strategies */}
         <CompactTable

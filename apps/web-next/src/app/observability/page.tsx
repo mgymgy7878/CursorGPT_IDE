@@ -18,10 +18,10 @@ function SafeBoundary({ children }: { children: React.ReactNode }) {
 
 export default function ObservabilityPage() {
   return (
-    <main className="max-w-6xl mx-auto p-6 space-y-6">
+    <main className="max-w-6xl mx-auto p-6 space-y-4">
       <div>
-        <h1 className="text-3xl font-semibold mb-2">Observability</h1>
-        <p className="text-neutral-400">Real-time system health and metrics</p>
+        <h1 className="text-xl font-semibold mb-1">Observability</h1>
+        <p className="text-xs text-neutral-400">Real-time system health and metrics</p>
       </div>
       <Suspense fallback={<div role="status" aria-label="Loading metrics">Loading metrics...</div>}>
         <SafeBoundary>

@@ -57,6 +57,12 @@ export default [
               name: '@/components/layout/AppFrame',
               message: 'AppFrame sadece root layout\'ta kullanılır. Sayfa layout\'larında kullanma.',
             },
+            // SSOT: Chart oluşturma createSparkChart üzerinden olmalı
+            {
+              name: 'lightweight-charts',
+              importNames: ['createChart'],
+              message: 'Chart creation must go through createSparkChart (SSOT). Use createSparkChart() from @/lib/charts/createSparkChart instead.',
+            },
           ],
           patterns: [
             {
@@ -77,6 +83,13 @@ export default [
           }
         ]
       ]
+    },
+  },
+  // SSOT override: createSparkChart.ts içinde createChart importuna izin ver
+  {
+    files: ['src/lib/charts/createSparkChart.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   ...compat.extends('next/core-web-vitals'),

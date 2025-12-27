@@ -3,6 +3,7 @@ import { AuditItem } from '@/hooks/useAuditLogs';
 import { DataTable, DataTableHeader, DataTableRow, DataTableCell, DataTableHeaderCell } from '@/components/ui/DataTable';
 import { badgeVariant } from '@/styles/uiTokens';
 import { cn } from '@/lib/utils';
+import { ClientTime } from '@/components/common/ClientTime';
 
 // Category icons mapping - Figma parity
 const getCategoryIcon = (category: string) => {
@@ -33,11 +34,29 @@ export default function AuditTable({ rows }: { rows: AuditItem[] }) {
           {rows.length === 0 ? (
             <tr>
               <td colSpan={6} className="py-12">
-                <div className="text-center space-y-3">
+                <div className="text-center space-y-4">
                   <div className="text-4xl mb-2">📋</div>
                   <div className="text-lg font-medium text-neutral-200">Henüz log kaydı yok</div>
-                  <div className="text-sm text-neutral-400 max-w-md mx-auto">
+                  <div className="text-sm text-neutral-400 max-w-md mx-auto mb-4">
                     Sistem kararları, AI sinyalleri ve işlem kayıtları burada görünecek
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
+                    <a
+                      href="/canary"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm text-white transition-colors"
+                    >
+                      Canary Test Çalıştır
+                    </a>
+                    <span className="text-xs text-neutral-500">veya</span>
+                    <a
+                      href="/technical-analysis"
+                      className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded-lg text-sm text-neutral-200 transition-colors"
+                    >
+                      Sample Data Seed
+                    </a>
+                  </div>
+                  <div className="text-xs text-neutral-500 mt-2">
+                    Log üretmek için: Canary Test çalıştır veya Sample Data Seed kullan
                   </div>
                 </div>
               </td>
@@ -50,7 +69,7 @@ export default function AuditTable({ rows }: { rows: AuditItem[] }) {
               return (
                 <DataTableRow key={r.auditId}>
                   <DataTableCell className="whitespace-nowrap font-mono text-xs text-neutral-300">
-                    {new Date(r.time).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 })}
+                    <ClientTime value={r.time} />
                   </DataTableCell>
                   <DataTableCell>
                     <div className="flex items-center gap-2">

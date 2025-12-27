@@ -59,15 +59,21 @@ export default function StrategyLabHeader({
 
   return (
     <div className="sticky top-0 z-40 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800">
-      <div className="container mx-auto px-4 py-4">
-        {/* Top Row: Title + Status + Actions */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-neutral-200">Strategy Lab</h1>
-            <p className="text-sm text-neutral-400 mt-1">AI → Backtest → Optimize → Best-of</p>
+      <div
+        className="container mx-auto px-4"
+        style={{
+          paddingTop: 'var(--summary-strip-py, 10px)',
+          paddingBottom: 'var(--summary-strip-py, 10px)',
+        }}
+      >
+        {/* Top Row: Density Title + Status */}
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-[18px] font-semibold tracking-[-0.02em] leading-none text-neutral-200">Strategy Lab</h1>
+            <span className="text-[11px] text-neutral-400 leading-none">AI → Backtest → Optimize → Best-of</span>
           </div>
-          {/* Status pills only - Ops Hızlı Yardım tek otorite olarak FAB'da */}
-          <div className="flex items-center gap-3">
+          {/* Status pills */}
+          <div className="flex items-center gap-2">
             <StatusPill label="Feed" value={feedStatus === 'healthy' ? 'Healthy' : feedStatus === 'degraded' ? 'Degraded' : 'Down'} tone={feedTone} />
             <StatusPill label="Broker" value={brokerStatus === 'online' ? 'Online' : 'Offline'} tone={brokerTone} />
             <StatusPill label="Env" value={env} tone="muted" />

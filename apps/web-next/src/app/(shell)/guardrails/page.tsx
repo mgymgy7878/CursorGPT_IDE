@@ -1,7 +1,11 @@
 "use client";
 
-import RiskProtectionPage from '@/components/guardrails/RiskProtectionPage';
+import { useEffect } from "react";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <RiskProtectionPage />;
+  useEffect(() => {
+    redirect('/control?tab=risk');
+  }, []);
+  return null;
 }

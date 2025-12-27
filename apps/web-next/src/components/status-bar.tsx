@@ -119,25 +119,25 @@ export default function StatusBar() {
             {/* Divider */}
             <div className="w-px h-4 bg-white/10 shrink-0" />
 
-            {/* Metrics - P95 · RT Delay · OrderBus (Figma separator style, consistent typography) */}
-            {metrics.p95 !== null && (
-              <>
-                <span className="text-[13px] text-white/60 tabular-nums whitespace-nowrap shrink-0 min-w-[52px] text-right font-medium">
-                  P95: {metrics.p95}ms
-                </span>
-                <span className="text-white/35 shrink-0">·</span>
-              </>
-            )}
-            {metrics.rtDelay !== null && (
-              <>
-                <span className="text-[13px] text-white/60 tabular-nums whitespace-nowrap shrink-0 min-w-[52px] text-right font-medium">
-                  <span className="hidden sm:inline">RT Delay: </span>
-                  <span className="sm:hidden">RT: </span>
-                  {metrics.rtDelay}ms
-                </span>
-                <span className="text-white/35 shrink-0">·</span>
-              </>
-            )}
+            {/* Metrics - P95 · RT Delay · WS Staleness · OrderBus (PATCH H: Telemetri metrikleri) */}
+            <span className="text-[13px] text-white/60 tabular-nums whitespace-nowrap shrink-0 min-w-[52px] text-right font-medium">
+              P95: {metrics.p95 !== null ? `${metrics.p95}ms` : '—'}
+            </span>
+            <span className="text-white/35 shrink-0">·</span>
+            <span className="text-[13px] text-white/60 tabular-nums whitespace-nowrap shrink-0 min-w-[52px] text-right font-medium">
+              <span className="hidden sm:inline">RT Delay: </span>
+              <span className="sm:hidden">RT: </span>
+              {metrics.rtDelay !== null ? `${metrics.rtDelay}ms` : '—'}
+            </span>
+            <span className="text-white/35 shrink-0">·</span>
+            {/* PATCH H: WS Staleness (mock - would come from WS heartbeat) */}
+            <span className="text-[13px] text-white/60 tabular-nums whitespace-nowrap shrink-0 min-w-[40px] text-right font-medium">
+              <span className="hidden sm:inline">WS: </span>
+              <span className={wsOk ? "text-emerald-300" : "text-amber-400"}>
+                {wsOk ? '<1s' : '—'}
+              </span>
+            </span>
+            <span className="text-white/35 shrink-0">·</span>
             <span className="text-[13px] whitespace-nowrap shrink-0 font-medium">
               <span className="hidden sm:inline text-white/60">OrderBus: </span>
               <span className="sm:hidden text-white/60">OB: </span>

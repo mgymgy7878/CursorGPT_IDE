@@ -22,8 +22,8 @@ export default function AiOptimizerPage(){
   return (
     <div className="p-6 space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">🤖 AI Optimizasyon</h1>
-        <p className="text-sm opacity-70">Parametre taraması ile en iyi EMA kombinasyonunu bul</p>
+        <h1 className="text-xl font-semibold">🤖 AI Optimizasyon</h1>
+        <p className="text-xs opacity-70">Parametre taraması ile en iyi EMA kombinasyonunu bul</p>
       </div>
       <div className="grid md:grid-cols-3 gap-2">
         <label className="text-sm">

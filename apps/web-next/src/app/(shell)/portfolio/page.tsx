@@ -50,30 +50,31 @@ function LivePnL() {
   const inOrders = 4347.50;
 
   return (
-    <div className="space-y-4">
-      <div className="text-center">
+    <div className="space-y-3">
+      {/* PATCH P: Vertical centering kaldırıldı, hero number token'a bağlandı */}
+      <div>
         <h3
-          className={`text-2xl font-bold tabular-nums ${pnl24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
+          className={`font-bold tabular-nums glance-hero-number ${pnl24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
           aria-live="polite"
           aria-atomic="true">
           {pnl24h >= 0 ? '+' : ''}{formatCurrency(pnl24h, 'USD')}
         </h3>
-        <div className="text-sm text-neutral-400">24 saat P&L</div>
+        <div className="text-sm text-neutral-400 mt-1">24 saat P&L</div>
       </div>
 
-      {/* P1 FIX: grid ile label/value hizası - gap-3 ile "sıkışık" hissi önlenir */}
-      <div className="space-y-2">
-        <div className="grid grid-cols-[1fr_auto] gap-3 text-sm min-w-0">
-          <span className="text-neutral-400 truncate">Toplam Bakiye</span>
-          <span className="text-white tabular-nums whitespace-nowrap">{formatCurrency(totalBalance, 'USD')}</span>
+      {/* PATCH P: 2 kolon grid + daha düşük gap */}
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div>
+          <div className="text-neutral-400 text-xs">Toplam Bakiye</div>
+          <div className="text-white tabular-nums whitespace-nowrap">{formatCurrency(totalBalance, 'USD')}</div>
         </div>
-        <div className="grid grid-cols-[1fr_auto] gap-3 text-sm min-w-0">
-          <span className="text-neutral-400 truncate">Kullanılabilir</span>
-          <span className="text-white tabular-nums whitespace-nowrap">{formatCurrency(available, 'USD')}</span>
+        <div>
+          <div className="text-neutral-400 text-xs">Kullanılabilir</div>
+          <div className="text-white tabular-nums whitespace-nowrap">{formatCurrency(available, 'USD')}</div>
         </div>
-        <div className="grid grid-cols-[1fr_auto] gap-3 text-sm min-w-0">
-          <span className="text-neutral-400 truncate">Emirde</span>
-          <span className="text-white tabular-nums whitespace-nowrap">{formatCurrency(inOrders, 'USD')}</span>
+        <div className="col-span-2">
+          <div className="text-neutral-400 text-xs">Emirde</div>
+          <div className="text-white tabular-nums whitespace-nowrap">{formatCurrency(inOrders, 'USD')}</div>
         </div>
       </div>
     </div>
@@ -109,21 +110,20 @@ export default function Portfolio() {
           </CardContent>
         </Card>
 
+        {/* PATCH P: Gereksiz min-h kaldırıldı, padding token'a bağlı */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Hesap Özeti</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-xs text-neutral-400">Toplam Bakiye</div>
-                  <div className="text-lg font-semibold num-tight text-neutral-200">{formatCurrency(12847.50, 'USD')}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-neutral-400">Kullanılabilir</div>
-                  <div className="text-lg font-semibold num-tight text-neutral-200">{formatCurrency(8500.00, 'USD')}</div>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-neutral-400">Toplam Bakiye</div>
+                <div className="text-lg font-semibold num-tight text-neutral-200">{formatCurrency(12847.50, 'USD')}</div>
+              </div>
+              <div>
+                <div className="text-xs text-neutral-400">Kullanılabilir</div>
+                <div className="text-lg font-semibold num-tight text-neutral-200">{formatCurrency(8500.00, 'USD')}</div>
               </div>
             </div>
           </CardContent>

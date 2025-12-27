@@ -45,6 +45,28 @@ const nextConfig = {
   },
   headers: async () => {
     const reportOnly = process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === "1";
+    const isDev = process.env.NODE_ENV === "development";
+
+    // Dev modunda CSP'yi kapat (HMR ve Next.js dev özellikleri için sorun çıkarıyor)
+    // Prod'da sıkı CSP korunuyor
+    // Not: CSP'yi sadece HTML'e uygulamak için middleware kullanılabilir
+    if (isDev) {
+      // Dev modunda CSP header'ı hiç basma (en az baş ağrısı)
+      return [
+        {
+          source: "/(.*)",
+          headers: [
+            { key: "X-Content-Type-Options", value: "nosniff" },
+            { key: "X-Frame-Options", value: "DENY" },
+            { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          ],
+        },
+      ];
+    }
+
+    // Production CSP (sıkı)
+    // Not: Asset'ler için CSP gereksiz ama Next.js headers() tüm route'lara uygular
+    // Middleware'de Accept header kontrolü yapılabilir (gelecekte)
     const csp = [
       "default-src 'self'",
       "base-uri 'self'",

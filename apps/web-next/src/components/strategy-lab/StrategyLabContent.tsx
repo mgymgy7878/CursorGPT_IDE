@@ -68,7 +68,7 @@ export default function StrategyLabContent({ activeTab, state = 'default' }: Str
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                className="w-full min-h-[160px] px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-200 placeholder-neutral-500 focus:border-blue-500 focus:outline-none resize-none"
+                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-200 placeholder-neutral-500 focus:border-blue-500 focus:outline-none resize-none overflow-auto glance-textarea"
                 placeholder="Başlamak için bir strateji isteği yazın. Örnek: BTCUSDT 1h EMA crossover stratejisi..."
                 disabled={isGenerating}
               />

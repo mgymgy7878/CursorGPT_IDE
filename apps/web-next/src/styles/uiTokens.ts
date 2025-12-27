@@ -71,14 +71,26 @@ export const dividerHorizontal = 'border-b border-white/8';
 // Layout Tokens
 // ============================================================================
 
-/** Card padding */
+/** Card padding - Compact mode */
 export const cardPadding = 'p-4';
 
-/** Card gap */
-export const cardGap = 'gap-5';
+/** Card padding - Critical cards (larger) */
+export const cardPaddingLarge = 'p-6';
 
-/** Section spacing */
+/** Card gap - Compact mode */
+export const cardGap = 'gap-4';
+
+/** Section spacing - Compact mode */
 export const sectionSpacing = 'space-y-1';
+
+/** Table row height - Compact mode (44-48px) */
+export const tableRowHeight = 'h-11'; // 44px
+
+/** Header row height - Compact mode */
+export const headerRowHeight = 'h-9'; // 36px
+
+/** Stat pill/badge (replaces large stat cards) */
+export const statPill = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-white/5 border border-white/10';
 
 // ============================================================================
 // Helper Functions

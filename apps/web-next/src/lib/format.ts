@@ -83,6 +83,51 @@ export function formatCurrency(
 }
 
 /**
+ * Format price USD (PATCH Y - Figma parity: smart decimals)
+ * @example formatPriceUsd(43245) => "$43,245" (integer, no .00)
+ * @example formatPriceUsd(0.6142) => "$0.6142" (<1, 4 decimals)
+ * @example formatPriceUsd(98.50) => "$98.50" (<100, 2 decimals)
+ * @example formatPriceUsd(42150) => "$42,150" (>=100, 0 decimals)
+ *
+ * Figma parity: büyük fiyatlar .00'sız, küçük fiyatlar anlamlı hassasiyetle
+ */
+export function formatPriceUsd(
+  value: number | string | null | undefined
+): string {
+  if (value === null || value === undefined) return '—';
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '—';
+
+  const abs = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+
+  // PATCH Y: Kademeli decimal logic (Figma parity)
+  let minDecimals = 0;
+  let maxDecimals = 0;
+
+  if (abs < 1) {
+    // <1: 4 decimals (örn 0.6142)
+    minDecimals = 4;
+    maxDecimals = 4;
+  } else if (abs < 100) {
+    // <100: 2 decimals (örn 98.50)
+    minDecimals = 2;
+    maxDecimals = 2;
+  } else {
+    // >=100: 0 decimals (örn 43,245 veya 42,150)
+    minDecimals = 0;
+    maxDecimals = 0;
+  }
+
+  return new Intl.NumberFormat(DEFAULT_LOCALE, {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: minDecimals,
+    maximumFractionDigits: maxDecimals,
+  }).format(num);
+}
+
+/**
  * Format percentage
  * @example formatPercent(1.2) => "1.2%"
  * @example formatPercent(0.012) => "1.2%" (auto: multiply by 100 if < 1)
@@ -157,4 +202,83 @@ export function formatTime(
     timeZone: 'Europe/Istanbul', // SABİT timezone - SSR/CSR mismatch'i önler
     ...options, // options içinde timeZone varsa override eder
   }).format(dateObj);
+}
+
+/**
+ * Format compact USD (PATCH V - Figma parity)
+ * @example formatCompactUsd(2840000000) => "$28.4B"
+ * @example formatCompactUsd(1800000000) => "$1.8B"
+ * @example formatCompactUsd(845000000) => "$845M"
+ * @example formatCompactUsd(1250000) => "$1.25M"
+ */
+export function formatCompactUsd(
+  value: number | string | null | undefined
+): string {
+  if (value === null || value === undefined) return '—';
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '—';
+
+  const abs = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+
+  // PATCH W: Remove .0 suffix for cleaner display (Figma parity)
+  const formatValue = (val: number, decimals: number) => {
+    const formatted = val.toFixed(decimals);
+    return formatted.replace(/\.0+$/, ''); // Remove trailing .0
+  };
+
+  if (abs >= 1_000_000_000) {
+    return `${sign}$${formatValue(abs / 1_000_000_000, 1)}B`;
+  } else if (abs >= 1_000_000) {
+    return `${sign}$${formatValue(abs / 1_000_000, 1)}M`;
+  } else if (abs >= 1_000) {
+    return `${sign}$${formatValue(abs / 1_000, 1)}K`;
+  } else {
+    return `${sign}$${abs.toFixed(2)}`;
+  }
+}
+
+/**
+ * Format signed USD change (PATCH W fix - preserve negative sign)
+ * @example formatSignedUsd(1024.50) => "+$1,024.50"
+ * @example formatSignedUsd(-450.25) => "-$450.25"
+ */
+export function formatSignedUsd(
+  value: number | string | null | undefined
+): string {
+  if (value === null || value === undefined) return '—';
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '—';
+
+  // PATCH W fix: Preserve negative sign (don't use Math.abs)
+  const sign = num >= 0 ? '+' : '-';
+  const absValue = Math.abs(num);
+  // formatCurrency always returns positive, so we prepend the sign
+  return `${sign}${formatCurrency(absValue, 'USD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/**
+ * Format signed percentage (PATCH W fix - preserve negative sign)
+ * @example formatSignedPct(2.4, { input: 'pct' }) => "+2.4%"
+ * @example formatSignedPct(-0.5, { input: 'pct' }) => "-0.5%"
+ * @example formatSignedPct(0.024, { input: 'ratio' }) => "+2.4%"
+ *
+ * @param value - Percentage value (pct-point if input='pct', decimal ratio if input='ratio')
+ * @param options - { input: 'pct' | 'ratio' } - 'pct' for percentage points (1.2 = 1.2%), 'ratio' for decimal (0.012 = 1.2%)
+ */
+export function formatSignedPct(
+  value: number | string | null | undefined,
+  options?: { input?: 'pct' | 'ratio' }
+): string {
+  if (value === null || value === undefined) return '—';
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '—';
+
+  // PATCH W: Explicit input type - no heuristics
+  const inputType = options?.input ?? 'pct';
+  const finalValue = inputType === 'ratio' ? num * 100 : num;
+  // PATCH W fix: Preserve negative sign
+  const sign = finalValue >= 0 ? '+' : '-';
+
+  return `${sign}${Math.abs(finalValue).toFixed(1)}%`;
 }

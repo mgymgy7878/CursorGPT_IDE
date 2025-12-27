@@ -14,6 +14,7 @@
 import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Surface } from '@/components/ui/Surface';
+import { StatCard } from '@/components/ui/StatCard';
 import { cardHeader, badgeVariant } from '@/styles/uiTokens';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatPercent } from '@/lib/format';
@@ -38,11 +39,43 @@ interface RiskAlert {
 export default function RiskProtectionPage() {
   const [riskLevel, setRiskLevel] = useState<'low' | 'medium' | 'high'>('medium');
   const [killSwitchActive, setKillSwitchActive] = useState(false);
+  const [showKillSwitchConfirm, setShowKillSwitchConfirm] = useState(false);
+  const [killSwitchTriggeredBy, setKillSwitchTriggeredBy] = useState<'UI' | 'AI' | 'System' | null>(null);
+  const [killSwitchLastTriggered, setKillSwitchLastTriggered] = useState<string | null>(null);
   const [killSwitchOptions, setKillSwitchOptions] = useState({
     closeAllPositions: false,
     stopStrategies: true,
     blockNewOrders: true,
   });
+
+  const handleKillSwitchToggle = () => {
+    if (!killSwitchActive) {
+      // Activating kill switch - show confirmation
+      setShowKillSwitchConfirm(true);
+    } else {
+      // Deactivating - direct action
+      setKillSwitchActive(false);
+      setKillSwitchTriggeredBy(null);
+    }
+  };
+
+  const confirmKillSwitch = () => {
+    setKillSwitchActive(true);
+    setKillSwitchTriggeredBy('UI');
+    setKillSwitchLastTriggered(new Date().toLocaleString('tr-TR'));
+    setShowKillSwitchConfirm(false);
+
+    // TODO: API call to trigger kill switch
+    fetch('/api/guardrails/kill-switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        active: true,
+        options: killSwitchOptions,
+        triggeredBy: 'UI',
+      }),
+    }).catch(() => {});
+  };
 
   // Mock metrics
   const metrics: RiskMetrics = {
@@ -72,8 +105,15 @@ export default function RiskProtectionPage() {
         subtitle="Global risk parametreleri ve acil durum kontrolleri"
       />
 
-      {/* Risk Level Indicator */}
-      <Surface variant="card" className="p-4 mb-6 border-amber-500/30 bg-amber-500/5">
+      {/* Risk Level Indicator - PATCH P: Compact py + radius vars */}
+      <div
+        className="mb-6 border-amber-500/30 bg-amber-500/5 rounded-lg"
+        style={{
+          padding: 'var(--card-pad, 12px)',
+          borderRadius: 'var(--card-radius, 12px)',
+          borderWidth: 'var(--card-border-w, 1px)',
+        }}
+      >
         <div className="flex items-center gap-3">
           <span className="text-2xl">▲</span>
           <div>
@@ -81,46 +121,42 @@ export default function RiskProtectionPage() {
             <div className="text-xl font-semibold text-amber-400">Medium</div>
           </div>
         </div>
-      </Surface>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Current Exposure</div>
-          <div className={cn(
-            "text-2xl font-semibold mb-1",
-            metrics.currentExposure >= metrics.exposureLimit * 0.8 ? 'text-red-400' : 'text-neutral-200'
-          )}>
-            {metrics.currentExposure}%
-          </div>
-          <div className="text-xs text-neutral-500">Limit: {metrics.exposureLimit}%</div>
-        </Surface>
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Max DD (24h)</div>
-          <div className="text-2xl font-semibold text-red-400 mb-1">
-            {formatPercent(metrics.maxDD24h)}
-          </div>
-          <div className="text-xs text-neutral-500">Limit: {metrics.maxDDLimit}%</div>
-        </Surface>
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Daily Loss</div>
-          <div className="text-2xl font-semibold text-neutral-200 mb-1">
-            {formatCurrency(metrics.dailyLoss, 'USD')}
-          </div>
-          <div className="text-xs text-neutral-500">Limit: {formatCurrency(metrics.dailyLossLimit, 'USD')}</div>
-        </Surface>
-        <Surface variant="card" className="p-4">
-          <div className="text-xs text-neutral-400 mb-1">Open Orders</div>
-          <div className="text-2xl font-semibold text-neutral-200 mb-1">
-            {metrics.openOrders}
-          </div>
-          <div className="text-xs text-neutral-500">Limit: {metrics.openOrdersLimit}</div>
-        </Surface>
       </div>
 
-      {/* Global Kill Switch */}
-      <Surface variant="card" className="p-6 mb-6 border-red-500/30 bg-red-500/5">
-        <div className="flex items-center justify-between mb-4">
+      {/* Key Metrics - PATCH P: MetricTile standardı */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          label="Current Exposure"
+          value={`${metrics.currentExposure}%`}
+          sublabel={`Limit: ${metrics.exposureLimit}%`}
+        />
+        <StatCard
+          label="Max DD (24h)"
+          value={formatPercent(metrics.maxDD24h)}
+          sublabel={`Limit: ${metrics.maxDDLimit}%`}
+        />
+        <StatCard
+          label="Daily Loss"
+          value={formatCurrency(metrics.dailyLoss, 'USD')}
+          sublabel={`Limit: ${formatCurrency(metrics.dailyLossLimit, 'USD')}`}
+        />
+        <StatCard
+          label="Open Orders"
+          value={metrics.openOrders}
+          sublabel={`Limit: ${metrics.openOrdersLimit}`}
+        />
+      </div>
+
+      {/* Global Kill Switch - PATCH P: Header padding azaltıldı */}
+      <div
+        className="mb-6 border-red-500/30 bg-red-500/5 rounded-lg"
+        style={{
+          padding: 'var(--card-pad, 12px)',
+          borderRadius: 'var(--card-radius, 12px)',
+          borderWidth: 'var(--card-border-w, 1px)',
+        }}
+      >
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <span className="text-2xl">⚡</span>
             <div>
@@ -134,7 +170,7 @@ export default function RiskProtectionPage() {
             </div>
           </div>
           <button
-            onClick={() => setKillSwitchActive(!killSwitchActive)}
+            onClick={handleKillSwitchToggle}
             className={cn(
               "px-6 py-3 rounded-lg font-semibold text-white transition-colors",
               killSwitchActive
@@ -146,7 +182,8 @@ export default function RiskProtectionPage() {
           </button>
         </div>
 
-        <div className="space-y-2 text-sm">
+        {/* PATCH S: Glance'da 2 kolon grid (SSR-safe) */}
+        <div className="text-sm glance-kill-switch-grid">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -178,7 +215,56 @@ export default function RiskProtectionPage() {
         <div className="mt-3 text-xs text-neutral-500">
           Seçili aksiyonlar acil durdurma tetiklendiğinde sırayla uygulanır.
         </div>
-      </Surface>
+        {killSwitchLastTriggered && (
+          <div className="mt-3 pt-3 border-t border-neutral-800">
+            <div className="text-xs text-neutral-400">
+              Son tetiklenme: {killSwitchLastTriggered}
+            </div>
+            {killSwitchTriggeredBy && (
+              <div className="text-xs text-neutral-500 mt-1">
+                Tetikleyen kaynak: {killSwitchTriggeredBy}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Kill Switch Confirmation Modal */}
+      {showKillSwitchConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-neutral-900 border border-red-500/30 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-3xl">⚡</span>
+              <div>
+                <div className="text-lg font-semibold text-red-400">Acil Durdurma Onayı</div>
+                <div className="text-sm text-neutral-400">Bu işlem geri alınamaz</div>
+              </div>
+            </div>
+            <div className="mb-4 space-y-2">
+              <div className="text-sm text-neutral-300 font-medium">Aşağıdaki aksiyonlar uygulanacak:</div>
+              <ul className="text-sm text-neutral-400 space-y-1 ml-4 list-disc">
+                {killSwitchOptions.blockNewOrders && <li>Yeni emirler engellenecek</li>}
+                {killSwitchOptions.stopStrategies && <li>Stratejiler durdurulacak</li>}
+                {killSwitchOptions.closeAllPositions && <li>Tüm pozisyonlar kapatılacak</li>}
+              </ul>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowKillSwitchConfirm(false)}
+                className="flex-1 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded-lg text-sm text-neutral-200 transition-colors"
+              >
+                İptal
+              </button>
+              <button
+                onClick={confirmKillSwitch}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold text-white transition-colors"
+              >
+                Onayla ve Tetikle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Aktif Risk Uyarıları */}
       <Surface variant="card" className="p-4 mb-6">

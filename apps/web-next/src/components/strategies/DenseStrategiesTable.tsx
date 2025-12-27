@@ -97,7 +97,13 @@ export default function DenseStrategiesTable({
   };
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-neutral-800">
+    <div
+      className="w-full rounded-lg border border-neutral-800 min-h-0"
+      style={{
+        maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 200px)',
+        overflow: 'auto',
+      }}
+    >
       <DataTable>
         <DataTableHeader>
           <DataTableRow hover={false} className="h-12">
@@ -130,22 +136,22 @@ export default function DenseStrategiesTable({
                     </DataTableCell>
                   )}
                   {row.pnl24h !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <DeltaText value={row.pnl24h} />
                     </DataTableCell>
                   )}
                   {row.pnl7d !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <DeltaText value={row.pnl7d} />
                     </DataTableCell>
                   )}
                   {row.winRate30d !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <MonoNumber value={formatPercent(row.winRate30d / 100)} className="text-sm text-neutral-300" />
                     </DataTableCell>
                   )}
                   {row.sharpe30d !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <MonoNumber value={row.sharpe30d.toFixed(2)} className="text-sm text-neutral-300" />
                     </DataTableCell>
                   )}
@@ -166,22 +172,22 @@ export default function DenseStrategiesTable({
                     </DataTableCell>
                   )}
                   {row.openPositions !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <MonoNumber value={row.openPositions} className="text-sm text-neutral-300" />
                     </DataTableCell>
                   )}
                   {row.exposure !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <MonoNumber value={formatCurrency(row.exposure)} className="text-sm text-neutral-300" />
                     </DataTableCell>
                   )}
                   {row.pnl24h !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <DeltaText value={row.pnl24h} />
                     </DataTableCell>
                   )}
                   {row.pnl7d !== undefined && (
-                    <DataTableCell className="text-right">
+                    <DataTableCell className="text-right tabular-nums">
                       <DeltaText value={row.pnl7d} />
                     </DataTableCell>
                   )}

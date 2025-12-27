@@ -11,29 +11,34 @@ export default function AuditFilters({ onChange }:{ onChange:(v:Form)=>void }) {
   useEffect(()=>()=>sub.unsubscribe(), [sub, submit]);
 
   return (
-    <form onSubmit={submit} className="grid md:grid-cols-5 gap-2">
+    <form onSubmit={submit} className="grid md:grid-cols-5 gap-1.5">
       <input
-        className="h-10 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        style={{ height: 'var(--control-h, 36px)' }}
         placeholder="Actor"
         {...register('actor')}
       />
       <input
-        className="h-10 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        style={{ height: 'var(--control-h, 36px)' }}
         placeholder="Action"
         {...register('action')}
       />
       <input
-        className="h-10 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        style={{ height: 'var(--control-h, 36px)' }}
         placeholder="Search (q)"
         {...register('q')}
       />
       <input
-        className="h-10 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        style={{ height: 'var(--control-h, 36px)' }}
         type="datetime-local"
         {...register('from')}
       />
       <input
-        className="h-10 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        style={{ height: 'var(--control-h, 36px)' }}
         type="datetime-local"
         {...register('to')}
       />
