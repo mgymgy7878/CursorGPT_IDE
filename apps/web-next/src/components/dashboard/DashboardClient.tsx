@@ -33,16 +33,15 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
     window.location.href = '/dashboard';
   };
 
-  // Golden Master v1.0: h-full + min-h-0 zinciri
-  // Container padding yok, GoldenDashboard kendi padding'ini veriyor
+  // Golden Master v1.0: Normal container structure (AppFrame handles height)
   return (
-    <div className="h-full min-h-0 overflow-hidden bg-[#050608]">
+    <div className="min-h-screen">
       {/* Debug state marker */}
       <div data-testid="dashboard-state" data-state={panelState} hidden aria-hidden="true" />
 
       {isLoading ? (
-        <div className="h-full flex items-center justify-center">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="p-4 rounded-lg border border-[#16181d] bg-[#111318] animate-pulse">
                 <div className="h-4 bg-[#262626] rounded w-1/3 mb-3"></div>
@@ -52,14 +51,14 @@ export default function DashboardClient({ devState }: DashboardClientProps) {
           </div>
         </div>
       ) : hasError ? (
-        <div className="h-full flex items-center justify-center">
+        <div className="flex items-center justify-center py-12">
           <ErrorState
             message="Dashboard verileri yüklenirken bir hata oluştu"
             onRetry={handleRetry}
           />
         </div>
       ) : isEmpty ? (
-        <div className="h-full flex items-center justify-center">
+        <div className="flex items-center justify-center py-12">
           <EmptyState
             title="Henüz dashboard verisi yok"
             description="Veriler yüklendiğinde burada görünecek"

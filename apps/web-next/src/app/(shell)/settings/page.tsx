@@ -43,7 +43,7 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
-      
+
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-neutral-800">
         <button
