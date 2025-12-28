@@ -3,12 +3,17 @@
 
 # Typecheck gate: Prevent runtime errors from missing imports/hooks
 echo "🔍 Running typecheck (web-next)..."
-pnpm --filter web-next typecheck
+if ! pnpm --filter web-next typecheck; then
+  echo "❌ Typecheck failed (web-next). Please fix errors before committing."
+  exit 1
+fi
 
 # Root typecheck (all packages)
 echo "🔍 Running typecheck (all packages)..."
-pnpm -w typecheck || {
-  echo "❌ Typecheck failed. Please fix errors before committing."
+if ! pnpm -w typecheck; then
+  echo "❌ Typecheck failed (all packages). Please fix errors before committing."
   exit 1
-}
+fi
+
+echo "✅ Typecheck passed"
 
