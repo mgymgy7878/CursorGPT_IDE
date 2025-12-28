@@ -73,6 +73,9 @@ jobs:
       - name: Install (offline mode)
         run: pnpm -w install --offline --frozen-lockfile --strict-peer-dependencies
       
+      - name: Typecheck (all packages)
+        run: pnpm -w typecheck
+      
       - name: UI Fast Verify
         run: pnpm verify
 

@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Typecheck gate: Prevent runtime errors from missing imports/hooks
+echo "🔍 Running typecheck (web-next)..."
+pnpm --filter web-next typecheck
+
+# Root typecheck (all packages)
+echo "🔍 Running typecheck (all packages)..."
+pnpm -w typecheck || {
+  echo "❌ Typecheck failed. Please fix errors before committing."
+  exit 1
+}
+
