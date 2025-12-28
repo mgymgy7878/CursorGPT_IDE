@@ -11,7 +11,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Surface } from '@/components/ui/Surface';
 import { StatCard } from '@/components/ui/StatCard';
@@ -274,11 +274,11 @@ export default function RiskProtectionPage() {
 
   const groupedAlerts = useMemo(() => {
     const groups = new Map<string, GroupedAlert>();
-    
+
     rawAlerts.forEach((alert) => {
       // Gruplama key'i: message içeriğine göre (gerçek uygulamada type+market+rule)
       const key = alert.message;
-      
+
       if (!groups.has(key)) {
         groups.set(key, {
           key,
@@ -290,7 +290,7 @@ export default function RiskProtectionPage() {
           alerts: [],
         });
       }
-      
+
       const group = groups.get(key)!;
       group.count++;
       group.alerts.push(alert);
@@ -299,7 +299,7 @@ export default function RiskProtectionPage() {
         group.lastTriggered = alert.timestamp;
       }
     });
-    
+
     return Array.from(groups.values());
   }, [rawAlerts]);
 
