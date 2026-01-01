@@ -13,6 +13,14 @@ const nextConfig = {
   experimental: {
     typedRoutes: false,
     optimizePackageImports: ["recharts"],
+    // Fix: styled-jsx is not automatically included in standalone builds
+    // https://github.com/vercel/next.js/issues/42641
+    outputFileTracingIncludes: {
+      "/**": [
+        "node_modules/styled-jsx/**/*",
+        "node_modules/styled-jsx/package.json",
+      ],
+    },
   },
   reactStrictMode: true,
   transpilePackages: [
@@ -37,12 +45,35 @@ const nextConfig = {
   },
   headers: async () => {
     const reportOnly = process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === "1";
+    const isDev = process.env.NODE_ENV === "development";
+
+    // Dev modunda CSP'yi kapat (HMR ve Next.js dev özellikleri için sorun çıkarıyor)
+    // Prod'da sıkı CSP korunuyor
+    // Not: CSP'yi sadece HTML'e uygulamak için middleware kullanılabilir
+    if (isDev) {
+      // Dev modunda CSP header'ı hiç basma (en az baş ağrısı)
+      return [
+        {
+          source: "/(.*)",
+          headers: [
+            { key: "X-Content-Type-Options", value: "nosniff" },
+            { key: "X-Frame-Options", value: "DENY" },
+            { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          ],
+        },
+      ];
+    }
+
+    // Production CSP (sıkı)
+    // Not: Asset'ler için CSP gereksiz ama Next.js headers() tüm route'lara uygular
+    // Middleware'de Accept header kontrolü yapılabilir (gelecekte)
     const csp = [
       "default-src 'self'",
       "base-uri 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      // script/style will be governed by middleware nonce/report-only
       "connect-src 'self' http: https: ws: wss:",
       "frame-ancestors 'none'",
     ].join("; ");

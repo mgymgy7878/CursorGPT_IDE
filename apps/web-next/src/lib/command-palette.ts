@@ -231,7 +231,7 @@ export const dailyRiskReport: CommandAction = {
   handler: async () => {
     try {
       const response = await fetch("/api/tools/risk-report?emitZip=true");
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -311,11 +311,11 @@ export const widgetsSmoke: CommandAction = {
       // For browser execution, we do a quick check instead
       const response = await fetch("/api/healthz");
       const health = await response.json();
-      
+
       const venueOk =
         (health.venues?.btcturk?.stalenessSec ?? 999) < 30 &&
         (health.venues?.bist?.stalenessSec ?? 999) < 30;
-      
+
       return {
         success: venueOk,
         message: venueOk
@@ -374,11 +374,11 @@ export const showVenueMetrics: CommandAction = {
     try {
       const response = await fetch("/api/tools/metrics?format=prometheus");
       const metrics = await response.text();
-      
+
       // Extract key metrics
       const lines = metrics.split('\n');
-      const venueMetrics = lines.filter(line => 
-        line.includes('venue_staleness_') || 
+      const venueMetrics = lines.filter(line =>
+        line.includes('venue_staleness_') ||
         line.includes('venue_http_429_total') ||
         line.includes('ws_reconnects_total')
       );
@@ -397,6 +397,76 @@ export const showVenueMetrics: CommandAction = {
   },
 };
 
+// PATCH K: Density Mode Commands
+export const setDensityUltra: CommandAction = {
+  id: "ui.density.ultra",
+  label: "Density: Ultra",
+  description: "Maksimum bilgi yoğunluğu (trading terminal)",
+  icon: "📊",
+  category: "dev" as const,
+  handler: async () => {
+    try {
+      localStorage.setItem('spark:density', 'ultra');
+      document.documentElement.dataset.density = 'ultra';
+      return {
+        success: true,
+        message: "Density mode: Ultra",
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Failed to set density: ${err}`,
+      };
+    }
+  },
+};
+
+export const setDensityCompact: CommandAction = {
+  id: "ui.density.compact",
+  label: "Density: Compact",
+  description: "Orta yoğunluk (denge)",
+  icon: "📋",
+  category: "dev" as const,
+  handler: async () => {
+    try {
+      localStorage.setItem('spark:density', 'compact');
+      document.documentElement.dataset.density = 'compact';
+      return {
+        success: true,
+        message: "Density mode: Compact",
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Failed to set density: ${err}`,
+      };
+    }
+  },
+};
+
+export const setDensityComfort: CommandAction = {
+  id: "ui.density.comfort",
+  label: "Density: Comfort",
+  description: "Rahat okuma (geniş boşluklar)",
+  icon: "📖",
+  category: "dev" as const,
+  handler: async () => {
+    try {
+      localStorage.setItem('spark:density', 'comfort');
+      document.documentElement.dataset.density = 'comfort';
+      return {
+        success: true,
+        message: "Density mode: Comfort",
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Failed to set density: ${err}`,
+      };
+    }
+  },
+};
+
 // All commands
 export const COMMANDS: CommandAction[] = [
   runCanaryMock,
@@ -409,6 +479,9 @@ export const COMMANDS: CommandAction[] = [
   widgetsSmoke,
   toggleKillSwitch,
   showVenueMetrics,
+  setDensityUltra,
+  setDensityCompact,
+  setDensityComfort,
 ];
 
 // Get commands by category

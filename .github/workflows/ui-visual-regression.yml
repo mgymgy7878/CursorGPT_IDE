@@ -1,0 +1,90 @@
+name: ui-visual-regression
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web-next/**'
+      - 'docs/**'
+      - '.github/workflows/ui-visual-regression.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/web-next/**'
+      - 'docs/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint + Typecheck (web-next)
+        run: |
+          pnpm --filter web-next lint
+          pnpm --filter web-next typecheck
+
+      - name: Install Playwright browsers
+        run: pnpm --filter web-next exec playwright install --with-deps
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: apps/web-next/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/web-next/next.config.*', 'apps/web-next/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-nextjs-
+
+      - name: Build web-next (CI cache)
+        shell: pwsh
+        working-directory: ./
+        run: pnpm --filter web-next build
+        # Build fail olursa Playwright'ın webServer katmanına gelmeden, daha temiz log + daha hızlı geri bildirim
+
+      - name: UI visual regression (Playwright)
+        shell: pwsh
+        working-directory: ./
+        run: ./apps/web-next/scripts/ci-visual-regression.ps1
+        continue-on-error: false
+
+      - name: Upload playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web-next/playwright-report
+          retention-days: 3
+          compression-level: 6
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: apps/web-next/test-results
+          retention-days: 3
+          compression-level: 6
+          if-no-files-found: ignore
+

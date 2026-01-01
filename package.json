@@ -14,9 +14,16 @@
     "build:exec": "pnpm --filter @spark/executor build",
     "ui:test": "pnpm --filter web-next exec playwright test",
     "ui:test:update": "pnpm --filter web-next exec playwright test --update-snapshots",
+    "ui:snap": "pnpm --filter web-next exec playwright test tests/ui/dashboard.spec.ts --update-snapshots",
+    "ui:diff": "pnpm --filter web-next exec playwright test tests/ui/dashboard.spec.ts",
     "ui:hash": "tsx scripts/ux/contract-hash.ts",
     "lint:tokens": "pnpm --filter web-next exec eslint --config eslint.tokens.config.js --ext .ts,.tsx src --max-warnings=0",
-    "verify": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/release/verify.ps1"
+    "verify": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/release/verify.ps1",
+    "dev:web:reset": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev-reset-web-next.ps1",
+    "dev:web:rescue": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/web-next-dev-rescue.ps1",
+    "smoke:css": "node tools/css-smoke-test.mjs",
+    "smoke:css:prod": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/css-smoke-test-prod.ps1",
+    "smoke:web": "cmd /c tools/web-next-smoke.cmd"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

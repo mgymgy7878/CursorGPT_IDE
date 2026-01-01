@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { createChart, CrosshairMode, ColorType } from "lightweight-charts";
+// SSOT: createChart import sadece type'lar için (CrosshairMode, ColorType)
+// Chart oluşturma createSparkChart helper'ı üzerinden yapılmalı (attributionLogo zorunlu false)
+import { CrosshairMode, ColorType } from "lightweight-charts";
 import type { IChartApi } from "lightweight-charts";
+import { createSparkChart } from '@/lib/charts/createSparkChart';
 
 type Candle = { t: number; o: number; h: number; l: number; c: number; v: number };
 type FibLevel = { ratio: number; price: number };
@@ -27,7 +30,7 @@ export default function PriceChartLC({
   const candleSeriesRef = useRef<any>(null);
   const volSeriesRef = useRef<any>(null);
   const lastBarTimeRef = useRef<number | undefined>(undefined);
-  
+
   const [live, setLive] = useState(false);
   const esRef = useRef<EventSource | null>(null);
 
@@ -40,11 +43,12 @@ export default function PriceChartLC({
       chartRef.current = null;
     }
 
-    const chart = createChart(divRef.current, {
+    // PATCH: createSparkChart helper kullan (attributionLogo zorunlu false)
+    const chart = createSparkChart(divRef.current, {
       height,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#e5e7eb"
+        textColor: "#e5e7eb",
       },
       grid: {
         horzLines: { color: "#1f2937" },
@@ -61,7 +65,7 @@ export default function PriceChartLC({
         borderColor: "#374151"
       },
     });
-    
+
     chartRef.current = chart as unknown as IChartApi;
 
     // Candlestick series (cast for compatibility with different typings)
@@ -74,7 +78,7 @@ export default function PriceChartLC({
       wickUpColor: "#16a34a",
       wickDownColor: "#ef4444",
     });
-    
+
     candleSeriesRef.current = candleSeries;
 
     const candleData = candles.map(k => ({
@@ -84,7 +88,7 @@ export default function PriceChartLC({
       low: k.l,
       close: k.c
     }));
-    
+
     candleSeries.setData(candleData);
     lastBarTimeRef.current = candleData[candleData.length - 1]?.time;
 
@@ -93,13 +97,13 @@ export default function PriceChartLC({
       priceScaleId: "",
       priceFormat: { type: 'volume' as const },
     });
-    
+
     volSeriesRef.current = volumeSeries;
-    
+
     volumeSeries.priceScale().applyOptions({
       scaleMargins: { top: 0.85, bottom: 0 }
     });
-    
+
     volumeSeries.setData(
       candles.map(k => ({
         time: Math.floor(k.t / 1000) as any,
@@ -115,14 +119,14 @@ export default function PriceChartLC({
         lineWidth: 1,
         title: "BB Upper"
       });
-      
+
       const middleLine = anyChart.addLineSeries({
         color: "#60a5fa",
         lineWidth: 1,
         lineStyle: 2, // dashed
         title: "BB Middle"
       });
-      
+
       const lowerLine = anyChart.addLineSeries({
         color: "#ef4444",
         lineWidth: 1,
@@ -130,15 +134,15 @@ export default function PriceChartLC({
       });
 
       const times = candles.map(k => Math.floor(k.t / 1000) as any);
-      
+
       upperLine.setData(
         times.map((t, i) => ({ time: t, value: bbSeries[i]?.u })).filter(p => !isNaN(p.value))
       );
-      
+
       middleLine.setData(
         times.map((t, i) => ({ time: t, value: bbSeries[i]?.m })).filter(p => !isNaN(p.value))
       );
-      
+
       lowerLine.setData(
         times.map((t, i) => ({ time: t, value: bbSeries[i]?.l })).filter(p => !isNaN(p.value))
       );
@@ -165,7 +169,7 @@ export default function PriceChartLC({
         chart.applyOptions({ width: Math.max(320, Math.floor(w)) });
       }
     });
-    
+
     ro.observe(divRef.current);
 
     return () => {
@@ -184,7 +188,7 @@ export default function PriceChartLC({
       esRef.current = null;
       return;
     }
-    
+
     const qs = new URLSearchParams({ symbol, timeframe });
     const es = new EventSource(`/api/marketdata/stream?${qs.toString()}`);
     esRef.current = es;
@@ -209,7 +213,7 @@ export default function PriceChartLC({
       try {
         const msg = JSON.parse(ev.data);
         if (msg.event !== "kline") return;
-        
+
         const t = Math.floor(msg.t / 1000);
         const bar = { time: t, open: msg.o, high: msg.h, low: msg.l, close: msg.c };
         const vol = { time: t, value: msg.v, color: msg.c >= msg.o ? "#16a34a66" : "#ef444466" };

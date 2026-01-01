@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
+import { formatDate } from '@/lib/format';
 
 interface CanaryCardProps {
   canaryPass: number;
@@ -23,7 +24,7 @@ export function CanaryCard({
   exitCode
 }: CanaryCardProps) {
   const passRate = canaryTotal > 0 ? (canaryPass / canaryTotal) * 100 : 0;
-  
+
   const getRiskColor = (level: string) => {
     switch (level) {
       case 'low':
@@ -92,8 +93,8 @@ export function CanaryCard({
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">P95 Latency</span>
             <span className={`text-sm font-medium ${
-              p95Latency < 1000 ? 'text-green-600 dark:text-green-400' : 
-              p95Latency < 2000 ? 'text-yellow-600 dark:text-yellow-400' : 
+              p95Latency < 1000 ? 'text-green-600 dark:text-green-400' :
+              p95Latency < 2000 ? 'text-yellow-600 dark:text-yellow-400' :
               'text-red-600 dark:text-red-400'
             }`}>
               {p95Latency}ms
@@ -105,8 +106,8 @@ export function CanaryCard({
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">Staleness</span>
             <span className={`text-sm font-medium ${
-              staleness < 30 ? 'text-green-600 dark:text-green-400' : 
-              staleness < 60 ? 'text-yellow-600 dark:text-yellow-400' : 
+              staleness < 30 ? 'text-green-600 dark:text-green-400' :
+              staleness < 60 ? 'text-yellow-600 dark:text-yellow-400' :
               'text-red-600 dark:text-red-400'
             }`}>
               {staleness}s
@@ -128,7 +129,7 @@ export function CanaryCard({
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600 dark:text-gray-400">Son Test</span>
           <span className="text-sm text-gray-900 dark:text-white">
-            {new Date(lastTimestamp).toLocaleString('tr-TR')}
+            {formatDate(new Date(lastTimestamp))}
           </span>
         </div>
       </div>
