@@ -84,7 +84,7 @@ try {
     if (-not (Test-Path $evidenceDir)) {
         New-Item -ItemType Directory -Path $evidenceDir | Out-Null
     }
-    
+
     $summary = @"
 Spark Testnet Mode Smoke Test Summary
 =====================================
@@ -97,7 +97,7 @@ buildCommit: $($healthData.buildCommit)
 requestId: $($healthData.requestId)
 klinesCount: $($klinesData.klines.Count)
 "@
-    
+
     $summary | Out-File -FilePath "$evidenceDir\smoke_summary.txt" -Encoding UTF8
     Write-Host "  ✓ Smoke summary saved to evidence\smoke_summary.txt" -ForegroundColor Green
 } catch {

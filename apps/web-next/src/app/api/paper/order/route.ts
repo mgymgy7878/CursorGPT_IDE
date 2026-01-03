@@ -1,6 +1,6 @@
 /**
  * Paper Order API - POST simulate market order
- * 
+ *
  * Sadece paper modda çalışır (guard).
  * Trade yok, sadece simülasyon.
  */
@@ -23,6 +23,12 @@ export async function POST(request: Request) {
       },
       { status: 400 }
     );
+  }
+
+  // Production warning: paper mode should not be deployed to production
+  if (process.env.NODE_ENV === 'production' && mode === 'paper') {
+    console.warn('[Paper] WARNING: Paper mode detected in production environment');
+    // Audit log için: ileride audit service'e gönderilebilir
   }
 
   try {
