@@ -1,6 +1,6 @@
 # Engine Adapter + Hardening + Full Pipeline Smoke
 
-**Dev:** web-next port 3003  
+**Dev:** web-next port 3003
 **Evidence:** Çıktılar `evidence/` klasörüne yazılır
 
 ## Summary
@@ -93,4 +93,10 @@ None. UI and API contracts remain unchanged.
 - `apps/web-next/src/app/api/optimize/run/route.ts` (prod gate)
 - `scripts/smoke-mode.ps1` (mode matrix)
 - `scripts/merge-readiness.ps1` (new)
+
+## Reviewer Checklist
+- [ ] `smoke_matrix.json` stub+real PASS
+- [ ] Prod enable gate net (`SPARK_ENGINE_MODE=real` + `SPARK_ENGINE_REAL_ENABLE=1`)
+- [ ] Evidence dosyaları boş değil (check `evidence/` directory)
+- [ ] Merge readiness output shows PASS for both modes
 
