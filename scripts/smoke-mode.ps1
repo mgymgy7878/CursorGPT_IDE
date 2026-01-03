@@ -1,9 +1,15 @@
 # Smoke Test - Spark Mode Validation (Testnet/Paper/Prod)
 # Windows PowerShell script for mode validation smoke test
+# Mode matrix: tests both stub and real engine modes
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Spark Mode Smoke Test" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Detect engine mode
+$engineMode = if ($env:SPARK_ENGINE_MODE) { $env:SPARK_ENGINE_MODE } else { "stub" }
+Write-Host "Engine Mode: $engineMode" -ForegroundColor Yellow
 Write-Host ""
 
 # Check if dev server is running
@@ -284,11 +290,31 @@ try {
     $healthData | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\health_testnet.json" -Encoding UTF8
     Write-Host "  ✓ Health response saved to evidence\health_testnet.json" -ForegroundColor Green
 
+    # Create mode matrix
+    $modeMatrix = @{
+        engineMode = $engineMode
+        sparkMode = $healthData.sparkMode
+        steps = @{
+            marketData = $pipelineResults.marketData
+            backtest = $pipelineResults.backtest
+            optimize = $pipelineResults.optimize
+            paperReset = $pipelineResults.paperReset
+            paperOrder = $pipelineResults.paperOrder
+            paperState = $pipelineResults.paperState
+        }
+        timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    }
+
+    # Save mode matrix
+    $modeMatrix | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\smoke_matrix.json" -Encoding UTF8
+    Write-Host "  ✓ Mode matrix saved to evidence\smoke_matrix.json" -ForegroundColor Green
+
     $summary = @"
 Spark Mode Smoke Test Summary
 ==============================
 Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 sparkMode: $($healthData.sparkMode)
+engineMode: $engineMode
 baseUrl: $(if ($healthData.sparkMode -eq 'testnet') { 'https://testnet.binance.vision/api' } elseif ($healthData.sparkMode -eq 'paper') { 'N/A (paper mode)' } else { 'https://api.binance.com' })
 interval: 1m
 HTTP Status: Health=$($healthResponse.StatusCode), Klines=$(if ($klinesData) { $klinesResponse.StatusCode } else { 'N/A' })
@@ -321,6 +347,7 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Evidence Package:" -ForegroundColor Yellow
 Write-Host "  - evidence\smoke_summary.txt" -ForegroundColor Gray
+Write-Host "  - evidence\smoke_matrix.json" -ForegroundColor Gray
 Write-Host "  - evidence\health_testnet.json" -ForegroundColor Gray
 if ($klinesData) {
     Write-Host "  - evidence\klines_testnet_10.json" -ForegroundColor Gray

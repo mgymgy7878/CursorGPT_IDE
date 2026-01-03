@@ -1,6 +1,6 @@
 /**
  * Stub Engine Adapter - Deterministic stub implementation
- * 
+ *
  * Mevcut jobStore mantığını kullanır, deterministic seed ile tekrarlanabilir sonuçlar.
  */
 

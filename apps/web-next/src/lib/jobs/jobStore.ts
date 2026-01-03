@@ -54,16 +54,30 @@ class JobStore {
   }
 
   /**
-   * Run engine job using adapter
+   * Run engine job using adapter (with timeout)
    */
   private async runEngineJob(jobId: string, type: 'backtest' | 'optimize', input?: any): Promise<JobResult> {
     const { getEngineAdapter } = require('../engines/engineAdapter');
     const adapter = getEngineAdapter();
+    const MAX_RUNTIME = process.env.NODE_ENV === 'production' ? 1500 : 3000; // 1.5s prod, 3s dev
 
-    if (type === 'backtest') {
-      return await adapter.runBacktest(input || { symbol: 'BTCUSDT', interval: '1h' });
-    } else {
-      return await adapter.runOptimize(input || { symbol: 'BTCUSDT', interval: '1h' });
+    const runPromise = type === 'backtest'
+      ? adapter.runBacktest(input || { symbol: 'BTCUSDT', interval: '1h' })
+      : adapter.runOptimize(input || { symbol: 'BTCUSDT', interval: '1h' });
+
+    const timeoutPromise = new Promise<JobResult>((_, reject) => {
+      setTimeout(() => reject(new Error('Engine execution timeout')), MAX_RUNTIME);
+    });
+
+    try {
+      return await Promise.race([runPromise, timeoutPromise]);
+    } catch (error) {
+      const currentJob = this.jobs.get(jobId);
+      if (currentJob) {
+        currentJob.error = error instanceof Error ? error.message : 'Engine execution failed';
+        this.jobs.set(jobId, currentJob);
+      }
+      throw error;
     }
   }
 

@@ -22,6 +22,22 @@ export async function POST(request: Request) {
     );
   }
 
+  // Prod enable check: real engine requires explicit enable
+  const engineMode = process.env.SPARK_ENGINE_MODE || 'stub';
+  const realEngineEnabled = process.env.SPARK_ENGINE_REAL_ENABLE === '1';
+  if (engineMode === 'real' && !realEngineEnabled && process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      {
+        error: 'Real engine requires SPARK_ENGINE_REAL_ENABLE=1 in production',
+      },
+      { status: 403 }
+    );
+  }
+
+  const requestId = require('crypto').randomUUID().split('-')[0];
+  const startTime = Date.now();
+  const MAX_RUNTIME = process.env.NODE_ENV === 'production' ? 1500 : 3000; // 1.5s prod, 3s dev
+
   try {
     const body = await request.json().catch(() => ({}));
     const { symbol, interval, startDate, endDate, baselineMetrics } = body; // baselineMetrics: Backtest → Optimize wiring
@@ -31,6 +47,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: 'symbol parameter is required',
+          requestId,
         },
         { status: 400 }
       );
@@ -38,18 +55,37 @@ export async function POST(request: Request) {
 
     // Fetch klines if not provided (for real engine)
     let klines: number[][] | undefined;
-    if (process.env.SPARK_ENGINE_MODE === 'real') {
+    if (engineMode === 'real') {
       try {
         const { BinanceSpotClient } = require('@/lib/exchanges/binance/spotClient');
-        const client = new BinanceSpotClient({ timeout: 5000 });
+        const client = new BinanceSpotClient({ timeout: 5000, requestId });
         klines = await client.getKlines({
           symbol,
           interval,
           limit: 200,
         });
+        
+        // Log klines validation result
+        if (klines && klines.length < 100) {
+          console.warn(`[backtest] requestId=${requestId} insufficient klines: ${klines.length}`);
+        }
       } catch (error) {
-        console.warn('Failed to fetch klines for real engine, using stub:', error);
+        console.error(`[backtest] requestId=${requestId} klines fetch failed:`, error);
+        throw new Error(`Failed to fetch klines: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
+    }
+
+    // Timeout check
+    const elapsed = Date.now() - startTime;
+    if (elapsed >= MAX_RUNTIME) {
+      return NextResponse.json(
+        {
+          error: 'Request timeout',
+          reason: 'timeout',
+          requestId,
+        },
+        { status: 408 }
+      );
     }
 
     // Create job with input
@@ -62,10 +98,14 @@ export async function POST(request: Request) {
     };
     const jobId = jobStore.createJob('backtest', input);
 
+    const elapsed = Date.now() - startTime;
+    console.log(`[backtest] requestId=${requestId} jobId=${jobId} elapsed=${elapsed}ms engineMode=${engineMode}`);
+
     return NextResponse.json(
       {
         jobId,
         message: 'Backtest job started',
+        requestId,
       },
       {
         headers: {
@@ -75,9 +115,12 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const elapsed = Date.now() - startTime;
+    console.error(`[backtest] requestId=${requestId} error after ${elapsed}ms:`, error);
     return NextResponse.json(
       {
         error: errorMessage,
+        requestId,
       },
       { status: 500 }
     );
