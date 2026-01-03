@@ -161,14 +161,14 @@ class RealEngineAdapter implements EngineAdapter {
 
   /**
    * Run optimization with parameter sweep
-   * 
+   *
    * Param sweep: fast 5..20, slow 21..80 (fast < slow)
    * Returns top result based on totalReturn/sharpe
    */
   async runOptimize(input: OptimizeInput): Promise<JobResult> {
     // For v0.1, we'll do a simplified sweep
     // In full version, this would require klines data and run multiple backtests
-    
+
     if (!input.baselineMetrics) {
       // Fallback if no baseline
       return {
@@ -191,7 +191,7 @@ class RealEngineAdapter implements EngineAdapter {
 
     // Simulate results for each combination (in real version, would run actual backtest)
     const results: Array<{ params: { fast: number; slow: number }; result: JobResult }> = [];
-    
+
     for (const params of paramCombinations) {
       // Simplified: improve baseline based on params
       const improvement = (params.fast + params.slow) / 100; // Simple heuristic

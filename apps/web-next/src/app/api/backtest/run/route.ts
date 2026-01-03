@@ -64,7 +64,7 @@ export async function POST(request: Request) {
           interval,
           limit: 200,
         });
-        
+
         // Log klines validation result
         if (klines && klines.length < 100) {
           console.warn(`[backtest] requestId=${requestId} insufficient klines: ${klines.length}`);
