@@ -106,7 +106,7 @@ pnpm --filter web-next dev
 ### Automated Smoke Test
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/smoke-testnet.ps1
+powershell -ExecutionPolicy Bypass -File scripts/smoke-mode.ps1
 ```
 
 **Evidence Package:**

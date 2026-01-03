@@ -1,8 +1,8 @@
-# Smoke Test - Testnet Mode Validation
-# Windows PowerShell script for testnet mode smoke test
+# Smoke Test - Spark Mode Validation (Testnet/Paper/Prod)
+# Windows PowerShell script for mode validation smoke test
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Spark Testnet Mode Smoke Test" -ForegroundColor Cyan
+Write-Host "  Spark Mode Smoke Test" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -10,20 +10,21 @@ Write-Host ""
 $healthUrl = "http://localhost:3003/api/health"
 $klinesUrl = "http://localhost:3003/api/binance/klines?symbol=BTCUSDT&interval=1m&limit=10"
 
-Write-Host "[1/3] Checking dev server health..." -ForegroundColor Yellow
+Write-Host "[1/4] Checking dev server health..." -ForegroundColor Yellow
 try {
     $healthResponse = Invoke-WebRequest -Uri $healthUrl -Method GET -UseBasicParsing -TimeoutSec 5
     $healthData = $healthResponse.Content | ConvertFrom-Json
 
     Write-Host "  ✓ Health endpoint responded" -ForegroundColor Green
-    Write-Host "  - sparkMode: $($healthData.sparkMode)" -ForegroundColor $(if ($healthData.sparkMode -eq 'testnet') { 'Green' } else { 'Red' })
+    Write-Host "  - sparkMode: $($healthData.sparkMode)" -ForegroundColor $(if ($healthData.sparkMode -eq 'testnet' -or $healthData.sparkMode -eq 'paper') { 'Green' } else { 'Yellow' })
     Write-Host "  - buildCommit: $($healthData.buildCommit)" -ForegroundColor Gray
     Write-Host "  - requestId: $($healthData.requestId)" -ForegroundColor Gray
 
-    if ($healthData.sparkMode -ne 'testnet') {
-        Write-Host "  ⚠ WARNING: sparkMode is not 'testnet'" -ForegroundColor Yellow
-        Write-Host "    PowerShell: `$env:SPARK_MODE='testnet'; `$env:NEXT_PUBLIC_SPARK_MODE='testnet'" -ForegroundColor Yellow
-        Write-Host "    CMD: set SPARK_MODE=testnet && set NEXT_PUBLIC_SPARK_MODE=testnet" -ForegroundColor Yellow
+    $expectedMode = if ($env:SPARK_MODE) { $env:SPARK_MODE } else { 'testnet' }
+    if ($healthData.sparkMode -ne $expectedMode) {
+        Write-Host "  ⚠ WARNING: sparkMode mismatch (expected: $expectedMode, got: $($healthData.sparkMode))" -ForegroundColor Yellow
+        Write-Host "    PowerShell: `$env:SPARK_MODE='$expectedMode'; `$env:NEXT_PUBLIC_SPARK_MODE='$expectedMode'" -ForegroundColor Yellow
+        Write-Host "    CMD: set SPARK_MODE=$expectedMode && set NEXT_PUBLIC_SPARK_MODE=$expectedMode" -ForegroundColor Yellow
     }
 } catch {
     Write-Host "  ✗ Health endpoint failed: $($_.Exception.Message)" -ForegroundColor Red
@@ -32,7 +33,8 @@ try {
 }
 
 Write-Host ""
-Write-Host "[2/3] Testing Binance Testnet klines endpoint..." -ForegroundColor Yellow
+Write-Host "[2/4] Testing Binance klines endpoint..." -ForegroundColor Yellow
+$klinesData = $null
 try {
     $klinesResponse = Invoke-WebRequest -Uri $klinesUrl -Method GET -UseBasicParsing -TimeoutSec 10
     $klinesData = $klinesResponse.Content | ConvertFrom-Json
@@ -65,16 +67,31 @@ try {
 }
 
 Write-Host ""
-Write-Host "[3/3] Saving health response to evidence..." -ForegroundColor Yellow
-try {
-    $evidenceDir = "evidence"
-    if (-not (Test-Path $evidenceDir)) {
-        New-Item -ItemType Directory -Path $evidenceDir | Out-Null
+Write-Host "[3/4] Testing Paper Ledger (if paper mode)..." -ForegroundColor Yellow
+$paperState = $null
+if ($healthData.sparkMode -eq 'paper') {
+    try {
+        $paperResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/paper/state" -Method GET -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
+        if ($paperResponse.StatusCode -eq 200) {
+            $paperState = $paperResponse.Content | ConvertFrom-Json
+            Write-Host "  ✓ Paper ledger state available" -ForegroundColor Green
+            Write-Host "  - cashBalance: `$$($paperState.cashBalance)" -ForegroundColor Gray
+            Write-Host "  - positions: $($paperState.positions.Count)" -ForegroundColor Gray
+            Write-Host "  - fills: $($paperState.fills.Count)" -ForegroundColor Gray
+            
+            # Save paper state to evidence
+            $evidenceDir = "evidence"
+            if (-not (Test-Path $evidenceDir)) {
+                New-Item -ItemType Directory -Path $evidenceDir | Out-Null
+            }
+            $paperState | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\paper_state.json" -Encoding UTF8
+            Write-Host "  ✓ Paper state saved to evidence\paper_state.json" -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "  ⚠ Paper ledger not available (expected if not in paper mode)" -ForegroundColor Yellow
     }
-    $healthData | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\health_testnet.json" -Encoding UTF8
-    Write-Host "  ✓ Health response saved to evidence\health_testnet.json" -ForegroundColor Green
-} catch {
-    Write-Host "  ✗ Failed to save health response: $($_.Exception.Message)" -ForegroundColor Red
+} else {
+    Write-Host "  ⏭ Skipped (not in paper mode)" -ForegroundColor Gray
 }
 
 Write-Host ""
@@ -84,18 +101,23 @@ try {
     if (-not (Test-Path $evidenceDir)) {
         New-Item -ItemType Directory -Path $evidenceDir | Out-Null
     }
+    
+    # Save health response
+    $healthData | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\health_testnet.json" -Encoding UTF8
+    Write-Host "  ✓ Health response saved to evidence\health_testnet.json" -ForegroundColor Green
 
     $summary = @"
-Spark Testnet Mode Smoke Test Summary
-=====================================
+Spark Mode Smoke Test Summary
+==============================
 Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 sparkMode: $($healthData.sparkMode)
-baseUrl: $(if ($healthData.sparkMode -eq 'testnet') { 'https://testnet.binance.vision/api' } else { 'https://api.binance.com' })
+baseUrl: $(if ($healthData.sparkMode -eq 'testnet') { 'https://testnet.binance.vision/api' } elseif ($healthData.sparkMode -eq 'paper') { 'N/A (paper mode)' } else { 'https://api.binance.com' })
 interval: 1m
-HTTP Status: Health=$($healthResponse.StatusCode), Klines=$($klinesResponse.StatusCode)
+HTTP Status: Health=$($healthResponse.StatusCode), Klines=$(if ($klinesData) { $klinesResponse.StatusCode } else { 'N/A' })
 buildCommit: $($healthData.buildCommit)
 requestId: $($healthData.requestId)
-klinesCount: $($klinesData.klines.Count)
+klinesCount: $(if ($klinesData) { $klinesData.klines.Count } else { 'N/A' })
+Paper State: $(if ($paperState) { 'Available' } else { 'N/A' })
 "@
 
     $summary | Out-File -FilePath "$evidenceDir\smoke_summary.txt" -Encoding UTF8
@@ -112,10 +134,14 @@ Write-Host ""
 Write-Host "Evidence Package:" -ForegroundColor Yellow
 Write-Host "  - evidence\smoke_summary.txt" -ForegroundColor Gray
 Write-Host "  - evidence\health_testnet.json" -ForegroundColor Gray
-Write-Host "  - evidence\klines_testnet_10.json" -ForegroundColor Gray
+if ($klinesData) {
+    Write-Host "  - evidence\klines_testnet_10.json" -ForegroundColor Gray
+}
+if ($paperState) {
+    Write-Host "  - evidence\paper_state.json" -ForegroundColor Gray
+}
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
-Write-Host "  1. Check UI: Status bar should show TESTNET badge" -ForegroundColor Gray
-Write-Host "  2. Check Strategy Lab: Pipeline Market Data step should work" -ForegroundColor Gray
+Write-Host "  1. Check UI: Status bar should show mode badge (TESTNET/PAPER)" -ForegroundColor Gray
+Write-Host "  2. Check Strategy Lab: Pipeline steps should work" -ForegroundColor Gray
 Write-Host ""
-
