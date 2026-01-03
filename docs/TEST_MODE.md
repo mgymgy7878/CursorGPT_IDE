@@ -85,13 +85,38 @@ if (mode === 'prod' && !confirmToken) {
 
 ## Smoke Test
 
-### Typecheck
-```bash
-pnpm -w --filter web-next typecheck
+### Environment Setup
+
+**PowerShell (Windows):**
+```powershell
+$env:SPARK_MODE="testnet"
+$env:NEXT_PUBLIC_SPARK_MODE="testnet"
+pnpm --filter web-next dev
 ```
 
-### Build
+**CMD (Windows):**
+```cmd
+set SPARK_MODE=testnet
+set NEXT_PUBLIC_SPARK_MODE=testnet
+pnpm --filter web-next dev
+```
+
+**Not:** `NEXT_PUBLIC_*` değişkenleri build-time okunduğu için dev server'ı yeniden başlatmak gerekir.
+
+### Automated Smoke Test
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/smoke-testnet.ps1
+```
+
+**Evidence Package:**
+- `evidence/smoke_summary.txt` - Tarih, sparkMode, baseUrl, interval, HTTP status
+- `evidence/health_testnet.json` - Health endpoint response
+- `evidence/klines_testnet_10.json` - Sample klines data
+
+### Manual Typecheck/Build
 ```bash
+pnpm -w --filter web-next typecheck
 pnpm -w --filter web-next build
 ```
 

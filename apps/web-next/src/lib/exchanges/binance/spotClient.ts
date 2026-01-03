@@ -86,10 +86,10 @@ export class BinanceSpotClient {
   }): Promise<any[]> {
     // Base URL kontrolü: çift /api olmamalı
     // testnet.binance.vision/api zaten /api içeriyor, /v3/klines ekleniyor
-    const apiPath = this.baseUrl.endsWith('/api') 
+    const apiPath = this.baseUrl.endsWith('/api')
       ? `${this.baseUrl}/v3/klines`
       : `${this.baseUrl}/api/v3/klines`;
-    
+
     const url = new URL(apiPath);
     url.searchParams.set('symbol', params.symbol.toUpperCase());
     url.searchParams.set('interval', this.normalizeInterval(params.interval));
@@ -140,7 +140,7 @@ export class BinanceSpotClient {
     const apiPath = this.baseUrl.endsWith('/api')
       ? `${this.baseUrl}/v3/exchangeInfo`
       : `${this.baseUrl}/api/v3/exchangeInfo`;
-    
+
     const url = new URL(apiPath);
 
     const headers: HeadersInit = {
@@ -185,7 +185,7 @@ export class BinanceSpotClient {
     const apiPath = this.baseUrl.endsWith('/api')
       ? `${this.baseUrl}/v3/ticker/24hr`
       : `${this.baseUrl}/api/v3/ticker/24hr`;
-    
+
     const url = new URL(apiPath);
     if (symbol) {
       url.searchParams.set('symbol', symbol.toUpperCase());

@@ -14,15 +14,16 @@ Write-Host "[1/3] Checking dev server health..." -ForegroundColor Yellow
 try {
     $healthResponse = Invoke-WebRequest -Uri $healthUrl -Method GET -UseBasicParsing -TimeoutSec 5
     $healthData = $healthResponse.Content | ConvertFrom-Json
-    
+
     Write-Host "  ✓ Health endpoint responded" -ForegroundColor Green
     Write-Host "  - sparkMode: $($healthData.sparkMode)" -ForegroundColor $(if ($healthData.sparkMode -eq 'testnet') { 'Green' } else { 'Red' })
     Write-Host "  - buildCommit: $($healthData.buildCommit)" -ForegroundColor Gray
     Write-Host "  - requestId: $($healthData.requestId)" -ForegroundColor Gray
-    
+
     if ($healthData.sparkMode -ne 'testnet') {
         Write-Host "  ⚠ WARNING: sparkMode is not 'testnet'" -ForegroundColor Yellow
-        Write-Host "    Make sure to set: SPARK_MODE=testnet NEXT_PUBLIC_SPARK_MODE=testnet" -ForegroundColor Yellow
+        Write-Host "    PowerShell: `$env:SPARK_MODE='testnet'; `$env:NEXT_PUBLIC_SPARK_MODE='testnet'" -ForegroundColor Yellow
+        Write-Host "    CMD: set SPARK_MODE=testnet && set NEXT_PUBLIC_SPARK_MODE=testnet" -ForegroundColor Yellow
     }
 } catch {
     Write-Host "  ✗ Health endpoint failed: $($_.Exception.Message)" -ForegroundColor Red
@@ -35,13 +36,13 @@ Write-Host "[2/3] Testing Binance Testnet klines endpoint..." -ForegroundColor Y
 try {
     $klinesResponse = Invoke-WebRequest -Uri $klinesUrl -Method GET -UseBasicParsing -TimeoutSec 10
     $klinesData = $klinesResponse.Content | ConvertFrom-Json
-    
+
     Write-Host "  ✓ Klines endpoint responded" -ForegroundColor Green
     Write-Host "  - symbol: $($klinesData.symbol)" -ForegroundColor Gray
     Write-Host "  - interval: $($klinesData.interval)" -ForegroundColor Gray
     Write-Host "  - klines count: $($klinesData.klines.Count)" -ForegroundColor $(if ($klinesData.klines.Count -gt 0) { 'Green' } else { 'Red' })
     Write-Host "  - requestId: $($klinesData.requestId)" -ForegroundColor Gray
-    
+
     if ($klinesData.klines.Count -eq 0) {
         Write-Host "  ⚠ WARNING: No klines data received" -ForegroundColor Yellow
     } else {
@@ -77,15 +78,44 @@ try {
 }
 
 Write-Host ""
+Write-Host "[4/4] Generating smoke summary..." -ForegroundColor Yellow
+try {
+    $evidenceDir = "evidence"
+    if (-not (Test-Path $evidenceDir)) {
+        New-Item -ItemType Directory -Path $evidenceDir | Out-Null
+    }
+    
+    $summary = @"
+Spark Testnet Mode Smoke Test Summary
+=====================================
+Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+sparkMode: $($healthData.sparkMode)
+baseUrl: $(if ($healthData.sparkMode -eq 'testnet') { 'https://testnet.binance.vision/api' } else { 'https://api.binance.com' })
+interval: 1m
+HTTP Status: Health=$($healthResponse.StatusCode), Klines=$($klinesResponse.StatusCode)
+buildCommit: $($healthData.buildCommit)
+requestId: $($healthData.requestId)
+klinesCount: $($klinesData.klines.Count)
+"@
+    
+    $summary | Out-File -FilePath "$evidenceDir\smoke_summary.txt" -Encoding UTF8
+    Write-Host "  ✓ Smoke summary saved to evidence\smoke_summary.txt" -ForegroundColor Green
+} catch {
+    Write-Host "  ✗ Failed to save smoke summary: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Smoke Test Complete" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
+Write-Host "Evidence Package:" -ForegroundColor Yellow
+Write-Host "  - evidence\smoke_summary.txt" -ForegroundColor Gray
+Write-Host "  - evidence\health_testnet.json" -ForegroundColor Gray
+Write-Host "  - evidence\klines_testnet_10.json" -ForegroundColor Gray
+Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. Check UI: Status bar should show TESTNET badge" -ForegroundColor Gray
 Write-Host "  2. Check Strategy Lab: Pipeline Market Data step should work" -ForegroundColor Gray
-Write-Host "  3. Review evidence files:" -ForegroundColor Gray
-Write-Host "     - evidence\health_testnet.json" -ForegroundColor Gray
-Write-Host "     - evidence\klines_testnet_10.json" -ForegroundColor Gray
 Write-Host ""
 
