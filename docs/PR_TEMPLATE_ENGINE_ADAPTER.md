@@ -27,6 +27,7 @@ This PR introduces an engine adapter layer that allows switching between stub an
 ### Production Safety
 - **Hard Disable**: All stub/paper APIs return 404 in production
 - **Real Engine Gate**: Requires both `SPARK_ENGINE_MODE=real` AND `SPARK_ENGINE_REAL_ENABLE=1` in production
+- **Deploy Default**: Prod deploy'da `SPARK_ENGINE_MODE` varsayılanı `stub` kalmalıdır (explicit opt-in)
 - **Controlled Errors**: RequestId logging, timeout handling, validation errors
 
 ## Evidence Package
