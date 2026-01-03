@@ -115,7 +115,7 @@ export function StrategyLabPipeline() {
     if (stepId === 'paper-run') {
       const step = steps.find(s => s.id === stepId);
       const optimizeStep = steps.find(s => s.id === 'optimize');
-      
+
       // Dependency check: Optimize başarılı olmalı (opsiyonel, şimdilik uyarı)
       if (optimizeStep?.status !== 'success' || !optimizeResult) {
         // Uyarı ver ama engelleme (kullanıcı manuel çalıştırabilir)
@@ -233,7 +233,7 @@ export function StrategyLabPipeline() {
     if (stepId === 'optimize') {
       const step = steps.find(s => s.id === stepId);
       const backtestStep = steps.find(s => s.id === 'backtest');
-      
+
       // Dependency check: Backtest başarılı olmalı
       if (backtestStep?.status !== 'success' || !backtestResult) {
         alert('Önce Backtest adımını başarıyla tamamlamalısınız.');

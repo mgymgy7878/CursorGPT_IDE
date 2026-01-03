@@ -191,7 +191,89 @@ if ($healthData.sparkMode -eq 'paper') {
 }
 
 Write-Host ""
-Write-Host "[6/6] Generating smoke summary..." -ForegroundColor Yellow
+Write-Host "[6/7] Full Pipeline Run (if paper mode)..." -ForegroundColor Yellow
+$pipelineResults = @{
+    marketData = "SKIP"
+    backtest = "SKIP"
+    optimize = "SKIP"
+    paperReset = "SKIP"
+    paperOrder = "SKIP"
+    paperState = "SKIP"
+}
+
+if ($healthData.sparkMode -eq 'paper') {
+    try {
+        # 1. Market Data (klines)
+        Write-Host "  [1/5] Market Data..." -ForegroundColor Gray
+        $klinesResponse = Invoke-WebRequest -Uri $klinesUrl -Method GET -UseBasicParsing -TimeoutSec 10 -ErrorAction SilentlyContinue
+        if ($klinesResponse.StatusCode -eq 200) {
+            $pipelineResults.marketData = "PASS ($($klinesResponse.StatusCode))"
+        } else {
+            $pipelineResults.marketData = "FAIL ($($klinesResponse.StatusCode))"
+        }
+
+        # 2. Backtest (already done above, reuse result)
+        if ($backtestStatus -and $backtestStatus.status -eq 'success') {
+            $pipelineResults.backtest = "PASS (status=$($backtestStatus.status))"
+        } elseif ($backtestStatus) {
+            $pipelineResults.backtest = "FAIL (status=$($backtestStatus.status))"
+        }
+
+        # 3. Optimize (already done above, reuse result)
+        if ($optimizeStatus -and $optimizeStatus.status -eq 'success') {
+            $pipelineResults.optimize = "PASS (status=$($optimizeStatus.status))"
+        } elseif ($optimizeStatus) {
+            $pipelineResults.optimize = "FAIL (status=$($optimizeStatus.status))"
+        }
+
+        # 4. Paper Reset
+        Write-Host "  [4/5] Paper Reset..." -ForegroundColor Gray
+        $paperResetResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/paper/reset" -Method POST -UseBasicParsing -ContentType "application/json" -Body '{"initialCash":10000}' -TimeoutSec 5 -ErrorAction SilentlyContinue
+        if ($paperResetResponse.StatusCode -eq 200) {
+            $pipelineResults.paperReset = "PASS ($($paperResetResponse.StatusCode))"
+        } else {
+            $pipelineResults.paperReset = "FAIL ($($paperResetResponse.StatusCode))"
+        }
+
+        # 5. Paper Order (if we have market price)
+        Write-Host "  [5/5] Paper Order..." -ForegroundColor Gray
+        if ($klinesData -and $klinesData.klines.Count -gt 0) {
+            $lastKline = $klinesData.klines[$klinesData.klines.Count - 1]
+            $lastClose = $lastKline[4]
+            $paperOrderBody = @{
+                symbol = "BTCUSDT"
+                side = "buy"
+                qty = 0.001
+                marketPrice = $lastClose
+            } | ConvertTo-Json
+            $paperOrderResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/paper/order" -Method POST -UseBasicParsing -ContentType "application/json" -Body $paperOrderBody -TimeoutSec 5 -ErrorAction SilentlyContinue
+            if ($paperOrderResponse.StatusCode -eq 200) {
+                $pipelineResults.paperOrder = "PASS ($($paperOrderResponse.StatusCode))"
+            } else {
+                $pipelineResults.paperOrder = "FAIL ($($paperOrderResponse.StatusCode))"
+            }
+        } else {
+            $pipelineResults.paperOrder = "SKIP (no market data)"
+        }
+
+        # 6. Paper State (final check)
+        $paperStateResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/paper/state" -Method GET -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
+        if ($paperStateResponse.StatusCode -eq 200) {
+            $pipelineResults.paperState = "PASS ($($paperStateResponse.StatusCode))"
+        } else {
+            $pipelineResults.paperState = "FAIL ($($paperStateResponse.StatusCode))"
+        }
+
+        Write-Host "  ✓ Pipeline run complete" -ForegroundColor Green
+    } catch {
+        Write-Host "  ⚠ Pipeline run failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  ⏭ Skipped (not in paper mode)" -ForegroundColor Gray
+}
+
+Write-Host ""
+Write-Host "[7/7] Generating smoke summary..." -ForegroundColor Yellow
 try {
     $evidenceDir = "evidence"
     if (-not (Test-Path $evidenceDir)) {
@@ -216,6 +298,14 @@ klinesCount: $(if ($klinesData) { $klinesData.klines.Count } else { 'N/A' })
 Paper State: $(if ($paperState) { 'Available' } else { 'N/A' })
 Backtest Job: $(if ($backtestStatus) { "$($backtestStatus.status) - $($backtestStatus.jobId)" } else { 'N/A' })
 Optimize Job: $(if ($optimizeStatus) { "$($optimizeStatus.status) - $($optimizeStatus.jobId)" } else { 'N/A' })
+
+Full Pipeline Run (Paper Mode):
+  Market Data: $($pipelineResults.marketData)
+  Backtest: $($pipelineResults.backtest)
+  Optimize: $($pipelineResults.optimize)
+  Paper Reset: $($pipelineResults.paperReset)
+  Paper Order: $($pipelineResults.paperOrder)
+  Paper State: $($pipelineResults.paperState)
 "@
 
     $summary | Out-File -FilePath "$evidenceDir\smoke_summary.txt" -Encoding UTF8

@@ -35,8 +35,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create job
-    const jobId = jobStore.createJob('optimize');
+    // Create job with input (including baselineMetrics from backtest)
+    const input = {
+      symbol,
+      interval,
+      parameters,
+      baselineMetrics, // Backtest → Optimize wiring
+    };
+    const jobId = jobStore.createJob('optimize', input);
 
     return NextResponse.json(
       {

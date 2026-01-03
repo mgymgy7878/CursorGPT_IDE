@@ -24,6 +24,7 @@ export interface JobState {
   finishedAt?: number;
   result?: JobResult;
   error?: string;
+  input?: any; // Input for engine execution
 }
 
 class JobStore {
@@ -33,7 +34,7 @@ class JobStore {
   /**
    * Create a new job
    */
-  createJob(type: 'backtest' | 'optimize'): string {
+  createJob(type: 'backtest' | 'optimize', input?: any): string {
     const jobId = `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const job: JobState = {
       jobId,
@@ -41,6 +42,7 @@ class JobStore {
       status: 'queued',
       progressPct: 0,
       startedAt: Date.now(),
+      input, // Store input for engine execution
     };
 
     this.jobs.set(jobId, job);
@@ -49,6 +51,20 @@ class JobStore {
     this.simulateJob(jobId);
 
     return jobId;
+  }
+
+  /**
+   * Run engine job using adapter
+   */
+  private async runEngineJob(jobId: string, type: 'backtest' | 'optimize', input?: any): Promise<JobResult> {
+    const { getEngineAdapter } = require('../engines/engineAdapter');
+    const adapter = getEngineAdapter();
+
+    if (type === 'backtest') {
+      return await adapter.runBacktest(input || { symbol: 'BTCUSDT', interval: '1h' });
+    } else {
+      return await adapter.runOptimize(input || { symbol: 'BTCUSDT', interval: '1h' });
+    }
   }
 
   /**
@@ -94,13 +110,24 @@ class JobStore {
         clearInterval(interval);
         this.progressIntervals.delete(jobId);
 
-        // Generate deterministic result
-        const result = this.generateDeterministicResult(jobId, job.type);
-        currentJob.status = 'success';
-        currentJob.progressPct = 100;
-        currentJob.finishedAt = Date.now();
-        currentJob.result = result;
-        this.jobs.set(jobId, currentJob);
+        // Use engine adapter to generate result
+        this.runEngineJob(jobId, job.type, job.input).then((result) => {
+          const currentJob = this.jobs.get(jobId);
+          if (currentJob) {
+            currentJob.status = 'success';
+            currentJob.progressPct = 100;
+            currentJob.finishedAt = Date.now();
+            currentJob.result = result;
+            this.jobs.set(jobId, currentJob);
+          }
+        }).catch((error) => {
+          const currentJob = this.jobs.get(jobId);
+          if (currentJob) {
+            currentJob.status = 'error';
+            currentJob.error = error.message || 'Engine execution failed';
+            this.jobs.set(jobId, currentJob);
+          }
+        });
       }
     }, stepDuration);
 

@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { jobStore } from '@/lib/jobs/jobStore';
+import { getEngineAdapter } from '@/lib/engines/engineAdapter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -35,8 +36,31 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create job
-    const jobId = jobStore.createJob('backtest');
+    // Fetch klines if not provided (for real engine)
+    let klines: number[][] | undefined;
+    if (process.env.SPARK_ENGINE_MODE === 'real') {
+      try {
+        const { BinanceSpotClient } = require('@/lib/exchanges/binance/spotClient');
+        const client = new BinanceSpotClient({ timeout: 5000 });
+        klines = await client.getKlines({
+          symbol,
+          interval,
+          limit: 200,
+        });
+      } catch (error) {
+        console.warn('Failed to fetch klines for real engine, using stub:', error);
+      }
+    }
+
+    // Create job with input
+    const input = {
+      symbol,
+      interval,
+      startDate,
+      endDate,
+      klines,
+    };
+    const jobId = jobStore.createJob('backtest', input);
 
     return NextResponse.json(
       {
