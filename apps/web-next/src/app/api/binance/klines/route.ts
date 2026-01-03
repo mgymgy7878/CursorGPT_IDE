@@ -1,6 +1,6 @@
 /**
  * Binance Klines Proxy - Server-side proxy for Binance Spot API
- * 
+ *
  * Client'ta key taşımadan klines çeker.
  * Rate-limit / cache (basit) opsiyon.
  */

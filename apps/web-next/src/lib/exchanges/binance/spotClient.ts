@@ -1,10 +1,10 @@
 /**
  * Binance Spot Client - Read-only data layer
- * 
+ *
  * Testnet ve mainnet base URL seçimi:
  * - testnet: https://testnet.binance.vision/api
  * - mainnet: https://api.binance.com
- * 
+ *
  * Prod guard: sparkMode=prod iken testnet baseUrl kullanılmaz (assert).
  */
 
@@ -14,7 +14,7 @@ export type BinanceNetwork = 'testnet' | 'mainnet';
 
 /**
  * getBinanceSpotBaseUrl - Binance Spot API base URL
- * 
+ *
  * Spark mode ve exchange network'e göre doğru base URL'i döndürür.
  * Prod guard: prod modunda testnet URL kullanılmaz.
  */
@@ -22,10 +22,13 @@ export function getBinanceSpotBaseUrl(): string {
   const mode = getSparkMode();
   const network = getExchangeNetwork();
 
-  // Prod guard: prod modunda testnet URL kullanılmaz
+  // Prod guard: prod modunda testnet URL kullanılmaz (controlled error, assert değil)
   if (mode === 'prod') {
     if (network === 'testnet') {
-      throw new Error('Prod mode cannot use testnet URL');
+      // Assert yerine controlled error (prod'da crash olmasın)
+      console.error('[Binance] Prod mode cannot use testnet URL - falling back to mainnet');
+      // Audit log için: ileride audit service'e gönderilebilir
+      return 'https://api.binance.com'; // Fallback to mainnet
     }
     return 'https://api.binance.com';
   }
@@ -41,7 +44,7 @@ export function getBinanceSpotBaseUrl(): string {
 
 /**
  * BinanceSpotClient - Read-only Binance Spot API client
- * 
+ *
  * Sadece read-only endpoint'ler: exchangeInfo, klines, ticker
  */
 export class BinanceSpotClient {
@@ -56,6 +59,22 @@ export class BinanceSpotClient {
   }
 
   /**
+   * Normalize interval - Binance format'a çevir
+   * UI tarafında "1min" gibi değerler varsa "1m" gibi Binance format'ına dönüştür
+   */
+  private normalizeInterval(interval: string): string {
+    const mapping: Record<string, string> = {
+      '1min': '1m',
+      '5min': '5m',
+      '15min': '15m',
+      '1hour': '1h',
+      '4hour': '4h',
+      '1day': '1d',
+    };
+    return mapping[interval.toLowerCase()] || interval;
+  }
+
+  /**
    * Fetch klines (candlestick data)
    */
   async getKlines(params: {
@@ -65,9 +84,15 @@ export class BinanceSpotClient {
     startTime?: number;
     endTime?: number;
   }): Promise<any[]> {
-    const url = new URL(`${this.baseUrl}/v3/klines`);
+    // Base URL kontrolü: çift /api olmamalı
+    // testnet.binance.vision/api zaten /api içeriyor, /v3/klines ekleniyor
+    const apiPath = this.baseUrl.endsWith('/api') 
+      ? `${this.baseUrl}/v3/klines`
+      : `${this.baseUrl}/api/v3/klines`;
+    
+    const url = new URL(apiPath);
     url.searchParams.set('symbol', params.symbol.toUpperCase());
-    url.searchParams.set('interval', params.interval);
+    url.searchParams.set('interval', this.normalizeInterval(params.interval));
     if (params.limit) url.searchParams.set('limit', String(params.limit));
     if (params.startTime) url.searchParams.set('startTime', String(params.startTime));
     if (params.endTime) url.searchParams.set('endTime', String(params.endTime));
@@ -111,7 +136,12 @@ export class BinanceSpotClient {
    * Fetch exchange info
    */
   async getExchangeInfo(): Promise<any> {
-    const url = new URL(`${this.baseUrl}/v3/exchangeInfo`);
+    // Base URL kontrolü: çift /api olmamalı
+    const apiPath = this.baseUrl.endsWith('/api')
+      ? `${this.baseUrl}/v3/exchangeInfo`
+      : `${this.baseUrl}/api/v3/exchangeInfo`;
+    
+    const url = new URL(apiPath);
 
     const headers: HeadersInit = {
       'Accept': 'application/json',
@@ -151,7 +181,12 @@ export class BinanceSpotClient {
    * Fetch 24h ticker
    */
   async getTicker24h(symbol?: string): Promise<any> {
-    const url = new URL(`${this.baseUrl}/v3/ticker/24hr`);
+    // Base URL kontrolü: çift /api olmamalı
+    const apiPath = this.baseUrl.endsWith('/api')
+      ? `${this.baseUrl}/v3/ticker/24hr`
+      : `${this.baseUrl}/api/v3/ticker/24hr`;
+    
+    const url = new URL(apiPath);
     if (symbol) {
       url.searchParams.set('symbol', symbol.toUpperCase());
     }

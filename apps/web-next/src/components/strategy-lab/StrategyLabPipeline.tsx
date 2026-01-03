@@ -34,7 +34,7 @@ export function StrategyLabPipeline() {
     if (stepId === 'market-data') {
       const step = steps.find(s => s.id === stepId);
       if (step?.status === 'idle' || step?.status === 'error') {
-        setSteps(prev => prev.map(s => 
+        setSteps(prev => prev.map(s =>
           s.id === stepId ? { ...s, status: 'running' as StepStatus } : s
         ));
 
@@ -54,15 +54,15 @@ export function StrategyLabPipeline() {
           }
 
           // Success
-          setSteps(prev => prev.map(s => 
-            s.id === stepId 
+          setSteps(prev => prev.map(s =>
+            s.id === stepId
               ? { ...s, status: 'success' as StepStatus, lastRun: new Date() }
               : s
           ));
         } catch (error) {
           // Error
-          setSteps(prev => prev.map(s => 
-            s.id === stepId 
+          setSteps(prev => prev.map(s =>
+            s.id === stepId
               ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
               : s
           ));
