@@ -4,7 +4,7 @@ export const EXECUTOR_BASE =
 
 /**
  * SparkMode - Platform çalışma modu
- * 
+ *
  * - prod: Production modu - gerçek borsa bağlantıları, gerçek işlemler
  * - testnet: Binance Testnet modu - testnet API'leri, testnet anahtarları
  * - paper: Paper trading modu - simüle edilmiş işlemler, gerçek veri akışı
@@ -13,10 +13,10 @@ export type SparkMode = "prod" | "testnet" | "paper";
 
 /**
  * getSparkMode - Tek kaynak Spark mode utility
- * 
+ *
  * Build sırasında SPARK_MODE env var set edilir (CI/CD'de).
  * UI ve API aynı değeri kullanır (NEXT_PUBLIC vs server env ayrımı yok).
- * 
+ *
  * Fallback sırası:
  * 1. SPARK_MODE (tek kaynak - build-time set edilir, server-side)
  * 2. NEXT_PUBLIC_SPARK_MODE (client-side erişim için, build-time'da SPARK_MODE'den kopyalanır)
@@ -66,7 +66,7 @@ export function getSparkMode(): SparkMode {
 
 /**
  * getExchangeNetwork - Exchange network bilgisi (Binance için)
- * 
+ *
  * Binance için testnet/mainnet ayrımı yapar.
  * Diğer exchange'ler için null döner.
  */

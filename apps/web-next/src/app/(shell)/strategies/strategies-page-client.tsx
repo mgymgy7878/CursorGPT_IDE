@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import MyStrategiesPage from '@/components/strategies/MyStrategiesPage';
 import StrategyLabHeader from '@/components/strategy-lab/StrategyLabHeader';
 import StrategyLabContent, { StrategyLabState } from '@/components/strategy-lab/StrategyLabContent';
+import { StrategyLabPipeline } from '@/components/strategy-lab/StrategyLabPipeline';
 import { cn } from '@/lib/utils';
 
 type StrategyTab = 'list' | 'lab';
@@ -96,6 +97,7 @@ export default function StrategiesPageClient({ initialTab }: StrategiesPageClien
               onStepClick={(step) => setLabActiveStep(step)}
             />
             <div className="px-4 py-3">
+              <StrategyLabPipeline />
               <StrategyLabContent activeTab={labActiveStep} state={labState} />
             </div>
           </>

@@ -11,6 +11,7 @@
 
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useMarketStore } from '@/stores/marketStore';
+import { getSparkMode, getExchangeNetwork, getBuildCommit } from '@/lib/spark/config';
 
 export interface CopilotContext {
   route: string;
@@ -26,6 +27,11 @@ export interface CopilotContext {
   pnl?: number;
   exposure?: number;
   openPositions?: number;
+  // Test mode context (her mesajda enjekte edilir)
+  sparkMode?: string;
+  exchange?: string;
+  network?: string | null;
+  buildCommit?: string;
 }
 
 export function useCopilotContext(): CopilotContext {
@@ -90,6 +96,14 @@ export function useCopilotContext(): CopilotContext {
     context.strategyId = 'primary';
   }
 
+  // Test mode context (her zaman ekle - Copilot "prod/testnet/paper" farkını bilmeli)
+  if (typeof window !== 'undefined') {
+    context.sparkMode = getSparkMode();
+    context.exchange = process.env.NEXT_PUBLIC_EXCHANGE || process.env.EXCHANGE || undefined;
+    context.network = getExchangeNetwork();
+    context.buildCommit = getBuildCommit();
+  }
+
   return context;
 }
 
@@ -136,6 +150,25 @@ export function formatContextForPrompt(context: CopilotContext): string {
     parts.push(`Açık Pozisyon: ${context.openPositions}`);
   }
 
-  return parts.length > 0 ? `[Bağlam: ${parts.join(', ')}]` : '';
+  // Test mode context (sistem/hidden context - kullanıcı mesajını kirletmez)
+  const systemParts: string[] = [];
+  if (context.sparkMode) {
+    systemParts.push(`sparkMode=${context.sparkMode}`);
+  }
+  if (context.exchange) {
+    systemParts.push(`exchange=${context.exchange}`);
+  }
+  if (context.network) {
+    systemParts.push(`network=${context.network}`);
+  }
+  if (context.buildCommit) {
+    systemParts.push(`buildCommit=${context.buildCommit}`);
+  }
+
+  const userContext = parts.length > 0 ? `[Bağlam: ${parts.join(', ')}]` : '';
+  const systemContext = systemParts.length > 0 ? `[Sistem: ${systemParts.join(', ')}]` : '';
+
+  // System context'i hidden olarak ekle (Copilot'a bilgi verir ama kullanıcıya gösterilmez)
+  return userContext + (systemContext ? `\n${systemContext}` : '');
 }
 

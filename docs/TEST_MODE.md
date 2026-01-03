@@ -44,7 +44,7 @@ BINANCE_NETWORK=testnet|mainnet
 
 ### Strategy Lab
 - **Run/Backtest/Optimize**: Tüm modlarda serbest
-- **Live Trade butonu**: 
+- **Live Trade butonu**:
   - `prod`: Gerçek işlem butonu (confirm_required şart)
   - `testnet`/`paper`: "Simulated" etiketi ile gösterilir, gerçek işlem yapılmaz
 
