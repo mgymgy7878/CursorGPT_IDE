@@ -27,6 +27,8 @@ import {
   IconHistory,
 } from '@/components/ui/LocalIcons'
 import type { ComponentType, SVGProps } from 'react'
+import { NavBadge } from '@/components/ui/NavBadge'
+import { useNavIndicators } from '@/hooks/useNavIndicators'
 
 // İkon tipi
 type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number }>;
@@ -54,6 +56,7 @@ interface LeftNavProps {
 
 export default function LeftNav({ collapsed = false }: LeftNavProps) {
   const pathname = usePathname()
+  const indicators = useNavIndicators()
 
   return (
     <aside className="h-full shrink-0 bg-neutral-950 flex flex-col border-r border-white/6">
@@ -66,6 +69,7 @@ export default function LeftNav({ collapsed = false }: LeftNavProps) {
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
             const Icon = item.icon
+          const badge = indicators.routes[item.href] || null
 
           return (
             <Link
@@ -73,7 +77,7 @@ export default function LeftNav({ collapsed = false }: LeftNavProps) {
               href={item.href}
                 className={cn(
                   // Base: rounded-md for pill-like feel
-                  "rounded-md flex items-center transition-all duration-150 select-none group",
+                  "rounded-md flex items-center transition-all duration-150 select-none group relative",
                   // Collapsed: centered icon, larger hit area
                   collapsed
                     ? "justify-center w-10 h-10 mx-auto"
@@ -85,15 +89,25 @@ export default function LeftNav({ collapsed = false }: LeftNavProps) {
                 )}
                 title={item.label}
               >
-                {/* Icon with accent color */}
-                <Icon
-                  size={collapsed ? 20 : 18}
-                  strokeWidth={1.8}
-                  className={cn(
-                    "shrink-0 transition-colors",
-                    isActive ? item.accent : "text-white/40 group-hover:text-white/60"
+                {/* Icon with accent color - relative for badge positioning */}
+                <div className="relative shrink-0">
+                  <Icon
+                    size={collapsed ? 20 : 18}
+                    strokeWidth={1.8}
+                    className={cn(
+                      "transition-colors",
+                      isActive ? item.accent : "text-white/40 group-hover:text-white/60"
+                    )}
+                  />
+                  {/* PATCH 1: Nav Badge */}
+                  {badge && (
+                    <NavBadge
+                      type={badge.type}
+                      variant={badge.variant}
+                      value={badge.value}
+                    />
                   )}
-                />
+                </div>
                 {/* Label - only in expanded mode */}
                 {!collapsed && (
                   <span className={cn(

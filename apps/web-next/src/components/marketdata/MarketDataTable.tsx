@@ -16,10 +16,12 @@ import { DataTable, DataTableHeader, DataTableRow, DataTableCell, DataTableHeade
 import { Badge } from '@/components/ui/badge';
 import { MonoNumber } from '@/components/ui/MonoNumber';
 import { RowActions, RowActionButton } from '@/components/ui/RowActions';
+import { RowOverflowMenu } from '@/components/ui/RowOverflowMenu';
 import { Sparkline, generateMockSparklineData } from '@/components/ui/Sparkline';
 import { formatPriceUsd, formatCompactUsd } from '@/lib/format';
 import { IconBarChart } from '@/components/ui/LocalIcons';
 import { ChangeCell } from './ChangeCell';
+import { uiCopy } from '@/lib/uiCopy';
 import { cn } from '@/lib/utils';
 
 // Symbol → Name mapping (Figma parity)
@@ -49,13 +51,13 @@ const MOCK_MARKET_DATA = [
   { symbol: 'ADA/USDT', price: 0.485, change: -2.1, changeAbs: -0.0102, spread: 0.15, volume: 95000000, rsi: 45, signal: 'HOLD' as SignalType },
 ];
 
-// Signal badge component (Figma colors)
+// Signal badge component (Figma colors) - PATCH Q: Türkçeleştirme
 function SignalBadge({ signal }: { signal: SignalType }) {
-  const variants: Record<SignalType, { bg: string; text: string; border: string }> = {
-    'BUY': { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30' },
-    'STRONG BUY': { bg: 'bg-emerald-500/30', text: 'text-emerald-300', border: 'border-emerald-400/40' },
-    'HOLD': { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' },
-    'SELL': { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' },
+  const variants: Record<SignalType, { bg: string; text: string; border: string; label: string }> = {
+    'BUY': { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30', label: uiCopy.signals.buy },
+    'STRONG BUY': { bg: 'bg-emerald-500/30', text: 'text-emerald-300', border: 'border-emerald-400/40', label: uiCopy.signals.strongBuy },
+    'HOLD': { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30', label: uiCopy.signals.hold },
+    'SELL': { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', label: uiCopy.signals.sell },
   };
   const v = variants[signal];
 
@@ -64,7 +66,7 @@ function SignalBadge({ signal }: { signal: SignalType }) {
       "inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide border",
       v.bg, v.text, v.border
     )}>
-      {signal}
+      {v.label}
     </span>
   );
 }
@@ -132,14 +134,17 @@ export default function MarketDataTable({
     );
   }
 
+  // PATCH W.3 (P0): Tablo wrapper - overflow-x-auto (gerekirse), kartın iç padding'inde boğma
+  // PATCH W.3.1: Scrollbar dark theme uyumu + padding düzenlemesi (scroll'u kartın gövdesine yedirme)
   return (
     <div
-      className="w-full min-h-0 overflow-auto"
+      className="w-full min-w-0 overflow-x-auto table-wrapper -mx-5 px-5"
       style={{
         maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 120px)',
       }}
     >
-      <DataTable className="table-fixed">
+      {/* PATCH W.3.1: min-w responsive kolonlara göre optimize (sparkline yoksa daha küçük) */}
+      <DataTable className={cn("table-fixed", showSparkline ? "min-w-[800px]" : "min-w-[600px]")}>
         <colgroup>
           <col style={{ width: '120px' }} />
           <col style={{ width: '180px' }} />
@@ -147,9 +152,9 @@ export default function MarketDataTable({
           <col style={{ width: '100px' }} />
           <col style={{ width: '100px' }} />
           <col style={{ width: '100px' }} />
-          <col style={{ width: '80px' }} />
+          <col className="hidden xl:table-column" style={{ width: '80px' }} />
           <col style={{ width: '140px' }} />
-          <col style={{ width: '100px' }} />
+          <col className="hidden lg:table-column" style={{ width: '100px' }} />
         </colgroup>
         <DataTableHeader>
           <DataTableRow hover={false} className="h-[40px] sticky top-0 bg-white/3 z-10">
@@ -166,14 +171,18 @@ export default function MarketDataTable({
             <DataTableHeaderCell className="text-right text-[10px] font-medium text-[#9CA3AF] leading-none tabular-nums py-[var(--table-head-py,8px)]">Fiyat</DataTableHeaderCell>
             <DataTableHeaderCell className="text-right text-[10px] font-medium text-[#9CA3AF] leading-none tabular-nums py-[var(--table-head-py,8px)]">Değişim</DataTableHeaderCell>
             <DataTableHeaderCell className="text-right text-[10px] font-medium text-[#9CA3AF] leading-none tabular-nums py-[var(--table-head-py,8px)]">Hacim</DataTableHeaderCell>
-            <DataTableHeaderCell className="text-center text-[10px] font-medium text-[#9CA3AF] leading-none tabular-nums py-[var(--table-head-py,8px)]">RSI</DataTableHeaderCell>
+            {/* PATCH W.3 (P0): Responsive kolon - RSI dar ekranda gizle */}
+            <DataTableHeaderCell className="hidden xl:table-cell text-center text-[10px] font-medium text-[#9CA3AF] leading-none tabular-nums py-[var(--table-head-py,8px)]">RSI</DataTableHeaderCell>
             <DataTableHeaderCell className="text-center text-[10px] font-medium text-[#9CA3AF] leading-none" style={{ paddingTop: '6px', paddingBottom: '6px' }}>Sinyal</DataTableHeaderCell>
-            <DataTableHeaderCell className="text-right text-[10px] font-medium text-[#9CA3AF] leading-none" style={{ paddingTop: '6px', paddingBottom: '6px' }}>Actions</DataTableHeaderCell>
+            {/* PATCH W.3 (P0): Responsive kolon - Actions dar ekranda gizle */}
+            {/* PATCH W.3.1: uiCopy'den al */}
+            <DataTableHeaderCell className="hidden lg:table-cell text-right text-[10px] font-medium text-[#9CA3AF] leading-none" style={{ paddingTop: '6px', paddingBottom: '6px' }}>{uiCopy.table.actions}</DataTableHeaderCell>
           </DataTableRow>
         </DataTableHeader>
         <tbody>
           {data.length === 0 ? (
             <DataTableRow>
+              {/* PATCH W.3 (P0): colSpan tüm kolonları kapsasın (responsive kolonlar dahil) */}
               <DataTableCell colSpan={showSparkline ? 9 : 8} className="py-12 text-center">
                 <div className="text-neutral-400 text-sm">No market data available</div>
               </DataTableCell>
@@ -206,7 +215,8 @@ export default function MarketDataTable({
 
                 {/* Mini Grafik */}
                 {showSparkline && (
-                  <DataTableCell className="px-[var(--cell-px,12px)] w-[160px]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
+                  <DataTableCell className="px-[var(--cell-px,12px)]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
+                    {/* PATCH W.3 (P0): Sabit genişlik kaldırıldı (w-[160px]) */}
                     <div className="flex justify-center items-center h-full">
                       <Sparkline
                         data={generateMockSparklineData(row.symbol, row.change >= 0, 24)}
@@ -233,8 +243,8 @@ export default function MarketDataTable({
                   <span className="text-[10px] text-[#9CA3AF] font-mono">{formatCompactUsd(row.volume)}</span>
                 </DataTableCell>
 
-                {/* RSI */}
-                <DataTableCell className="text-center tabular-nums px-[var(--cell-px,12px)]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
+                {/* PATCH W.3 (P0): RSI - responsive kolon (dar ekranda gizle) */}
+                <DataTableCell className="hidden xl:table-cell text-center tabular-nums px-[var(--cell-px,12px)]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
                   <span className={cn(
                     "text-[10px] font-medium font-mono",
                     row.rsi > 70 ? "text-[#f97373]" :
@@ -247,19 +257,33 @@ export default function MarketDataTable({
 
                 {/* Sinyal */}
                 <DataTableCell className="text-center px-[var(--cell-px,12px)]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
-                  <SignalBadge signal={row.signal} />
+                  <div className="flex items-center justify-center gap-2">
+                    <SignalBadge signal={row.signal} />
+                    {/* PATCH W.4: Overflow menu - lg'den küçük ekranlarda Actions yerine */}
+                    <div className="lg:hidden" onClick={(e) => e.stopPropagation()}>
+                      <RowOverflowMenu>
+                        <RowActionButton
+                          icon={<IconBarChart size={14} strokeWidth={1.8} />}
+                          label={uiCopy.tooltip.chart}
+                          onClick={() => onViewChart?.(row.symbol)}
+                        />
+                        <RowActionButton icon="⚙️" label={uiCopy.tooltip.settings} />
+                      </RowOverflowMenu>
+                    </div>
+                  </div>
                 </DataTableCell>
 
-                {/* Actions */}
-                <DataTableCell className="text-right px-[var(--cell-px,12px)]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
+                {/* PATCH W.3 (P0): Actions - responsive kolon (dar ekranda gizle) */}
+                {/* PATCH W.4: lg'den küçük ekranlarda overflow menu Sinyal kolonunda görünür */}
+                <DataTableCell className="hidden lg:table-cell text-right px-[var(--cell-px,12px)]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
                   <div onClick={(e) => e.stopPropagation()}>
                   <RowActions>
                       <RowActionButton
                         icon={<IconBarChart size={14} strokeWidth={1.8} />}
-                        label="View chart"
+                        label={uiCopy.tooltip.chart}
                         onClick={() => onViewChart?.(row.symbol)}
                       />
-                    <RowActionButton icon="⚙️" label="Settings" />
+                    <RowActionButton icon="⚙️" label={uiCopy.tooltip.settings} />
                   </RowActions>
                   </div>
                 </DataTableCell>

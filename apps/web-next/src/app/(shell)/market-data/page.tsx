@@ -20,6 +20,7 @@ const MarketChartWorkspace = dynamic(
   { ssr: false }
 );
 import { cn } from '@/lib/utils';
+import { uiCopy } from '@/lib/uiCopy';
 
 /**
  * Market Data Page - Figma Parity v3
@@ -177,9 +178,17 @@ export default function MarketData() {
 
   const marketData = getMarketDataForSymbol(selectedSymbol);
 
+  // PATCH U: w-screen sadece fullscreen modda, normal modda w-full
+  // PATCH W.2 (P0): Wide layout for list view
+  // PATCH W.3 (P0): List view container'ı "full" yap (kart içinde scroll önleme)
+  // PATCH SCROLL-AUDIT: List view'da overflow-y-auto kaldırıldı (AppFrame'in main container'ı zaten scroll yapıyor)
   return (
-    <div className={cn("h-full", viewMode === 'full' ? "overflow-hidden h-screen w-screen" : "overflow-y-auto")}>
-      <div className={cn(viewMode === 'full' ? "h-full w-full p-0" : "container mx-auto px-4 py-3")}>
+    <div className={cn("h-full", viewMode === 'full' ? "overflow-hidden h-screen w-screen" : "w-full")}>
+      <div className={cn(
+        viewMode === 'full' ? "h-full w-full p-0" :
+        viewMode === 'list' ? "w-full max-w-none px-4 py-3" : // PATCH W.3: Full width, no max-w constraint
+        "container mx-auto px-4 py-3"
+      )}>
         {/* List View Header */}
         {viewMode === 'list' && (
           <>
@@ -249,7 +258,7 @@ export default function MarketData() {
               onClick={handleBackToList}
               className="sticky left-0 z-10 flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium text-neutral-400 hover:text-neutral-200 hover:bg-white/5 transition-colors bg-neutral-950/95 backdrop-blur-sm"
             >
-              ← Tabloya Dön
+              ← {uiCopy.nav.backToList}
             </button>
             <button
               onClick={() => handleToggleView('full')}
@@ -280,48 +289,48 @@ export default function MarketData() {
                   />
                 </div>
 
-                {/* Detay Kartları (2 satırlık grid) */}
+                {/* PATCH W: Detay Kartları - Info-card görünümü (kalın outline kaldırıldı) */}
                 {marketData && (
                   <div className="grid grid-cols-2 gap-3">
                     {/* Satır 1: Price, Change%, High/Low, Volume */}
-                    <Surface variant="card" className="p-4">
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">Last Price</div>
-                        <div className="text-[18px] font-semibold text-neutral-200">{formatPriceUsd(marketData.price)}</div>
+                        <div className="text-[11px] text-neutral-400">Last Price</div>
+                        <div className="text-[20px] font-semibold text-neutral-200">{formatPriceUsd(marketData.price)}</div>
                       </div>
-                    </Surface>
-                    <Surface variant="card" className="p-4">
+                    </div>
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">24h Change</div>
+                        <div className="text-[11px] text-neutral-400">24h Change</div>
                         <div className={cn(
-                          "text-[18px] font-semibold",
+                          "text-[20px] font-semibold",
                           marketData.change >= 0 ? "text-emerald-400" : "text-red-400"
                         )}>
                           {formatSignedPct(marketData.change, { input: 'pct' })}
                         </div>
                       </div>
-                    </Surface>
-                    <Surface variant="card" className="p-4">
+                    </div>
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">24h High / Low</div>
-                        <div className="text-[14px] font-medium text-neutral-300">
+                        <div className="text-[11px] text-neutral-400">24h High / Low</div>
+                        <div className="text-[15px] font-medium text-neutral-300">
                           {formatPriceUsd(marketData.high)} / {formatPriceUsd(marketData.low)}
                         </div>
                       </div>
-                    </Surface>
-                    <Surface variant="card" className="p-4">
+                    </div>
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">Volume</div>
-                        <div className="text-[14px] font-medium text-neutral-300">{formatCompactUsd(marketData.volume)}</div>
+                        <div className="text-[11px] text-neutral-400">Volume</div>
+                        <div className="text-[15px] font-medium text-neutral-300">{formatCompactUsd(marketData.volume)}</div>
                       </div>
-                    </Surface>
+                    </div>
 
                     {/* Satır 2: RSI, Signal, Regime, Volatility */}
-                    <Surface variant="card" className="p-4">
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">RSI (14)</div>
+                        <div className="text-[11px] text-neutral-400">RSI (14)</div>
                         <div className={cn(
-                          "text-[18px] font-semibold",
+                          "text-[20px] font-semibold",
                           marketData.rsi > 70 ? "text-red-400" :
                           marketData.rsi < 30 ? "text-emerald-400" :
                           "text-neutral-200"
@@ -329,32 +338,45 @@ export default function MarketData() {
                           {marketData.rsi}
                         </div>
                       </div>
-                    </Surface>
-                    <Surface variant="card" className="p-4">
+                    </div>
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">Signal</div>
-                        <div className={cn(
-                          "text-[14px] font-medium",
-                          marketData.signal === 'BUY' || marketData.signal === 'STRONG BUY' ? "text-emerald-400" :
-                          marketData.signal === 'SELL' ? "text-red-400" :
-                          "text-amber-400"
-                        )}>
-                          {marketData.signal}
+                        <div className="text-[11px] text-neutral-400">Signal</div>
+                        {/* PATCH W: Signal badge (rozet) */}
+                        <div>
+                          {marketData.signal === 'BUY' || marketData.signal === 'STRONG BUY' ? (
+                            <span className={cn(
+                              "inline-flex items-center px-2.5 py-1 rounded text-[12px] font-semibold",
+                              marketData.signal === 'STRONG BUY'
+                                ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40"
+                                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            )}>
+                              {marketData.signal === 'STRONG BUY' ? uiCopy.signals.strongBuy : uiCopy.signals.buy}
+                            </span>
+                          ) : marketData.signal === 'SELL' ? (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded text-[12px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
+                              {uiCopy.signals.sell}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded text-[12px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                              {uiCopy.signals.hold}
+                            </span>
+                          )}
                         </div>
                       </div>
-                    </Surface>
-                    <Surface variant="card" className="p-4">
+                    </div>
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">Regime</div>
-                        <div className="text-[14px] font-medium text-neutral-300">Trend</div>
+                        <div className="text-[11px] text-neutral-400">Regime</div>
+                        <div className="text-[15px] font-medium text-neutral-300">Trend</div>
                       </div>
-                    </Surface>
-                    <Surface variant="card" className="p-4">
+                    </div>
+                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
-                        <div className="text-[10px] text-neutral-500">Volatility</div>
-                        <div className="text-[14px] font-medium text-neutral-300">High</div>
+                        <div className="text-[11px] text-neutral-400">Volatility</div>
+                        <div className="text-[15px] font-medium text-neutral-300">High</div>
                       </div>
-                    </Surface>
+                    </div>
                   </div>
                 )}
               </>
@@ -408,9 +430,10 @@ export default function MarketData() {
         ) : (
           <>
             {/* Main content: Table (full-width when preview closed) - Figma parity: rounded-2xl, px-5 py-4 */}
-            <div className="w-full">
+            {/* PATCH W.3 (P0): Kart wrapper - sabit genişlikleri kaldır, full width */}
+            <div className="w-full min-w-0">
               {/* Market Data Table */}
-              <Surface variant="card" className="overflow-hidden w-full rounded-2xl border border-white/10 bg-[#0b0d10] px-5 py-4">
+              <Surface variant="card" className="overflow-hidden w-full max-w-none min-w-0 rounded-2xl border border-white/10 bg-[#0b0d10] px-5 py-4">
                 {loading ? (
                   <MarketDataTable loading={true} />
                 ) : !hasData ? (
@@ -446,7 +469,7 @@ export default function MarketData() {
                     onClick={() => selectedSymbol && handleViewChart(selectedSymbol)}
                     className="px-2 py-1 text-[10px] font-medium rounded bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 transition-colors"
                   >
-                    Tam Ekran →
+                    {uiCopy.nav.exit}
                   </button>
                 </div>
 

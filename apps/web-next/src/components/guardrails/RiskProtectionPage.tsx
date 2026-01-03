@@ -15,12 +15,16 @@ import { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Surface } from '@/components/ui/Surface';
 import { StatCard } from '@/components/ui/StatCard';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { cardHeader, badgeVariant } from '@/styles/uiTokens';
 import { cn } from '@/lib/utils';
+import { ClientTime } from '@/components/common/ClientTime';
+import { uiCopy } from '@/lib/uiCopy';
 import { formatCurrency, formatPercent } from '@/lib/format';
+import { useDensityMode } from '@/hooks/useDensityMode';
 
 // UI-1: Collapsible Risk Parameters component (varsayılan kapalı) + ops-safe form
-function CollapsibleRiskParams() {
+function CollapsibleRiskParams({ isCompact }: { isCompact: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [values, setValues] = useState({
@@ -29,31 +33,53 @@ function CollapsibleRiskParams() {
     maxPositionSize: '10000',
     allowedMarkets: 'all',
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // PATCH P0: Type alias for useState generic (TSX parser fix)
+  type FieldErrors = Record<string, string>;
+  const [errors, setErrors] = useState<FieldErrors>({});
 
   return (
-    <Surface variant="card" className="p-4">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between mb-0 text-left"
-      >
-        <div className="flex items-center gap-2">
-          <div className={cn(cardHeader, "mb-0")}>
+    <Surface variant="card" className="p-3 overflow-visible">
+      {/* PATCH CONTROL-OPT-1: Özet şeridi + Düzenle butonu */}
+      <div className={cn("flex items-center justify-between", isCompact ? "mb-2" : "mb-2.5")}>
+        <div className="flex-1">
+          <div className={cn(cardHeader, "mb-1 text-sm leading-tight")}>
             Risk Parametreleri
           </div>
-          {hasUnsavedChanges && (
-            <span className="text-[10px] font-medium text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-              Unsaved
-            </span>
-          )}
+          {/* Özet şeridi */}
+          <div className={cn(
+            "flex items-center gap-3 text-neutral-400",
+            isCompact ? "text-[10px]" : "text-[11px]"
+          )}>
+            <span>Exposure limit: <span className="text-neutral-300 font-medium">50%</span></span>
+            <span>•</span>
+            <span>Max DD: <span className="text-neutral-300 font-medium">{values.maxDrawdown}%</span></span>
+            <span>•</span>
+            <span>Günlük zarar: <span className="text-neutral-300 font-medium">${parseInt(values.maxPositionSize).toLocaleString()}</span></span>
+            {hasUnsavedChanges && (
+              <>
+                <span>•</span>
+                <span className="text-amber-400 font-medium">Unsaved</span>
+              </>
+            )}
+          </div>
         </div>
-        <span className="text-neutral-400 text-sm">
-          {isOpen ? '▼' : '▶'}
-        </span>
-      </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "rounded-lg font-medium text-white transition-colors shrink-0",
+            isCompact ? "px-2.5 py-1 text-[10px]" : "px-3 py-1.5 text-xs",
+            isOpen
+              ? "bg-blue-600 hover:bg-blue-700"
+              : "bg-neutral-700 hover:bg-neutral-600"
+          )}
+        >
+          {isOpen ? 'Kaydet' : 'Düzenle'}
+        </button>
+      </div>
       {isOpen && (
-        <div className="mt-4 space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+        <>
+          <div className="mt-3 space-y-4 pb-4 overflow-visible">
+            <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-2">
                 Max Daily Drawdown (%)
@@ -147,18 +173,10 @@ function CollapsibleRiskParams() {
               </select>
             </div>
           </div>
-          {/* UI-1: Ops-safe form - Save button */}
+          </div>
+          {/* PATCH CONTROL-OPT-1: Sticky Save/Cancel bar (dirty-state ile) */}
           {hasUnsavedChanges && (
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-800">
-              <button
-                onClick={() => {
-                  setHasUnsavedChanges(false);
-                  // TODO: API call to save
-                }}
-                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-              >
-                Kaydet
-              </button>
+            <div className="sticky bottom-0 -mx-3 -mb-3 px-3 py-2.5 bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-800 flex items-center justify-end gap-2">
               <button
                 onClick={() => {
                   setValues({
@@ -169,14 +187,25 @@ function CollapsibleRiskParams() {
                   });
                   setHasUnsavedChanges(false);
                   setErrors({});
+                  setIsOpen(false);
                 }}
                 className="px-3 py-1.5 text-sm font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg border border-neutral-700 transition-colors"
               >
-                İptal
+                Vazgeç
+              </button>
+              <button
+                onClick={() => {
+                  setHasUnsavedChanges(false);
+                  // TODO: API call to save
+                  setIsOpen(false);
+                }}
+                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              >
+                Kaydet
               </button>
             </div>
           )}
-        </div>
+        </>
       )}
     </Surface>
   );
@@ -210,15 +239,92 @@ export default function RiskProtectionPage() {
     stopStrategies: true,
     blockNewOrders: true,
   });
+  // PATCH A: Alerts expand/collapse
+  const [alertsExpanded, setAlertsExpanded] = useState(false);
+  // PATCH W: Kill Switch arm/hold-to-confirm
+  const [killSwitchArmed, setKillSwitchArmed] = useState(false);
+  const [holdStartTime, setHoldStartTime] = useState<number | null>(null);
+  const holdDuration = 2000; // 2 seconds
+  // PATCH W.1: Armed durumu + süre penceresi (30s otomatik disarm)
+  const [armedAt, setArmedAt] = useState<number | null>(null);
+  const armedTimeout = 30000; // 30 seconds
+
+  // PATCH F: Adaptive compact mode - density + viewport height
+  const [density] = useDensityMode();
+  const [isViewportShort, setIsViewportShort] = useState(false);
+
+  useEffect(() => {
+    const checkViewport = () => {
+      // 768p + browser UI + zoom (110-125%) = ~680-720px available height
+      // Risk: viewport height < 720px ise compact mode
+      setIsViewportShort(window.innerHeight < 720);
+    };
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
+
+  const isCompact = density === 'compact' || density === 'ultra' || isViewportShort;
+
+  // PATCH W: Arm toggle
+  const handleArmToggle = () => {
+    if (killSwitchArmed) {
+      setKillSwitchArmed(false);
+      setHoldStartTime(null);
+      setArmedAt(null);
+    } else {
+      setKillSwitchArmed(true);
+      setArmedAt(Date.now());
+    }
+  };
+
+  // PATCH W.1: Otomatik disarm (30s sonra)
+  useEffect(() => {
+    if (!killSwitchArmed || !armedAt) return;
+
+    const timer = setTimeout(() => {
+      setKillSwitchArmed(false);
+      setArmedAt(null);
+      setHoldStartTime(null);
+    }, armedTimeout);
+
+    return () => clearTimeout(timer);
+  }, [killSwitchArmed, armedAt]);
+
+  // PATCH W.1: Armed süre hesaplama (badge için)
+  const armedTimeRemaining = armedAt ? Math.max(0, Math.ceil((armedTimeout - (Date.now() - armedAt)) / 1000)) : 0;
+
+  // PATCH W: Hold-to-confirm handlers
+  const handleHoldStart = () => {
+    if (!killSwitchArmed) return;
+    setHoldStartTime(Date.now());
+  };
+
+  const handleHoldEnd = () => {
+    if (!killSwitchArmed || !holdStartTime) return;
+    const elapsed = Date.now() - holdStartTime;
+    if (elapsed >= holdDuration) {
+      // Hold duration met - trigger kill switch
+      confirmKillSwitch();
+    }
+    setHoldStartTime(null);
+  };
 
   const handleKillSwitchToggle = () => {
     if (!killSwitchActive) {
-      // Activating kill switch - show confirmation
+      // Activating kill switch - arm required first
+      if (!killSwitchArmed) {
+        // Show arm prompt
+        return;
+      }
+      // If armed, show confirmation modal
       setShowKillSwitchConfirm(true);
     } else {
       // Deactivating - direct action
       setKillSwitchActive(false);
       setKillSwitchTriggeredBy(null);
+      setKillSwitchArmed(false);
+      setHoldStartTime(null);
     }
   };
 
@@ -227,6 +333,8 @@ export default function RiskProtectionPage() {
     setKillSwitchTriggeredBy('UI');
     setKillSwitchLastTriggered(new Date().toLocaleString('tr-TR'));
     setShowKillSwitchConfirm(false);
+    setKillSwitchArmed(false);
+    setHoldStartTime(null);
 
     // TODO: API call to trigger kill switch
     fetch('/api/guardrails/kill-switch', {
@@ -239,6 +347,31 @@ export default function RiskProtectionPage() {
       }),
     }).catch(() => {});
   };
+
+  // PATCH W: Hold progress calculation
+  const holdProgress = holdStartTime
+    ? Math.min(100, ((Date.now() - holdStartTime) / holdDuration) * 100)
+    : 0;
+
+  // PATCH W.1: Hold progress için animasyon (smooth update)
+  const [animatedHoldProgress, setAnimatedHoldProgress] = useState(0);
+
+  useEffect(() => {
+    if (!holdStartTime) {
+      setAnimatedHoldProgress(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const progress = Math.min(100, ((Date.now() - holdStartTime) / holdDuration) * 100);
+      setAnimatedHoldProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
+      }
+    }, 16); // ~60fps
+
+    return () => clearInterval(interval);
+  }, [holdStartTime]);
 
   // Mock metrics
   const metrics: RiskMetrics = {
@@ -282,7 +415,7 @@ export default function RiskProtectionPage() {
       if (!groups.has(key)) {
         groups.set(key, {
           key,
-          title: 'High Exposure Detected',
+          title: 'Yüksek Maruziyet Tespit Edildi',
           message: alert.message,
           count: 0,
           lastTriggered: alert.timestamp,
@@ -303,30 +436,58 @@ export default function RiskProtectionPage() {
     return Array.from(groups.values());
   }, [rawAlerts]);
 
+  // PATCH A: Above-the-fold fit - overflow-hidden, sıkı spacing
+  // PATCH F: Adaptive spacing based on compact mode
+  // PATCH G/H: Root gap yumuşatıldı (yukarı fazla çekilmiş hissini düzelt)
+  // PATCH I: min-h-0 zinciri + son kartların taşmasını engelle
+  // PATCH J: Üst boşluk recapture - gap ve padding azaltıldı
+  // PATCH CONTROL-LAYOUT-1: Scroll host'ta olacağı için içeride overflow yönetme
+  const rootGap = isCompact ? 'gap-2' : 'gap-2.5';
+  const cardPadding = isCompact ? 'p-2.5' : 'p-3';
+  // PATCH G/H: Alerts max-height düzeltildi - collapsed en az 110px, expanded 200px/240px
+  const alertsMaxH = isCompact ? (alertsExpanded ? 'max-h-[200px]' : 'max-h-[110px]') : (alertsExpanded ? 'max-h-[240px]' : 'max-h-[110px]');
+
   return (
-    <div className="space-y-3">
-      {/* Risk Level Indicator - UI-1: Compact density - mb-3, padding küçültüldü */}
-      <div
-        className="mb-3 border-amber-500/30 bg-amber-500/5 rounded-lg"
-        style={{
-          padding: 'var(--card-pad, 12px)',
-          borderRadius: 'var(--card-radius, 12px)',
-          borderWidth: 'var(--card-border-w, 1px)',
-        }}
-      >
-        <div className="flex items-center gap-2 py-2">
-          <span className="text-lg">▲</span>
-          <div>
-            <div className="text-xs text-neutral-400 mb-0.5">Risk Level</div>
-            <div className="text-base font-semibold text-amber-400">Medium</div>
-          </div>
+    <div className={cn("flex flex-col", rootGap)}>
+      {/* Risk Level Indicator - PATCH CONTROL-OPT-3: Kompakt chip özetli komuta satırı */}
+      <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/5">
+        {/* Sol: Risk durumu pill */}
+        <div className="flex items-center gap-2">
+          <span className={cn("text-amber-400", isCompact ? "text-xs" : "text-sm")}>▲</span>
+          <span className={cn("font-semibold text-amber-400", isCompact ? "text-xs" : "text-sm")}>Risk: Orta</span>
+        </div>
+        {/* Orta: Kısa özet chips */}
+        <div className="flex items-center gap-2 flex-1 justify-center">
+          <span className={cn("text-neutral-400", isCompact ? "text-[9px]" : "text-[10px]")}>
+            Exposure {metrics.currentExposure}/{metrics.exposureLimit}
+          </span>
+          <span className="text-neutral-600">•</span>
+          <span className={cn("text-neutral-400", isCompact ? "text-[9px]" : "text-[10px]")}>
+            DD {formatPercent(metrics.maxDD24h)}/{metrics.maxDDLimit}%
+          </span>
+          <span className="text-neutral-600">•</span>
+          <span className={cn("text-neutral-400", isCompact ? "text-[9px]" : "text-[10px]")}>
+            Daily {formatCurrency(metrics.dailyLoss, 'USD')}/{formatCurrency(metrics.dailyLossLimit, 'USD')}
+          </span>
+          <span className="text-neutral-600">•</span>
+          <span className={cn("text-neutral-400", isCompact ? "text-[9px]" : "text-[10px]")}>
+            Open {metrics.openOrders}/{metrics.openOrdersLimit}
+          </span>
+        </div>
+        {/* Sağ: Son güncelleme + heartbeat */}
+        <div className="flex items-center gap-1.5">
+          <span className={cn("text-neutral-500", isCompact ? "text-[9px]" : "text-[10px]")}>
+            Son: <ClientTime value={Date.now() - 12000} format="relative" />
+          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         </div>
       </div>
 
-      {/* Key Metrics - UI-1: Compact density - mb-3, gap-3 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+      {/* Key Metrics - PATCH A: Sıkı spacing, PATCH F: Adaptive gap */}
+      <div className={cn("grid grid-cols-2 md:grid-cols-4", isCompact ? "gap-1.5" : "gap-2")}>
+        {/* PATCH O: Türkçeleştirme */}
         <StatCard
-          label="Current Exposure"
+          label="Mevcut Maruziyet"
           value={`${metrics.currentExposure}%`}
           sublabel={`Limit: ${metrics.exposureLimit}%`}
         />
@@ -336,87 +497,126 @@ export default function RiskProtectionPage() {
           sublabel={`Limit: ${metrics.maxDDLimit}%`}
         />
         <StatCard
-          label="Daily Loss"
+          label="Günlük Zarar"
           value={formatCurrency(metrics.dailyLoss, 'USD')}
           sublabel={`Limit: ${formatCurrency(metrics.dailyLossLimit, 'USD')}`}
         />
         <StatCard
-          label="Open Orders"
+          label="Açık Emirler"
           value={metrics.openOrders}
           sublabel={`Limit: ${metrics.openOrdersLimit}`}
         />
       </div>
 
-      {/* Global Kill Switch - UI-1: Compact density - mb-3 */}
-      <div
-        className="mb-3 border-red-500/30 bg-red-500/5 rounded-lg"
-        style={{
-          padding: 'var(--card-pad, 12px)',
-          borderRadius: 'var(--card-radius, 12px)',
-          borderWidth: 'var(--card-border-w, 1px)',
-        }}
-      >
-        <div className="flex items-center justify-between mb-2">
+      {/* Global Kill Switch - PATCH CONTROL-OPT-1: Kompakt 2 satır layout */}
+      <Surface variant="card" className={cn(cardPadding, "border-red-500/30 bg-red-500/5")}>
+        {/* Satır 1: Durum + Arm Butonu */}
+        <div className={cn("flex items-center justify-between", isCompact ? "mb-2" : "mb-2.5")}>
           <div className="flex items-center gap-2">
-            <span className="text-lg">⚡</span>
+            <span className={isCompact ? "text-base" : "text-lg"}>⚡</span>
             <div>
-              <div className="text-base font-semibold text-neutral-200">Global Kill Switch</div>
-              <div className={cn(
-                "text-xs",
-                killSwitchActive ? 'text-red-400' : 'text-emerald-400'
-              )}>
-                {killSwitchActive ? 'System Blocked' : 'System Normal'}
+              <div className={cn("font-semibold text-neutral-200 leading-tight", isCompact ? "text-xs" : "text-sm")}>
+                Global Kill Switch
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className={cn(
+                  killSwitchActive ? 'text-red-400' : killSwitchArmed ? 'text-amber-400' : 'text-emerald-400',
+                  "leading-tight font-medium",
+                  isCompact ? "text-[10px]" : "text-[11px]"
+                )}>
+                  {killSwitchActive ? 'Sistem Engellendi' : killSwitchArmed ? uiCopy.killSwitch.armed : uiCopy.killSwitch.systemNormal}
+                </div>
+                {killSwitchArmed && armedTimeRemaining > 0 && (
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded text-[9px] font-semibold",
+                    "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                  )}>
+                    {armedTimeRemaining}s
+                  </span>
+                )}
               </div>
             </div>
           </div>
           <button
-            onClick={handleKillSwitchToggle}
+            onClick={handleArmToggle}
             className={cn(
-              "px-4 py-2 text-sm rounded-lg font-semibold text-white transition-colors",
-              killSwitchActive
-                ? "bg-neutral-700 hover:bg-neutral-600"
-                : "bg-red-600 hover:bg-red-700"
+              "rounded-lg font-medium text-white transition-colors shrink-0",
+              isCompact ? "px-2.5 py-1 text-[10px]" : "px-3 py-1.5 text-xs",
+              killSwitchArmed
+                ? "bg-amber-600 hover:bg-amber-700"
+                : "bg-neutral-700 hover:bg-neutral-600"
             )}
           >
-            {killSwitchActive ? 'SİSTEMİ AÇ' : 'ACİL DURDUR'}
+            {killSwitchArmed ? 'Disarm' : uiCopy.killSwitch.arm}
           </button>
         </div>
 
-        {/* PATCH S: Glance'da 2 kolon grid (SSR-safe) */}
-        <div className="text-sm glance-kill-switch-grid">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={killSwitchOptions.closeAllPositions}
-              onChange={(e) => setKillSwitchOptions({ ...killSwitchOptions, closeAllPositions: e.target.checked })}
-              className="w-4 h-4 rounded border-neutral-600"
-            />
-            <span className="text-neutral-300">Tüm Pozisyonları Kapat</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={killSwitchOptions.stopStrategies}
-              onChange={(e) => setKillSwitchOptions({ ...killSwitchOptions, stopStrategies: e.target.checked })}
-              className="w-4 h-4 rounded border-neutral-600"
-            />
-            <span className="text-neutral-300">Stratejileri Durdur</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={killSwitchOptions.blockNewOrders}
-              onChange={(e) => setKillSwitchOptions({ ...killSwitchOptions, blockNewOrders: e.target.checked })}
-              className="w-4 h-4 rounded border-neutral-600"
-            />
-            <span className="text-neutral-300">Yeni Emirleri Engelle</span>
-          </label>
-        </div>
-        <div className="mt-3 text-xs text-neutral-500">
-          Seçili aksiyonlar acil durdurma tetiklendiğinde sırayla uygulanır.
+        {/* Satır 2: Toggles + Acil Durdur */}
+        <div className="flex items-center justify-between gap-3">
+          <div className={cn("flex items-center gap-3 flex-1", isCompact ? "text-[11px]" : "text-[12px]")}>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={killSwitchOptions.closeAllPositions}
+                onChange={(e) => setKillSwitchOptions({ ...killSwitchOptions, closeAllPositions: e.target.checked })}
+                className={cn("rounded border-neutral-600", isCompact ? "w-3.5 h-3.5" : "w-4 h-4")}
+              />
+              <span className="text-neutral-300 leading-tight">Pozisyonları Kapat</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={killSwitchOptions.blockNewOrders}
+                onChange={(e) => setKillSwitchOptions({ ...killSwitchOptions, blockNewOrders: e.target.checked })}
+                className={cn("rounded border-neutral-600", isCompact ? "w-3.5 h-3.5" : "w-4 h-4")}
+              />
+              <span className="text-neutral-300 leading-tight">Yeni Emirleri Engelle</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={killSwitchOptions.stopStrategies}
+                onChange={(e) => setKillSwitchOptions({ ...killSwitchOptions, stopStrategies: e.target.checked })}
+                className={cn("rounded border-neutral-600", isCompact ? "w-3.5 h-3.5" : "w-4 h-4")}
+              />
+              <span className="text-neutral-300 leading-tight">Stratejileri Durdur</span>
+            </label>
+          </div>
+          {/* Acil Durdur - PATCH CONTROL-OPT-1: Sağda tek CTA */}
+          {!killSwitchArmed && !killSwitchActive ? (
+            <Tooltip content={uiCopy.killSwitch.armFirst} side="top">
+              <button
+                disabled={true}
+                className={cn(
+                  "rounded-lg font-semibold text-white transition-all relative overflow-hidden shrink-0",
+                  isCompact ? "px-3 py-1.5 text-[10px]" : "px-4 py-2 text-xs",
+                  "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+                )}
+              >
+                {uiCopy.killSwitch.emergencyStop}
+              </button>
+            </Tooltip>
+          ) : (
+            <button
+              onClick={() => {
+                // PATCH CONTROL-OPT-3: 2-adımlı onay modal'ı aç (arm kontrolü handleKillSwitchToggle içinde)
+                handleKillSwitchToggle();
+              }}
+              disabled={killSwitchActive}
+              className={cn(
+                "rounded-lg font-semibold text-white transition-all relative overflow-hidden shrink-0",
+                isCompact ? "px-3 py-1.5 text-[10px]" : "px-4 py-2 text-xs",
+                killSwitchActive
+                  ? "bg-neutral-700 hover:bg-neutral-600"
+                  : "bg-red-600 hover:bg-red-700 active:bg-red-800"
+              )}
+            >
+              {killSwitchActive ? 'SİSTEMİ AÇ' : uiCopy.killSwitch.emergencyStop}
+            </button>
+          )}
         </div>
         {killSwitchLastTriggered && (
-          <div className="mt-3 pt-3 border-t border-neutral-800">
+          <div className={cn("border-t border-neutral-800 mt-3 pt-3", isCompact ? "mt-2 pt-2" : "mt-3 pt-3")}>
             <div className="text-xs text-neutral-400">
               Son tetiklenme: {killSwitchLastTriggered}
             </div>
@@ -427,7 +627,7 @@ export default function RiskProtectionPage() {
             )}
           </div>
         )}
-      </div>
+      </Surface>
 
       {/* Kill Switch Confirmation Modal */}
       {showKillSwitchConfirm && (
@@ -466,51 +666,82 @@ export default function RiskProtectionPage() {
         </div>
       )}
 
-      {/* Aktif Risk Uyarıları - UI-1: Gruplama (toplu olay) */}
-      <Surface variant="card" className="p-4 mb-3">
-        <div className={cn(cardHeader, "mb-3")}>
-          Aktif Risk Uyarıları
+      {/* Aktif Risk Uyarıları - PATCH CONTROL-OPT-1: Top 3 + Tümünü gör */}
+      <Surface variant="card" className={cn(cardPadding, "overflow-visible flex flex-col")}>
+        <div className={cn("flex items-center justify-between shrink-0", isCompact ? "mb-2" : "mb-2.5")}>
+          <div>
+            <div className={cn(cardHeader, "mb-0 leading-tight", isCompact ? "text-xs" : "text-sm")}>
+              Aktif Risk Uyarıları
+            </div>
+            <div className={cn("text-neutral-500 mt-0.5 leading-tight", isCompact ? "text-[9px]" : "text-[10px]")}>
+              Real-time monitoring
+            </div>
+          </div>
+          {groupedAlerts.length > 3 && (
+            <button
+              onClick={() => setAlertsExpanded(!alertsExpanded)}
+              className={cn(
+                "font-medium text-blue-400 hover:text-blue-300 rounded border border-blue-500/30 hover:bg-blue-500/10 transition-colors",
+                isCompact ? "text-[10px] px-2 py-1" : "text-xs px-2.5 py-1.5"
+              )}
+            >
+              {alertsExpanded ? '▼ Gizle' : `Tümünü gör (${groupedAlerts.length})`}
+            </button>
+          )}
         </div>
-        <div className="text-xs text-neutral-400 mb-3">Real-time monitoring</div>
-        <div className="space-y-2">
-          {groupedAlerts.map((group) => (
+        <div className={cn(
+          "space-y-2",
+          isCompact ? "space-y-1.5" : "space-y-2"
+        )}>
+          {(alertsExpanded ? groupedAlerts : groupedAlerts.slice(0, 3)).map((group) => (
             <div
               key={group.key}
-              className="p-3 rounded-lg bg-red-500/10 border border-red-500/20"
+              className={cn(
+                "rounded-lg border border-red-500/20 transition-colors",
+                isCompact ? "p-1.5" : "p-2",
+                "bg-red-500/10 hover:bg-red-500/15"
+              )}
             >
-              <div className="flex items-start justify-between gap-3">
+              {/* PATCH CONTROL-OPT-3: Kompakt tek satır layout */}
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="text-sm font-medium text-red-300">
+                  <div className="flex items-center gap-1.5">
+                    <div className={cn("font-medium text-red-300", isCompact ? "text-[10px]" : "text-xs")}>
                       {group.title}
                     </div>
                     {group.count > 1 && (
-                      <span className="text-xs font-medium text-red-400 bg-red-500/20 px-1.5 py-0.5 rounded">
+                      <span className={cn(
+                        "font-medium text-red-400 bg-red-500/20 px-1 py-0.5 rounded",
+                        isCompact ? "text-[8px]" : "text-[9px]"
+                      )}>
                         (x{group.count})
                       </span>
                     )}
-                  </div>
-                  <div className="text-xs text-neutral-400 mb-1.5">
-                    {group.message}
-                  </div>
-                  <div className="text-[10px] text-neutral-500">
-                    {group.trend} · Son: {group.lastTriggered}
+                    <span className={cn("text-neutral-500", isCompact ? "text-[8px]" : "text-[9px]")}>
+                      · {group.lastTriggered}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => {/* TODO: Acknowledge */}}
-                    className="px-2 py-1 text-[10px] font-medium text-neutral-300 hover:text-white bg-neutral-800/50 hover:bg-neutral-700 rounded border border-neutral-700 transition-colors"
+                    className={cn(
+                      "font-medium text-neutral-300 hover:text-white bg-neutral-800/50 hover:bg-neutral-700 rounded border border-neutral-700 transition-colors",
+                      isCompact ? "px-1 py-0.5 text-[8px]" : "px-1 py-0.5 text-[9px]"
+                    )}
                     title="Onayla"
                   >
-                    ✓ Onayla
+                    ✓
                   </button>
                   <button
                     onClick={() => {/* TODO: Snooze 10m */}}
-                    className="px-2 py-1 text-[10px] font-medium text-neutral-300 hover:text-white bg-neutral-800/50 hover:bg-neutral-700 rounded border border-neutral-700 transition-colors"
+                    className={cn(
+                      "font-medium text-neutral-300 hover:text-white bg-neutral-800/50 hover:bg-neutral-700 rounded border border-neutral-700 transition-colors",
+                      isCompact ? "px-1 py-0.5 text-[8px]" : "px-1 py-0.5 text-[9px]"
+                    )}
                     title="10 dk ertele"
                   >
-                    ⏰ 10m
+                    ⏰
                   </button>
                 </div>
               </div>
@@ -519,8 +750,10 @@ export default function RiskProtectionPage() {
         </div>
       </Surface>
 
-      {/* Risk Parametreleri - UI-1: Collapsible (varsayılan kapalı) */}
-      <CollapsibleRiskParams />
+      {/* Risk Parametreleri - PATCH I: Padding yumuşatıldı, isCompact prop */}
+      <div className={isCompact ? "[&>*]:p-2.5" : "[&>*]:p-3"}>
+        <CollapsibleRiskParams isCompact={isCompact} />
+      </div>
     </div>
   );
 }

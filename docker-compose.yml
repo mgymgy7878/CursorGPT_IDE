@@ -58,6 +58,27 @@ services:
     depends_on:
       - prometheus
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: spark-postgres
+    environment:
+      POSTGRES_DB: spark_trading
+      POSTGRES_USER: spark_user
+      POSTGRES_PASSWORD: spark_secure_password_2024
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - spark-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spark_user -d spark_trading"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   spark-network:
     driver: bridge
@@ -69,4 +90,6 @@ volumes:
   prometheus_data:
     driver: local
   grafana_data:
+    driver: local
+  postgres_data:
     driver: local

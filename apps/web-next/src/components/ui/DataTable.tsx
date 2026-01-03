@@ -25,7 +25,15 @@ export function DataTable({ children, className }: DataTableProps) {
 
 export function DataTableHeader({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <thead className={cn('text-left text-neutral-300 bg-neutral-900/50', className)}>
+    <thead className={cn(
+      'text-left text-neutral-300',
+      // PATCH W.1: Sticky header z-index + opak background (blend önleme)
+      'sticky top-0 z-20 backdrop-blur-sm',
+      'bg-neutral-900/98 border-b border-white/10',
+      // PATCH W.1: DPI/Windows ölçek desteği (subpixel rendering)
+      'will-change-transform',
+      className
+    )}>
       {children}
     </thead>
   );
@@ -45,10 +53,12 @@ export function DataTableRow({
   return (
     <tr
       className={cn(
-      'border-b border-white/5',
-      hover && 'transition-colors',
+        'border-b border-white/5',
+        // PATCH W: Zebra pattern (çok hafif) + hover
+        'even:bg-white/[0.01]',
+        hover && 'transition-colors hover:bg-white/5',
         onClick && 'cursor-pointer',
-      className
+        className
       )}
       onClick={onClick}
     >

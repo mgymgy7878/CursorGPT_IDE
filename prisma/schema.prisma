@@ -1,0 +1,181 @@
+// Prisma Schema for Spark Trading Platform
+// Based on schema-v1.4-enhanced.prisma
+// Production-ready schema with Decimal precision, Enum types, and proper indexes
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS - Type Safety
+// ============================================
+
+enum TradeStatus {
+  pending
+  submitted
+  filled
+  settled
+  cancelled
+  rejected
+  expired
+}
+
+enum StrategyStatus {
+  draft
+  active
+  paused
+  stopped
+  archived
+}
+
+enum BacktestStatus {
+  pending
+  running
+  completed
+  failed
+  cancelled
+}
+
+enum IdempotencyStatus {
+  pending   // Request in progress (prevents race)
+  completed // Request completed
+  failed    // Request failed
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  strategies Strategy[]
+  backtests  Backtest[]
+
+  @@index([email])
+}
+
+model Strategy {
+  id          String         @id @default(cuid())
+  name        String
+  code        String         @db.Text
+  params      Json
+  status      StrategyStatus @default(draft)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  backtests   Backtest[]
+  trades      Trade[]
+  positions   Position[]
+
+  @@index([userId, status])
+  @@index([status, updatedAt])
+  @@index([userId, createdAt])
+}
+
+model Backtest {
+  id          String         @id @default(cuid())
+  strategyId  String
+  strategy    Strategy       @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  params      Json
+  results     Json
+  startDate   DateTime
+  endDate     DateTime
+  status      BacktestStatus @default(pending)
+  createdAt   DateTime       @default(now())
+  completedAt DateTime?
+
+  @@index([strategyId, status])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([strategyId, createdAt])
+}
+
+model Trade {
+  id            String      @id @default(cuid())
+  strategyId    String
+  strategy      Strategy    @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  symbol        String
+  side          String      // buy, sell
+  type          String      // market, limit
+
+  // ✅ CRITICAL: Decimal for precise financial calculations
+  price         Decimal     @db.Decimal(38, 18)
+  quantity      Decimal     @db.Decimal(38, 18)
+  commission    Decimal     @db.Decimal(38, 18) @default(0)
+  pnl           Decimal?    @db.Decimal(38, 18)
+
+  status        TradeStatus @default(pending)
+  exchange      String
+  clientOrderId String?     // Exchange order ID
+  createdAt     DateTime    @default(now())
+  filledAt      DateTime?
+
+  // ✅ Prevent duplicate exchange orders (nullable clientOrderId için partial unique)
+  @@unique([exchange, clientOrderId])
+  @@index([strategyId, createdAt])
+  @@index([symbol, exchange])
+  @@index([status, createdAt])
+  @@index([exchange, createdAt])
+}
+
+model Position {
+  id         String   @id @default(cuid())
+  strategyId String?  // ✅ Strategy ownership (nullable for system-wide positions)
+  symbol     String
+  side       String   // long, short
+
+  // ✅ CRITICAL: Decimal precision
+  quantity   Decimal  @db.Decimal(38, 18)
+  avgPrice   Decimal  @db.Decimal(38, 18)
+
+  exchange   String
+  updatedAt  DateTime @updatedAt
+
+  strategy   Strategy? @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  // ✅ CRITICAL: Prevent paper/real collision (unique constraint with nullable strategyId)
+  @@unique([strategyId, symbol, exchange])
+  @@index([exchange, symbol])
+  @@index([strategyId, updatedAt])
+  @@index([symbol, exchange, side])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  actor     String
+  payload   Json     // ✅ Masked sensitive data
+  hash      String   // ✅ HMAC-SHA256 for integrity
+  timestamp DateTime @default(now())
+
+  @@index([action, timestamp])
+  @@index([actor, timestamp])
+  @@index([hash]) // For deduplication
+  @@index([timestamp])
+}
+
+model IdempotencyKey {
+  key        String            @id
+  status     IdempotencyStatus @default(pending)
+  result     Json?
+  createdAt  DateTime          @default(now())
+  ttlAt      DateTime          // Auto-expire after 24-48h
+
+  @@index([ttlAt])      // For efficient GC
+  @@index([createdAt])  // For monitoring
+  @@index([status, ttlAt]) // For cleanup queries
+}
+

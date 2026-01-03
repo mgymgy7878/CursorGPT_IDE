@@ -33,9 +33,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   // Normal: Ince kabuk - sadece UX eklentileri (client-only, dynamic)
   // suppressHydrationWarning: theme/SSR mismatch gürültüsünü azaltır
+  // PATCH HARDENING: dvh + single-scroll contract (root seviyesinde)
   return (
-    <html lang="tr" suppressHydrationWarning>
-      <body className="overflow-hidden">
+    <html lang="tr" suppressHydrationWarning className="h-full">
+      <body className="h-dvh min-h-0 overflow-hidden overscroll-none">
         {children}
         <CommandPalette />
         <Toaster />

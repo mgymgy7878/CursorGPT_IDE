@@ -23,6 +23,7 @@ import {
   IconServer,
   IconMoreHorizontal
 } from '../ui/LocalIcons';
+import { uiCopy } from '@/lib/uiCopy';
 
 export default function GoldenDashboard() {
   // Temporary fix: Inject critical CSS if not loaded
@@ -133,7 +134,8 @@ export default function GoldenDashboard() {
                 <div className="bg-[#0a0c0f] rounded p-2 border border-[#262626]">
                    <div className="text-[9px] text-[#6b7280]">Margin Level</div>
                    <div className="text-sm text-[#f97316] font-medium">1,240%</div>
-                   <div className="text-[9px] text-[#6b7280]">Healthy</div>
+                   {/* PATCH W.5: uiCopy'den */}
+                   <div className="text-[9px] text-[#6b7280]">{uiCopy.connection.healthy}</div>
                 </div>
              </div>
           </div>
@@ -211,7 +213,8 @@ export default function GoldenDashboard() {
               <IconShield className="w-3.5 h-3.5 text-[#9ca3af]" />
               Risk Durumu
             </h3>
-            <span className="text-[9px] text-[#f97316]">Moderate</span>
+            {/* PATCH W.5: uiCopy'den */}
+            <span className="text-[9px] text-[#f97316]">{uiCopy.connection.moderate}</span>
           </header>
           <div className="flex-1 min-h-0 flex flex-col gap-2 justify-center">
              <div className="flex items-center justify-between text-[10px]">
@@ -249,12 +252,14 @@ export default function GoldenDashboard() {
              <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-[10px] p-1.5 bg-[#0a0c0f] border border-[#262626] rounded">
                    <span className="text-[#e5e7eb]">BUY BTC/USDT</span>
-                   <span className="text-[#9ca3af]">RSI Oversold condition met</span>
+                   {/* PATCH W.5: uiCopy'den */}
+                   <span className="text-[#9ca3af]">{uiCopy.aiDecision.oversoldConditionMet}</span>
                    <span className="text-[#4ade80]">98% Conf.</span>
                 </div>
                 <div className="flex items-center justify-between text-[10px] p-1.5 bg-[#0a0c0f] border border-[#262626] rounded">
                    <span className="text-[#e5e7eb]">CLOSE ETH/USDT</span>
-                   <span className="text-[#9ca3af]">Take profit target hit</span>
+                   {/* PATCH W.5: uiCopy'den */}
+                   <span className="text-[#9ca3af]">{uiCopy.aiDecision.takeProfitTargetHit}</span>
                    <span className="text-[#4ade80]">100% Conf.</span>
                 </div>
              </div>
@@ -280,7 +285,8 @@ export default function GoldenDashboard() {
              </div>
              <div className="flex justify-between border-b border-[#262626] pb-1">
                 <span className="text-[#9ca3af]">Execution</span>
-                <span className="text-[#4ade80]">Operational</span>
+                {/* PATCH W.5: uiCopy'den */}
+                <span className="text-[#4ade80]">{uiCopy.connection.operational}</span>
              </div>
              <div className="flex justify-between">
                 <span className="text-[#9ca3af]">Data Stream</span>

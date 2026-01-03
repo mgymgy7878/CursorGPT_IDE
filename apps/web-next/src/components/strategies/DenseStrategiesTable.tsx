@@ -13,9 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { DeltaText } from '@/components/ui/DeltaText';
 import { MonoNumber } from '@/components/ui/MonoNumber';
 import { RowActions, RowActionButton } from '@/components/ui/RowActions';
+import { RowOverflowMenu } from '@/components/ui/RowOverflowMenu';
 import { formatCurrency, formatPercent } from '@/lib/format';
 import { SkeletonBlock } from '@/components/ui/SkeletonBlock';
 import { EmptyState } from '@/components/ui/states';
+import { uiCopy } from '@/lib/uiCopy';
+import { cn } from '@/lib/utils';
 
 export interface StrategyRow {
   id: string;
@@ -43,6 +46,7 @@ export interface DenseStrategiesTableProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onStatusChange?: (id: string, status: 'start' | 'stop' | 'pause') => void;
+  executorHealthy?: boolean; // Disable actions if executor is down
   variant?: 'my-strategies' | 'running-strategies';
 }
 
@@ -53,6 +57,7 @@ export default function DenseStrategiesTable({
   onEdit,
   onDelete,
   onStatusChange,
+  executorHealthy = true,
   variant = 'my-strategies',
 }: DenseStrategiesTableProps) {
   if (loading) {
@@ -68,50 +73,56 @@ export default function DenseStrategiesTable({
     );
   }
 
+  // PATCH W.5: Status badge'leri uiCopy'den
   const getStatusBadge = (status: StrategyRow['status']) => {
     switch (status) {
       case 'active':
       case 'running':
-        return <Badge variant="success">Active</Badge>;
+        return <Badge variant="success">{uiCopy.status.active}</Badge>;
       case 'paused':
-        return <Badge variant="warning">Paused</Badge>;
+        return <Badge variant="warning">{uiCopy.status.paused}</Badge>;
       case 'stuck':
-        return <Badge variant="destructive">Stuck</Badge>;
+        return <Badge variant="destructive">{uiCopy.status.stuck}</Badge>;
       default:
-        return <Badge variant="secondary">Inactive</Badge>;
+        return <Badge variant="secondary">{uiCopy.status.inactive}</Badge>;
     }
   };
 
+  // PATCH W.5: Health badge'leri uiCopy'den
   const getHealthBadge = (health?: StrategyRow['health']) => {
     if (!health) return null;
     switch (health) {
       case 'ok':
-        return <Badge variant="success">OK</Badge>;
+        return <Badge variant="success">{uiCopy.health.ok}</Badge>;
       case 'degraded':
-        return <Badge variant="warning">Degraded</Badge>;
+        return <Badge variant="warning">{uiCopy.health.degraded}</Badge>;
       case 'error':
-        return <Badge variant="destructive">Error</Badge>;
+        return <Badge variant="destructive">{uiCopy.health.error}</Badge>;
       default:
         return null;
     }
   };
 
+  // PATCH SCROLL-AUDIT: Nested scroll kaldırıldı - sayfa scroll'una güveniliyor
   return (
     <div
       className="w-full rounded-lg border border-neutral-800 min-h-0"
-      style={{
-        maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 200px)',
-        overflow: 'auto',
-      }}
     >
       <DataTable>
         <DataTableHeader>
           <DataTableRow hover={false} className="h-12">
-            {columns.map((col) => (
-              <DataTableHeaderCell key={col} className="text-xs font-medium">
-                {col}
-              </DataTableHeaderCell>
-            ))}
+            {columns.map((col) => {
+              // PATCH W.4: Actions kolonu - lg ve üzeri ekranlarda görünür
+              const isActions = col === uiCopy.table.actions;
+              return (
+                <DataTableHeaderCell
+                  key={col}
+                  className={cn("text-xs font-medium", isActions && "hidden lg:table-cell")}
+                >
+                  {col}
+                </DataTableHeaderCell>
+              );
+            })}
           </DataTableRow>
         </DataTableHeader>
         <tbody>
@@ -147,8 +158,8 @@ export default function DenseStrategiesTable({
                   )}
                   {row.winRate30d !== undefined && (
                     <DataTableCell className="text-right tabular-nums">
-                      {/* UI-1: Yüzde 2 decimal standardı */}
-                      <MonoNumber value={formatPercent(row.winRate30d / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} className="text-sm text-neutral-300" />
+                      {/* PATCH W.2.1: WinRate normalizasyonu - 0-1 ratio ise auto ×100, 0-100 ise olduğu gibi */}
+                      <MonoNumber value={formatPercent(row.winRate30d, { auto: true, minimumFractionDigits: 2, maximumFractionDigits: 2 })} className="text-sm text-neutral-300" />
                     </DataTableCell>
                   )}
                   {row.sharpe30d !== undefined && (
@@ -158,7 +169,10 @@ export default function DenseStrategiesTable({
                   )}
                   {row.risk && (
                     <DataTableCell>
-                      <Badge variant="info">{row.risk}</Badge>
+                      {/* PATCH Q: Risk seviyeleri Türkçeleştirme */}
+                      <Badge variant="info">
+                        {row.risk === 'Low' ? uiCopy.risk.low : row.risk === 'Medium' ? uiCopy.risk.medium : row.risk === 'High' ? uiCopy.risk.high : row.risk}
+                      </Badge>
                     </DataTableCell>
                   )}
                 </>
@@ -167,8 +181,9 @@ export default function DenseStrategiesTable({
                 <>
                   {row.mode && (
                     <DataTableCell>
+                      {/* PATCH W.5: Mode badge'leri uiCopy'den */}
                       <Badge variant={row.mode === 'live' ? 'success' : 'secondary'}>
-                        {row.mode}
+                        {row.mode === 'live' ? uiCopy.mode.live : uiCopy.mode.shadow}
                       </Badge>
                     </DataTableCell>
                   )}
@@ -194,7 +209,10 @@ export default function DenseStrategiesTable({
                   )}
                   {row.risk && (
                     <DataTableCell>
-                      <Badge variant="info">{row.risk}</Badge>
+                      {/* PATCH Q: Risk seviyeleri Türkçeleştirme */}
+                      <Badge variant="info">
+                        {row.risk === 'Low' ? uiCopy.risk.low : row.risk === 'Medium' ? uiCopy.risk.medium : row.risk === 'High' ? uiCopy.risk.high : row.risk}
+                      </Badge>
                     </DataTableCell>
                   )}
                   {row.health && (
@@ -205,21 +223,61 @@ export default function DenseStrategiesTable({
                 </>
               )}
               <DataTableCell>
-                {getStatusBadge(row.status)}
+                <div className="flex items-center justify-between gap-2">
+                  {getStatusBadge(row.status)}
+                  {/* PATCH W.4: Overflow menu - lg'den küçük ekranlarda Actions yerine */}
+                  <div className="lg:hidden" onClick={(e) => e.stopPropagation()}>
+                    <RowOverflowMenu>
+                      {onStatusChange && row.status === 'active' && (
+                        <RowActionButton
+                          icon="⏸"
+                          label={executorHealthy ? uiCopy.tooltip.pause : 'Executor kullanılamıyor'}
+                          onClick={() => executorHealthy && onStatusChange(row.id, 'pause')}
+                          disabled={!executorHealthy}
+                        />
+                      )}
+                      {onStatusChange && row.status === 'paused' && (
+                        <RowActionButton
+                          icon="▶"
+                          label={executorHealthy ? uiCopy.tooltip.resume : 'Executor kullanılamıyor'}
+                          onClick={() => executorHealthy && onStatusChange(row.id, 'start')}
+                          disabled={!executorHealthy}
+                        />
+                      )}
+                      {onEdit && (
+                        <RowActionButton icon="✏️" label={uiCopy.tooltip.edit} onClick={() => onEdit(row.id)} />
+                      )}
+                      {onDelete && (
+                        <RowActionButton icon="🗑️" label={uiCopy.tooltip.delete} variant="danger" onClick={() => onDelete(row.id)} />
+                      )}
+                    </RowOverflowMenu>
+                  </div>
+                </div>
               </DataTableCell>
-              <DataTableCell className="text-right">
+              {/* PATCH W.4: Actions kolonu - lg ve üzeri ekranlarda görünür */}
+              <DataTableCell className="hidden lg:table-cell text-right">
                 <RowActions>
                   {onStatusChange && row.status === 'active' && (
-                    <RowActionButton icon="⏸" label="Pause" onClick={() => onStatusChange(row.id, 'pause')} />
+                    <RowActionButton
+                      icon="⏸"
+                      label={executorHealthy ? uiCopy.tooltip.pause : 'Executor kullanılamıyor'}
+                      onClick={() => executorHealthy && onStatusChange(row.id, 'pause')}
+                      disabled={!executorHealthy}
+                    />
                   )}
                   {onStatusChange && row.status === 'paused' && (
-                    <RowActionButton icon="▶" label="Resume" onClick={() => onStatusChange(row.id, 'start')} />
+                    <RowActionButton
+                      icon="▶"
+                      label={executorHealthy ? uiCopy.tooltip.resume : 'Executor kullanılamıyor'}
+                      onClick={() => executorHealthy && onStatusChange(row.id, 'start')}
+                      disabled={!executorHealthy}
+                    />
                   )}
                   {onEdit && (
-                    <RowActionButton icon="✏️" label="Edit" onClick={() => onEdit(row.id)} />
+                    <RowActionButton icon="✏️" label={uiCopy.tooltip.edit} onClick={() => onEdit(row.id)} />
                   )}
                   {onDelete && (
-                    <RowActionButton icon="🗑️" label="Delete" variant="danger" onClick={() => onDelete(row.id)} />
+                    <RowActionButton icon="🗑️" label={uiCopy.tooltip.delete} variant="danger" onClick={() => onDelete(row.id)} />
                   )}
                 </RowActions>
               </DataTableCell>

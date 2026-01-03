@@ -46,6 +46,8 @@ import {
   LS_COPILOT_DOCK_COLLAPSED,
 } from "./layout-tokens";
 import { IconShield, IconBell, IconBarChart } from "@/components/ui/LocalIcons";
+import { useNavIndicators } from "@/hooks/useNavIndicators";
+import { NavBadge } from "@/components/ui/NavBadge";
 
 /**
  * ComposerBar - Chat input bar with ResizeObserver for FAB offset sync
@@ -233,7 +235,7 @@ export default function AppFrame({ children }: AppFrameProps) {
   return (
     <div
       className={cn(
-        "fixed inset-0 flex flex-col overflow-hidden",
+        "fixed inset-0 h-dvh flex flex-col overflow-hidden",
         isMarketFullscreen && "h-screen w-screen p-0"
       )}
       style={
@@ -276,22 +278,25 @@ export default function AppFrame({ children }: AppFrameProps) {
           </>
         )}
 
-        {/* Main Content Area - PATCH L: Shell & Scroll Discipline */}
+        {/* Main Content Area - PATCH I: Viewport budget kesinleştir */}
         <main className={cn(
           "flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col",
           isMarketFullscreen && "overflow-hidden"
         )}>
           <div
             className={cn(
-              "flex-1 min-h-0 overflow-y-auto overflow-x-hidden",
+              "h-[calc(100dvh-var(--app-topbar-h,48px))] min-h-0 overflow-hidden flex flex-col scroll-gutter-stable",
               isMarketFullscreen && "overflow-hidden p-0"
             )}
             style={isMarketFullscreen ? {} : {
               paddingLeft: 'var(--page-px, 12px)',
               paddingRight: 'var(--page-px, 12px)',
-              paddingTop: 'var(--page-py, 10px)',
-              paddingBottom: 'var(--page-py, 10px)',
-            }}
+              paddingTop: 'var(--page-pt, 10px)',
+              // PATCH W.5b: Bottom padding - density mode'a göre dinamik + safe-area desteği
+              paddingBottom: 'calc(var(--page-pb, 32px) + env(safe-area-inset-bottom, 0px))',
+              overflowY: 'auto', // PATCH U: İç container scroll alır, body scroll yok
+              scrollbarGutter: 'stable', // PATCH HARDENING: Prevent layout jitter
+            } as React.CSSProperties}
           >
             {children}
           </div>
@@ -357,6 +362,9 @@ function RightRailDock({
   onOpenPanel,
   activeTab = "copilot",
 }: RightRailDockProps) {
+  // PATCH 8: Right Rail Indicators - useNavIndicators hook'undan badge'leri al
+  const indicators = useNavIndicators();
+
   const dockItems = [
     {
       id: "copilot",
@@ -365,6 +373,7 @@ function RightRailDock({
       shortcut: "C",
       color: "text-emerald-400",
       hoverBg: "hover:bg-emerald-500/10",
+      badge: indicators.rightRail.spark,
     },
     {
       id: "risk",
@@ -373,6 +382,7 @@ function RightRailDock({
       shortcut: "R",
       color: "text-amber-400",
       hoverBg: "hover:bg-amber-500/10",
+      badge: indicators.rightRail.shield,
     },
     {
       id: "alerts",
@@ -381,6 +391,7 @@ function RightRailDock({
       shortcut: "A",
       color: "text-yellow-400",
       hoverBg: "hover:bg-yellow-500/10",
+      badge: indicators.rightRail.bell,
     },
     {
       id: "metrics",
@@ -389,6 +400,7 @@ function RightRailDock({
       shortcut: "M",
       color: "text-blue-400",
       hoverBg: "hover:bg-blue-500/10",
+      badge: null, // Metrics için badge yok (sistem alarmı varsa pulse eklenebilir)
     },
   ];
 
@@ -429,17 +441,27 @@ function RightRailDock({
             aria-pressed={isActive}
             tabIndex={0}
           >
-            <Icon
-              size={20}
-              strokeWidth={1.8}
-              className={cn(
-                "transition-all duration-150",
-                item.color,
-                isActive
-                  ? "opacity-100"
-                  : "opacity-60 group-hover:opacity-100 group-focus-visible:opacity-100"
+            <div className="relative">
+              <Icon
+                size={20}
+                strokeWidth={1.8}
+                className={cn(
+                  "transition-all duration-150",
+                  item.color,
+                  isActive
+                    ? "opacity-100"
+                    : "opacity-60 group-hover:opacity-100 group-focus-visible:opacity-100"
+                )}
+              />
+              {/* PATCH 8: Right Rail Badge */}
+              {item.badge && (
+                <NavBadge
+                  type={item.badge.type}
+                  variant={item.badge.variant}
+                  value={item.badge.value}
+                />
               )}
-            />
+            </div>
             {/* Tooltip - custom positioning */}
             <span
               className={cn(
@@ -556,10 +578,9 @@ function RightRailCopilotSkeleton() {
                 Copilot
               </span>
             </div>
+            {/* PATCH T: Greeting artık CopilotDock içinde global store'da tutuluyor, burada tekrar gösterme */}
             <div className="text-[12px] text-neutral-400 leading-relaxed">
-              Merhaba, ben Spark Copilot. Portföy durumunu, çalışan stratejileri
-              ve risk limitlerini izliyorum. İstersen önce genel portföy riskini
-              çıkarabilirim.
+              Portföy durumunu, çalışan stratejileri ve risk limitlerini izliyorum.
             </div>
           </div>
         </div>

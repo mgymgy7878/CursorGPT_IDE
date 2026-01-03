@@ -76,6 +76,9 @@ evidence/
 !evidence/**/MANUAL_TEST_RUNBOOK.md
 !evidence/**/REGRESSION_CHECKLIST.md
 
+# SLO tracking (herkesin lokalinde farklı tarih/istatistik → sürekli diff)
+evidence/gate-slo-tracking.json
+
 # Playwright test results (commit edilmez)
 test-results/
 playwright-report/

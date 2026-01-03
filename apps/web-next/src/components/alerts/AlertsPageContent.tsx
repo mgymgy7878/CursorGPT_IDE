@@ -17,6 +17,7 @@ import { Surface } from '@/components/ui/Surface';
 import { StatCard } from '@/components/ui/StatCard';
 import { cardHeader, badgeVariant } from '@/styles/uiTokens';
 import { cn } from '@/lib/utils';
+import { ClientTime } from '@/components/common/ClientTime';
 
 export interface AlertItem {
   id: string;
@@ -54,6 +55,8 @@ export default function AlertsPageContent({
 }: AlertsPageContentProps) {
   const [searchValue, setSearchValue] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  // PATCH CONTROL-OPT-2: Bulk actions dropdown state
+  const [bulkMenuOpen, setBulkMenuOpen] = useState(false);
 
   // Summary stats
   const totalAlerts = items.length;
@@ -86,135 +89,262 @@ export default function AlertsPageContent({
   ];
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="flex flex-col min-h-0 h-full">
       <PageHeader
         title="Uyarılar"
         subtitle="Fiyat, P&L ve risk seviyeleri için bildirim ayarları"
       />
 
       {/* Summary Stats - PATCH P: MetricTile standardı */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Toplam Uyarı" value={totalAlerts} />
-        <StatCard label="Aktif" value={activeAlerts} />
-        <StatCard label="Bugün Tetiklenen" value={triggeredToday} />
-        <StatCard label="Beklemede" value={pendingAlerts} />
-      </div>
-
-      {/* Actions Row */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <a href="/technical-analysis" className="text-sm text-blue-400 hover:text-blue-300">
-            Uyarı Geçmişini Gör
-          </a>
+      {/* PATCH SCROLL-OPT: Empty durumda kompakt mod (KPI kartları scroll tetiklemesin) */}
+      {totalAlerts === 0 ? (
+        <div className="flex flex-wrap gap-2 mb-4 shrink-0">
+          <div className="px-3 py-1.5 rounded-lg bg-neutral-900/50 border border-neutral-800 text-xs">
+            <span className="text-neutral-400">Toplam:</span> <span className="text-neutral-200 font-medium">0</span>
+          </div>
+          <div className="px-3 py-1.5 rounded-lg bg-neutral-900/50 border border-neutral-800 text-xs">
+            <span className="text-neutral-400">Aktif:</span> <span className="text-neutral-200 font-medium">0</span>
+          </div>
+          <div className="px-3 py-1.5 rounded-lg bg-neutral-900/50 border border-neutral-800 text-xs">
+            <span className="text-neutral-400">Bugün:</span> <span className="text-neutral-200 font-medium">0</span>
+          </div>
+          <div className="px-3 py-1.5 rounded-lg bg-neutral-900/50 border border-neutral-800 text-xs">
+            <span className="text-neutral-400">Beklemede:</span> <span className="text-neutral-200 font-medium">0</span>
+          </div>
         </div>
-        <button
-          onClick={() => {/* TODO: Create alert modal */}}
-          className="px-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white flex items-center gap-2"
-          style={{ height: 'var(--control-h, 36px)' }}
-        >
-          <span>+</span>
-          <span>Yeni Uyarı Oluştur</span>
-        </button>
-      </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
+          <StatCard label="Toplam Uyarı" value={totalAlerts} />
+          <StatCard label="Aktif" value={activeAlerts} />
+          <StatCard label="Bugün Tetiklenen" value={triggeredToday} />
+          <StatCard label="Beklemede" value={pendingAlerts} />
+        </div>
+      )}
 
-      {/* Filter Bar */}
-      <div className="mb-4">
-        <FilterBar
-          chips={filterChips}
-          searchPlaceholder="Ara..."
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-        />
-      </div>
+      {/* PATCH NOSCROLL-EMPTY: Empty durumda filtre/arama/action bar yok (scroll önleme) */}
+      {totalAlerts > 0 && (
+        <>
+          {/* Actions Row - PATCH CONTROL-OPT-2: Normal buton boyutu + şablon dropdown */}
+          <div className="flex items-center justify-between mb-4 shrink-0">
+            <div className="flex items-center gap-2">
+              <a href="/technical-analysis" className="text-sm text-blue-400 hover:text-blue-300">
+                Uyarı Geçmişini Gör
+              </a>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Şablonlar dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => {/* TODO: Template dropdown */}}
+                  className="px-3 py-1.5 text-sm rounded-lg border border-neutral-700 hover:bg-neutral-800 text-neutral-300 transition-colors"
+                >
+                  Şablonlar ▼
+                </button>
+              </div>
+              <button
+                onClick={() => {/* TODO: Create alert modal */}}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white flex items-center gap-2 transition-colors"
+              >
+                <span>+</span>
+                <span>Yeni Uyarı</span>
+              </button>
+            </div>
+          </div>
 
-      {/* Bulk Actions */}
-      <div className="flex items-center gap-2 mb-4">
-        <button
-          onClick={() => {/* TODO: Pause all */}}
-          className="px-3 py-1.5 text-sm rounded-lg border border-neutral-700 hover:bg-neutral-800 text-neutral-300"
-        >
-          Tümünü Duraklat
-        </button>
-        <button
-          onClick={() => {/* TODO: Delete triggered */}}
-          className="px-3 py-1.5 text-sm rounded-lg border border-red-700 hover:bg-red-900/20 text-red-300"
-        >
-          Tetiklenenleri Sil
-        </button>
-      </div>
+          {/* Filter Bar + Bulk Actions - PATCH CONTROL-OPT-2: Bulk actions toolbar sağında dropdown */}
+          <div className="mb-4 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex-1">
+              <FilterBar
+                chips={filterChips}
+                searchPlaceholder="Ara..."
+                searchValue={searchValue}
+                onSearchChange={setSearchValue}
+              />
+            </div>
+        {filteredItems.length > 0 && (
+          <div className="relative">
+            <button
+              onClick={() => setBulkMenuOpen(!bulkMenuOpen)}
+              className="px-3 py-1.5 text-sm rounded-lg border border-neutral-700 hover:bg-neutral-800 text-neutral-300 transition-colors flex items-center gap-1.5"
+            >
+              <span>Toplu İşlemler</span>
+              <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">
+                {filteredItems.length}
+              </span>
+              <span className="text-xs">▼</span>
+            </button>
+            {bulkMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setBulkMenuOpen(false)}
+                />
+                <div className="absolute right-0 top-full mt-1 w-48 bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg z-20 py-1">
+                  <button
+                    onClick={() => {
+                      if (confirm('Tüm uyarıları duraklatmak istediğinizden emin misiniz?')) {
+                        // TODO: Pause all
+                        setBulkMenuOpen(false);
+                      }
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800 transition-colors"
+                  >
+                    Tümünü Duraklat
+                  </button>
+                  <button
+                    onClick={() => {
+                      const triggeredCount = filteredItems.filter(a => a.status === 'triggered').length;
+                      if (triggeredCount > 0 && confirm(`Tetiklenen ${triggeredCount} uyarıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
+                        // TODO: Delete triggered
+                        setBulkMenuOpen(false);
+                      }
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-red-300 hover:bg-red-900/20 transition-colors"
+                  >
+                    Tetiklenenleri Sil
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+          </div>
+        </>
+      )}
 
-      {/* Alert Table */}
-      <Surface variant="card" className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left bg-neutral-900/50 border-b border-neutral-800">
-              <tr>
-                <th className="py-3 px-4 text-neutral-300 font-medium">Sembol</th>
-                <th className="py-3 px-4 text-neutral-300 font-medium">Strateji</th>
-                <th className="py-3 px-4 text-neutral-300 font-medium">Koşul</th>
-                <th className="py-3 px-4 text-neutral-300 font-medium">Oluşturulma</th>
-                <th className="py-3 px-4 text-neutral-300 font-medium">Son Tetiklenme</th>
-                <th className="py-3 px-4 text-neutral-300 font-medium">Durum</th>
-                <th className="py-3 px-4 text-neutral-300 font-medium">Kanal</th>
-                <th className="py-3 px-4 text-right text-neutral-300 font-medium">Aksiyonlar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayItems.length === 0 ? (
-                <>
-                  {/* Example Template Cards */}
-                  <tr>
-                    <td colSpan={8} className="py-6">
-                      <div className="grid md:grid-cols-3 gap-3 mb-6">
-                        <div className="p-4 rounded-lg border border-neutral-700 bg-neutral-900/30 opacity-60">
-                          <div className="text-sm font-medium text-neutral-300 mb-1">RSI {'>'} 70</div>
-                          <div className="text-xs text-neutral-500">Fiyat: RSI aşırı alım seviyesi</div>
-                          <div className="mt-2 text-xs text-neutral-600">Örnek şablon (devre dışı)</div>
+      {/* PATCH B: Liste alanı - flex-1 min-h-0 ile kalan alanı doldur */}
+      {/* PATCH SCROLL-OPT: Empty state kompakt (flex-1 justify-center scroll üretiyordu) */}
+      <div className="flex-1 min-h-0 flex flex-col">
+        {displayItems.length === 0 ? (
+          <div className="w-full h-full">
+            {/* PATCH 3: 2-col empty state - terminal density */}
+            <div className="grid lg:grid-cols-2 gap-4 h-full">
+              {/* Sol: Şablonlar + Create CTA + Quick Steps */}
+              <Surface variant="card" className="p-6 flex flex-col">
+                <div className="text-center mb-4">
+                  <div className="text-3xl mb-2">🔔</div>
+                  <div className="text-base font-medium text-neutral-200">Henüz uyarı yok</div>
+                  <div className="text-xs text-neutral-400 mt-1">
+                    Fiyat, P&L veya risk seviyeleri için bildirim oluşturun
+                  </div>
+                </div>
+
+                {/* Şablonlar */}
+                <div className="space-y-2 mb-4">
+                  <div className="text-xs font-medium text-neutral-400 mb-2">Hızlı Şablonlar</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {/* TODO: Create from template - Fiyat */}}
+                      className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded text-xs text-neutral-300 hover:text-white border border-neutral-700 transition-colors"
+                    >
+                      📊 Fiyat
+                    </button>
+                    <button
+                      onClick={() => {/* TODO: Create from template - RSI */}}
+                      className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded text-xs text-neutral-300 hover:text-white border border-neutral-700 transition-colors"
+                    >
+                      📈 RSI
+                    </button>
+                    <button
+                      onClick={() => {/* TODO: Create from template - Risk */}}
+                      className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded text-xs text-neutral-300 hover:text-white border border-neutral-700 transition-colors"
+                    >
+                      ⚠️ Risk
+                    </button>
+                    <button
+                      onClick={() => {/* TODO: Create from template - Sistem */}}
+                      className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded text-xs text-neutral-300 hover:text-white border border-neutral-700 transition-colors"
+                    >
+                      🔧 Sistem
+                    </button>
+                  </div>
+                </div>
+
+                {/* Create CTA */}
+                <button
+                  onClick={() => {/* TODO: Create alert modal */}}
+                  className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition-colors mb-4"
+                >
+                  + Yeni Uyarı Oluştur
+                </button>
+
+                {/* Quick Steps */}
+                <div className="mt-auto pt-4 border-t border-neutral-800">
+                  <div className="text-xs font-medium text-neutral-400 mb-2">Hızlı Kurulum (3 adım)</div>
+                  <div className="space-y-1.5 text-xs text-neutral-500">
+                    <div>1. Şablon seç veya özel koşul tanımla</div>
+                    <div>2. Tetikleme kanallarını ayarla</div>
+                    <div>3. Test et ve aktif et</div>
+                  </div>
+                </div>
+              </Surface>
+
+              {/* Sağ: Recent Triggers (Demo) + Pipeline Health */}
+              <div className="flex flex-col gap-4">
+                {/* Recent Triggers */}
+                <Surface variant="card" className="p-4 flex-1">
+                  <div className="text-xs font-medium text-neutral-400 mb-3 flex items-center justify-between">
+                    <span>Son Tetiklenenler (Demo)</span>
+                    <span className="text-[10px] px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded border border-blue-500/30">Demo</span>
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { symbol: 'BTC/USDT', type: 'Fiyat', condition: '> $42,000', timestamp: Date.now() - 120000 },
+                      { symbol: 'ETH/USDT', type: 'RSI', condition: 'RSI < 30', timestamp: Date.now() - 900000 },
+                      { symbol: 'SOL/USDT', type: 'Risk', condition: 'DD > 5%', timestamp: Date.now() - 1000 },
+                    ].map((trigger, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 bg-neutral-900/50 rounded border border-neutral-800">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium text-neutral-200 truncate">{trigger.symbol}</div>
+                          <div className="text-[10px] text-neutral-400">{trigger.type}: {trigger.condition}</div>
                         </div>
-                        <div className="p-4 rounded-lg border border-neutral-700 bg-neutral-900/30 opacity-60">
-                          <div className="text-sm font-medium text-neutral-300 mb-1">PnL Günlük -%X</div>
-                          <div className="text-xs text-neutral-500">Risk: Günlük zarar limiti</div>
-                          <div className="mt-2 text-xs text-neutral-600">Örnek şablon (devre dışı)</div>
-                        </div>
-                        <div className="p-4 rounded-lg border border-neutral-700 bg-neutral-900/30 opacity-60">
-                          <div className="text-sm font-medium text-neutral-300 mb-1">WS Disconnect</div>
-                          <div className="text-xs text-neutral-500">Sistem: WebSocket bağlantı kesildi</div>
-                          <div className="mt-2 text-xs text-neutral-600">Örnek şablon (devre dışı)</div>
+                        <div className="text-[10px] text-neutral-500 ml-2">
+                          <ClientTime value={trigger.timestamp} format="relative" minWidth="10ch" />
                         </div>
                       </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={8} className="py-12">
-                      <div className="text-center space-y-3">
-                        <div className="text-4xl mb-2">🔔</div>
-                        <div className="text-lg font-medium text-neutral-200">Henüz alert yok</div>
-                        <div className="text-sm text-neutral-400 max-w-md mx-auto">
-                          Fiyat, P&L veya risk seviyeleri için bildirim oluşturarak başlayın
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2 justify-center items-center mt-4">
-                          <button
-                            onClick={() => {/* TODO: Create alert modal */}}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm text-white transition-colors"
-                          >
-                            + Yeni Uyarı Oluştur
-                          </button>
-                          <a
-                            href="/technical-analysis"
-                            className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded-lg text-sm text-neutral-200 transition-colors"
-                          >
-                            Technical Analysis → Hızlı Uyarı
-                          </a>
-                        </div>
-                        <div className="text-xs text-neutral-500 mt-3 max-w-md mx-auto">
-                          Uyarılar executor + risk gate'den tetiklenir. Aktif uyarılar burada görünecek.
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </>
-              ) : (
-                displayItems.map((item) => (
+                    ))}
+                  </div>
+                </Surface>
+
+                {/* Pipeline Health */}
+                <Surface variant="card" className="p-4">
+                  <div className="text-xs font-medium text-neutral-400 mb-3">Alert Pipeline Health</div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-300">Executor</span>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30">Healthy</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-300">Risk Gate</span>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30">Active</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-300">Notification</span>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded border border-amber-500/30">1 pending</span>
+                    </div>
+                  </div>
+                </Surface>
+              </div>
+            </div>
+          </div>
+        ) : (
+        <Surface variant="card" className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left bg-neutral-900/50 border-b border-neutral-800">
+                <tr>
+                  <th className="py-3 px-4 text-neutral-300 font-medium">Sembol</th>
+                  <th className="py-3 px-4 text-neutral-300 font-medium">Strateji</th>
+                  <th className="py-3 px-4 text-neutral-300 font-medium">Koşul</th>
+                  <th className="py-3 px-4 text-neutral-300 font-medium">Oluşturulma</th>
+                  <th className="py-3 px-4 text-neutral-300 font-medium">Son Tetiklenme</th>
+                  <th className="py-3 px-4 text-neutral-300 font-medium">Durum</th>
+                  <th className="py-3 px-4 text-neutral-300 font-medium">Kanal</th>
+                  <th className="py-3 px-4 text-right text-neutral-300 font-medium">Aksiyonlar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayItems.map((item) => (
                   <tr key={item.id} className="border-b border-neutral-900 hover:bg-neutral-900/30">
                     <td className="py-3 px-4 font-semibold text-neutral-200">{item.symbol}</td>
                     <td className="py-3 px-4 text-neutral-300">{item.strategy}</td>
@@ -263,9 +393,8 @@ export default function AlertsPageContent({
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
+                ))}
+              </tbody>
           </table>
           {/* UI-1: Compact mode - "Tümünü gör" button */}
           {hasMore && (
@@ -280,6 +409,8 @@ export default function AlertsPageContent({
           )}
         </div>
       </Surface>
+        )}
+      </div>
     </div>
   );
 }

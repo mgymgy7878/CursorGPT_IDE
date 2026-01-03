@@ -18,6 +18,7 @@ import { COMMAND_TEMPLATES, getTemplatesForScope, type CommandTemplate } from '.
 import { useDeferredLocalStorageState } from '@/hooks/useDeferredLocalStorageState';
 import { useCopilotContext, formatContextForPrompt } from '@/hooks/useCopilotContext';
 import { SparkAvatar } from './SparkAvatar';
+import { uiCopy } from '@/lib/uiCopy';
 
 interface Message {
   id: string;
@@ -38,14 +39,28 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
   const pathname = usePathname();
   const context = useCopilotContext();
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'assistant',
-      content: 'Merhaba, ben Spark Copilot. Portföy durumunu, çalışan stratejileri ve risk limitlerini izliyorum. İstersen önce genel portföy riskini çıkarabilirim.',
-      timestamp: new Date(),
-    },
-  ]);
+  // PATCH T: Copilot greeting'i global store'da tut (localStorage persist)
+  const GREETING_KEY = 'copilot.greeting.shown';
+  const GREETING_MESSAGE = 'Merhaba, ben Spark Copilot. Portföy durumunu, çalışan stratejileri ve risk limitlerini izliyorum. İstersen önce genel portföy riskini çıkarabilirim.';
+
+  const [messages, setMessages] = useState<Message[]>(() => {
+    // İlk render'da greeting gösterilmiş mi kontrol et
+    if (typeof window !== 'undefined') {
+      const greetingShown = localStorage.getItem(GREETING_KEY);
+      if (greetingShown === 'true') {
+        return []; // Greeting gösterilmişse boş başla
+      }
+      // İlk kez gösteriliyorsa greeting ekle ve flag'i set et
+      localStorage.setItem(GREETING_KEY, 'true');
+      return [{
+        id: '1',
+        type: 'assistant',
+        content: GREETING_MESSAGE,
+        timestamp: new Date(),
+      }];
+    }
+    return [];
+  });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCommandMenu, setShowCommandMenu] = useState(false);
@@ -279,23 +294,45 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
   // PATCH H: Determine if emoji should be shown (dashboard default: off)
   const showEmoji = scope !== 'dashboard';
 
-  // PATCH H: Format context line (single line with dot separators)
-  const formatContextLine = () => {
-    const parts: string[] = [];
-    parts.push('Sistem: Normal');
+  // PATCH T: Format context as 3 chips (instead of single line)
+  // PATCH V: uiCopy.ts'den context etiketleri
+  // PATCH W.2 (P0): Context "—" cleanup - boş değerleri gizle veya eylem göster
+  const isMeaningful = (v: string | undefined | null): boolean => {
+    if (!v) return false;
+    const trimmed = String(v).trim();
+    return trimmed !== '' && trimmed !== '—' && trimmed !== '-';
+  };
 
-    // Strategy: symbol (market-data) or strategyName (dashboard/strategy-lab) or "—"
-    if (context.symbol) {
-      parts.push(`Strateji: ${context.symbol}`);
-    } else if (context.strategyName) {
-      parts.push(`Strateji: ${context.strategyName}`);
+  const formatContextChips = () => {
+    const chips: Array<{ label: string; value: string; clickable?: boolean; onClick?: () => void }> = [];
+
+    // System chip - her zaman göster
+    chips.push({ label: uiCopy.copilot.context.system, value: uiCopy.copilot.contextValues.normal });
+
+    // Strategy chip - PATCH W.2: boşsa "Seçili değil" göster veya gizle
+    const strategyValue = context.symbol || context.strategyName;
+    if (isMeaningful(strategyValue)) {
+      chips.push({ label: uiCopy.copilot.context.strategy, value: strategyValue as string });
     } else {
-      parts.push('Strateji: —');
+      // Boşsa "Seçili değil" + tıklanabilir
+      chips.push({
+        label: uiCopy.copilot.context.strategy,
+        value: 'Seçili değil',
+        clickable: true,
+        onClick: () => {
+          // Navigate to strategies page or open strategy selector
+          window.location.href = '/strategies';
+        },
+      });
     }
 
-    parts.push('Risk modu: Shadow');
-    return parts.join(' · ');
+    // Mode chip - her zaman göster
+    chips.push({ label: uiCopy.copilot.context.mode, value: uiCopy.copilot.contextValues.shadow });
+
+    return chips;
   };
+
+  const contextChips = formatContextChips();
 
   return (
     <div className="h-full flex flex-col bg-neutral-950 border-l border-white/6 rounded-l-2xl shadow-xl">
@@ -319,10 +356,28 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
         </div>
       </div>
 
-      {/* Context Row - PATCH M: Compact */}
+      {/* Context Row - PATCH T: 3 küçük chip (tek satır metin yerine) */}
+      {/* PATCH W.2 (P0): Boş değerler gizlendi veya "Seçili değil" gösteriliyor */}
       <div className="px-3 py-1.5 border-b border-white/10 shrink-0">
-        <div className="text-[10px] text-neutral-400 leading-tight">
-          {formatContextLine()}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {contextChips.map((chip, idx) => {
+            const Component = chip.clickable ? 'button' : 'span';
+            return (
+              <Component
+                key={idx}
+                onClick={chip.onClick}
+                className={cn(
+                  "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-white/5 border text-neutral-400",
+                  chip.clickable
+                    ? "border-white/20 hover:border-white/30 hover:bg-white/10 cursor-pointer transition-colors"
+                    : "border-white/10"
+                )}
+              >
+                <span className="text-neutral-500">{chip.label}:</span>
+                <span className={cn("text-neutral-300", chip.clickable && "hover:text-neutral-200")}>{chip.value}</span>
+              </Component>
+            );
+          })}
         </div>
       </div>
 

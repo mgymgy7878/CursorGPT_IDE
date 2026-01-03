@@ -16,9 +16,11 @@ import { MiniList } from "@/components/ui/MiniList";
 import { CompactTable } from "@/components/ui/CompactTable";
 import { RiskBar } from "@/components/ui/RiskBar";
 import { SystemHealthCard } from "@/components/ui/SystemHealthCard";
+import { RuntimeHealthCard } from "@/components/dashboard/RuntimeHealthCard";
 import { Surface } from "@/components/ui/Surface";
 import { cardHeader, label, value, subtleText, miniStatCard, badgeVariant } from "@/styles/uiTokens";
 import { cn } from "@/lib/utils";
+import { uiCopy } from "@/lib/uiCopy";
 
 export default function DashboardGrid() {
   // Mock data - executor kapalıyken bile aynı görünüm
@@ -62,15 +64,16 @@ export default function DashboardGrid() {
     { name: "ETH Scalp", market: "Crypto", pnl: "-$120", pnlPositive: false },
   ];
 
+  // PATCH W.5: AI karar mesajları uiCopy'den
   const aiDecisions = [
     {
       label: "BUY BTC/USDT",
-      value: "RSI Oversold condition met",
+      value: uiCopy.aiDecision.oversoldConditionMet,
       delta: { value: "98% Conf.", isPositive: true },
     },
     {
       label: "CLOSE ETH/USDT",
-      value: "Take profit target hit",
+      value: uiCopy.aiDecision.takeProfitTargetHit,
       delta: { value: "100% Conf.", isPositive: true },
     },
   ];
@@ -173,15 +176,8 @@ export default function DashboardGrid() {
         {/* Bottom Left: Last AI Decisions */}
         <MiniList title="Son Yapay Zeka Kararları" items={aiDecisions} />
 
-        {/* Bottom Right: System Health */}
-        <SystemHealthCard
-          title="Sistem Sağlığı"
-          items={[
-            { label: "API Latency", value: "12ms", status: "healthy" },
-            { label: "Execution", value: "Operational", status: "healthy" },
-            { label: "Data Stream", value: "Connected", status: "healthy" },
-          ]}
-        />
+        {/* Bottom Right: Runtime Health */}
+        <RuntimeHealthCard />
       </div>
     </div>
   );
