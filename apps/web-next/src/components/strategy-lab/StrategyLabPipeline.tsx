@@ -1,6 +1,6 @@
 /**
  * StrategyLabPipeline - Backtest → Optimize → Paper Run pipeline bar
- * 
+ *
  * Test mode canlandırması için görsel pipeline gösterimi.
  * Her adım: idle/running/success/error + son çalışma zamanı + küçük log linki.
  */
@@ -23,15 +23,58 @@ interface PipelineStep {
 
 export function StrategyLabPipeline() {
   const [steps, setSteps] = useState<PipelineStep[]>([
+    { id: 'market-data', label: 'Market Data', status: 'idle' },
     { id: 'backtest', label: 'Backtest', status: 'idle' },
     { id: 'optimize', label: 'Optimize', status: 'idle' },
     { id: 'paper-run', label: 'Paper Run', status: 'idle' },
   ]);
 
-  const handleStepClick = (stepId: string) => {
+  const handleStepClick = async (stepId: string) => {
+    // Market Data step: gerçek klines çağrısı
+    if (stepId === 'market-data') {
+      const step = steps.find(s => s.id === stepId);
+      if (step?.status === 'idle' || step?.status === 'error') {
+        setSteps(prev => prev.map(s => 
+          s.id === stepId ? { ...s, status: 'running' as StepStatus } : s
+        ));
+
+        try {
+          // Gerçek klines çağrısı
+          const response = await fetch('/api/binance/klines?symbol=BTCUSDT&interval=1h&limit=100', {
+            cache: 'no-store',
+          });
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (!data.klines || data.klines.length === 0) {
+            throw new Error('No klines data received');
+          }
+
+          // Success
+          setSteps(prev => prev.map(s => 
+            s.id === stepId 
+              ? { ...s, status: 'success' as StepStatus, lastRun: new Date() }
+              : s
+          ));
+        } catch (error) {
+          // Error
+          setSteps(prev => prev.map(s => 
+            s.id === stepId 
+              ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
+              : s
+          ));
+          console.error('Market data fetch error:', error);
+        }
+      }
+      return;
+    }
+
+    // Diğer step'ler: demo state (sonraki sprint'te gerçek endpoint'lere bağlanacak)
     setSteps(prev => prev.map(step => {
       if (step.id === stepId) {
-        // Demo: butona basınca running->success (UI canlılığı)
         if (step.status === 'idle') {
           return { ...step, status: 'running', lastRun: new Date() };
         } else if (step.status === 'running') {
