@@ -1,6 +1,6 @@
 /**
  * Optimize Run API - POST start optimization job
- * 
+ *
  * Job-state stub: gerçek engine yokken bile "çalışıyor" hissini verir.
  */
 
@@ -11,9 +11,19 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Prod hard-disable: production'da stub API'leri kapalı
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      {
+        error: 'Optimize stub is not available in production',
+      },
+      { status: 404 }
+    );
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
-    const { symbol, interval, parameters } = body;
+    const { symbol, interval, parameters, baselineMetrics } = body; // baselineMetrics: Backtest → Optimize wiring
 
     // Validation (optional, şimdilik basit)
     if (!symbol) {

@@ -12,6 +12,16 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  // Prod hard-disable: production'da paper API'leri kapalı
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      {
+        error: 'Paper trading is not available in production',
+      },
+      { status: 404 }
+    );
+  }
+
   // Guard: sadece paper modda çalışır
   const mode = getSparkMode();
   if (mode !== 'paper') {

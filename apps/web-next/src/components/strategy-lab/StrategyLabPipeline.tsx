@@ -60,6 +60,8 @@ export function StrategyLabPipeline() {
   const [lastMarketPrice, setLastMarketPrice] = useState<number | null>(null);
   const [backtestJob, setBacktestJob] = useState<JobState | null>(null);
   const [optimizeJob, setOptimizeJob] = useState<JobState | null>(null);
+  const [backtestResult, setBacktestResult] = useState<JobResult | null>(null);
+  const [optimizeResult, setOptimizeResult] = useState<JobResult | null>(null);
 
   const handleStepClick = async (stepId: string) => {
     // Market Data step: gerçek klines çağrısı
@@ -109,9 +111,17 @@ export function StrategyLabPipeline() {
       return;
     }
 
-    // Paper Run step: gerçek sim order
+    // Paper Run step: gerçek sim order (Optimize result'ı parametre olarak kullanır)
     if (stepId === 'paper-run') {
       const step = steps.find(s => s.id === stepId);
+      const optimizeStep = steps.find(s => s.id === 'optimize');
+      
+      // Dependency check: Optimize başarılı olmalı (opsiyonel, şimdilik uyarı)
+      if (optimizeStep?.status !== 'success' || !optimizeResult) {
+        // Uyarı ver ama engelleme (kullanıcı manuel çalıştırabilir)
+        console.warn('Optimize step not completed, using default parameters');
+      }
+
       if (step?.status === 'idle' || step?.status === 'error') {
         // Start paper run
         setIsPaperRunning(true);
@@ -119,7 +129,11 @@ export function StrategyLabPipeline() {
           s.id === stepId ? { ...s, status: 'running' as StepStatus } : s
         ));
 
-        // Demo: BTCUSDT buy 0.001 (gerçek sim order)
+        // Calculate position size based on optimize result (if available)
+        const positionSizePct = optimizeResult ? Math.min(10, Math.max(1, optimizeResult.totalReturn / 10)) : 1; // 1-10% based on return
+        const qty = lastMarketPrice ? (10000 * positionSizePct / 100) / lastMarketPrice : 0.001; // Default 0.001 if no price
+
+        // Demo: BTCUSDT buy (gerçek sim order)
         if (lastMarketPrice) {
           try {
             const response = await fetch('/api/paper/order', {
@@ -128,8 +142,9 @@ export function StrategyLabPipeline() {
               body: JSON.stringify({
                 symbol: 'BTCUSDT',
                 side: 'buy',
-                qty: 0.001,
+                qty: qty,
                 marketPrice: lastMarketPrice,
+                // Optimize → Paper Run wiring: feeBps, slippageBps could come from optimize result
               }),
             });
 
@@ -199,6 +214,7 @@ export function StrategyLabPipeline() {
 
           const runData = await runResponse.json();
           setBacktestJob({ jobId: runData.jobId, type: 'backtest', status: 'queued', progressPct: 0, startedAt: Date.now() });
+          setBacktestResult(null); // Reset result
 
           // Polling will handle status updates
         } catch (error) {
@@ -213,22 +229,31 @@ export function StrategyLabPipeline() {
       return;
     }
 
-    // Optimize step: gerçek job API
+    // Optimize step: gerçek job API (Backtest result'ı input olarak alır)
     if (stepId === 'optimize') {
       const step = steps.find(s => s.id === stepId);
+      const backtestStep = steps.find(s => s.id === 'backtest');
+      
+      // Dependency check: Backtest başarılı olmalı
+      if (backtestStep?.status !== 'success' || !backtestResult) {
+        alert('Önce Backtest adımını başarıyla tamamlamalısınız.');
+        return;
+      }
+
       if (step?.status === 'idle' || step?.status === 'error') {
         setSteps(prev => prev.map(s =>
           s.id === stepId ? { ...s, status: 'running' as StepStatus } : s
         ));
 
         try {
-          // Start optimize job
+          // Start optimize job with backtest baseline metrics
           const runResponse = await fetch('/api/optimize/run', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               symbol: 'BTCUSDT',
               interval: '1h',
+              baselineMetrics: backtestResult, // Backtest → Optimize wiring
             }),
           });
 
@@ -238,6 +263,7 @@ export function StrategyLabPipeline() {
 
           const runData = await runResponse.json();
           setOptimizeJob({ jobId: runData.jobId, type: 'optimize', status: 'queued', progressPct: 0, startedAt: Date.now() });
+          setOptimizeResult(null); // Reset result
 
           // Polling will handle status updates
         } catch (error) {
@@ -312,19 +338,45 @@ export function StrategyLabPipeline() {
     return () => clearInterval(interval);
   }, [isPaperRunning]);
 
-  // Poll backtest job status
+  // Poll backtest job status (with timeout + abort)
   useEffect(() => {
     if (!backtestJob || backtestJob.status === 'success' || backtestJob.status === 'error') return;
 
+    const MAX_POLL_TIME = 45000; // 45 seconds
+    const POLL_INTERVAL = 2000; // 2 seconds
+    const MAX_ATTEMPTS = 25; // 25 attempts max
+
+    const startTime = Date.now();
+    let attempts = 0;
+    const abortController = new AbortController();
+
     const pollStatus = async () => {
+      attempts++;
+      const elapsed = Date.now() - startTime;
+
+      // Timeout check
+      if (elapsed >= MAX_POLL_TIME || attempts >= MAX_ATTEMPTS) {
+        setSteps(prev => prev.map(s =>
+          s.id === 'backtest'
+            ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
+            : s
+        ));
+        setBacktestJob(prev => prev ? { ...prev, status: 'error' as JobState['status'], error: 'Polling timeout' } : null);
+        return;
+      }
+
       try {
-        const response = await fetch(`/api/backtest/status?jobId=${backtestJob.jobId}`, { cache: 'no-store' });
+        const response = await fetch(`/api/backtest/status?jobId=${backtestJob.jobId}`, {
+          cache: 'no-store',
+          signal: abortController.signal,
+        });
         if (response.ok) {
           const status: JobState = await response.json();
           setBacktestJob(status);
 
           // Update step status
           if (status.status === 'success') {
+            setBacktestResult(status.result || null);
             setSteps(prev => prev.map(s =>
               s.id === 'backtest'
                 ? { ...s, status: 'success' as StepStatus, lastRun: new Date() }
@@ -339,28 +391,60 @@ export function StrategyLabPipeline() {
           }
         }
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return; // Aborted, ignore
+        }
         console.error('Failed to poll backtest status:', error);
       }
     };
 
     pollStatus();
-    const interval = setInterval(pollStatus, 2000); // Every 2s
-    return () => clearInterval(interval);
+    const interval = setInterval(pollStatus, POLL_INTERVAL);
+    return () => {
+      clearInterval(interval);
+      abortController.abort();
+    };
   }, [backtestJob]);
 
-  // Poll optimize job status
+  // Poll optimize job status (with timeout + abort)
   useEffect(() => {
     if (!optimizeJob || optimizeJob.status === 'success' || optimizeJob.status === 'error') return;
 
+    const MAX_POLL_TIME = 45000; // 45 seconds
+    const POLL_INTERVAL = 2000; // 2 seconds
+    const MAX_ATTEMPTS = 25; // 25 attempts max
+
+    const startTime = Date.now();
+    let attempts = 0;
+    const abortController = new AbortController();
+
     const pollStatus = async () => {
+      attempts++;
+      const elapsed = Date.now() - startTime;
+
+      // Timeout check
+      if (elapsed >= MAX_POLL_TIME || attempts >= MAX_ATTEMPTS) {
+        setSteps(prev => prev.map(s =>
+          s.id === 'optimize'
+            ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
+            : s
+        ));
+        setOptimizeJob(prev => prev ? { ...prev, status: 'error' as JobState['status'], error: 'Polling timeout' } : null);
+        return;
+      }
+
       try {
-        const response = await fetch(`/api/optimize/status?jobId=${optimizeJob.jobId}`, { cache: 'no-store' });
+        const response = await fetch(`/api/optimize/status?jobId=${optimizeJob.jobId}`, {
+          cache: 'no-store',
+          signal: abortController.signal,
+        });
         if (response.ok) {
           const status: JobState = await response.json();
           setOptimizeJob(status);
 
           // Update step status
           if (status.status === 'success') {
+            setOptimizeResult(status.result || null);
             setSteps(prev => prev.map(s =>
               s.id === 'optimize'
                 ? { ...s, status: 'success' as StepStatus, lastRun: new Date() }
@@ -375,13 +459,19 @@ export function StrategyLabPipeline() {
           }
         }
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return; // Aborted, ignore
+        }
         console.error('Failed to poll optimize status:', error);
       }
     };
 
     pollStatus();
-    const interval = setInterval(pollStatus, 2000); // Every 2s
-    return () => clearInterval(interval);
+    const interval = setInterval(pollStatus, POLL_INTERVAL);
+    return () => {
+      clearInterval(interval);
+      abortController.abort();
+    };
   }, [optimizeJob]);
 
   return (

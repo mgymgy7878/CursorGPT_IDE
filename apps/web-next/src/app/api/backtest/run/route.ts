@@ -1,6 +1,6 @@
 /**
  * Backtest Run API - POST start backtest job
- * 
+ *
  * Job-state stub: gerçek engine yokken bile "çalışıyor" hissini verir.
  */
 
@@ -11,9 +11,19 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Prod hard-disable: production'da stub API'leri kapalı
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      {
+        error: 'Backtest stub is not available in production',
+      },
+      { status: 404 }
+    );
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
-    const { symbol, interval, startDate, endDate } = body;
+    const { symbol, interval, startDate, endDate, baselineMetrics } = body; // baselineMetrics: Backtest → Optimize wiring
 
     // Validation (optional, şimdilik basit)
     if (!symbol) {

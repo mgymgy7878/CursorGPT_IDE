@@ -1,6 +1,6 @@
 /**
  * Job Store - In-memory job state management
- * 
+ *
  * Dev/demo için in-memory singleton. İleride DB'ye taşınabilir.
  * Deterministic seed ile tekrarlanabilir sonuçlar (smoke/QA için).
  */

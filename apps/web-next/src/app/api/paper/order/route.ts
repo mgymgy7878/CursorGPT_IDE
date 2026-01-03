@@ -13,6 +13,16 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Prod hard-disable: production'da paper API'leri kapalı
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      {
+        error: 'Paper trading is not available in production',
+      },
+      { status: 404 }
+    );
+  }
+
   // Guard: sadece paper modda çalışır
   const mode = getSparkMode();
   if (mode !== 'paper') {
@@ -23,12 +33,6 @@ export async function POST(request: Request) {
       },
       { status: 400 }
     );
-  }
-
-  // Production warning: paper mode should not be deployed to production
-  if (process.env.NODE_ENV === 'production' && mode === 'paper') {
-    console.warn('[Paper] WARNING: Paper mode detected in production environment');
-    // Audit log için: ileride audit service'e gönderilebilir
   }
 
   try {

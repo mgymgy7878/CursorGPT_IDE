@@ -1,6 +1,6 @@
 /**
  * Backtest Status API - GET job status
- * 
+ *
  * Job-state stub: polling için status döndürür.
  */
 
