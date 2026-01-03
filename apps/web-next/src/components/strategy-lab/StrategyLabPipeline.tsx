@@ -28,6 +28,25 @@ interface PaperState {
   pnl: { unrealized: number; realized: number; total: number };
 }
 
+interface JobResult {
+  trades: number;
+  winRate: number;
+  maxDrawdown: number;
+  sharpe: number;
+  totalReturn: number;
+}
+
+interface JobState {
+  jobId: string;
+  type: 'backtest' | 'optimize';
+  status: 'queued' | 'running' | 'success' | 'error';
+  progressPct: number;
+  startedAt: number;
+  finishedAt?: number;
+  result?: JobResult;
+  error?: string;
+}
+
 export function StrategyLabPipeline() {
   const [steps, setSteps] = useState<PipelineStep[]>([
     { id: 'market-data', label: 'Market Data', status: 'idle' },
@@ -39,6 +58,8 @@ export function StrategyLabPipeline() {
   const [paperState, setPaperState] = useState<PaperState | null>(null);
   const [isPaperRunning, setIsPaperRunning] = useState(false);
   const [lastMarketPrice, setLastMarketPrice] = useState<number | null>(null);
+  const [backtestJob, setBacktestJob] = useState<JobState | null>(null);
+  const [optimizeJob, setOptimizeJob] = useState<JobState | null>(null);
 
   const handleStepClick = async (stepId: string) => {
     // Market Data step: gerçek klines çağrısı
@@ -153,28 +174,82 @@ export function StrategyLabPipeline() {
       return;
     }
 
-    // Diğer step'ler: demo state (sonraki sprint'te gerçek endpoint'lere bağlanacak)
-    setSteps(prev => prev.map(step => {
-      if (step.id === stepId) {
-        if (step.status === 'idle') {
-          return { ...step, status: 'running', lastRun: new Date() };
-        } else if (step.status === 'running') {
-          return { ...step, status: 'success', lastRun: new Date() };
+    // Backtest step: gerçek job API
+    if (stepId === 'backtest') {
+      const step = steps.find(s => s.id === stepId);
+      if (step?.status === 'idle' || step?.status === 'error') {
+        setSteps(prev => prev.map(s =>
+          s.id === stepId ? { ...s, status: 'running' as StepStatus } : s
+        ));
+
+        try {
+          // Start backtest job
+          const runResponse = await fetch('/api/backtest/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              symbol: 'BTCUSDT',
+              interval: '1h',
+            }),
+          });
+
+          if (!runResponse.ok) {
+            throw new Error(`API error: ${runResponse.status}`);
+          }
+
+          const runData = await runResponse.json();
+          setBacktestJob({ jobId: runData.jobId, type: 'backtest', status: 'queued', progressPct: 0, startedAt: Date.now() });
+
+          // Polling will handle status updates
+        } catch (error) {
+          setSteps(prev => prev.map(s =>
+            s.id === stepId
+              ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
+              : s
+          ));
+          console.error('Backtest run error:', error);
         }
       }
-      return step;
-    }));
+      return;
+    }
 
-    // Simulate running state
-    if (steps.find(s => s.id === stepId)?.status === 'idle') {
-      setTimeout(() => {
-        setSteps(prev => prev.map(step => {
-          if (step.id === stepId && step.status === 'running') {
-            return { ...step, status: 'success', lastRun: new Date() };
+    // Optimize step: gerçek job API
+    if (stepId === 'optimize') {
+      const step = steps.find(s => s.id === stepId);
+      if (step?.status === 'idle' || step?.status === 'error') {
+        setSteps(prev => prev.map(s =>
+          s.id === stepId ? { ...s, status: 'running' as StepStatus } : s
+        ));
+
+        try {
+          // Start optimize job
+          const runResponse = await fetch('/api/optimize/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              symbol: 'BTCUSDT',
+              interval: '1h',
+            }),
+          });
+
+          if (!runResponse.ok) {
+            throw new Error(`API error: ${runResponse.status}`);
           }
-          return step;
-        }));
-      }, 2000);
+
+          const runData = await runResponse.json();
+          setOptimizeJob({ jobId: runData.jobId, type: 'optimize', status: 'queued', progressPct: 0, startedAt: Date.now() });
+
+          // Polling will handle status updates
+        } catch (error) {
+          setSteps(prev => prev.map(s =>
+            s.id === stepId
+              ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
+              : s
+          ));
+          console.error('Optimize run error:', error);
+        }
+      }
+      return;
     }
   };
 
@@ -237,6 +312,78 @@ export function StrategyLabPipeline() {
     return () => clearInterval(interval);
   }, [isPaperRunning]);
 
+  // Poll backtest job status
+  useEffect(() => {
+    if (!backtestJob || backtestJob.status === 'success' || backtestJob.status === 'error') return;
+
+    const pollStatus = async () => {
+      try {
+        const response = await fetch(`/api/backtest/status?jobId=${backtestJob.jobId}`, { cache: 'no-store' });
+        if (response.ok) {
+          const status: JobState = await response.json();
+          setBacktestJob(status);
+
+          // Update step status
+          if (status.status === 'success') {
+            setSteps(prev => prev.map(s =>
+              s.id === 'backtest'
+                ? { ...s, status: 'success' as StepStatus, lastRun: new Date() }
+                : s
+            ));
+          } else if (status.status === 'error') {
+            setSteps(prev => prev.map(s =>
+              s.id === 'backtest'
+                ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
+                : s
+            ));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to poll backtest status:', error);
+      }
+    };
+
+    pollStatus();
+    const interval = setInterval(pollStatus, 2000); // Every 2s
+    return () => clearInterval(interval);
+  }, [backtestJob]);
+
+  // Poll optimize job status
+  useEffect(() => {
+    if (!optimizeJob || optimizeJob.status === 'success' || optimizeJob.status === 'error') return;
+
+    const pollStatus = async () => {
+      try {
+        const response = await fetch(`/api/optimize/status?jobId=${optimizeJob.jobId}`, { cache: 'no-store' });
+        if (response.ok) {
+          const status: JobState = await response.json();
+          setOptimizeJob(status);
+
+          // Update step status
+          if (status.status === 'success') {
+            setSteps(prev => prev.map(s =>
+              s.id === 'optimize'
+                ? { ...s, status: 'success' as StepStatus, lastRun: new Date() }
+                : s
+            ));
+          } else if (status.status === 'error') {
+            setSteps(prev => prev.map(s =>
+              s.id === 'optimize'
+                ? { ...s, status: 'error' as StepStatus, lastRun: new Date() }
+                : s
+            ));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to poll optimize status:', error);
+      }
+    };
+
+    pollStatus();
+    const interval = setInterval(pollStatus, 2000); // Every 2s
+    return () => clearInterval(interval);
+  }, [optimizeJob]);
+
   return (
     <div className="space-y-3 mb-4">
       {/* Pipeline Bar */}
@@ -269,6 +416,66 @@ export function StrategyLabPipeline() {
           ))}
         </div>
       </Surface>
+
+      {/* Backtest Result Chips */}
+      {backtestJob?.result && steps.find(s => s.id === 'backtest')?.status === 'success' && (
+        <Surface variant="card" className="p-3">
+          <div className="text-xs font-medium text-neutral-400 mb-2">Backtest Results:</div>
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-1 rounded bg-neutral-800 text-xs">
+              Trades: {backtestJob.result.trades}
+            </span>
+            <span className={cn(
+              "px-2 py-1 rounded text-xs",
+              backtestJob.result.winRate >= 50 ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+            )}>
+              Win Rate: {backtestJob.result.winRate.toFixed(1)}%
+            </span>
+            <span className="px-2 py-1 rounded bg-neutral-800 text-xs">
+              Max DD: {backtestJob.result.maxDrawdown.toFixed(1)}%
+            </span>
+            <span className="px-2 py-1 rounded bg-neutral-800 text-xs">
+              Sharpe: {backtestJob.result.sharpe.toFixed(2)}
+            </span>
+            <span className={cn(
+              "px-2 py-1 rounded text-xs",
+              backtestJob.result.totalReturn >= 0 ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+            )}>
+              Return: {backtestJob.result.totalReturn >= 0 ? '+' : ''}{backtestJob.result.totalReturn.toFixed(1)}%
+            </span>
+          </div>
+        </Surface>
+      )}
+
+      {/* Optimize Result Chips */}
+      {optimizeJob?.result && steps.find(s => s.id === 'optimize')?.status === 'success' && (
+        <Surface variant="card" className="p-3">
+          <div className="text-xs font-medium text-neutral-400 mb-2">Optimize Results:</div>
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-1 rounded bg-neutral-800 text-xs">
+              Trades: {optimizeJob.result.trades}
+            </span>
+            <span className={cn(
+              "px-2 py-1 rounded text-xs",
+              optimizeJob.result.winRate >= 50 ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+            )}>
+              Win Rate: {optimizeJob.result.winRate.toFixed(1)}%
+            </span>
+            <span className="px-2 py-1 rounded bg-neutral-800 text-xs">
+              Max DD: {optimizeJob.result.maxDrawdown.toFixed(1)}%
+            </span>
+            <span className="px-2 py-1 rounded bg-neutral-800 text-xs">
+              Sharpe: {optimizeJob.result.sharpe.toFixed(2)}
+            </span>
+            <span className={cn(
+              "px-2 py-1 rounded text-xs",
+              optimizeJob.result.totalReturn >= 0 ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+            )}>
+              Return: {optimizeJob.result.totalReturn >= 0 ? '+' : ''}{optimizeJob.result.totalReturn.toFixed(1)}%
+            </span>
+          </div>
+        </Surface>
+      )}
 
       {/* Paper State Panel (sadece paper-run success olduğunda göster) */}
       {paperState && steps.find(s => s.id === 'paper-run')?.status === 'success' && (

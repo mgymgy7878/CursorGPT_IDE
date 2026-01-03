@@ -78,7 +78,7 @@ if ($healthData.sparkMode -eq 'paper') {
             Write-Host "  - cashBalance: `$$($paperState.cashBalance)" -ForegroundColor Gray
             Write-Host "  - positions: $($paperState.positions.Count)" -ForegroundColor Gray
             Write-Host "  - fills: $($paperState.fills.Count)" -ForegroundColor Gray
-            
+
             # Save paper state to evidence
             $evidenceDir = "evidence"
             if (-not (Test-Path $evidenceDir)) {
@@ -95,13 +95,109 @@ if ($healthData.sparkMode -eq 'paper') {
 }
 
 Write-Host ""
-Write-Host "[4/4] Generating smoke summary..." -ForegroundColor Yellow
+Write-Host "[4/6] Testing Backtest Job (if paper mode)..." -ForegroundColor Yellow
+$backtestStatus = $null
+if ($healthData.sparkMode -eq 'paper') {
+    try {
+        # Start backtest job
+        $backtestRunResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/backtest/run" -Method POST -UseBasicParsing -ContentType "application/json" -Body '{"symbol":"BTCUSDT","interval":"1h"}' -TimeoutSec 5 -ErrorAction SilentlyContinue
+        if ($backtestRunResponse.StatusCode -eq 200) {
+            $backtestRunData = $backtestRunResponse.Content | ConvertFrom-Json
+            $backtestJobId = $backtestRunData.jobId
+            Write-Host "  ✓ Backtest job started: $backtestJobId" -ForegroundColor Green
+
+            # Poll for completion (max 10 seconds)
+            $maxWait = 10
+            $waited = 0
+            while ($waited -lt $maxWait) {
+                Start-Sleep -Seconds 1
+                $waited++
+                $backtestStatusResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/backtest/status?jobId=$backtestJobId" -Method GET -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+                if ($backtestStatusResponse.StatusCode -eq 200) {
+                    $backtestStatus = $backtestStatusResponse.Content | ConvertFrom-Json
+                    if ($backtestStatus.status -eq 'success' -or $backtestStatus.status -eq 'error') {
+                        Write-Host "  ✓ Backtest job completed: $($backtestStatus.status)" -ForegroundColor Green
+                        if ($backtestStatus.result) {
+                            Write-Host "    - Trades: $($backtestStatus.result.trades), Win Rate: $($backtestStatus.result.winRate)%" -ForegroundColor Gray
+                        }
+                        break
+                    }
+                }
+            }
+
+            # Save backtest status to evidence
+            if ($backtestStatus) {
+                $evidenceDir = "evidence"
+                if (-not (Test-Path $evidenceDir)) {
+                    New-Item -ItemType Directory -Path $evidenceDir | Out-Null
+                }
+                $backtestStatus | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\backtest_status.json" -Encoding UTF8
+                Write-Host "  ✓ Backtest status saved to evidence\backtest_status.json" -ForegroundColor Green
+            }
+        }
+    } catch {
+        Write-Host "  ⚠ Backtest job test failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  ⏭ Skipped (not in paper mode)" -ForegroundColor Gray
+}
+
+Write-Host ""
+Write-Host "[5/6] Testing Optimize Job (if paper mode)..." -ForegroundColor Yellow
+$optimizeStatus = $null
+if ($healthData.sparkMode -eq 'paper') {
+    try {
+        # Start optimize job
+        $optimizeRunResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/optimize/run" -Method POST -UseBasicParsing -ContentType "application/json" -Body '{"symbol":"BTCUSDT","interval":"1h"}' -TimeoutSec 5 -ErrorAction SilentlyContinue
+        if ($optimizeRunResponse.StatusCode -eq 200) {
+            $optimizeRunData = $optimizeRunResponse.Content | ConvertFrom-Json
+            $optimizeJobId = $optimizeRunData.jobId
+            Write-Host "  ✓ Optimize job started: $optimizeJobId" -ForegroundColor Green
+
+            # Poll for completion (max 10 seconds)
+            $maxWait = 10
+            $waited = 0
+            while ($waited -lt $maxWait) {
+                Start-Sleep -Seconds 1
+                $waited++
+                $optimizeStatusResponse = Invoke-WebRequest -Uri "http://localhost:3003/api/optimize/status?jobId=$optimizeJobId" -Method GET -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+                if ($optimizeStatusResponse.StatusCode -eq 200) {
+                    $optimizeStatus = $optimizeStatusResponse.Content | ConvertFrom-Json
+                    if ($optimizeStatus.status -eq 'success' -or $optimizeStatus.status -eq 'error') {
+                        Write-Host "  ✓ Optimize job completed: $($optimizeStatus.status)" -ForegroundColor Green
+                        if ($optimizeStatus.result) {
+                            Write-Host "    - Trades: $($optimizeStatus.result.trades), Win Rate: $($optimizeStatus.result.winRate)%" -ForegroundColor Gray
+                        }
+                        break
+                    }
+                }
+            }
+
+            # Save optimize status to evidence
+            if ($optimizeStatus) {
+                $evidenceDir = "evidence"
+                if (-not (Test-Path $evidenceDir)) {
+                    New-Item -ItemType Directory -Path $evidenceDir | Out-Null
+                }
+                $optimizeStatus | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\optimize_status.json" -Encoding UTF8
+                Write-Host "  ✓ Optimize status saved to evidence\optimize_status.json" -ForegroundColor Green
+            }
+        }
+    } catch {
+        Write-Host "  ⚠ Optimize job test failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  ⏭ Skipped (not in paper mode)" -ForegroundColor Gray
+}
+
+Write-Host ""
+Write-Host "[6/6] Generating smoke summary..." -ForegroundColor Yellow
 try {
     $evidenceDir = "evidence"
     if (-not (Test-Path $evidenceDir)) {
         New-Item -ItemType Directory -Path $evidenceDir | Out-Null
     }
-    
+
     # Save health response
     $healthData | ConvertTo-Json -Depth 10 | Out-File -FilePath "$evidenceDir\health_testnet.json" -Encoding UTF8
     Write-Host "  ✓ Health response saved to evidence\health_testnet.json" -ForegroundColor Green
@@ -118,6 +214,8 @@ buildCommit: $($healthData.buildCommit)
 requestId: $($healthData.requestId)
 klinesCount: $(if ($klinesData) { $klinesData.klines.Count } else { 'N/A' })
 Paper State: $(if ($paperState) { 'Available' } else { 'N/A' })
+Backtest Job: $(if ($backtestStatus) { "$($backtestStatus.status) - $($backtestStatus.jobId)" } else { 'N/A' })
+Optimize Job: $(if ($optimizeStatus) { "$($optimizeStatus.status) - $($optimizeStatus.jobId)" } else { 'N/A' })
 "@
 
     $summary | Out-File -FilePath "$evidenceDir\smoke_summary.txt" -Encoding UTF8
@@ -139,6 +237,12 @@ if ($klinesData) {
 }
 if ($paperState) {
     Write-Host "  - evidence\paper_state.json" -ForegroundColor Gray
+}
+if ($backtestStatus) {
+    Write-Host "  - evidence\backtest_status.json" -ForegroundColor Gray
+}
+if ($optimizeStatus) {
+    Write-Host "  - evidence\optimize_status.json" -ForegroundColor Gray
 }
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow

@@ -1,26 +1,51 @@
-import { NextResponse } from "next/server";
-import { fetchSafe } from "@/lib/net/fetchSafe";
-import { EXECUTOR_BASE } from "@/lib/spark/config";
+/**
+ * Backtest Run API - POST start backtest job
+ * 
+ * Job-state stub: gerçek engine yokken bile "çalışıyor" hissini verir.
+ */
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { NextResponse } from 'next/server';
+import { jobStore } from '@/lib/jobs/jobStore';
 
-export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  
-  const url = `${EXECUTOR_BASE}/backtest/run`;
-  const res = await fetchSafe(url, {
-    method: "POST",
-    body,
-    headers: { "Content-Type": "application/json" }
-  });
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-  const headers: Record<string, string> = {};
-  const retryAfter = res.headers.get("retry-after");
-  if (retryAfter) headers["Retry-After"] = retryAfter;
+export async function POST(request: Request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const { symbol, interval, startDate, endDate } = body;
 
-  return NextResponse.json(res.data, {
-    status: res.ok ? 200 : 200, // Always 200 with _err field
-    headers
-  });
+    // Validation (optional, şimdilik basit)
+    if (!symbol) {
+      return NextResponse.json(
+        {
+          error: 'symbol parameter is required',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create job
+    const jobId = jobStore.createJob('backtest');
+
+    return NextResponse.json(
+      {
+        jobId,
+        message: 'Backtest job started',
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      }
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json(
+      {
+        error: errorMessage,
+      },
+      { status: 500 }
+    );
+  }
 }

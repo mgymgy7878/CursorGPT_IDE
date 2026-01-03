@@ -77,7 +77,7 @@ class PaperLedger {
 
   /**
    * Reset ledger to initial state
-   * 
+   *
    * Deterministic reset: her zaman aynı başlangıç durumuna döner (smoke/QA için).
    */
   reset(initialCash?: number): void {

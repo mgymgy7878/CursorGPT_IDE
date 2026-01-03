@@ -1,6 +1,6 @@
 /**
  * Paper Ledger Reset API - POST reset ledger to initial state
- * 
+ *
  * Sadece paper modda çalışır (guard).
  * Smoke/QA tekrarlanabilirliği için.
  */
