@@ -1,5 +1,8 @@
 # Engine Adapter + Hardening + Full Pipeline Smoke
 
+**Dev:** web-next port 3003  
+**Evidence:** Çıktılar `evidence/` klasörüne yazılır
+
 ## Summary
 
 This PR introduces an engine adapter layer that allows switching between stub and real engines without breaking UI/API contracts. It includes comprehensive hardening (timeout, validation, determinism, metrics docs) and full pipeline smoke testing with mode matrix evidence.
@@ -37,10 +40,12 @@ This PR introduces an engine adapter layer that allows switching between stub an
 - `evidence/paper_state.json` - Paper ledger state after order
 
 ### Validation
-Run merge readiness check:
+Run merge readiness check (dev server must be running on port 3003):
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/merge-readiness.ps1 -Mode both
 ```
+
+**Note:** Merge readiness script expects dev server on port 3003. Evidence files are written to `evidence/` directory.
 
 ## Testing
 
