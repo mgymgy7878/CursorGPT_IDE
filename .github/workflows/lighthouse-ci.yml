@@ -12,39 +12,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      
-      - uses: pnpm/action-setup@v2
+
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
-      
+          version: 10.18.3
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Build packages
         run: pnpm -w -r build
-      
+
       - name: Build web-next (standalone)
         run: pnpm --filter web-next build
-      
+
       - name: Copy standalone assets
         run: node tools/copy-standalone-assets.cjs
-      
+
       - name: Install Lighthouse CI
         run: npm i -g @lhci/cli wait-on
-      
+
       - name: Start production server
         run: |
           pnpm --filter web-next start -- -p 3003 &
-      
+
       - name: Wait for server warmup
         run: |
           npx wait-on http://127.0.0.1:3003 --timeout 30000
           sleep 20
-      
+
       - name: Run Lighthouse CI
         run: lhci autorun --config=.lighthouserc.json
 
