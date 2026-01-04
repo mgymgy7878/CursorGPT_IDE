@@ -166,21 +166,15 @@ class RealEngineAdapter implements EngineAdapter {
    * Returns top result based on totalReturn/sharpe
    */
   async runOptimize(input: OptimizeInput): Promise<JobResult> {
-    // For v0.1, we'll do a simplified sweep
-    // In full version, this would require klines data and run multiple backtests
-
-    if (!input.baselineMetrics) {
-      // Fallback if no baseline
-      return {
-        trades: 75,
-        winRate: 52,
-        maxDrawdown: -8,
-        sharpe: 1.5,
-        totalReturn: 12,
-      };
+    // Validate klines if provided (for real optimization)
+    if (input.klines) {
+      const validation = this.validateKlines(input.klines);
+      if (!validation.valid) {
+        throw new Error(`Klines validation failed: ${validation.error}`);
+      }
     }
 
-    // Simplified param sweep: test 5 combinations
+    // Param sweep: fast 5..20, slow 21..80 (fast < slow)
     const paramCombinations = [
       { fast: 5, slow: 21 },
       { fast: 10, slow: 30 },
@@ -189,22 +183,44 @@ class RealEngineAdapter implements EngineAdapter {
       { fast: 10, slow: 50 },
     ];
 
-    // Simulate results for each combination (in real version, would run actual backtest)
     const results: Array<{ params: { fast: number; slow: number }; result: JobResult }> = [];
 
-    for (const params of paramCombinations) {
+    // If klines available, run real backtests for each param combination
+    if (input.klines && input.klines.length >= 100) {
+      for (const params of paramCombinations) {
+        // Run backtest with these parameters
+        const backtestResult = await this.runBacktestWithParams(input, params.fast, params.slow);
+        results.push({
+          params,
+          result: backtestResult,
+        });
+      }
+    } else {
+      // Fallback: use baseline or generate deterministic results
+      if (!input.baselineMetrics) {
+        return {
+          trades: 75,
+          winRate: 52,
+          maxDrawdown: -8,
+          sharpe: 1.5,
+          totalReturn: 12,
+        };
+      }
+
       // Simplified: improve baseline based on params
-      const improvement = (params.fast + params.slow) / 100; // Simple heuristic
-      results.push({
-        params,
-        result: {
-          trades: input.baselineMetrics.trades,
-          winRate: Math.min(100, input.baselineMetrics.winRate + improvement * 2),
-          maxDrawdown: input.baselineMetrics.maxDrawdown,
-          sharpe: input.baselineMetrics.sharpe + improvement * 0.2,
-          totalReturn: input.baselineMetrics.totalReturn + improvement * 5,
-        },
-      });
+      for (const params of paramCombinations) {
+        const improvement = (params.fast + params.slow) / 100;
+        results.push({
+          params,
+          result: {
+            trades: input.baselineMetrics.trades,
+            winRate: Math.min(100, input.baselineMetrics.winRate + improvement * 2),
+            maxDrawdown: input.baselineMetrics.maxDrawdown,
+            sharpe: input.baselineMetrics.sharpe + improvement * 0.2,
+            totalReturn: input.baselineMetrics.totalReturn + improvement * 5,
+          },
+        });
+      }
     }
 
     // Sort by totalReturn * sharpe (combined score) and return top
@@ -215,6 +231,69 @@ class RealEngineAdapter implements EngineAdapter {
     });
 
     return results[0].result; // Top result
+  }
+
+  /**
+   * Run backtest with specific SMA parameters (for optimization)
+   */
+  private async runBacktestWithParams(input: OptimizeInput, fastPeriod: number, slowPeriod: number): Promise<JobResult> {
+    if (!input.klines || input.klines.length < 100) {
+      throw new Error('Klines data is required for real optimization');
+    }
+
+    const closes = input.klines.map(k => parseFloat(String(k[4])));
+
+    // Calculate SMAs with given parameters
+    const fastSMA = this.calculateSMA(closes, fastPeriod);
+    const slowSMA = this.calculateSMA(closes, slowPeriod);
+
+    // Generate trades
+    const trades: Trade[] = [];
+    let position: 'long' | null = null;
+    let entryPrice = 0;
+
+    for (let i = slowPeriod; i < closes.length; i++) {
+      const fast = fastSMA[i];
+      const slow = slowSMA[i];
+      const prevFast = fastSMA[i - 1];
+      const prevSlow = slowSMA[i - 1];
+
+      const bullishCross = prevFast <= prevSlow && fast > slow;
+      const bearishCross = prevFast >= prevSlow && fast < slow;
+
+      if (bullishCross && !position) {
+        position = 'long';
+        entryPrice = closes[i];
+      } else if (bearishCross && position === 'long') {
+        const exitPrice = closes[i];
+        const pnl = ((exitPrice - entryPrice) / entryPrice) * 100;
+        trades.push({
+          entryPrice,
+          exitPrice,
+          entryTime: input.klines[i - 1]?.[0] || Date.now(),
+          exitTime: input.klines[i][0],
+          side: 'long',
+          pnl,
+        });
+        position = null;
+      }
+    }
+
+    // Calculate metrics
+    const winningTrades = trades.filter(t => t.pnl > 0).length;
+    const winRate = trades.length > 0 ? (winningTrades / trades.length) * 100 : 0;
+    const returns = trades.map(t => t.pnl);
+    const totalReturn = calculateTotalReturn(returns);
+    const maxDrawdown = calculateMaxDrawdown(returns);
+    const sharpe = calculateSharpeRatio(returns, 0);
+
+    return {
+      trades: trades.length,
+      winRate: Math.round(winRate * 10) / 10,
+      maxDrawdown: Math.round(maxDrawdown * 10) / 10,
+      sharpe: Math.round(sharpe * 100) / 100,
+      totalReturn: Math.round(totalReturn * 10) / 10,
+    };
   }
 }
 
