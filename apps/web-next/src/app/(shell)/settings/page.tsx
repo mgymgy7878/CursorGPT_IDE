@@ -12,8 +12,35 @@ import { useTheme } from "@/components/theme/ThemeProvider";
 import { Surface } from "@/components/ui/Surface";
 import { ClientTime } from "@/components/common/ClientTime";
 import { ConnectionHealthCard } from "@/components/settings/ConnectionHealthCard";
+import { getSparkMode, type SparkMode } from "@/lib/spark/config";
 
 type SettingsTab = 'exchange' | 'ai' | 'app' | 'guide' | 'about';
+
+// SSR-safe Spark Mode hook (client-only localStorage override)
+function useSparkMode(): [SparkMode, (mode: SparkMode) => void] {
+  const [mode, setMode] = useState<SparkMode>(() => {
+    if (typeof window === 'undefined') {
+      return getSparkMode(); // SSR: use env-based mode
+    }
+    // Client: check localStorage override first
+    const stored = localStorage.getItem('spark-mode-override');
+    if (stored && (stored === 'prod' || stored === 'testnet' || stored === 'paper')) {
+      return stored as SparkMode;
+    }
+    return getSparkMode(); // Fallback to env-based
+  });
+
+  const updateMode = (newMode: SparkMode) => {
+    setMode(newMode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('spark-mode-override', newMode);
+      // Dispatch custom event for same-window updates (StatusBar listens)
+      window.dispatchEvent(new Event('spark-mode-changed'));
+    }
+  };
+
+  return [mode, updateMode];
+}
 
 /**
  * Settings Page - AppFrame shell içinde
@@ -25,6 +52,7 @@ export default function Settings() {
     (searchParams?.get('tab') as SettingsTab) || 'exchange'
   );
   const { theme, setTheme } = useTheme();
+  const [sparkMode, setSparkMode] = useSparkMode();
 
   // Deep-link support: URL'deki tab parametresini dinle
   useEffect(() => {
@@ -233,6 +261,49 @@ export default function Settings() {
 
         {activeTab === 'app' && (
           <div className="space-y-4">
+            {/* Spark Mode - PATCH: Testnet/Paper/Prod selector */}
+            <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-4">
+              <h3 className="text-base font-semibold text-neutral-200 mb-3">Spark Mode</h3>
+              <p className="text-xs text-neutral-400 mb-3">
+                Platform çalışma modu. Testnet ve Paper modları güvenli test için, Prod gerçek işlemler için.
+              </p>
+              <div className="flex gap-2">
+                {(['prod', 'testnet', 'paper'] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setSparkMode(m)}
+                    className={cn(
+                      'px-3 py-1.5 text-sm rounded-lg border transition-colors',
+                      sparkMode === m
+                        ? m === 'prod'
+                          ? 'border-red-500 bg-red-500/20 text-red-400'
+                          : m === 'testnet'
+                          ? 'border-amber-500 bg-amber-500/20 text-amber-400'
+                          : 'border-blue-500 bg-blue-500/20 text-blue-400'
+                        : 'border-neutral-700 text-neutral-400 hover:text-neutral-300'
+                    )}
+                    title={
+                      m === 'prod' ? 'Production: Gerçek işlemler' :
+                      m === 'testnet' ? 'Testnet: Binance testnet API' :
+                      'Paper: Simüle edilmiş işlemler'
+                    }
+                  >
+                    {m === 'prod' ? '🔴 Prod' : m === 'testnet' ? '🟡 Testnet' : '🔵 Paper'}
+                  </button>
+                ))}
+              </div>
+              {sparkMode === 'prod' && (
+                <div className="mt-3 p-2 rounded border border-red-500/30 bg-red-500/10">
+                  <p className="text-xs text-red-400">
+                    ⚠️ Production modu aktif. Gerçek işlemler yapılacaktır. Dikkatli olun.
+                  </p>
+                </div>
+              )}
+              <p className="text-xs text-neutral-500 mt-2">
+                Not: Bu ayar localStorage'da saklanır (client-only override). Build-time env vars önceliklidir.
+              </p>
+            </div>
+
             {/* Tema */}
             <div className="rounded-lg border border-white/10 bg-neutral-900/50 p-4">
               <h3 className="text-base font-semibold text-neutral-200 mb-3">Tema</h3>

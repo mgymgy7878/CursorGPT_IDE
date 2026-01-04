@@ -15,7 +15,7 @@ import { useWsHeartbeat } from '@/hooks/useWsHeartbeat'
 import { useEngineHealth } from '@/hooks/useEngineHealth'
 import { useWebNextHealth } from '@/hooks/useWebNextHealth'
 import { useExecutorHealth } from '@/hooks/useExecutorHealth'
-import { getSparkMode } from '@/lib/spark/config'
+import { getSparkMode, type SparkMode } from '@/lib/spark/config'
 // CommandButton kaldırıldı - Figma parity: hotkey hint ComposerBar'da
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
@@ -146,6 +146,38 @@ export default function StatusBar() {
     return `${Math.floor(secondsAgo / 60)}m ago`
   }
 
+  // SSR-safe Spark Mode display (client-only localStorage override)
+  const [sparkMode, setSparkMode] = useState<SparkMode>(() => {
+    if (typeof window === 'undefined') {
+      return getSparkMode(); // SSR: use env-based mode
+    }
+    // Client: check localStorage override first
+    const stored = localStorage.getItem('spark-mode-override');
+    if (stored && (stored === 'prod' || stored === 'testnet' || stored === 'paper')) {
+      return stored as SparkMode;
+    }
+    return getSparkMode(); // Fallback to env-based
+  });
+
+  useEffect(() => {
+    // Listen for localStorage changes (from Settings page)
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem('spark-mode-override');
+      if (stored && (stored === 'prod' || stored === 'testnet' || stored === 'paper')) {
+        setSparkMode(stored as SparkMode);
+      } else {
+        setSparkMode(getSparkMode());
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    // Also listen for same-window changes (custom event)
+    window.addEventListener('spark-mode-changed', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('spark-mode-changed', handleStorageChange);
+    };
+  }, []);
+
   // DEV mode (her zaman true, local development için)
   const devOk = true
 
@@ -214,9 +246,10 @@ export default function StatusBar() {
               title={`Executor (port 4001)\nStatus: ${executorOk ? 'UP' : 'DOWN'}\nLast OK: ${getLastOkText('executor')}\nClick to open health endpoint`}
             />
             <HealthPill
-              ok={'degraded' as any} // DEV is always amber (mode indicator, not health)
-              label="DEV"
-              title="Development Mode"
+              ok={sparkMode === 'prod' ? false : sparkMode === 'testnet' ? 'degraded' : true}
+              label={sparkMode === 'prod' ? 'PROD' : sparkMode === 'testnet' ? 'TESTNET' : 'PAPER'}
+              onClick={() => router.push('/settings?tab=app')}
+              title={`Spark Mode: ${sparkMode}\nClick to change in Settings`}
             />
 
             {/* Divider */}
