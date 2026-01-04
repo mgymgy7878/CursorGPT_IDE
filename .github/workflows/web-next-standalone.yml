@@ -62,16 +62,20 @@ jobs:
         run: |
           set -euo pipefail
           echo "[build] Starting web-next build (standalone mode)..."
-          if pnpm -w --filter web-next build 2>&1 | tee build.log; then
-            echo "[build] ✅ Build completed successfully"
-          else
-            BUILD_EXIT=$?
+          # Run build and capture output
+          pnpm -w --filter web-next build 2>&1 | tee build.log || {
+            BUILD_EXIT=${PIPESTATUS[0]}
             echo "::error::Build failed with exit code $BUILD_EXIT"
             echo "[build] ---- build.log tail (last 200 lines) ----"
-            tail -n 200 build.log || true
+            if [ -f build.log ]; then
+              tail -n 200 build.log || cat build.log
+            else
+              echo "[build] WARNING: build.log file not found"
+            fi
             echo "[build] ---- end of build.log tail ----"
             exit $BUILD_EXIT
-          fi
+          }
+          echo "[build] ✅ Build completed successfully"
       - name: Upload build log (always)
         if: always()
         uses: actions/upload-artifact@v4
