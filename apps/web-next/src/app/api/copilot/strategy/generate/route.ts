@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchSafe } from "@/lib/net/fetchSafe";
+import { EXECUTOR_BASE } from "@/lib/spark/config";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { symbol, timeframe, risk, notes } = await req.json();
+    const body = await req.json();
+    const { symbol, timeframe, risk, notes } = body;
 
-    // Mock delay to simulate AI processing
+    // Try to connect to executor service first
+    const executorUrl = `${EXECUTOR_BASE}/copilot/strategy.generate`;
+    
+    try {
+      const executorRes = await fetchSafe(executorUrl, {
+        method: "POST",
+        body: { symbol, timeframe, risk, notes },
+        headers: { "Content-Type": "application/json" },
+        timeoutMs: 30000, // 30s timeout for AI generation
+      });
+
+      if (executorRes.ok && executorRes.data) {
+        return NextResponse.json(executorRes.data);
+      }
+    } catch (executorError) {
+      console.warn("[copilot/strategy/generate] Executor service unavailable, using fallback:", executorError);
+      // Fall through to fallback suggestions
+    }
+
+    // Fallback: Mock suggestions if executor is unavailable
+    // This ensures UI works even when executor service is down
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Mock suggestions based on risk profile
     const suggestions = {
       conservative: [
         {
