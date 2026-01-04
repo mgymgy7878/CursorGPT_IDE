@@ -20,6 +20,7 @@ export interface OptimizeInput {
   interval: string;
   baselineMetrics?: JobResult; // Backtest result (for comparison)
   parameters?: Record<string, any>;
+  klines?: number[][]; // Binance klines format: [open, high, low, close, volume, ...]
 }
 
 export interface EngineAdapter {

@@ -5,7 +5,7 @@ const RechartsLine = dynamic(() => import('@/components/charts/RechartsLine'), {
 const LightweightMini = dynamic(() => import('@/components/charts/LightweightMini'), { ssr: false, loading: () => <div>Loading chart…</div> });
 const MACDPanel = dynamic(() => import('@/components/technical/MACDPanelStub'), { ssr: false });
 const StochPanel = dynamic(() => import('@/components/technical/StochPanelStub'), { ssr: false });
-const PriceChartLC = dynamic(() => import('@/components/technical/PriceChartLCStub'), { ssr: false });
+const PriceChartLC = dynamic(() => import('@/components/technical/PriceChartLC'), { ssr: false });
 
 export default function TechnicalAnalysisPage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
@@ -260,7 +260,13 @@ export default function TechnicalAnalysisPage() {
 
         {/* Chart with Overlays */}
         <div className="mt-4">
-          <PriceChartLC />
+          <PriceChartLC
+            candles={candles}
+            symbol={symbol}
+            timeframe={tf}
+            fibLevels={fibLevels}
+            bbSeries={bbSeries}
+          />
         </div>
 
         {/* Technical Overview (stubbed while build hotfix) */}
