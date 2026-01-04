@@ -59,13 +59,34 @@ jobs:
           name: standalone-install-logs
           path: install.log
       - name: Build web-next (standalone)
-        run: pnpm -w --filter web-next build 2>&1 | tee build.log
+        run: |
+          set -o pipefail
+          pnpm -w --filter web-next build 2>&1 | tee build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "::error::Build failed with exit code $BUILD_EXIT"
+            exit $BUILD_EXIT
+          fi
       - name: Upload build logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: standalone-build-logs
           path: build.log
+      - name: Verify standalone output exists
+        run: |
+          if [ ! -d "apps/web-next/.next/standalone" ]; then
+            echo "::error::Standalone output directory not found"
+            echo "Build may have failed or standalone output is not enabled"
+            ls -la apps/web-next/.next/ || echo ".next directory not found"
+            exit 1
+          fi
+          if [ ! -f "apps/web-next/.next/standalone/server.js" ] && [ ! -f "apps/web-next/.next/standalone/apps/web-next/server.js" ]; then
+            echo "::error::Standalone server.js not found"
+            find apps/web-next/.next/standalone -name "server.js" || echo "No server.js found"
+            exit 1
+          fi
+          echo "✅ Standalone output verified"
       - name: Pack standalone artefact
         run: |
           tar -czf web-next-standalone.tgz -C apps/web-next/.next/standalone .

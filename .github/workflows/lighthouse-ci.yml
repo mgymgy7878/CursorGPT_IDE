@@ -36,9 +36,13 @@ jobs:
       - name: Install Lighthouse CI
         run: npm i -g @lhci/cli wait-on
 
-      - name: Start production server
+      - name: Start dev server (endpoints hard-disabled in production)
         run: |
-          pnpm --filter web-next start -- -p 3003 &
+          pnpm --filter web-next dev -- --port 3003 &
+        env:
+          SPARK_MODE: paper
+          NEXT_PUBLIC_SPARK_MODE: paper
+          SPARK_ENGINE_MODE: stub
 
       - name: Wait for server warmup
         run: |
