@@ -153,7 +153,7 @@ class RealEngineAdapter implements EngineAdapter {
     return {
       trades: trades.length,
       winRate: Math.round(winRate * 10) / 10,
-      maxDrawdown: Math.round(maxDD * 10) / 10,
+      maxDrawdown: Math.round(maxDrawdown * 10) / 10,
       sharpe: Math.round(sharpe * 100) / 100,
       totalReturn: Math.round(totalReturn * 10) / 10,
     };

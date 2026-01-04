@@ -13,7 +13,8 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   // Prod hard-disable: production'da stub API'leri kapalı
-  if (process.env.NODE_ENV === 'production') {
+  const nodeEnv = process.env.NODE_ENV as string;
+  if (nodeEnv === 'production') {
     return NextResponse.json(
       {
         error: 'Backtest stub is not available in production',
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
   // Prod enable check: real engine requires explicit enable
   const engineMode = process.env.SPARK_ENGINE_MODE || 'stub';
   const realEngineEnabled = process.env.SPARK_ENGINE_REAL_ENABLE === '1';
-  if (engineMode === 'real' && !realEngineEnabled && process.env.NODE_ENV === 'production') {
+  if (engineMode === 'real' && !realEngineEnabled && nodeEnv === 'production') {
     return NextResponse.json(
       {
         error: 'Real engine requires SPARK_ENGINE_REAL_ENABLE=1 in production',
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
 
   const requestId = require('crypto').randomUUID().split('-')[0];
   const startTime = Date.now();
-  const MAX_RUNTIME = process.env.NODE_ENV === 'production' ? 1500 : 3000; // 1.5s prod, 3s dev
+  const MAX_RUNTIME = nodeEnv === 'production' ? 1500 : 3000; // 1.5s prod, 3s dev
 
   try {
     const body = await request.json().catch(() => ({}));
@@ -98,8 +99,9 @@ export async function POST(request: Request) {
     };
     const jobId = jobStore.createJob('backtest', input);
 
-    const elapsed = Date.now() - startTime;
-    console.log(`[backtest] requestId=${requestId} jobId=${jobId} elapsed=${elapsed}ms engineMode=${engineMode}`);
+    // Reuse elapsed from timeout check above
+    const finalElapsed = Date.now() - startTime;
+    console.log(`[backtest] requestId=${requestId} jobId=${jobId} elapsed=${finalElapsed}ms engineMode=${engineMode}`);
 
     return NextResponse.json(
       {

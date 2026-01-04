@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 export function ConnectionHealthCard() {
   const apiOk = useHeartbeat();
   const wsOk = useWsHeartbeat();
-  const { ok: executorOk } = useExecutorHealth();
+  const { healthy: executorOk } = useExecutorHealth();
   const [lastTestAt, setLastTestAt] = useState<number>(Date.now());
 
   // Update lastTestAt when any status changes

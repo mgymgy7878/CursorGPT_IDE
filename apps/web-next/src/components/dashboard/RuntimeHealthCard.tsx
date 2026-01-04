@@ -129,7 +129,7 @@ export function RuntimeHealthCard() {
 
   const getWSStatusText = () => {
     // Separate connection status from last message time
-    if (wsStatus === "healthy" || wsStatus === "connected") {
+    if (wsStatus === "healthy") {
       if (wsStaleness > 0) {
         // Show both connection status and last message time
         return `${Math.floor(wsStaleness)}s once`;
@@ -176,7 +176,7 @@ export function RuntimeHealthCard() {
         <div className="flex items-center justify-between">
           <span className={subtleText}>WS Baglantisi</span>
           <div className="flex items-center gap-2">
-            <span>{getStatusIcon(wsStatus === "healthy" || wsStatus === "connected")}</span>
+            <span>{getStatusIcon(wsStatus === "healthy")}</span>
             <span className="text-sm">{getWSStatusText()}</span>
           </div>
         </div>

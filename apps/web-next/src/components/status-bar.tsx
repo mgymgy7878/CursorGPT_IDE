@@ -71,7 +71,7 @@ export default function StatusBar() {
   const wsOk = useWsHeartbeat()
   const { ok: engineOk } = useEngineHealth()
   const { ok: webNextOk } = useWebNextHealth()
-  const { ok: executorOk, latencyMs: executorLatencyMs } = useExecutorHealth()
+  const { healthy: executorOk } = useExecutorHealth()
   const metrics = useHealthzMetrics()
   const breadcrumb = getBreadcrumb(pathname)
   const barRef = useRef<HTMLDivElement>(null)
@@ -209,9 +209,9 @@ export default function StatusBar() {
             <HealthPill
               ok={executorOk}
               label="Executor"
-              latency={executorLatencyMs ?? null}
+              latency={null}
               onClick={() => window.open('http://127.0.0.1:4001/healthz', '_blank')}
-              title={`Executor (port 4001)\nStatus: ${executorOk ? 'UP' : 'DOWN'}\nLatency: ${executorLatencyMs !== undefined ? `${executorLatencyMs}ms` : 'N/A'}\nLast OK: ${getLastOkText('executor')}\nClick to open health endpoint`}
+              title={`Executor (port 4001)\nStatus: ${executorOk ? 'UP' : 'DOWN'}\nLast OK: ${getLastOkText('executor')}\nClick to open health endpoint`}
             />
             <HealthPill
               ok={'degraded' as any} // DEV is always amber (mode indicator, not health)
