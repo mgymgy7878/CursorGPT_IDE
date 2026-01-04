@@ -62,16 +62,14 @@ jobs:
         run: |
           set -euo pipefail
           echo "[build] Starting web-next build (standalone mode)..."
+          # Pre-create log file to ensure it exists even on fast failures
+          : > build.log
           # Run build and capture output
-          pnpm -w --filter web-next build 2>&1 | tee build.log || {
+          pnpm -w --filter web-next build 2>&1 | tee -a build.log || {
             BUILD_EXIT=${PIPESTATUS[0]}
             echo "::error::Build failed with exit code $BUILD_EXIT"
             echo "[build] ---- build.log tail (last 200 lines) ----"
-            if [ -f build.log ]; then
-              tail -n 200 build.log || cat build.log
-            else
-              echo "[build] WARNING: build.log file not found"
-            fi
+            tail -n 200 build.log || cat build.log || true
             echo "[build] ---- end of build.log tail ----"
             exit $BUILD_EXIT
           }

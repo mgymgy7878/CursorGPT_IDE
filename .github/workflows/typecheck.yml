@@ -44,10 +44,7 @@ jobs:
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm version mismatch"; exit 1; }
 
       - name: Install dependencies
-        run: |
-          pnpm -w install --frozen-lockfile
-          # Ensure @types/node is installed for web-next
-          pnpm --filter web-next install --frozen-lockfile || true
+        run: pnpm -w install --frozen-lockfile
 
       - name: Typecheck (web-next)
         run: pnpm --filter web-next typecheck
