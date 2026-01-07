@@ -1,0 +1,54 @@
+﻿# HELP spark_up 1 if service is alive
+# TYPE spark_up gauge
+spark_up 1
+
+# HELP spark_ws_btcturk_msgs_total Total BTCTurk WebSocket messages received
+# TYPE spark_ws_btcturk_msgs_total counter
+spark_ws_btcturk_msgs_total 0
+
+# HELP spark_ws_staleness_seconds Seconds since last WebSocket message
+# TYPE spark_ws_staleness_seconds gauge
+spark_ws_staleness_seconds 2
+
+# HELP spark_api_latency_p95_ms API latency P95 in milliseconds
+# TYPE spark_api_latency_p95_ms gauge
+spark_api_latency_p95_ms 58
+
+# HELP spark_error_rate Error rate percentage
+# TYPE spark_error_rate gauge
+spark_error_rate 0
+
+# HELP spark_copilot_sse_stream_open_total Total Copilot SSE streams opened
+# TYPE spark_copilot_sse_stream_open_total counter
+spark_copilot_sse_stream_open_total 1
+
+# HELP spark_copilot_sse_stream_close_total Total Copilot SSE streams closed by reason
+# TYPE spark_copilot_sse_stream_close_total counter
+spark_copilot_sse_stream_close_total{reason="done"} 1
+
+# HELP spark_copilot_sse_stream_active Current number of active Copilot SSE streams
+# TYPE spark_copilot_sse_stream_active gauge
+spark_copilot_sse_stream_active 0
+
+# HELP spark_copilot_sse_event_total Total Copilot SSE events by type
+# TYPE spark_copilot_sse_event_total counter
+spark_copilot_sse_event_total{event="token"} 25
+spark_copilot_sse_event_total{event="message_done"} 1
+spark_copilot_sse_event_total{event="complete"} 1
+
+# HELP spark_copilot_sse_invalid_drop_total Total invalid Copilot SSE events dropped
+# TYPE spark_copilot_sse_invalid_drop_total counter
+spark_copilot_sse_invalid_drop_total{event="unknown",reason="zod"} 0
+
+# HELP spark_copilot_sse_bytes_total Total bytes sent in Copilot SSE streams
+# TYPE spark_copilot_sse_bytes_total counter
+spark_copilot_sse_bytes_total 3330
+
+# HELP spark_copilot_sse_duration_seconds Copilot SSE stream duration summary
+# TYPE spark_copilot_sse_duration_seconds summary
+spark_copilot_sse_duration_seconds_sum 1.424
+spark_copilot_sse_duration_seconds_count 1
+spark_copilot_sse_duration_seconds{quantile="0.5"} 1.424
+spark_copilot_sse_duration_seconds{quantile="0.95"} 2.136
+spark_copilot_sse_duration_seconds{quantile="0.99"} 2.848
+

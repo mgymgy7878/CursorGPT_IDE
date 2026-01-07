@@ -1,0 +1,95 @@
+Gate C: Live Session Manager - FINAL CLOSURE
+=============================================
+Date: 2026-01-07 13:50 (UTC+3)
+Status: ✅ CLOSED (PASS)
+
+ACCEPTANCE CRITERIA: ALL PASS
+=============================
+
+T1: Dual Panel Single Stream
+----------------------------
+✅ Single SSE connection maintained across panel toggles
+✅ Zustand global store ensures state sync between components
+✅ RequestId stable during stream
+✅ Evidence: artifacts/gateC/t1_network.png, t1_zustand_test.png
+
+T2: Abort Determinism
+--------------------
+✅ State transitions: idle → connecting → streaming → done
+✅ No error events emitted on abort
+✅ AbortError handled gracefully
+✅ Evidence: artifacts/gateC/t2_console.txt
+
+T3: Limits Enforcement
+---------------------
+✅ URL param liveMaxDurationMs recognized
+✅ getDevLimitOverrides() reads debug params
+✅ Duration limit enforcement verified
+✅ Evidence: artifacts/gateC/t3_limits.png
+
+VERIFY SCRIPT: PASS
+==================
+.\tools\gate-c-verify-artifacts.ps1 → PASS
+- All artifacts present and valid
+- All evidence files updated (no placeholders)
+- All test results: PASS
+
+KEY CHANGES MADE
+================
+
+1. CopilotDock.tsx
+   - Added debug logging for send/startSession
+   - Mock flag propagation via query AND header
+   - useDebugTrigger hook for remote trigger
+
+2. LiveDebugBadge.tsx
+   - "Start Mock Stream" button for dev testing
+   - Extended telemetry display
+   - Global event emitter for debug trigger
+
+3. useLiveSession.ts
+   - Zustand global store (useLiveSessionStore)
+   - State sync across all components
+   - Extended telemetry (lastStartUrl, lastStartAt, etc.)
+
+CHANGED FILES
+=============
+- apps/web-next/src/components/copilot/CopilotDock.tsx
+- apps/web-next/src/components/debug/LiveDebugBadge.tsx
+- apps/web-next/src/lib/live-react/useLiveSession.ts
+- evidence/gateC_dual_panel_single_stream.txt
+- evidence/gateC_abort_idle_no_error_event.txt
+- evidence/gateC_limits_enforced.txt
+- artifacts/gateC/*.png, *.txt
+
+KEY IMPROVEMENT
+===============
+Zustand Global Store for Live Session State
+- Before: Each component had its own useLiveSession state
+- After: Single global store shared across all components
+- Result: Debug badge correctly shows Streams/Tokens/State
+
+Debug Trigger Button
+- One-click mock stream start
+- No need to type in Copilot panel
+- Enables deterministic Gate C testing
+
+USAGE
+=====
+Test URL: http://127.0.0.1:3003/dashboard?debugLive=1&mock=1
+- debugLive=1: Shows debug badge
+- mock=1: Enables mock SSE stream (no API key needed)
+
+Debug Button: "🚀 Start Mock Stream"
+- Triggers mock stream via CopilotDock
+- Shows state/tokens/events in real-time
+
+Verify: .\tools\gate-c-verify-artifacts.ps1
+
+GATE C + GATE D STATUS
+======================
+Gate C: ✅ CLOSED (Live Session Manager)
+Gate D: ✅ CLOSED (Prometheus Metrics)
+
+Both gates now use request-based mock mode (?mock=1) for deterministic testing.
+

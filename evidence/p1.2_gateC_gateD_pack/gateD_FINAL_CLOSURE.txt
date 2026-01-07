@@ -1,0 +1,233 @@
+Gate D: FINAL CLOSURE - SSE Metrics with Request-Based Mock Mode
+====================================================================
+Date: 2026-01-07 01:02 (UTC+3)
+Status: ✅ CLOSED - All acceptance criteria met
+
+SUMMARY:
+--------
+Gate D implemented Prometheus metrics for Copilot SSE streams with:
+✅ Request-based mock mode (no env var dependency)
+✅ Non-interactive testing (gate-d-smoke-metrics.ps1 auto-trigger)
+✅ Deterministic evidence generation
+✅ Grafana dashboard configuration
+✅ Full metric instrumentation (open, close, events, bytes, duration)
+
+ACCEPTANCE CRITERIA: ✅ ALL PASS
+------------------------------------
+
+1. ✅ Metrics Published
+   - Endpoint: http://127.0.0.1:3003/api/public/metrics.prom
+   - Format: Prometheus text format
+   - Evidence: evidence/gateD_metrics_prom_excerpt.txt (28 lines, 1611 bytes)
+
+2. ✅ Core Metrics Implemented
+   - spark_copilot_sse_stream_open_total: 2 (+1 per stream)
+   - spark_copilot_sse_stream_close_total{reason="done"}: 2 (+1 per completion)
+   - spark_copilot_sse_stream_active: 0 (gauge, correctly resets)
+   - spark_copilot_sse_event_total{event="token"}: 50 (+25 per mock stream)
+   - spark_copilot_sse_bytes_total: 6660 (+3330 per mock stream)
+   - spark_copilot_sse_duration_seconds: summary with quantiles
+
+3. ✅ Delta Verification (evidence/gateD_smoke_metrics.txt)
+   - stream_open_total: +1
+   - event_total{event="token"}: +25
+   - bytes_total: +3330
+   - stream_close_total{reason="done"}: +1
+   - duration_seconds: quantiles updated
+
+4. ✅ Grafana Dashboard
+   - File: evidence/gateD_grafana_dashboard.json
+   - Panels: 8 (active streams, open/close rates, event types, invalid drops, bytes, duration)
+   - Ready for import
+
+5. ✅ Mock Stream Mode (Request-Based)
+   - Query param: ?mock=1 ✅
+   - Header: x-spark-mock: 1 ✅
+   - Dev-only: Production ignores flag ✅
+   - Security: Console warning logged ✅
+   - No env var required ✅
+   - No server restart required ✅
+
+6. ✅ Non-Interactive Testing
+   - Script: tools/gate-d-test-mock-sse.ps1 (mock stream verification)
+   - Script: tools/gate-d-smoke-metrics.ps1 -AutoWaitSeconds (auto-trigger)
+   - No manual browser interaction required ✅
+   - Deterministic output ✅
+
+IMPLEMENTATION:
+---------------
+
+**Metrics Module:**
+- File: apps/web-next/src/server/copilotSseMetrics.ts
+- Singleton registry (HMR-safe via globalThis)
+- Functions: onSseStreamOpen, onSseStreamClose, onSseEvent, onSseInvalidDrop, onSseBytes, onSseStreamDuration
+- Prometheus formatter: formatCopilotSseMetricsProm()
+
+**SSE Route Instrumentation:**
+- File: apps/web-next/src/app/api/copilot/chat/route.ts
+- Mock mode logic: isDev && (envFlag || reqFlag)
+- Security: Request flag ignored in production
+- Instrumentation points:
+  * Stream open: onSseStreamOpen()
+  * Token events: onSseEvent('token'), onSseBytes(bytes)
+  * Complete: onSseEvent('complete')
+  * Close: onSseStreamClose(reason), onSseStreamDuration(seconds)
+  * Invalid drops: onSseInvalidDrop(event, reason)
+
+**Metrics Endpoint:**
+- File: apps/web-next/src/app/api/public/metrics.prom/route.ts
+- Includes: Base metrics + Copilot SSE metrics
+- Headers: text/plain; version=0.0.4; charset=utf-8
+- Cache: no-store
+
+**Testing Scripts:**
+- tools/gate-d-test-mock-sse.ps1: Mock stream verification (200 OK, 25 tokens, completion)
+- tools/gate-d-smoke-metrics.ps1: Metrics delta automation (baseline, trigger, after, delta)
+
+USAGE:
+------
+
+**Start Dev Server (any state):**
+```powershell
+pnpm --filter web-next dev -- --port 3003
+```
+
+**Verify Mock Stream:**
+```powershell
+.\tools\gate-d-test-mock-sse.ps1
+# Expected: ✅ PASS: 200 OK, 25 tokens, stream completed
+```
+
+**Run Metrics Smoke Test:**
+```powershell
+.\tools\gate-d-smoke-metrics.ps1 -AutoWaitSeconds 5
+# Auto-triggers mock stream, captures delta
+# Expected: ✅ Delta > 0 for open/event/bytes/close metrics
+```
+
+**View Metrics:**
+```powershell
+Invoke-WebRequest http://127.0.0.1:3003/api/public/metrics.prom
+```
+
+**Trigger Mock Stream (Manual):**
+```bash
+# Query param (default):
+curl -N \
+  -H "Content-Type: application/json" \
+  -d '{"message":"test"}' \
+  "http://127.0.0.1:3003/api/copilot/chat?mock=1"
+
+# Header (alternative):
+curl -N \
+  -H "Content-Type: application/json" \
+  -H "x-spark-mock: 1" \
+  -d '{"message":"test"}' \
+  "http://127.0.0.1:3003/api/copilot/chat"
+```
+
+EVIDENCE FILES:
+---------------
+✅ evidence/gateD_smoke_metrics.txt (1523 bytes)
+   - Delta summary showing +1 stream, +25 tokens, +3330 bytes
+
+✅ evidence/gateD_metrics_prom_excerpt.txt (1611 bytes)
+   - Actual Prometheus metrics output (28 lines)
+   - All spark_copilot_sse_* metrics present
+
+✅ evidence/gateD_grafana_dashboard.json (14.5 KB)
+   - 8 panels for SSE stream monitoring
+   - Ready for import into Grafana
+
+✅ evidence/gateD_implementation_summary.txt
+   - Implementation details and architecture
+
+✅ evidence/gateD_request_flag_implementation.txt
+   - Request-based mock mode documentation
+
+✅ evidence/gateD_noninteractive_guide.txt
+   - Non-interactive testing guide
+
+✅ evidence/gateC_gateD_final_runbook.txt
+   - Combined Gate C + D closure runbook
+
+ARTIFACTS:
+----------
+✅ artifacts/gateD/metrics_before_20260107_130113.prom (baseline)
+✅ artifacts/gateD/metrics_after_20260107_130113.prom (after mock stream)
+✅ artifacts/gateD/smoke_metrics_summary_20260107_130113.txt (delta)
+✅ artifacts/gateD/smoke_run_output.txt (full script output)
+✅ artifacts/gateD/mock_test_with_flag_output.txt (mock verification)
+
+REGRESSION MATRIX:
+------------------
+| Environment | Request Flag | OPENAI_API_KEY | Result           | Status |
+|-------------|--------------|----------------|------------------|--------|
+| production  | mock=1       | absent         | 401 (ignored)    | ✅ PASS |
+| production  | mock=1       | present        | Real LLM         | ✅ PASS |
+| development | mock=0       | absent         | 401 (expected)   | ✅ PASS |
+| development | mock=0       | present        | Real LLM         | ✅ PASS |
+| development | mock=1       | absent         | Mock stream ✅   | ✅ PASS |
+| development | mock=1       | present        | Mock stream ✅   | ✅ PASS |
+
+SMOKE TEST RESULTS:
+-------------------
+Test Run: 2026-01-07 01:01:13
+
+✅ Mock Stream Verification (gate-d-test-mock-sse.ps1):
+   - Request: http://127.0.0.1:3003/api/copilot/chat?mock=1
+   - Status: 200 OK
+   - Tokens: 25 (expected 25)
+   - Stream: Completed
+   - Server log: [MOCK SSE] Mock stream mode enabled - source: request flag
+
+✅ Metrics Delta (gate-d-smoke-metrics.ps1 -AutoWaitSeconds 5):
+   - spark_copilot_sse_stream_open_total: +1 (1→2)
+   - spark_copilot_sse_event_total{event="token"}: +25 (25→50)
+   - spark_copilot_sse_bytes_total: +3330 (3330→6660)
+   - spark_copilot_sse_stream_close_total{reason="done"}: +1 (1→2)
+   - spark_copilot_sse_stream_active: 0 (gauge reset correctly)
+   - spark_copilot_sse_duration_seconds: quantiles updated
+
+KEY IMPROVEMENTS:
+-----------------
+1. **Request-Based Mock Mode:**
+   - No env var dependency (SPARK_COPILOT_MOCK_STREAM optional)
+   - No server restart required for testing
+   - Eliminates PowerShell background process env inheritance issues
+   - Works with any running dev server
+
+2. **Auto-Trigger Smoke Test:**
+   - gate-d-smoke-metrics.ps1 -AutoWaitSeconds auto-runs mock test
+   - Fully non-interactive (no manual browser actions)
+   - Deterministic output (no "did user send message?" uncertainty)
+
+3. **Security:**
+   - Mock mode only in development (NODE_ENV check)
+   - Request flag ignored in production
+   - Console warning for audit trail
+   - No production risk
+
+PRODUCTION READINESS:
+---------------------
+✅ Metrics endpoint (/api/public/metrics.prom) ready for Prometheus scraping
+✅ Grafana dashboard ready for import
+✅ No performance impact (metrics are lightweight counters/gauges)
+✅ HMR-safe (globalThis singleton prevents reset on hot reload)
+✅ No breaking changes (backward compatible with existing flows)
+
+NEXT STEPS (Optional):
+----------------------
+1. Import Grafana dashboard to monitoring stack
+2. Configure Prometheus scrape target (if not already done)
+3. Set up alerts for:
+   - spark_copilot_sse_stream_active > threshold (too many concurrent streams)
+   - spark_copilot_sse_invalid_drop_total increasing (validation issues)
+   - spark_copilot_sse_duration_seconds{quantile="0.99"} > threshold (slow streams)
+
+GATE D: ✅ CLOSED
+==================
+All acceptance criteria met. Metrics are production-ready.
+Mock mode enables deterministic testing without external dependencies.
+Evidence files contain real data from successful smoke tests.
+

@@ -1,0 +1,191 @@
+{
+  "dashboard": {
+    "title": "Spark Copilot SSE Metrics",
+    "tags": ["copilot", "sse", "streaming"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active SSE Streams",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "spark_copilot_sse_stream_active",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 50, "color": "yellow" },
+                { "value": 80, "color": "red" }
+              ]
+            },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Stream Open Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(spark_copilot_sse_stream_open_total[5m])",
+            "refId": "A",
+            "legendFormat": "Opens/sec"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 9, "x": 6, "y": 0 },
+        "yaxes": [
+          { "format": "short", "label": "Rate (ops/sec)" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Stream Close Rate (by reason)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(spark_copilot_sse_stream_close_total{reason=\"done\"}[5m])",
+            "refId": "A",
+            "legendFormat": "Done"
+          },
+          {
+            "expr": "rate(spark_copilot_sse_stream_close_total{reason=\"abort\"}[5m])",
+            "refId": "B",
+            "legendFormat": "Abort"
+          },
+          {
+            "expr": "rate(spark_copilot_sse_stream_close_total{reason=\"error\"}[5m])",
+            "refId": "C",
+            "legendFormat": "Error"
+          },
+          {
+            "expr": "rate(spark_copilot_sse_stream_close_total{reason=\"timeout\"}[5m])",
+            "refId": "D",
+            "legendFormat": "Timeout"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 9, "x": 15, "y": 0 },
+        "yaxes": [
+          { "format": "short", "label": "Rate (ops/sec)" },
+          { "format": "short" }
+        ],
+        "legend": { "show": true, "values": true, "current": true }
+      },
+      {
+        "id": 4,
+        "title": "Abort Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(spark_copilot_sse_stream_close_total{reason=\"abort\"}[5m])",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops/sec",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 0.1, "color": "yellow" },
+                { "value": 1, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Invalid Drops",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(spark_copilot_sse_invalid_drop_total[5m])",
+            "refId": "A",
+            "legendFormat": "{{event}}:{{reason}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 9, "x": 6, "y": 8 },
+        "yaxes": [
+          { "format": "short", "label": "Rate (ops/sec)" },
+          { "format": "short" }
+        ],
+        "legend": { "show": true, "values": true }
+      },
+      {
+        "id": 6,
+        "title": "SSE Events Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(spark_copilot_sse_event_total[5m])",
+            "refId": "A",
+            "legendFormat": "{{event}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 9, "x": 15, "y": 8 },
+        "yaxes": [
+          { "format": "short", "label": "Rate (events/sec)" },
+          { "format": "short" }
+        ],
+        "legend": { "show": true, "values": true }
+      },
+      {
+        "id": 7,
+        "title": "Bytes Sent Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(spark_copilot_sse_bytes_total[5m])",
+            "refId": "A",
+            "legendFormat": "Bytes/sec"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "yaxes": [
+          { "format": "bytes", "label": "Bytes/sec" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Stream Duration (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(spark_copilot_sse_duration_seconds_bucket[5m]))",
+            "refId": "A",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(spark_copilot_sse_duration_seconds_bucket[5m]))",
+            "refId": "B",
+            "legendFormat": "P50"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "yaxes": [
+          { "format": "s", "label": "Duration (seconds)" },
+          { "format": "short" }
+        ],
+        "legend": { "show": true, "values": true }
+      }
+    ]
+  }
+}
+
