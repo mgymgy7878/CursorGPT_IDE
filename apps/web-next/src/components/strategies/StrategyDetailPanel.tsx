@@ -49,14 +49,14 @@ export const StrategyDetailPanel: React.FC<StrategyDetailPanelProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{strategy.name}</CardTitle>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-xl"
+              className="text-neutral-400 hover:text-neutral-200 text-xl transition-colors"
             >
               ×
             </button>
@@ -66,7 +66,7 @@ export const StrategyDetailPanel: React.FC<StrategyDetailPanelProps> = ({
               status={getStatusColor(strategy.status)}
               label={strategy.status}
             />
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-neutral-400">
               {strategy.type === 'automated' ? 'Otomatik' : 'Manuel'}
             </span>
           </div>
@@ -74,10 +74,10 @@ export const StrategyDetailPanel: React.FC<StrategyDetailPanelProps> = ({
         <CardContent className="space-y-6">
           {strategy.description && (
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+              <h3 className="text-sm font-medium text-neutral-200 mb-2">
                 Açıklama
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-neutral-400">
                 {strategy.description}
               </p>
             </div>
@@ -85,31 +85,31 @@ export const StrategyDetailPanel: React.FC<StrategyDetailPanelProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
+              <h3 className="text-sm font-medium text-neutral-200 mb-4">
                 Strateji Bilgileri
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Risk Seviyesi:</span>
-                  <span className="text-sm font-medium capitalize">
+                  <span className="text-sm text-neutral-400">Risk Seviyesi:</span>
+                  <span className="text-sm font-medium text-neutral-200 capitalize">
                     {strategy.riskLevel}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">İşlem Sayısı:</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm text-neutral-400">İşlem Sayısı:</span>
+                  <span className="text-sm font-medium text-neutral-200">
                     {strategy.tradesCount || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Oluşturulma:</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm text-neutral-400">Oluşturulma:</span>
+                  <span className="text-sm font-medium text-neutral-200">
                     {formatDate(strategy.createdAt)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Son Güncelleme:</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm text-neutral-400">Son Güncelleme:</span>
+                  <span className="text-sm font-medium text-neutral-200">
                     {formatDate(strategy.updatedAt)}
                   </span>
                 </div>
@@ -117,21 +117,21 @@ export const StrategyDetailPanel: React.FC<StrategyDetailPanelProps> = ({
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
+              <h3 className="text-sm font-medium text-neutral-200 mb-4">
                 Performans
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Toplam Kar/Zarar:</span>
+                  <span className="text-sm text-neutral-400">Toplam Kar/Zarar:</span>
                   <span className={`text-sm font-medium ${
-                    (strategy.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                    (strategy.profitLoss || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
                   }`}>
                     {formatCurrency(strategy.profitLoss)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Ortalama İşlem:</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm text-neutral-400">Ortalama İşlem:</span>
+                  <span className="text-sm font-medium text-neutral-200">
                     {strategy.tradesCount && strategy.profitLoss
                       ? formatCurrency(strategy.profitLoss / strategy.tradesCount)
                       : 'N/A'
@@ -139,8 +139,8 @@ export const StrategyDetailPanel: React.FC<StrategyDetailPanelProps> = ({
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Başarı Oranı:</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm text-neutral-400">Başarı Oranı:</span>
+                  <span className="text-sm font-medium text-neutral-200">
                     {strategy.tradesCount ? `${Math.floor(Math.random() * 40) + 60}%` : 'N/A'}
                   </span>
                 </div>
@@ -148,17 +148,17 @@ export const StrategyDetailPanel: React.FC<StrategyDetailPanelProps> = ({
             </div>
           </div>
 
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
+          <div className="border-t border-neutral-800 pt-4">
+            <h3 className="text-sm font-medium text-neutral-200 mb-3">
               Strateji Durumu
             </h3>
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <div className="bg-neutral-900/50 rounded-lg p-4 border border-neutral-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Mevcut durum: <span className="font-medium capitalize">{strategy.status}</span>
+                  <p className="text-sm text-neutral-400">
+                    Mevcut durum: <span className="font-medium text-neutral-200 capitalize">{strategy.status}</span>
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-neutral-500 mt-1">
                     Strateji durumunu değiştirmek için ana sayfadaki kontrolleri kullanın.
                   </p>
                 </div>

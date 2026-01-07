@@ -42,7 +42,7 @@ function startDevServer() {
     ...process.env,
     WATCHPACK_POLLING: 'true',
     WATCHPACK_POLLING_INTERVAL: '2000',
-    NEXT_WEBPACK_USEPERSISTENTCACHE: 'false',
+    NEXT_WEBPACK_USEPERSISTENTCACHE: 'true',
     CHOKIDAR_USEPOLLING: '1',
   };
 

@@ -10,7 +10,7 @@ function StalenessPill({ st }: { st: Staleness }) {
               : st === 'warn' ? 'bg-amber-600/20 text-amber-300'
               : 'bg-red-600/20 text-red-300';
   const label = st === 'ok' ? 'Güncel' : st === 'warn' ? 'Gecikmeli' : 'Eski';
-  
+
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs ${color}`}>
       {label}
@@ -51,7 +51,7 @@ export default function LiveMarketCard({ symbol = 'BTCUSDT' }: { symbol?: string
         <div className="flex justify-between items-center">
           <span className="text-sm text-neutral-400">Fiyat</span>
           <span className="text-xl font-bold tabular whitespace-nowrap">
-            {formatCurrency(ticker.price, 'tr-TR', 'USD')}
+            {formatCurrency(ticker.price, 'USD')}
           </span>
         </div>
 
@@ -60,13 +60,13 @@ export default function LiveMarketCard({ symbol = 'BTCUSDT' }: { symbol?: string
           <div>
             <div className="text-neutral-400 text-xs mb-1">Alış</div>
             <div className="text-green-400 tabular whitespace-nowrap">
-              {formatCurrency(bid, 'tr-TR', 'USD')}
+              {formatCurrency(bid, 'USD')}
             </div>
           </div>
           <div>
             <div className="text-neutral-400 text-xs mb-1">Satış</div>
             <div className="text-red-400 tabular whitespace-nowrap">
-              {formatCurrency(ask, 'tr-TR', 'USD')}
+              {formatCurrency(ask, 'USD')}
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function LiveMarketCard({ symbol = 'BTCUSDT' }: { symbol?: string
         <div className="flex justify-between items-center text-sm">
           <span className="text-neutral-400">Spread</span>
           <span className="tabular">
-            {spreadPct.toFixed(3)}% ({formatCurrency(spread, 'tr-TR', 'USD')})
+            {spreadPct.toFixed(3)}% ({formatCurrency(spread, 'USD')})
           </span>
         </div>
 

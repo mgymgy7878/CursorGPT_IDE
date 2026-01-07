@@ -1,0 +1,9 @@
+﻿Gate D Metrics Delta Summary
+=============================
+Timestamp: 20260106_225643
+MetricsUrl: http://127.0.0.1:3003/api/public/metrics.prom
+Before: metrics_before_20260106_225626.prom
+After : metrics_after_20260106_225638.prom
+
+WARNING: No metric changes detected!
+Possible: Mock stream not executed or server needs restart

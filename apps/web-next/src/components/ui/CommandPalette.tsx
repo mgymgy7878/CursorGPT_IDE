@@ -49,15 +49,11 @@ export default function CommandPalette() {
     }
   };
 
+  // Figma Parity: Command Palette kapalıyken hiç render yok
+  // ⌘K/Ctrl+K butonu TopStatusBar'da tek otorite
+  // Keyboard shortcut her zaman aktif (useEffect içinde)
   if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg transition-colors text-sm"
-      >
-        ⌘K Commands
-      </button>
-    );
+    return null;
   }
 
   return (

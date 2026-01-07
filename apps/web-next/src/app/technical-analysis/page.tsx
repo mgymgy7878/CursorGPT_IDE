@@ -30,9 +30,9 @@ export default function TechnicalAnalysisPage() {
       const fibRes = showFib ? await fetch('/api/copilot/action', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ 
-          action: 'tools/fibonacci_levels', 
-          params: { symbol, timeframe: tf, period: 300 } 
+        body: JSON.stringify({
+          action: 'tools/fibonacci_levels',
+          params: { symbol, timeframe: tf, period: 300 }
         })
       }).then(r => r.json()) : null;
 
@@ -40,9 +40,9 @@ export default function TechnicalAnalysisPage() {
       const bbRes = showBB ? await fetch('/api/copilot/action', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ 
-          action: 'tools/bollinger_bands', 
-          params: { symbol, timeframe: tf, period: 20, stdDev: 2 } 
+        body: JSON.stringify({
+          action: 'tools/bollinger_bands',
+          params: { symbol, timeframe: tf, period: 20, stdDev: 2 }
         })
       }).then(r => r.json()) : null;
 
@@ -50,9 +50,9 @@ export default function TechnicalAnalysisPage() {
       const macdRes = await fetch('/api/copilot/action', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ 
-          action: 'tools/macd', 
-          params: { symbol, timeframe: tf } 
+        body: JSON.stringify({
+          action: 'tools/macd',
+          params: { symbol, timeframe: tf }
         })
       }).then(r => r.json());
 
@@ -60,9 +60,9 @@ export default function TechnicalAnalysisPage() {
       const stochRes = await fetch('/api/copilot/action', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ 
-          action: 'tools/stochastic', 
-          params: { symbol, timeframe: tf } 
+        body: JSON.stringify({
+          action: 'tools/stochastic',
+          params: { symbol, timeframe: tf }
         })
       }).then(r => r.json());
 
@@ -84,19 +84,19 @@ export default function TechnicalAnalysisPage() {
   return (
     <div className="p-6 space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold mb-2">📈 Teknik Analiz</h1>
-        <p className="text-sm opacity-70">Fibonacci ve Bollinger Bands araçları</p>
+        <h1 className="text-xl font-semibold mb-1">📈 Teknik Analiz</h1>
+        <p className="text-xs opacity-70">Fibonacci ve Bollinger Bands araçları</p>
       </div>
 
       {/* Controls */}
       <div className="flex gap-2 items-center">
-        <input 
+        <input
           value={symbol}
           onChange={e => setSymbol(e.target.value.toUpperCase())}
           placeholder="Symbol"
           className="px-3 py-2 rounded bg-black/40 border border-neutral-800"
         />
-        <select 
+        <select
           value={tf}
           onChange={e => setTf(e.target.value as any)}
           className="px-3 py-2 rounded bg-black/40 border border-neutral-800"
@@ -106,27 +106,27 @@ export default function TechnicalAnalysisPage() {
           <option value="4h">4h</option>
           <option value="1d">1d</option>
         </select>
-        
+
         <label className="flex items-center gap-2 text-sm">
-          <input 
-            type="checkbox" 
-            checked={showFib} 
+          <input
+            type="checkbox"
+            checked={showFib}
             onChange={e => setShowFib(e.target.checked)}
           />
           <span>Fibonacci</span>
         </label>
-        
+
         <label className="flex items-center gap-2 text-sm">
-          <input 
-            type="checkbox" 
-            checked={showBB} 
+          <input
+            type="checkbox"
+            checked={showBB}
             onChange={e => setShowBB(e.target.checked)}
           />
           <span>Bollinger Bands</span>
         </label>
-        
-        <button 
-          onClick={loadAll} 
+
+        <button
+          onClick={loadAll}
           disabled={loading}
           className="px-4 py-2 rounded-xl border border-neutral-700 hover:bg-neutral-800 disabled:opacity-50 transition"
         >
@@ -215,8 +215,8 @@ export default function TechnicalAnalysisPage() {
               </div>
               <div className="text-xs space-y-1">
                 {fib.levels.map((l: any) => (
-                  <div 
-                    key={l.ratio} 
+                  <div
+                    key={l.ratio}
                     className="flex justify-between p-1 rounded hover:bg-neutral-800/50"
                   >
                     <span className={l.ratio === 0.618 ? 'text-yellow-400 font-semibold' : ''}>
@@ -273,17 +273,17 @@ export default function TechnicalAnalysisPage() {
 
         {/* Momentum Indicators */}
         {macd && (
-          <MACDPanel 
-            macd={macd.macd} 
-            signal={macd.signal} 
-            hist={macd.histogram} 
+          <MACDPanel
+            macd={macd.macd}
+            signal={macd.signal}
+            hist={macd.histogram}
           />
         )}
-        
+
         {stoch && (
-          <StochPanel 
-            k={stoch.k} 
-            d={stoch.d} 
+          <StochPanel
+            k={stoch.k}
+            d={stoch.d}
           />
         )}
 
@@ -300,7 +300,7 @@ export default function TechnicalAnalysisPage() {
             <button
               onClick={async () => {
                 const type = (document.getElementById('atype') as HTMLSelectElement)?.value;
-                
+
                 try {
                   const res = await fetch('/api/copilot/action', {
                     method: 'POST',
@@ -310,7 +310,7 @@ export default function TechnicalAnalysisPage() {
                       params: { symbol, timeframe: tf, type, params: { side: 'both' } }
                     })
                   }).then(r => r.json());
-                  
+
                   alert(res?.ok ? `Alert oluşturuldu: ${res.id.slice(0, 8)}...` : 'Hata oluştu');
                 } catch (err) {
                   alert('Alert oluşturulamadı');
@@ -331,7 +331,7 @@ export default function TechnicalAnalysisPage() {
                       params: {}
                     })
                   }).then(r => r.json());
-                  
+
                   alert(res?.ok ? '🔔 Test bildirimi gönderildi' : 'Bildirim hatası');
                 } catch (err) {
                   alert('Bildirim gönderilemedi');
@@ -363,7 +363,7 @@ function QuickTemplate({
     <button
       onClick={async () => {
         const body = JSON.stringify(payload(symbol, tf));
-        
+
         try {
           const r = await fetch("/api/alerts/create", {
             method: "POST",
