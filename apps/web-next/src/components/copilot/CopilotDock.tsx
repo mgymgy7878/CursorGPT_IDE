@@ -11,7 +11,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { IconSpark } from '@/components/ui/LocalIcons';
 import { cn } from '@/lib/utils';
 import { COMMAND_TEMPLATES, getTemplatesForScope, type CommandTemplate } from './commandTemplates';
@@ -19,6 +19,9 @@ import { useDeferredLocalStorageState } from '@/hooks/useDeferredLocalStorageSta
 import { useCopilotContext, formatContextForPrompt } from '@/hooks/useCopilotContext';
 import { SparkAvatar } from './SparkAvatar';
 import { uiCopy } from '@/lib/uiCopy';
+import { useLiveSession } from '@/lib/live-react/useLiveSession';
+import { writeEvidence } from '@/lib/live-react/evidence';
+import { useDebugTrigger } from '@/components/debug/LiveDebugBadge';
 
 interface Message {
   id: string;
@@ -37,7 +40,11 @@ const MAX_RECENT_COMMANDS = 5;
 
 export default function CopilotDock({ collapsed: externalCollapsed, onToggle: externalOnToggle }: CopilotDockProps = {}) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const context = useCopilotContext();
+
+  // Gate C/D: Support mock mode via URL param
+  const mockFlag = searchParams.get('mock') === '1';
 
   // PATCH T: Copilot greeting'i global store'da tut (localStorage persist)
   const GREETING_KEY = 'copilot.greeting.shown';
@@ -71,6 +78,9 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const commandMenuRef = useRef<HTMLDivElement>(null);
+
+  // Gate C: Live session manager
+  const { state: sessionState, telemetry, start: startSession, abort: abortSession, requestId } = useLiveSession();
 
   // Determine scope from pathname
   const scope = pathname?.includes('/dashboard') ? 'dashboard' :
@@ -189,10 +199,24 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
     }
   }, [injectContext, saveRecentCommand]);
 
-  // Handle send message
+  // Gate C: Handle send message with live session manager
   const handleSend = useCallback((customPrompt?: string) => {
     const prompt = customPrompt || input.trim();
-    if (!prompt) return;
+
+    // Gate C Debug: Log send attempt
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[LIVE] send clicked', {
+        hasMock: mockFlag,
+        messageLen: prompt.length,
+        hasPrompt: !!prompt,
+        inputValue: input.trim().slice(0, 20) + '...'
+      });
+    }
+
+    if (!prompt) {
+      console.warn('[LIVE] send aborted: empty prompt');
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -207,18 +231,185 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
     }
     setIsLoading(true);
 
-    // Mock AI response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: `Bu konuda size yardımcı olabilirim. "${prompt}" hakkında daha fazla bilgi verebilir miyim?`,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1000);
-  }, [input]);
+    // Gate C: Use live session manager (tek stream garantisi)
+    const assistantMessageId = (Date.now() + 1).toString();
+    let assistantContent = '';
+    let assistantMessage: Message | null = null;
+
+    // Gate C/D: Append mock flag to URL if present + header
+    const apiUrl = mockFlag ? '/api/copilot/chat?mock=1' : '/api/copilot/chat';
+    const extraHeaders: Record<string, string> = mockFlag ? { 'x-spark-mock': '1' } : {};
+
+    // Gate C Debug: Log startSession call
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[LIVE] startSession', { url: apiUrl, hasMockHeader: mockFlag });
+    }
+
+    startSession(
+      {
+        url: apiUrl,
+        method: 'POST',
+        headers: extraHeaders,
+        body: {
+          message: prompt,
+          history: messages.map(m => ({
+            role: m.type === 'user' ? 'user' as const : 'assistant' as const,
+            content: m.content,
+          })),
+          userId: 'anonymous', // TODO: Get from auth
+          userRole: 'readonly', // TODO: Get from user context
+          dryRun: true,
+        },
+        maxTokens: 10000,
+        maxChars: 1000000,
+        maxDuration: 60000, // 60s
+      },
+      {
+        onToken: (token) => {
+          assistantContent += token;
+
+          // Update or create assistant message
+          if (!assistantMessage) {
+            assistantMessage = {
+              id: assistantMessageId,
+              type: 'assistant',
+              content: assistantContent,
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, assistantMessage!]);
+          } else {
+            setMessages(prev => prev.map(m =>
+              m.id === assistantMessageId
+                ? { ...m, content: assistantContent }
+                : m
+            ));
+          }
+        },
+        onEvent: (event) => {
+          // P0.5: Support new SSE envelope format
+          const eventData = event.data || event;
+          const eventType = event.event;
+
+          if (eventType === 'tool_call') {
+            console.log('Tool call:', eventData);
+          } else if (eventType === 'tool_result') {
+            const toolResultData = eventData.data || eventData;
+            if (toolResultData && !toolResultData.success) {
+              const errorMsg = toolResultData.error || 'Bilinmeyen hata';
+              const errorCode = event.errorCode || toolResultData.errorCode;
+
+              if (errorCode === 'NOT_READY') {
+                setMessages(prev => [...prev, {
+                  id: (Date.now() + 2).toString(),
+                  type: 'assistant',
+                  content: `ℹ️ ${errorMsg} (Job henüz tamamlanmadı, lütfen bekleyin)`,
+                  timestamp: new Date(),
+                }]);
+              } else if (errorCode === 'EXECUTION_ERROR' && errorMsg.includes('timeout')) {
+                setMessages(prev => [...prev, {
+                  id: (Date.now() + 2).toString(),
+                  type: 'assistant',
+                  content: `⏱️ ${errorMsg} (İşlem zaman aşımına uğradı)`,
+                  timestamp: new Date(),
+                }]);
+              } else {
+                const errorDisplay = errorCode ? `${errorMsg} (${errorCode})` : errorMsg;
+                setMessages(prev => [...prev, {
+                  id: (Date.now() + 2).toString(),
+                  type: 'assistant',
+                  content: `❌ Tool "${toolResultData.tool || 'unknown'}" hatası: ${errorDisplay}`,
+                  timestamp: new Date(),
+                }]);
+              }
+            }
+          } else if (eventType === 'error') {
+            const errorMsg = eventData.error || event.error || 'Bilinmeyen hata';
+            const errorCode = event.errorCode || eventData.errorCode;
+            const errorDisplay = errorCode ? `${errorMsg} (${errorCode})` : errorMsg;
+            setMessages(prev => [...prev, {
+              id: (Date.now() + 2).toString(),
+              type: 'assistant',
+              content: `Hata: ${errorDisplay}`,
+              timestamp: new Date(),
+            }]);
+            setIsLoading(false);
+          } else if (eventType === 'job_failed') {
+            const failedData = eventData.data || eventData;
+            setMessages(prev => [...prev, {
+              id: (Date.now() + 3).toString(),
+              type: 'assistant',
+              content: `Job hatası: ${failedData.error || failedData.message || 'Bilinmeyen hata'}${failedData.errorCode ? ` (${failedData.errorCode})` : ''}`,
+              timestamp: new Date(),
+            }]);
+          }
+        },
+        onMessage: (message) => {
+          // Gate C: Final message (message_done event sonrası)
+          if (assistantMessage) {
+            setMessages(prev => prev.map(m =>
+              m.id === assistantMessageId
+                ? { ...m, content: message }
+                : m
+            ));
+          }
+        },
+        onComplete: () => {
+          setIsLoading(false);
+          // Gate C: Write evidence
+          writeEvidence('live_session', {
+            requestId: requestId || telemetry.requestId,
+            timestamp: Date.now(),
+            state: 'done',
+            tokensReceived: telemetry.tokensReceived,
+            eventsReceived: telemetry.eventsReceived,
+            streamDurationMs: telemetry.streamDurationMs,
+            lastEventTs: telemetry.lastEventTs,
+          });
+        },
+        onError: (error, errorCode) => {
+          setIsLoading(false);
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 2).toString(),
+            type: 'assistant',
+            content: `Bağlantı hatası: ${errorMsg}${errorCode ? ` (${errorCode})` : ''}`,
+            timestamp: new Date(),
+          }]);
+          // Gate C: Write evidence
+          writeEvidence('live_session', {
+            requestId: requestId || telemetry.requestId,
+            timestamp: Date.now(),
+            state: 'error',
+            tokensReceived: telemetry.tokensReceived,
+            eventsReceived: telemetry.eventsReceived,
+            streamDurationMs: telemetry.streamDurationMs,
+            lastEventTs: telemetry.lastEventTs,
+            error: errorMsg,
+            errorCode,
+          });
+        },
+        onAbort: () => {
+          setIsLoading(false);
+          // Gate C: Write evidence
+          writeEvidence('cancel', {
+            requestId: requestId || telemetry.requestId,
+            timestamp: Date.now(),
+            state: 'aborted',
+            tokensReceived: telemetry.tokensReceived,
+            eventsReceived: telemetry.eventsReceived,
+            streamDurationMs: telemetry.streamDurationMs,
+            lastEventTs: telemetry.lastEventTs,
+          });
+        },
+      }
+    );
+  }, [input, messages, startSession, requestId, telemetry, mockFlag]);
+
+  // Gate C: Listen for debug trigger from LiveDebugBadge
+  useDebugTrigger(useCallback((message: string) => {
+    console.debug('[LIVE] Debug trigger received:', message);
+    handleSend(message);
+  }, [handleSend]));
 
   // Handle quick command chip click
   const handleQuickCommand = useCallback((template: CommandTemplate) => {

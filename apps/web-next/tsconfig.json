@@ -16,9 +16,6 @@
         "./src/*"
       ]
     },
-    "types": [
-      "node"
-    ],
     "skipLibCheck": true,
     "allowJs": true,
     "incremental": true,

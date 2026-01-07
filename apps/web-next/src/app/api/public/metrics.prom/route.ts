@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { formatCopilotSseMetricsProm } from "@/server/copilotSseMetrics";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,8 +12,8 @@ export const revalidate = 0;
  * @see https://chromium.googlesource.com/external/github.com/prometheus/common/+/refs/tags/v0.63.0/expfmt/expfmt.go
  */
 export async function GET() {
-  // Mock metrics in Prometheus text format
-  const metrics = [
+  // Base metrics
+  const baseMetrics = [
     "# HELP spark_up 1 if service is alive",
     "# TYPE spark_up gauge",
     "spark_up 1",
@@ -35,7 +36,12 @@ export async function GET() {
     "",
   ].join("\n");
 
-  return new Response(metrics, {
+  // Gate D: Add Copilot SSE metrics
+  const copilotMetrics = formatCopilotSseMetricsProm();
+
+  const allMetrics = baseMetrics + "\n" + copilotMetrics;
+
+  return new Response(allMetrics, {
     status: 200,
     headers: {
       "Content-Type": "text/plain; version=0.0.4; charset=utf-8",

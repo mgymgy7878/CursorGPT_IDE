@@ -13,6 +13,11 @@ const CommandPalette = nextDynamic(
 const Toaster = nextDynamic(() => import("@/components/toast/Toaster"), {
   ssr: false,
 });
+// Gate C: Live Debug Badge (debug mode only)
+const LiveDebugBadge = nextDynamic(
+  () => import("@/components/debug/LiveDebugBadge").then(m => ({ default: m.LiveDebugBadge })),
+  { ssr: false }
+);
 
 export const metadata = {
   title: "Spark Trading",
@@ -40,6 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {children}
         <CommandPalette />
         <Toaster />
+        <LiveDebugBadge />
       </body>
     </html>
   );
