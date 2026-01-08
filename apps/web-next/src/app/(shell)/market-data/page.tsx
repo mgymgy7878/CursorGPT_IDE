@@ -182,8 +182,9 @@ export default function MarketData() {
   // PATCH W.2 (P0): Wide layout for list view
   // PATCH W.3 (P0): List view container'ı "full" yap (kart içinde scroll önleme)
   // PATCH SCROLL-AUDIT: List view'da overflow-y-auto kaldırıldı (AppFrame'in main container'ı zaten scroll yapıyor)
+  // PATCH: Overflow hijyeni - yatay scroll asla oluşmasın
   return (
-    <div className={cn("h-full", viewMode === 'full' ? "overflow-hidden h-screen w-screen" : "w-full")}>
+    <div className={cn("h-full overflow-x-hidden", viewMode === 'full' ? "overflow-hidden h-screen w-screen" : "w-full")}>
       <div className={cn(
         viewMode === 'full' ? "h-full w-full p-0" :
         viewMode === 'list' ? "w-full max-w-none px-4 py-3" : // PATCH W.3: Full width, no max-w constraint
@@ -273,8 +274,9 @@ export default function MarketData() {
         )}
 
         {/* Workspace View: Büyük grafik + detay kartları */}
+        {/* PATCH: Overflow kontrolü - container seviyesinde */}
         {viewMode === 'workspace' ? (
-          <div className="h-full flex flex-col gap-4">
+          <div className="h-full flex flex-col gap-4 overflow-x-hidden">
             {selectedSymbol ? (
               <>
                 {/* Chart Area */}
@@ -290,16 +292,18 @@ export default function MarketData() {
                 </div>
 
                 {/* PATCH W: Detay Kartları - Info-card görünümü (kalın outline kaldırıldı) */}
+                {/* PATCH: Responsive grid - xl+ ekranlarda auto-fit (3-4 kolon) */}
                 {marketData && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 overflow-x-hidden">
                     {/* Satır 1: Price, Change%, High/Low, Volume */}
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    {/* PATCH: Compact padding (p-3 instead of p-4) for better density */}
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">Last Price</div>
                         <div className="text-[20px] font-semibold text-neutral-200">{formatPriceUsd(marketData.price)}</div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">24h Change</div>
                         <div className={cn(
@@ -310,7 +314,7 @@ export default function MarketData() {
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">24h High / Low</div>
                         <div className="text-[15px] font-medium text-neutral-300">
@@ -318,7 +322,7 @@ export default function MarketData() {
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">Volume</div>
                         <div className="text-[15px] font-medium text-neutral-300">{formatCompactUsd(marketData.volume)}</div>
@@ -326,7 +330,7 @@ export default function MarketData() {
                     </div>
 
                     {/* Satır 2: RSI, Signal, Regime, Volatility */}
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">RSI (14)</div>
                         <div className={cn(
@@ -339,7 +343,7 @@ export default function MarketData() {
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">Signal</div>
                         {/* PATCH W: Signal badge (rozet) */}
@@ -365,13 +369,13 @@ export default function MarketData() {
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">Regime</div>
                         <div className="text-[15px] font-medium text-neutral-300">Trend</div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
+                    <div className="p-3 rounded-lg bg-neutral-900/30 border border-white/5 shadow-inner">
                       <div className="space-y-2">
                         <div className="text-[11px] text-neutral-400">Volatility</div>
                         <div className="text-[15px] font-medium text-neutral-300">High</div>

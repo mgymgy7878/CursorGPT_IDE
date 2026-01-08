@@ -18,6 +18,9 @@ import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatNumber } from '@/lib/format';
 import { createSparkChart } from '@/lib/charts/createSparkChart';
+// MVL: Live market data hook + staleness badge
+import { useMarketCandles } from '@/lib/marketdata/useMarketCandles';
+import { MarketStalenessBadge } from '@/components/market/MarketStalenessBadge';
 
 export interface MarketChartWorkspaceProps {
   symbol: string;
@@ -77,12 +80,36 @@ export default function MarketChartWorkspace({
   const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
   const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const rsiResizeObserverRef = useRef<ResizeObserver | null>(null);
+  // PATCH: PriceLine registry for dedupe and cleanup
+  const priceLinesRef = useRef<Map<string, any>>(new Map());
 
   const [selectedTimeframe, setSelectedTimeframe] = useState(timeframe);
   const [ohlc, setOhlc] = useState({ o: 0, h: 0, l: 0, c: 0, v: 0 });
   const [currentRsi, setCurrentRsi] = useState<number | null>(null);
 
   const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W', '1M'];
+
+  // MVL: Live market data (with mock fallback)
+  const binanceSymbol = symbol.replace("/", ""); // BTC/USDT -> BTCUSDT
+  const live = useMarketCandles({
+    exchange: "binance",
+    symbol: binanceSymbol,
+    tf: selectedTimeframe.toLowerCase(), // "1m"
+    limit: 500,
+  });
+
+  // Use live data if available, fallback to mock
+  const candlesForChart = (live.candles && live.candles.length > 0
+    ? live.candles.map(c => ({
+        time: Math.floor(c.t / 1000) as any, // ms -> unix timestamp (seconds)
+        open: c.o,
+        high: c.h,
+        low: c.l,
+        close: c.c,
+        volume: c.v,
+      }))
+    : generateMockCandles(symbol, 200)
+  );
 
   // Initialize chart
   useEffect(() => {
@@ -115,6 +142,8 @@ export default function MarketChartWorkspace({
       },
       rightPriceScale: {
         borderColor: '#374151',
+        // PATCH: Chart alanını genişletmek için scale offset (TP/Entry ladder için alan)
+        scaleMargins: { top: 0.1, bottom: 0.1 },
       },
     });
 
@@ -151,68 +180,7 @@ export default function MarketChartWorkspace({
     // Fit content to view
     chart.timeScale().fitContent();
 
-    // Generate and set data
-    const candles = generateMockCandles(symbol, 200);
-    const lastCandle = candles[candles.length - 1];
-
-    setOhlc({
-      o: lastCandle.open,
-      h: lastCandle.high,
-      l: lastCandle.low,
-      c: lastCandle.close,
-      v: lastCandle.volume,
-    });
-
-    candleSeries.setData(
-      candles.map(c => ({
-        time: c.time as any,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-      }))
-    );
-
-    volumeSeries.setData(
-      candles.map(c => ({
-        time: c.time as any,
-        value: c.volume,
-        color: c.close >= c.open ? '#16a34a66' : '#ef444466',
-      }))
-    );
-
-    // Entry/TP/SL price lines (Figma parity - PATCH E)
-    const currentPrice = lastCandle.close;
-    const entryPrice = currentPrice * 0.995; // Entry %0.5 below
-    const tpPrice = currentPrice * 1.03; // TP %3 above
-    const slPrice = currentPrice * 0.97; // SL %3 below
-
-    (candleSeries as any).createPriceLine({
-      price: entryPrice,
-      color: '#60a5fa',
-      lineWidth: 2,
-      lineStyle: 0, // solid
-      axisLabelVisible: true,
-      title: 'Entry',
-    });
-
-    (candleSeries as any).createPriceLine({
-      price: tpPrice,
-      color: '#4ade80',
-      lineWidth: 2,
-      lineStyle: 0, // solid
-      axisLabelVisible: true,
-      title: 'TP',
-    });
-
-    (candleSeries as any).createPriceLine({
-      price: slPrice,
-      color: '#f87171',
-      lineWidth: 2,
-      lineStyle: 0, // solid
-      axisLabelVisible: true,
-      title: 'SL',
-    });
+    // Initial data will be set via separate effect below
 
     // RSI Chart (PATCH E - alt panel)
     if (rsiChartContainerRef.current) {
@@ -257,22 +225,9 @@ export default function MarketChartWorkspace({
       });
       rsiSeriesRef.current = rsiSeries as ISeriesApi<'Line'>;
 
-      // Generate RSI data (mock - 0-100 range)
-      const rsiData = candles.map((c, i) => {
-        // Simple RSI mock: oscillate between 30-70 with some randomness
-        const baseRsi = 50 + Math.sin(i / 10) * 20 + (Math.random() - 0.5) * 10;
-        return {
-          time: c.time as any,
-          value: Math.max(20, Math.min(80, baseRsi)),
-        };
-      });
-
-      rsiSeries.setData(rsiData);
-
-      // Set current RSI value (last data point)
-      if (rsiData.length > 0) {
-        setCurrentRsi(rsiData[rsiData.length - 1].value);
-      }
+      // Note: RSI data will be set in a separate useEffect that has access to candlesForChart
+      // For now, initialize with empty data to avoid crashes
+      rsiSeries.setData([]);
 
       // RSI reference lines (30/70)
       (rsiSeries as any).createPriceLine({
@@ -294,12 +249,22 @@ export default function MarketChartWorkspace({
       });
 
       // Sync time scale with main chart
-      // Note: subscribeVisibleTimeRangeChange returns void, cleanup is handled by chart.remove()
-      chart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
-        if (timeRange && rsiChartRef.current) {
-          rsiChartRef.current.timeScale().setVisibleRange(timeRange);
+      // Guard against null range values ({from:null, to:null}) that can crash setVisibleRange
+      const onVisibleRange = (timeRange: any) => {
+        // timeRange bazen { from: null, to: null } geliyor → truthy ama invalid
+        if (!timeRange) return;
+        if (timeRange.from == null || timeRange.to == null) return;
+        const rsiChart = rsiChartRef.current;
+        if (!rsiChart) return;
+
+        try {
+          rsiChart.timeScale().setVisibleRange(timeRange);
+        } catch {
+          // no-op: chart senkronu kritik değil, UI crash etmemeli
         }
-      });
+      };
+
+      chart.timeScale().subscribeVisibleTimeRangeChange(onVisibleRange);
 
       // ResizeObserver for RSI chart
       const rsiRo = new ResizeObserver(entries => {
@@ -342,7 +307,28 @@ export default function MarketChartWorkspace({
 
       // Not: TradingView attribution CSS ile gizleniyor, MutationObserver gerekmiyor
 
-      // Remove charts (price lines otomatik temizlenir)
+      // Remove charts (subscriptions otomatik temizlenir, price lines otomatik temizlenir)
+      // Note: chart.remove() automatically unsubscribes all event listeners including onVisibleRange
+
+      // PATCH: Cleanup priceLines before removing chart (with runtime guard)
+      if (candleSeriesRef.current) {
+        const series = candleSeriesRef.current as any;
+        // Runtime guard: Check if removePriceLine API exists
+        if (typeof series.removePriceLine === 'function') {
+          priceLinesRef.current.forEach((handle) => {
+            if (handle) {
+              try {
+                series.removePriceLine(handle);
+              } catch {
+                // Ignore cleanup errors (chart.remove() will handle remaining cleanup)
+              }
+            }
+          });
+        }
+        // Note: If removePriceLine doesn't exist, chart.remove() will clean up all priceLines
+        priceLinesRef.current.clear();
+      }
+
       if (rsiChartRef.current) {
         rsiChartRef.current.remove();
         rsiChartRef.current = null;
@@ -352,12 +338,126 @@ export default function MarketChartWorkspace({
         chartRef.current = null;
       }
 
-      // Clear refs
-      candleSeriesRef.current = null;
-      volumeSeriesRef.current = null;
-      rsiSeriesRef.current = null;
-    };
-  }, [symbol]);
+    // Clear refs
+    candleSeriesRef.current = null;
+    volumeSeriesRef.current = null;
+    rsiSeriesRef.current = null;
+  };
+  }, [symbol, selectedTimeframe]);
+
+  // MVL: Update chart data when live candles change
+  useEffect(() => {
+    if (!candleSeriesRef.current || !volumeSeriesRef.current || candlesForChart.length === 0) {
+      // If RSI chart exists but no candle data, clear RSI
+      if (rsiSeriesRef.current) {
+        rsiSeriesRef.current.setData([]);
+        setCurrentRsi(null);
+      }
+      return;
+    }
+
+    const lastCandle = candlesForChart[candlesForChart.length - 1];
+
+    setOhlc({
+      o: lastCandle.open,
+      h: lastCandle.high,
+      l: lastCandle.low,
+      c: lastCandle.close,
+      v: lastCandle.volume,
+    });
+
+    candleSeriesRef.current.setData(
+      candlesForChart.map(c => ({
+        time: c.time as any,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+      }))
+    );
+
+    volumeSeriesRef.current.setData(
+      candlesForChart.map(c => ({
+        time: c.time as any,
+        value: c.volume,
+        color: c.close >= c.open ? '#16a34a66' : '#ef444466',
+      }))
+    );
+
+    // Generate and update RSI data (mock - 0-100 range)
+    if (rsiSeriesRef.current && candlesForChart.length > 0) {
+      const rsiData = candlesForChart.map((c, i) => {
+        // Simple RSI mock: oscillate between 30-70 with some randomness
+        const baseRsi = 50 + Math.sin(i / 10) * 20 + (Math.random() - 0.5) * 10;
+        return {
+          time: c.time as any,
+          value: Math.max(20, Math.min(80, baseRsi)),
+        };
+      });
+
+      rsiSeriesRef.current.setData(rsiData);
+
+      // Set current RSI value (last data point)
+      if (rsiData.length > 0) {
+        setCurrentRsi(rsiData[rsiData.length - 1].value);
+      }
+    }
+
+    // PATCH: Entry/TP/SL price lines with dedupe and cleanup
+    const currentPrice = lastCandle.close;
+    const entryPrice = Number((currentPrice * 0.995).toFixed(2)); // Entry %0.5 below
+    const tpPrice = Number((currentPrice * 1.03).toFixed(2)); // TP %3 above
+    const slPrice = Number((currentPrice * 0.97).toFixed(2)); // SL %3 below
+
+    // Normalize: unique levels by kind
+    const desiredLevels = new Map<string, { kind: string; price: number; color: string; title: string }>();
+    desiredLevels.set(`ENTRY:${entryPrice}`, { kind: 'ENTRY', price: entryPrice, color: '#60a5fa', title: 'EN' });
+    desiredLevels.set(`TP:${tpPrice}`, { kind: 'TP', price: tpPrice, color: '#4ade80', title: 'TP' });
+    desiredLevels.set(`SL:${slPrice}`, { kind: 'SL', price: slPrice, color: '#f87171', title: 'SL' });
+
+    if (!candleSeriesRef.current) return;
+
+    const series = candleSeriesRef.current as any;
+    const existingKeys = new Set(priceLinesRef.current.keys());
+
+    // PATCH: Remove priceLines that are no longer needed (with runtime guard)
+    existingKeys.forEach((key) => {
+      if (!desiredLevels.has(key)) {
+        const handle = priceLinesRef.current.get(key);
+        // Runtime guard: Check if removePriceLine API exists (lightweight-charts version compatibility)
+        if (handle && typeof (series as any).removePriceLine === 'function') {
+          try {
+            (series as any).removePriceLine(handle);
+          } catch {
+            // Ignore remove errors (chart may handle cleanup on remove)
+          }
+        }
+        priceLinesRef.current.delete(key);
+      }
+    });
+
+    // Create or skip priceLines for desired levels
+    desiredLevels.forEach((level, key) => {
+      if (!priceLinesRef.current.has(key)) {
+        try {
+          const handle = series.createPriceLine({
+            price: level.price,
+            color: level.color,
+            lineWidth: 1, // PATCH: Thinner line since sidebar is primary display
+            lineStyle: 0, // solid
+            axisLabelVisible: false, // PATCH: Hide label (sidebar shows full info, chart shows line only)
+            title: '', // Empty title since axisLabelVisible is false
+          });
+          if (handle) {
+            priceLinesRef.current.set(key, handle);
+          }
+        } catch {
+          // Ignore create errors
+        }
+      }
+      // If key exists, skip (no re-create)
+    });
+  }, [candlesForChart]);
 
   const handleTimeframeClick = (tf: string) => {
     setSelectedTimeframe(tf);
@@ -374,6 +474,8 @@ export default function MarketChartWorkspace({
             <span className="px-3 py-1 rounded-full text-[12px] font-semibold bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
               {symbol}
             </span>
+            {/* MVL: Staleness badge */}
+            <MarketStalenessBadge status={live.status} />
             {/* Timeframe chips */}
             {timeframes.map((tf) => (
               <button
@@ -435,6 +537,8 @@ export default function MarketChartWorkspace({
             <span className="px-3 py-1 rounded-full text-[12px] font-semibold bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
               {symbol}
             </span>
+            {/* MVL: Staleness badge */}
+            <MarketStalenessBadge status={live.status} />
             <span className="text-[11px] text-neutral-500">1D · Trend Follower v1</span>
           </div>
 
@@ -519,8 +623,71 @@ export default function MarketChartWorkspace({
       )}
 
       {/* Chart Area - Main (Candles + Volume) - flex-1 min-h-0 ile dikey alan yönetimi */}
-      <div className="flex-1 min-h-0 relative overflow-hidden" style={{ minHeight: '300px' }}>
-        <div ref={chartContainerRef} className="w-full h-full" />
+      {/* PATCH: Chart container overflow kontrolü + sağda compact sidebar için flex layout */}
+      <div className="flex-1 min-h-0 relative overflow-hidden flex" style={{ minHeight: '300px' }}>
+        <div ref={chartContainerRef} className="flex-1 min-w-0 h-full" />
+        {/* PATCH: Compact TP/Entry ladder sidebar (max 140px, scrollable if needed) */}
+        {/* PATCH: Compact TP/Entry ladder sidebar (max 140px, scrollable if needed) */}
+        {/* PATCH: Unique levels only (dedupe by price) */}
+        {(() => {
+          const currentPrice = ohlc.c || 0;
+          const entryPrice = Number((currentPrice * 0.995).toFixed(2));
+          const tpPrice = Number((currentPrice * 1.03).toFixed(2));
+          const slPrice = Number((currentPrice * 0.97).toFixed(2));
+
+          // PATCH: Unique levels (dedupe by price)
+          const uniqueLevels = [
+            { kind: 'TP', price: tpPrice, color: 'emerald', count: 1 },
+            { kind: 'Entry', price: entryPrice, color: 'blue', count: 1 },
+            { kind: 'SL', price: slPrice, color: 'red', count: 1 },
+          ].filter(level => level.price > 0);
+
+          return (
+            <div className="flex-shrink-0 w-[140px] border-l border-white/10 bg-neutral-900/40 overflow-y-auto overflow-x-hidden">
+              <div className="p-1.5 space-y-0.5">
+                {/* TP Orders - unique only */}
+                {uniqueLevels.filter(l => l.kind === 'TP').length > 0 && (
+                  <>
+                    <div className="text-[9px] text-neutral-500 mb-1 px-1 font-medium">TP</div>
+                    {uniqueLevels
+                      .filter(l => l.kind === 'TP')
+                      .map((level, i) => (
+                        <div key={`tp-${i}`} className="px-1.5 py-0.5 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 rounded leading-tight">
+                          {level.price.toFixed(2)}
+                        </div>
+                      ))}
+                  </>
+                )}
+                {/* Entry Orders - unique only */}
+                {uniqueLevels.filter(l => l.kind === 'Entry').length > 0 && (
+                  <>
+                    <div className="text-[9px] text-neutral-500 mb-1 mt-2 px-1 font-medium">Entry</div>
+                    {uniqueLevels
+                      .filter(l => l.kind === 'Entry')
+                      .map((level, i) => (
+                        <div key={`entry-${i}`} className="px-1.5 py-0.5 text-[10px] font-mono text-blue-400 bg-blue-500/10 rounded leading-tight">
+                          {level.price.toFixed(2)}
+                        </div>
+                      ))}
+                  </>
+                )}
+                {/* SL Orders - unique only */}
+                {uniqueLevels.filter(l => l.kind === 'SL').length > 0 && (
+                  <>
+                    <div className="text-[9px] text-neutral-500 mb-1 mt-2 px-1 font-medium">SL</div>
+                    {uniqueLevels
+                      .filter(l => l.kind === 'SL')
+                      .map((level, i) => (
+                        <div key={`sl-${i}`} className="px-1.5 py-0.5 text-[10px] font-mono text-red-400 bg-red-500/10 rounded leading-tight">
+                          {level.price.toFixed(2)}
+                        </div>
+                      ))}
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* RSI Panel (PATCH: default açık, dikey alan garantisi) */}
