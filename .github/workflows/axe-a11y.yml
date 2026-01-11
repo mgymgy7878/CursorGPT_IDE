@@ -11,42 +11,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Build packages
         run: pnpm -w -r build
-      
+
       - name: Build web-next (standalone)
         run: pnpm --filter web-next build
-      
+
       - name: Copy standalone assets
         run: node tools/copy-standalone-assets.cjs
-      
+
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps
-      
-      - name: Start production server
+
+      - name: Start dev server (endpoints hard-disabled in production)
         run: |
-          pnpm --filter web-next start -- -p 3003 &
-      
+          pnpm --filter web-next dev -- --port 3003 &
+        env:
+          SPARK_MODE: paper
+          NEXT_PUBLIC_SPARK_MODE: paper
+          SPARK_ENGINE_MODE: stub
+
       - name: Wait for server warmup
         run: |
           npx wait-on http://127.0.0.1:3003 --timeout 30000
           sleep 15
-      
+
       - name: Run Axe tests
         run: pnpm exec playwright test tests/a11y/axe.spec.ts
-      
+
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v4

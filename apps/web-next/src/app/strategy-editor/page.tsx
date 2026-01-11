@@ -25,8 +25,8 @@ export default function StrategyEditorPage(){
   return (
     <div className="p-6 space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">🧩 Strateji Editörü</h1>
-        <p className="text-sm opacity-70">Basit JS strateji şablonları ile deneyin</p>
+        <h1 className="text-xl font-semibold">🧩 Strateji Editörü</h1>
+        <p className="text-xs opacity-70">Basit JS strateji şablonları ile deneyin</p>
       </div>
       <div className="grid md:grid-cols-2 gap-4">
         <textarea value={code} onChange={e=>setCode(e.target.value)} className="w-full h-64 p-3 rounded-xl bg-black/40 border border-neutral-800 font-mono text-sm"/>

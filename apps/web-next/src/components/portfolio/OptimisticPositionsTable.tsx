@@ -117,26 +117,32 @@ export function OptimisticPositionsTable() {
   }
 
   return (
-    <div className="overflow-x-auto table-wrapper">
+    <div
+      className="table-wrapper min-h-0"
+      style={{
+        maxHeight: 'calc(100vh - 260px)',
+        overflow: 'auto',
+      }}
+    >
       <table className="w-full">
         <thead>
           <tr className="border-b border-neutral-700">
-            <th className="text-left py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-left px-2 text-sm font-medium text-neutral-400" style={{ paddingTop: 'var(--table-head-py, 8px)', paddingBottom: 'var(--table-head-py, 8px)' }}>
               Varlık
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-right px-2 text-sm font-medium text-neutral-400 tabular-nums" style={{ paddingTop: 'var(--table-head-py, 8px)', paddingBottom: 'var(--table-head-py, 8px)' }}>
               Miktar
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-right px-2 text-sm font-medium text-neutral-400 tabular-nums" style={{ paddingTop: 'var(--table-head-py, 8px)', paddingBottom: 'var(--table-head-py, 8px)' }}>
               Fiyat (USD)
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-right px-2 text-sm font-medium text-neutral-400 tabular-nums" style={{ paddingTop: 'var(--table-head-py, 8px)', paddingBottom: 'var(--table-head-py, 8px)' }}>
               PnL (USD)
             </th>
-            <th className="text-right py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-right px-2 text-sm font-medium text-neutral-400 tabular-nums" style={{ paddingTop: 'var(--table-head-py, 8px)', paddingBottom: 'var(--table-head-py, 8px)' }}>
               PnL %
             </th>
-            <th className="text-center py-3 px-2 text-sm font-medium text-neutral-400">
+            <th className="text-center px-2 text-sm font-medium text-neutral-400" style={{ paddingTop: 'var(--table-head-py, 8px)', paddingBottom: 'var(--table-head-py, 8px)' }}>
               Aksiyon
             </th>
           </tr>
@@ -149,28 +155,30 @@ export function OptimisticPositionsTable() {
                 pending[position.asset] ? "opacity-50" : ""
               }`}
             >
-              <td className="py-3 px-2">
+              <td className="px-2" style={{ paddingTop: 'var(--table-row-py, 8px)', paddingBottom: 'var(--table-row-py, 8px)' }}>
                 <div className="font-medium strategy-name">{position.asset}</div>
               </td>
-              <td className="py-3 px-2 text-right text-sm num-tight">{position.amount}</td>
-              <td className="py-3 px-2 text-right text-sm num-tight">{formatCurrency(position.price, 'tr-TR', 'USD')}</td>
+              <td className="px-2 text-right text-sm tabular-nums">{position.amount}</td>
+              <td className="px-2 text-right text-sm tabular-nums">{formatCurrency(position.price, 'USD')}</td>
               <td
-                className={`py-3 px-2 text-right text-sm num-tight ${
+                className={`px-2 text-right text-sm tabular-nums ${
                   position.pnl >= 0 ? "text-green-400" : "text-red-400"
                 }`}
+                style={{ paddingTop: 'var(--table-row-py, 8px)', paddingBottom: 'var(--table-row-py, 8px)' }}
               >
-                {position.pnl >= 0 ? '+' : ''}{formatCurrency(position.pnl, 'tr-TR', 'USD')}
+                {position.pnl >= 0 ? '+' : ''}{formatCurrency(position.pnl, 'USD')}
               </td>
               <td
-                className={`py-3 px-2 text-right text-sm num-tight ${
+                className={`px-2 text-right text-sm tabular-nums ${
                   position.pnlPercent.startsWith("+")
                     ? "text-green-400"
                     : "text-red-400"
                 }`}
+                style={{ paddingTop: 'var(--table-row-py, 8px)', paddingBottom: 'var(--table-row-py, 8px)' }}
               >
                 {position.pnlPercent}
               </td>
-              <td className="py-3 px-2 text-center">
+              <td className="px-2 text-center" style={{ paddingTop: 'var(--table-row-py, 8px)', paddingBottom: 'var(--table-row-py, 8px)' }}>
                 <div className="flex gap-2 justify-center">
                   <Button
                     size="sm"

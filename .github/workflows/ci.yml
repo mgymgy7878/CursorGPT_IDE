@@ -49,31 +49,64 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-      
+
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
-      
+
       - name: Verify pnpm version (from packageManager)
         run: |
           EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
           ACTUAL=$(pnpm -v)
           echo "Expected: $EXPECTED, Actual: $ACTUAL"
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm version mismatch"; exit 1; }
-      
+
       - name: Fetch dependencies (pre-warm store)
         run: pnpm fetch --prod=false
-      
+
       - name: Install (offline mode)
         run: pnpm -w install --offline --frozen-lockfile --strict-peer-dependencies
-      
+
+      - name: Typecheck (all packages)
+        run: pnpm -w typecheck
+
       - name: UI Fast Verify
         run: pnpm verify
+
+      - name: Setup PowerShell (Ubuntu)
+        if: runner.os == 'Linux'
+        uses: azure/setup-powershell@v1
+        with:
+          version: 'latest'
+
+      - name: Release Gate Check
+        id: gate_check
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path evidence | Out-Null
+          pnpm release:gate 2>&1 | Tee-Object -FilePath evidence/release-gate.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) { exit $code }
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        continue-on-error: false
+
+      - name: Upload Gate Artifacts
+        if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && steps.gate_check.conclusion == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-failure-${{ github.run_number }}
+          path: |
+            docs/ops/RELEASE_GATE_FINAL.md
+            evidence/release-gate.log
+            evidence/final_verification_*/
+            evidence/negative_tests_*/
+          retention-days: 30
+          if-no-files-found: warn
 
 

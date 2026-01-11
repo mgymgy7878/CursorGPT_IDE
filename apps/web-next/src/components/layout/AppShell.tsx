@@ -1,5 +1,12 @@
+/**
+ * AppShell - Legacy shell (Settings ve bazı eski sayfalar için)
+ *
+ * NOT: Ana shell AppFrame.tsx'de. Bu sadece geriye dönük uyumluluk için.
+ * HYDRATION: document.cookie okuma mount sonrasına taşındı.
+ */
 "use client";
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import { StatusChip } from "./StatusChip";
 import { OpsDrawer } from "./OpsDrawer";
 import { CommandButton } from "./CommandButton";
@@ -40,14 +47,25 @@ interface AppShellProps {
 
 export default function AppShell({ children, title, subtitle }: AppShellProps) {
   const pathname = usePathname();
-  // Gerçek JWT'yi cookie'den çek ve role çıkarımı yap; yoksa guest
-  const token = typeof document === 'undefined'
-    ? undefined
-    : (document.cookie.split('; ').find(c => c.startsWith('spark_session='))?.split('=')[1] ?? undefined);
-  const roles = inferRolesFromCookie(token);
+
+  // HYDRATION FIX: Role'leri mount sonrası oku (SSR'da boş array, CSR'da cookie'den)
+  const [roles, setRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Mount sonrası: document.cookie'den token oku ve role'leri çıkar
+    const token = document.cookie
+      .split('; ')
+      .find(c => c.startsWith('spark_session='))
+      ?.split('=')[1];
+    const inferredRoles = inferRolesFromCookie(token);
+    setRoles(inferredRoles as string[]);
+  }, []);
+
+  // SSR'da tüm navItems göster, CSR'da role filtreleme uygula
   const filtered = Array.isArray(navItems)
-    ? (navItems as any[]).filter((i) => !i.roles || i.roles.some((r: string) => (roles as any).includes(r)))
+    ? (navItems as any[]).filter((i) => !i.roles || i.roles.some((r: string) => roles.includes(r)))
     : [];
+
   return (
     <div className="grid min-h-screen grid-cols-[280px_1fr] grid-rows-[56px_1fr] bg-neutral-950 text-neutral-100">
       {/* Sidebar - sabit, scroll yok */}
@@ -59,7 +77,7 @@ export default function AppShell({ children, title, subtitle }: AppShellProps) {
             </div>
             <span className="font-semibold">Spark Trading</span>
           </div>
-          
+
           <nav className="space-y-1">
             {filtered.map((item: any) => (
               <a
@@ -76,7 +94,7 @@ export default function AppShell({ children, title, subtitle }: AppShellProps) {
             ))}
           </nav>
         </div>
-        
+
         {/* Tema seçici - alt */}
         <div className="p-4 border-t border-neutral-800">
           <SafeThemeToggle />
@@ -91,7 +109,7 @@ export default function AppShell({ children, title, subtitle }: AppShellProps) {
             <SafeStatusChip label="Feed" value="Healthy" tone="success" />
             <SafeStatusChip label="Broker" value="Offline" tone="warn" />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <SafeCommandButton />
             <SafeOpsDrawer />
           </div>

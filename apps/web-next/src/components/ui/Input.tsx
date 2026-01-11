@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useId } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -10,7 +10,8 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, helperText, required, className, id, ...props }, ref) => {
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = useId();
+    const inputId = id || generatedId;
     const errorId = `${inputId}-error`;
     const helperId = `${inputId}-helper`;
 
@@ -19,7 +20,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="block text-sm font-medium text-neutral-300"
           >
             {label}
             {required && <span className="text-red-500 ml-1">*</span>}
@@ -29,14 +30,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600',
-            'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
-            'placeholder:text-gray-400 dark:placeholder:text-gray-500',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'disabled:cursor-not-allowed disabled:opacity-50',
+            'flex w-full rounded-lg border border-neutral-700',
+            'bg-neutral-800 px-3 text-sm text-neutral-200',
+            'placeholder:text-neutral-500',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+            'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-900',
             error && 'border-red-500 focus:ring-red-500',
             className
           )}
+          style={{
+            height: 'var(--control-h, 36px)',
+            paddingTop: 'calc(var(--control-h, 36px) * 0.25)',
+            paddingBottom: 'calc(var(--control-h, 36px) * 0.25)',
+          }}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={cn(
             error && errorId,
@@ -45,12 +51,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p id={errorId} className="text-sm text-red-600 dark:text-red-400">
+          <p id={errorId} className="text-sm text-red-400">
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={helperId} className="text-sm text-gray-500 dark:text-gray-400">
+          <p id={helperId} className="text-sm text-neutral-400">
             {helperText}
           </p>
         )}

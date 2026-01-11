@@ -1,0 +1,57 @@
+# Example CI Workflow for Hydration Safety
+#
+# Bu dosyayı .github/workflows/ci.yml içine entegre edin veya
+# ayrı bir workflow olarak kullanın.
+
+name: Hydration Safety Check
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web-next/src/**/*.tsx'
+      - 'apps/web-next/src/**/*.ts'
+  push:
+    branches: [main, canary]
+
+jobs:
+  hydration-safety:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (Hydration Safety)
+        run: pnpm --filter web-next lint
+        # ESLint hydration-safety kuralları otomatik çalışır
+        # JSX içinde new Date(), Date.now(), Math.random() vb. yakalanır
+
+      - name: Build
+        run: pnpm --filter web-next build
+
+      - name: Install Playwright
+        run: pnpm --filter web-next exec playwright install --with-deps
+
+      - name: E2E Test (Hydration Safety)
+        run: pnpm --filter web-next test:e2e tests/e2e/hydration.spec.ts
+        # Console'da "Hydration failed" mesajı varsa test fail olur
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report
+          path: apps/web-next/playwright-report/
+          retention-days: 7
+

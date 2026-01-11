@@ -1,0 +1,27 @@
+﻿# HELP spark_copilot_sse_stream_open_total Total Copilot SSE streams opened
+# TYPE spark_copilot_sse_stream_open_total counter
+spark_copilot_sse_stream_open_total 2
+# HELP spark_copilot_sse_stream_close_total Total Copilot SSE streams closed by reason
+# TYPE spark_copilot_sse_stream_close_total counter
+spark_copilot_sse_stream_close_total{reason="done"} 2
+# HELP spark_copilot_sse_stream_active Current number of active Copilot SSE streams
+# TYPE spark_copilot_sse_stream_active gauge
+spark_copilot_sse_stream_active 0
+# HELP spark_copilot_sse_event_total Total Copilot SSE events by type
+# TYPE spark_copilot_sse_event_total counter
+spark_copilot_sse_event_total{event="token"} 50
+spark_copilot_sse_event_total{event="message_done"} 2
+spark_copilot_sse_event_total{event="complete"} 2
+# HELP spark_copilot_sse_invalid_drop_total Total invalid Copilot SSE events dropped
+# TYPE spark_copilot_sse_invalid_drop_total counter
+spark_copilot_sse_invalid_drop_total{event="unknown",reason="zod"} 0
+# HELP spark_copilot_sse_bytes_total Total bytes sent in Copilot SSE streams
+# TYPE spark_copilot_sse_bytes_total counter
+spark_copilot_sse_bytes_total 6660
+# HELP spark_copilot_sse_duration_seconds Copilot SSE stream duration summary
+# TYPE spark_copilot_sse_duration_seconds summary
+spark_copilot_sse_duration_seconds_sum 2.9669999999999996
+spark_copilot_sse_duration_seconds_count 2
+spark_copilot_sse_duration_seconds{quantile="0.5"} 1.4834999999999998
+spark_copilot_sse_duration_seconds{quantile="0.95"} 2.22525
+spark_copilot_sse_duration_seconds{quantile="0.99"} 2.9669999999999996

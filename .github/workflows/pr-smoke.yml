@@ -21,7 +21,7 @@ jobs:
         id: changes
         uses: dorny/paths-filter@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           filters: |
             docs:
               - 'docs/**'
@@ -80,7 +80,24 @@ jobs:
 
       - name: Build web-next (standalone)
         if: steps.changes.outputs.code == 'true'
-        run: pnpm --filter web-next build
+        run: |
+          set -e
+          echo "[pr-smoke] Building web-next (standalone mode)"
+          echo "[pr-smoke] Command: pnpm --filter web-next build"
+          pnpm --filter web-next build 2>&1 | tee build.log
+          echo "[pr-smoke] Build completed. Checking for copy-standalone-assets markers..."
+          if grep -q "\[copy-standalone-assets\] START" build.log; then
+            echo "✅ [copy-standalone-assets] START marker found in build log"
+          else
+            echo "⚠️  [copy-standalone-assets] START marker NOT found in build log"
+            echo "   This may indicate the postbuild script did not run"
+          fi
+          if grep -q "\[copy-standalone-assets\] styled-jsx OK" build.log; then
+            echo "✅ [copy-standalone-assets] styled-jsx OK marker found in build log"
+          else
+            echo "⚠️  [copy-standalone-assets] styled-jsx OK marker NOT found in build log"
+            echo "   This may indicate styled-jsx copy failed"
+          fi
         env:
           NODE_ENV: production
 
@@ -91,28 +108,296 @@ jobs:
 
       - name: Verify build output exists
         if: steps.changes.outputs.code == 'true'
-        working-directory: apps/web-next
         run: |
-          if [ -f ".next/standalone/server.js" ]; then
-            echo "Standalone build present ✔"
+          echo "[pr-smoke] Checking standalone server.js locations..."
+          if [ -f "apps/web-next/.next/standalone/apps/web-next/server.js" ]; then
+            echo "✅ Standalone server.js found (nested): apps/web-next/.next/standalone/apps/web-next/server.js"
+            ls -la apps/web-next/.next/standalone/apps/web-next/ | head -10
+          elif [ -f "apps/web-next/.next/standalone/server.js" ]; then
+            echo "✅ Standalone server.js found (root): apps/web-next/.next/standalone/server.js"
+            ls -la apps/web-next/.next/standalone/ | head -10
           else
-            echo "No standalone, will rely on next start ⚠"
+            echo "⚠️  No standalone server.js found, will rely on next start"
+            echo "Checking standalone structure:"
+            find apps/web-next/.next/standalone -name "server.js" 2>/dev/null || echo "No server.js found"
           fi
 
-      - name: Start server (standalone with fallback)
+      - name: Assert styled-jsx in standalone (fail-fast)
         if: steps.changes.outputs.code == 'true'
-        working-directory: apps/web-next
-        env:
-          NODE_ENV: production
-          PORT: 3003
-          HOSTNAME: 127.0.0.1
         run: |
           set -e
-          if [ -f ".next/standalone/server.js" ]; then
-            nohup node .next/standalone/server.js > ../../pr-smoke-server.log 2>&1 &
-          else
-            nohup npx next start -p 3003 -H 127.0.0.1 > ../../pr-smoke-server.log 2>&1 &
+          echo "[pr-smoke] Assert styled-jsx in standalone (fail-fast)"
+          echo "[pr-smoke] Current working directory: $(pwd)"
+
+          # Try both paths: repo-root and app-cwd
+          PATH_REPO_ROOT="apps/web-next/.next/standalone/node_modules/styled-jsx/package.json"
+          PATH_APP_CWD=".next/standalone/node_modules/styled-jsx/package.json"
+
+          FOUND_PATH=""
+          if [ -f "$PATH_REPO_ROOT" ]; then
+            FOUND_PATH="$PATH_REPO_ROOT"
+            echo "✅ styled-jsx found (repo-root path): $FOUND_PATH"
+          elif [ -f "$PATH_APP_CWD" ]; then
+            FOUND_PATH="$PATH_APP_CWD"
+            echo "✅ styled-jsx found (app-cwd path): $FOUND_PATH"
           fi
+
+          if [ -n "$FOUND_PATH" ]; then
+            echo "[pr-smoke] styled-jsx package.json content (first 5 lines):"
+            head -5 "$FOUND_PATH" || true
+            echo "[pr-smoke] styled-jsx directory listing:"
+            if [ "$FOUND_PATH" = "$PATH_REPO_ROOT" ]; then
+              ls -la apps/web-next/.next/standalone/node_modules/styled-jsx/ | head -10
+            else
+              ls -la .next/standalone/node_modules/styled-jsx/ | head -10
+            fi
+          else
+            echo "❌ styled-jsx NOT found in standalone"
+            echo "[pr-smoke] Tried paths:"
+            echo "  - Repo-root: $PATH_REPO_ROOT (exists: $([ -f "$PATH_REPO_ROOT" ] && echo 'YES' || echo 'NO'))"
+            echo "  - App-cwd: $PATH_APP_CWD (exists: $([ -f "$PATH_APP_CWD" ] && echo 'YES' || echo 'NO'))"
+            echo "[pr-smoke] Current directory structure:"
+            echo "  - pwd: $(pwd)"
+            echo "  - apps/web-next exists: $([ -d "apps/web-next" ] && echo 'YES' || echo 'NO')"
+            echo "  - .next exists: $([ -d ".next" ] && echo 'YES' || echo 'NO')"
+            echo "[pr-smoke] Checking standalone structure:"
+            if [ -d "apps/web-next/.next/standalone" ]; then
+              echo "Standalone root (repo-root):"
+              ls -la apps/web-next/.next/standalone/ | head -20 || true
+              echo "Standalone node_modules (repo-root):"
+              ls -la apps/web-next/.next/standalone/node_modules/ 2>/dev/null | head -20 || echo "node_modules not found"
+            elif [ -d ".next/standalone" ]; then
+              echo "Standalone root (app-cwd):"
+              ls -la .next/standalone/ | head -20 || true
+              echo "Standalone node_modules (app-cwd):"
+              ls -la .next/standalone/node_modules/ 2>/dev/null | head -20 || echo "node_modules not found"
+            else
+              echo "Standalone directory not found in either location"
+            fi
+            echo "[pr-smoke] Build log should contain '[copy-standalone-assets] START' and '[copy-standalone-assets] styled-jsx OK' markers"
+            exit 1
+          fi
+
+      - name: Isolate standalone to temp (prevent ancestor node_modules leakage)
+        if: steps.changes.outputs.code == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE="${GITHUB_WORKSPACE}/apps/web-next/.next/standalone"
+          TARGET="${RUNNER_TEMP}/standalone-web-next"
+
+          echo "[pr-smoke] Isolating standalone to temp directory (prevents pnpm-store next selection)"
+          echo "[pr-smoke] Source: $SOURCE"
+          echo "[pr-smoke] Target: $TARGET"
+
+          # Broken symlink envanteri (kanıt): isolate kopyasından önce
+          echo "[pr-smoke] Broken symlink inventory (pre-isolate)..."
+          BROKEN_COUNT=$(find "$SOURCE" -xtype l 2>/dev/null | wc -l | tr -d ' ')
+          echo "[pr-smoke] Broken symlinks found: $BROKEN_COUNT"
+          if [ "$BROKEN_COUNT" -gt 0 ]; then
+            echo "[pr-smoke] Listing broken symlinks (first 200):"
+            find "$SOURCE" -xtype l 2>/dev/null | head -200 | while read -r link; do
+              echo "  BROKEN: $link -> $(readlink "$link" 2>/dev/null || echo 'target missing')"
+            done
+          fi
+
+          # Clean target
+          rm -rf "$TARGET"
+          mkdir -p "$TARGET"
+
+          # Copy standalone server tree with symlink dereference (prevents broken symlinks in temp)
+          # Use rsync -aL (dereference symlinks) if available, fallback to cp -aL
+          # --copy-unsafe-links: copy files pointed to by symlinks even if symlink is broken
+          echo "[pr-smoke] Copying standalone tree (dereferencing symlinks)..."
+          RSYNC_EXIT=0
+          if command -v rsync >/dev/null 2>&1; then
+            # rsync -aL: -a = archive mode, -L = dereference symlinks
+            # --copy-unsafe-links: handle broken symlinks gracefully
+            rsync -aL --copy-unsafe-links "$SOURCE/" "$TARGET/" || RSYNC_EXIT=$?
+            if [ $RSYNC_EXIT -eq 23 ]; then
+              echo "⚠️  rsync exit 23 (broken symlinks detected) - treating as warning, continuing..."
+              echo "[pr-smoke] rsync 23: broken symlinks were skipped (expected with --copy-unsafe-links)"
+            elif [ $RSYNC_EXIT -ne 0 ]; then
+              echo "⚠️  rsync encountered errors (exit $RSYNC_EXIT), continuing..."
+            fi
+          else
+            # cp -aL: -a = archive mode, -L = dereference symlinks (GNU cp)
+            cp -aL "$SOURCE/." "$TARGET/" || {
+              echo "⚠️  cp encountered some errors (broken symlinks), continuing..."
+            }
+          fi
+
+          # Broken symlink envanteri (kanıt): isolate kopyasından sonra
+          echo "[pr-smoke] Broken symlink inventory (post-isolate)..."
+          BROKEN_COUNT_AFTER=$(find "$TARGET" -xtype l 2>/dev/null | wc -l | tr -d ' ')
+          echo "[pr-smoke] Broken symlinks in isolated copy: $BROKEN_COUNT_AFTER"
+          if [ "$BROKEN_COUNT_AFTER" -gt 0 ]; then
+            echo "[pr-smoke] WARNING: Broken symlinks still present in isolated copy (first 200):"
+            find "$TARGET" -xtype l 2>/dev/null | head -200 | while read -r link; do
+              echo "  BROKEN: $link -> $(readlink "$link" 2>/dev/null || echo 'target missing')"
+            done
+          fi
+
+          # Find server.js in isolated standalone first
+          SERVER_JS="$(find "$TARGET" -type f -name server.js | head -n 1)"
+          if [ -z "$SERVER_JS" ]; then
+            echo "❌ server.js not found in isolated standalone"
+            exit 1
+          fi
+
+          SERVER_DIR="$(dirname "$SERVER_JS")"
+          APP_ROOT="$SERVER_DIR"
+          echo "[pr-smoke] Found server.js at: $SERVER_JS"
+          echo "[pr-smoke] App root (server.js directory): $APP_ROOT"
+
+          # Copy .next/static and public to app root (next to server.js)
+          # This works for both old structure ($TARGET/server.js) and nested structure ($TARGET/apps/web-next/server.js)
+          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/.next/static" ]; then
+            mkdir -p "$APP_ROOT/.next"
+            echo "[pr-smoke] Copying .next/static to app root (dereferencing symlinks)..."
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static/" "$APP_ROOT/.next/static/" || true
+            else
+              cp -aL "${GITHUB_WORKSPACE}/apps/web-next/.next/static" "$APP_ROOT/.next/static" || true
+            fi
+          fi
+
+          if [ -d "${GITHUB_WORKSPACE}/apps/web-next/public" ]; then
+            echo "[pr-smoke] Copying public to app root (dereferencing symlinks)..."
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -aL "${GITHUB_WORKSPACE}/apps/web-next/public/" "$APP_ROOT/public/" || true
+            else
+              cp -aL "${GITHUB_WORKSPACE}/apps/web-next/public" "$APP_ROOT/public" || true
+            fi
+          fi
+
+          echo "ISOLATED_SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
+          echo "ISOLATED_SERVER_DIR=$SERVER_DIR" >> "$GITHUB_ENV"
+          echo "ISOLATED_STANDALONE_ROOT=$TARGET" >> "$GITHUB_ENV"
+
+          # Build NODE_PATH from isolated standalone (no ancestor node_modules)
+          NODE_PATH_VAL="$TARGET/node_modules"
+          if [ -d "$TARGET/apps/web-next/node_modules" ]; then
+            NODE_PATH_VAL="$NODE_PATH_VAL:$TARGET/apps/web-next/node_modules"
+          fi
+          echo "NODE_PATH=$NODE_PATH_VAL" >> "$GITHUB_ENV"
+
+          # Verify critical modules exist in isolated copy (fail-fast before preflight)
+          echo "[pr-smoke] Verifying critical modules in isolated copy..."
+          NEXT_FOUND=false
+          if [ -f "$TARGET/node_modules/next/package.json" ]; then
+            NEXT_FOUND=true
+            echo "✅ next found: $TARGET/node_modules/next/package.json"
+          elif [ -f "$TARGET/apps/web-next/node_modules/next/package.json" ]; then
+            NEXT_FOUND=true
+            echo "✅ next found: $TARGET/apps/web-next/node_modules/next/package.json"
+          fi
+          if [ "$NEXT_FOUND" = false ]; then
+            echo "❌ next/package.json not found in isolated copy"
+            echo "[pr-smoke] Checking isolated structure:"
+            ls -la "$TARGET/" | head -20
+            if [ -d "$TARGET/node_modules" ]; then
+              echo "[pr-smoke] Root node_modules contents:"
+              ls -la "$TARGET/node_modules/" | head -20
+            fi
+            if [ -d "$TARGET/apps/web-next/node_modules" ]; then
+              echo "[pr-smoke] Nested node_modules contents:"
+              ls -la "$TARGET/apps/web-next/node_modules/" | head -20
+            fi
+            exit 1
+          fi
+
+          echo "✅ Isolated standalone ready"
+          echo "✅ SERVER_JS=$SERVER_JS"
+          echo "✅ SERVER_DIR=$SERVER_DIR"
+          echo "✅ NODE_PATH=$NODE_PATH_VAL"
+
+      - name: Start standalone server (with runtime preflight)
+        if: steps.changes.outputs.code == 'true'
+        shell: bash
+        working-directory: ${{ env.ISOLATED_SERVER_DIR }}
+        env:
+          PORT: "3003"
+          HOSTNAME: "127.0.0.1"
+          NODE_ENV: "production"
+          NODE_PATH: ${{ env.NODE_PATH }}
+        run: |
+          set -euo pipefail
+          echo "[pr-smoke] Starting standalone server from isolated temp directory"
+          echo "[pr-smoke] Working directory: $(pwd)"
+          echo "[pr-smoke] NODE_PATH=$NODE_PATH"
+
+          # Runtime preflight: verify module resolution in isolated environment
+          echo "[pr-smoke] Runtime preflight: checking module resolution..."
+          node -e "console.log('NODE_PATH=',process.env.NODE_PATH); console.log('globalPaths=',require('module').globalPaths)"
+
+          # Critical: Check which next instance is being loaded
+          # Good: .../.next/standalone/.../node_modules/next/package.json
+          # Bad: .../apps/web-next/node_modules/.pnpm/next@.../node_modules/next/package.json
+          echo "[pr-smoke] Checking which next instance is loaded..."
+          node -e "console.log('next=', require.resolve('next/package.json'))" || {
+            echo "❌ next resolution failed"
+            exit 1
+          }
+
+          # Runtime preflight: verify core packages under require-hook (same resolution path as server runtime)
+          # This catches "silent missing copy" risks that rsync 23 might have skipped
+          echo "[pr-smoke] Runtime preflight: verifying core packages under require-hook..."
+          PREFLIGHT_FAILED=0
+
+          # Load require-hook (Next.js internal module resolution)
+          node -e "require('next/dist/server/require-hook')" || {
+            echo "❌ require-hook load failed"
+            exit 1
+          }
+
+          # Verify styled-jsx (already checked, but keep for consistency)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ styled-jsx resolved:', require.resolve('styled-jsx/package.json'))" || {
+            echo "❌ styled-jsx resolution failed under require-hook (runtime preflight)"
+            PREFLIGHT_FAILED=1
+          }
+
+          # Verify react (core dependency)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ react resolved:', require.resolve('react/package.json'))" || {
+            echo "❌ react resolution failed under require-hook (runtime preflight)"
+            PREFLIGHT_FAILED=1
+          }
+
+          # Verify react-dom (core dependency)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ react-dom resolved:', require.resolve('react-dom/package.json'))" || {
+            echo "❌ react-dom resolution failed under require-hook (runtime preflight)"
+            PREFLIGHT_FAILED=1
+          }
+
+          # Verify scheduler (React internal, may be needed)
+          node -e "require('next/dist/server/require-hook'); console.log('✅ scheduler resolved:', require.resolve('scheduler/package.json'))" || {
+            echo "⚠️  scheduler resolution failed under require-hook (may be optional, continuing...)"
+            # scheduler is optional, don't fail on it
+          }
+
+          if [ $PREFLIGHT_FAILED -ne 0 ]; then
+            echo "[pr-smoke] Runtime preflight FAILED - core packages missing"
+            echo "[pr-smoke] Checking node_modules structure:"
+            ls -la node_modules/ 2>/dev/null | head -20 || echo "node_modules not found in server dir"
+            if [ -d "../node_modules" ]; then
+              echo "[pr-smoke] Parent node_modules:"
+              ls -la ../node_modules/ 2>/dev/null | head -20 || echo "parent node_modules not found"
+            fi
+            echo "[pr-smoke] This indicates rsync 23 may have skipped critical files"
+            echo "[pr-smoke] Job will FAIL - preflight must pass before server start"
+            exit 1
+          fi
+
+          echo "[pr-smoke] ✅ Runtime preflight PASSED - all core packages resolved"
+
+          # Start server (same step, same environment, isolated from repo)
+          LOG_PATH="${GITHUB_WORKSPACE}/pr-smoke-server.log"
+          # NODE_DEBUG=module is verbose; only enable if needed for debugging
+          # For now, keep it off to reduce log size
+          nohup node server.js > "$LOG_PATH" 2>&1 &
+          echo "[pr-smoke] Server started in background (PID: $!)"
+          echo "[pr-smoke] Server log: $LOG_PATH"
+          echo "[pr-smoke] Server should be listening on http://127.0.0.1:3003"
 
       - name: Wait for health (bash, 120s)
         if: steps.changes.outputs.code == 'true'
@@ -127,8 +412,31 @@ jobs:
             sleep 1
           done
           echo "Health endpoint did not respond in 120s ❌"
-          echo "---- pr-smoke-server.log (tail) ----"
-          tail -n 120 pr-smoke-server.log || true
+          echo "---- pr-smoke-server.log (tail, last 400 lines) ----"
+          tail -n 400 pr-smoke-server.log || true
+
+          # If styled-jsx error detected, enable NODE_DEBUG and retry once
+          if grep -q "styled-jsx" pr-smoke-server.log 2>/dev/null; then
+            echo "---- styled-jsx error detected, enabling NODE_DEBUG and retrying ----"
+            echo "---- styled-jsx path verification ----"
+            if [ -n "${{ env.ISOLATED_STANDALONE_ROOT }}" ]; then
+              ls -la "${{ env.ISOLATED_STANDALONE_ROOT }}/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in isolated standalone root"
+              if [ -d "${{ env.ISOLATED_STANDALONE_ROOT }}/apps/web-next/node_modules" ]; then
+                ls -la "${{ env.ISOLATED_STANDALONE_ROOT }}/apps/web-next/node_modules/styled-jsx" 2>/dev/null || echo "styled-jsx not found in nested isolated standalone"
+              fi
+            fi
+
+            # Kill existing server and restart with NODE_DEBUG
+            pkill -f "node server.js" || true
+            sleep 2
+            cd "${{ env.ISOLATED_SERVER_DIR }}"
+            PORT=3003 HOSTNAME=127.0.0.1 NODE_ENV=production NODE_PATH="${{ env.NODE_PATH }}" NODE_DEBUG=module nohup node server.js > "${GITHUB_WORKSPACE}/pr-smoke-server-debug.log" 2>&1 &
+            echo "Server restarted with NODE_DEBUG=module (PID: $!)"
+            echo "Waiting 10s for server to start..."
+            sleep 10
+            echo "---- pr-smoke-server-debug.log (tail, last 200 lines) ----"
+            tail -n 200 "${GITHUB_WORKSPACE}/pr-smoke-server-debug.log" || true
+          fi
           exit 1
 
       - name: Extra health poll (curl)

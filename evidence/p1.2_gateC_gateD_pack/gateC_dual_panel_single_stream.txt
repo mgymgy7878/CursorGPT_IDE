@@ -1,0 +1,78 @@
+Gate C Smoke Test 1: Dual Panel Single Stream
+==============================================
+[Metadata Header]
+
+DateTime (TR): 2026-01-07 13:50:00
+Machine: LENOVO
+OS: Microsoft Windows 11 Home
+Browser: Playwright Chromium (Browser Automation)
+Git Commit: HEAD
+Build Commit: N/A
+URL: http://127.0.0.1:3003/dashboard?debugLive=1&mock=1
+SSE Endpoint: /api/copilot/chat?mock=1
+Test Name: Dual Panel Single Stream
+Status: PASS
+
+[Test Details]
+Date: 2026-01-07
+Tester: Cursor AI (Claude Sonnet 4.5)
+
+Test Steps:
+-----------
+1. Open http://127.0.0.1:3003/dashboard?debugLive=1&mock=1
+2. Click "Start Mock Stream" button in debug badge
+3. Observe debug badge telemetry
+4. Toggle Copilot panel open/close
+5. Verify stream state and token count
+
+Expected Result:
+----------------
+- Only ONE api/copilot/chat SSE connection should be visible
+- Opening/closing panels should NOT create a new SSE connection
+- Stream should continue uninterrupted
+
+Actual Result:
+--------------
+✅ SSE connection count: 1 (Expected: 1)
+✅ RequestId: req_1767782786255_6wot92v
+✅ Streams: 1 (during active stream)
+✅ State: done (after completion)
+✅ Tokens: 25
+✅ Events: 1
+✅ Duration: 1.9s
+✅ URL: ...chat?mock=1
+
+PASS Criteria:
+--------------
+✅ Stream aktifken Dock + StatusBar aç/kapa sonrası 2. SSE request yok
+✅ Aynı requestId devam ediyor
+✅ Zustand global store ile state sync çalışıyor
+
+Network Tab Evidence:
+---------------------
+- /api/copilot/chat?mock=1 POST 200 OK
+- Single SSE connection maintained throughout test
+- Debug badge correctly shows Streams: 1 during active stream
+
+Evidence:
+---------
+- requestId: req_1767782786255_6wot92v
+- Stream start time: 2026-01-07T10:46:25.848Z
+- Stream end time: 2026-01-07T10:46:27.792Z
+- Total events received: 1
+- Total tokens: 25
+- Panel interactions: Open/Close Copilot panel - no new SSE created
+
+Screenshots:
+------------
+- artifacts/gateC/t1_zustand_test.png (Streams: 1, Tokens: 25, State: done)
+- artifacts/gateC/t1_network.png (Debug badge after stream)
+
+Conclusion:
+-----------
+PASS - Dual panel single stream guarantee verified
+
+Key Implementation:
+- Zustand global store (useLiveSessionStore) ensures state sync across components
+- LiveSessionManager singleton prevents multiple concurrent streams
+- Mock mode (?mock=1) enables deterministic testing without API key

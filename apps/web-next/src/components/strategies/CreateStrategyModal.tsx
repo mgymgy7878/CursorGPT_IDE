@@ -28,7 +28,7 @@ export const CreateStrategyModal: React.FC<CreateStrategyModalProps> = ({
   loading = false,
 }) => {
   const [error, setError] = useState<string | null>(null);
-  
+
   const {
     register,
     handleSubmit,
@@ -54,7 +54,7 @@ export const CreateStrategyModal: React.FC<CreateStrategyModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Yeni Strateji Oluştur</CardTitle>
@@ -103,7 +103,7 @@ export const CreateStrategyModal: React.FC<CreateStrategyModalProps> = ({
             />
 
             {error && (
-              <div className="text-red-600 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
+              <div className="text-red-400 text-sm bg-red-900/20 border border-red-800 p-3 rounded-lg">
                 {error}
               </div>
             )}

@@ -34,8 +34,8 @@ if (isWindows) {
   });
 } else {
   // Unix: Use rm
-  const clearCache = spawn('rm', ['-rf', '.next'], { 
-    cwd: projectRoot, 
+  const clearCache = spawn('rm', ['-rf', '.next'], {
+    cwd: projectRoot,
     stdio: 'inherit',
     shell: true
   });
@@ -53,7 +53,7 @@ function startDevServer() {
     ...process.env,
     WATCHPACK_POLLING: 'true',
     WATCHPACK_POLLING_INTERVAL: '2000',
-    NEXT_WEBPACK_USEPERSISTENTCACHE: 'false',
+    NEXT_WEBPACK_USEPERSISTENTCACHE: 'true',
     CHOKIDAR_USEPOLLING: '1',
   };
 

@@ -1,0 +1,13 @@
+Spark Trading Platform
+Copyright (c) 2025
+
+This software includes the following third-party components:
+
+lightweight-charts
+Copyright (c) TradingView
+Licensed under the Apache License, Version 2.0
+https://github.com/tradingview/lightweight-charts
+
+The full text of the Apache License, Version 2.0 can be found at:
+http://www.apache.org/licenses/LICENSE-2.0
+

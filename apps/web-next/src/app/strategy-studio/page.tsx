@@ -14,9 +14,9 @@ export default function StrategyStudio() {
   const [wizardCode, setWizardCode] = useState<string | null>(null);
 
   return (
-    <main className="p-6 space-y-6">
+    <main className="p-6 space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-semibold">Strategy Studio</h1>
+        <h1 className="text-xl font-semibold">Strategy Studio</h1>
         <button
           onClick={() => setShowWizard(true)}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-blue-500"

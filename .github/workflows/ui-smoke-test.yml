@@ -23,9 +23,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.18.3
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -46,12 +46,12 @@ jobs:
           }
           Write-Host "Waiting for server to start (15 seconds)..." -ForegroundColor Gray
           Start-Sleep -Seconds 15
-          
+
           # Check if server is up
           $maxRetries = 10
           $retryCount = 0
           $serverUp = $false
-          
+
           while(-not $serverUp -and $retryCount -lt $maxRetries){
             try {
               $response = Invoke-WebRequest -Uri "http://127.0.0.1:3003/api/public/engine-health" -TimeoutSec 3 -ErrorAction Stop
@@ -65,7 +65,7 @@ jobs:
               Start-Sleep -Seconds 2
             }
           }
-          
+
           if(-not $serverUp){
             Write-Host "❌ Server failed to start" -ForegroundColor Red
             Stop-Job $job
@@ -77,7 +77,7 @@ jobs:
         run: |
           Write-Host "Running D2 SMOKE check..." -ForegroundColor Cyan
           pwsh scripts/d2-smoke-check.ps1 | Tee-Object -FilePath smoke_output.txt
-          
+
       - name: Display smoke results
         if: always()
         shell: pwsh
@@ -103,7 +103,7 @@ jobs:
           Write-Host "Workflow: UI D2 SMOKE Test" -ForegroundColor White
           Write-Host "Runner: windows-latest" -ForegroundColor White
           Write-Host "Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor White
-          
+
           if(Test-Path smoke_output.txt){
             $output = Get-Content smoke_output.txt -Raw
             if($output -match "SMOKE: PASS"){

@@ -1,0 +1,15 @@
+UI-P0-001: Dashboard skeleton & empty/error states
+
+- Skeleton component eklendi (DashboardSkeleton.tsx)
+- Empty state component eklendi (DashboardEmptyState.tsx)
+- Error state component eklendi (DashboardErrorState.tsx)
+- Dashboard page state yönetimi eklendi
+- Error handling iyileştirildi (response.ok kontrolü)
+- Telemetry hook eklendi (useDashboardTelemetry.ts)
+- E2E testler eklendi (dashboard-states.spec.ts - 6/6 passed)
+- A11y iyileştirmeleri (aria-busy, aria-live, role=alert)
+
+UI/UX Talimatları §3.1 P0 maddeleri karşılandı.
+
+Closes #<issue-num>
+

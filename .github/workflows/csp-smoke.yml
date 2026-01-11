@@ -1,0 +1,130 @@
+name: CSP Smoke Test
+
+on:
+  pull_request:
+    paths:
+      - "apps/web-next/**"
+      - ".github/workflows/csp-smoke.yml"
+    paths-ignore:
+      - "apps/web-next/**/*.md"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  csp-smoke:
+    name: CSP Regression Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Verify pnpm version
+        run: |
+          EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          ACTUAL=$(pnpm -v)
+          test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (prod)
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+        run: pnpm build
+
+      - name: Install Playwright Browsers
+        working-directory: apps/web-next
+        run: npx playwright install --with-deps chromium
+
+      - name: Start server (prod mode)
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+        run: |
+          pnpm start -- -p 3003 &
+          echo $! > server.pid
+          sleep 5
+          # Health check
+          for i in {1..30}; do
+            if curl -f http://127.0.0.1:3003/dashboard > /dev/null 2>&1; then
+              echo "Server is ready"
+              break
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 1
+          done
+
+      - name: CSS HEAD sanity check
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+        run: |
+          # İlk CSS linkinin Content-Type: text/css olduğunu garanti et
+          HTML=$(curl -sS http://127.0.0.1:3003/dashboard)
+          CSS=$(node -e "const h=process.argv[1];const m=h.match(/href=\"([^\"]*\/_next\/static\/[^\"]+\.css)\"/);if(!m){process.exit(2)}console.log(m[1])" "$HTML")
+          if [ -z "$CSS" ]; then
+            echo "::error::No CSS link found in HTML"
+            exit 1
+          fi
+          CT=$(curl -sS -I "http://127.0.0.1:3003$CSS" | grep -i "content-type:" | head -1)
+          if [[ ! "$CT" =~ "text/css" ]]; then
+            echo "::error::CSS Content-Type is not text/css: $CT"
+            exit 1
+          fi
+          echo "✅ CSS HEAD sanity check passed: $CSS -> $CT"
+
+      - name: Run CSP smoke test
+        working-directory: apps/web-next
+        env:
+          NODE_ENV: production
+          BASE_URL: http://127.0.0.1:3003
+        run: |
+          pnpm smoke:csp || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" -ne 0 ]; then
+            echo "::error::CSP smoke test failed"
+            exit $EXIT_CODE
+          fi
+
+      - name: Upload Playwright trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-trace-csp-${{ github.run_number }}
+          path: apps/web-next/test-results/
+          retention-days: 7
+
+      - name: Upload Playwright screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots-csp-${{ github.run_number }}
+          path: apps/web-next/test-results/**/*.png
+          retention-days: 7
+
+      - name: Stop server
+        if: always()
+        working-directory: apps/web-next
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid) || true
+            rm -f server.pid
+          fi
+

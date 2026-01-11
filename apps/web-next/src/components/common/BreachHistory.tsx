@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { ClientTime } from "@/components/common/ClientTime";
 
 type Breach = {
   timestamp: number;
@@ -71,7 +72,7 @@ export default function BreachHistory({ hours = 24 }: Props) {
               key={f}
               onClick={() => setFilter(f)}
               className={`text-xs px-2 py-0.5 rounded ${
-                filter === f 
+                filter === f
                   ? f === "critical" ? "bg-red-500 text-white" : f === "warning" ? "bg-yellow-500 text-black" : "bg-blue-500 text-white"
                   : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
               }`}
@@ -104,7 +105,7 @@ export default function BreachHistory({ hours = 24 }: Props) {
                   {breach.severity === "critical" ? "🚨" : "⚠️"} {formatMetric(breach.metric)}
                 </span>
                 <span className="text-xs text-neutral-500">
-                  {new Date(breach.timestamp).toLocaleTimeString('tr-TR')}
+                  <ClientTime value={breach.timestamp} format="time" />
                 </span>
               </div>
               <div className="text-xs text-neutral-400">

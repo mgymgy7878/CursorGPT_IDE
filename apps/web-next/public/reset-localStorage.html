@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>localStorage Reset - Spark Trading</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0a0a;
+      color: #e0e0e0;
+    }
+    h1 { color: #3b82f6; }
+    .button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 8px 4px;
+      transition: background 0.2s;
+    }
+    .button:hover { background: #2563eb; }
+    .button.danger { background: #ef4444; }
+    .button.danger:hover { background: #dc2626; }
+    .info {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 16px;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .success { color: #10b981; }
+    .warning { color: #f59e0b; }
+  </style>
+</head>
+<body>
+  <h1>🔧 localStorage Reset Tool</h1>
+
+  <div class="info">
+    <p><strong>Bu sayfa UI state'ini (panel pinned durumları) sıfırlamak için kullanılır.</strong></p>
+    <p class="warning">⚠️ Sadece UI ayarları silinir, diğer veriler korunur.</p>
+  </div>
+
+  <div>
+    <button class="button" onclick="clearUIState()">
+      🧹 UI State Temizle (Önerilen)
+    </button>
+    <button class="button danger" onclick="clearAll()">
+      🗑️ Tüm localStorage Temizle
+    </button>
+  </div>
+
+  <div id="result" style="margin-top: 20px;"></div>
+
+  <div class="info" style="margin-top: 30px;">
+    <h3>Mevcut localStorage Key'leri:</h3>
+    <pre id="keys" style="background: #0a0a0a; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 11px;"></pre>
+  </div>
+
+  <script>
+    function updateKeys() {
+      const keys = Object.keys(localStorage);
+      document.getElementById('keys').textContent = keys.length
+        ? keys.map(k => `  ${k}: ${localStorage.getItem(k).substring(0, 50)}...`).join('\n')
+        : '  (boş)';
+    }
+
+    function clearUIState() {
+      // "Overlay mode" için net değerler (pinned kapalı, collapsed açık)
+      localStorage.setItem('ui.sidebarCollapsed', 'true');   // sol rail ikon-only
+      localStorage.setItem('ui.rightRailOpen', 'false');     // sağ rail dock-only (kapalı/mini)
+
+      // Eski key'leri temizle (varsa)
+      const oldKeys = [
+        'ui.leftPinned',
+        'ui.rightPinned',
+        'spark:sidebarCollapsed',
+        'spark:rightRailOpen'
+      ];
+      oldKeys.forEach(key => localStorage.removeItem(key));
+
+      const result = document.getElementById('result');
+      result.innerHTML = `<p class="success">✅ UI state "overlay mode"a ayarlandı. Sayfayı yeniliyor...</p>`;
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+      updateKeys();
+    }
+
+    function clearAll() {
+      if (confirm('Tüm localStorage verilerini silmek istediğinizden emin misiniz?')) {
+        localStorage.clear();
+        document.getElementById('result').innerHTML = '<p class="success">✅ Tüm localStorage temizlendi. Sayfayı yenileyin.</p>';
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        updateKeys();
+      }
+    }
+
+    // Sayfa yüklendiğinde key'leri göster
+    updateKeys();
+  </script>
+</body>
+</html>
+

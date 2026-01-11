@@ -1,14 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
+import { formatDate, formatTime } from "@/lib/format";
 
 /**
  * Client-only date/time component to prevent hydration mismatches
  */
-export function ClientDateTime({ 
-  date, 
-  format = "locale" 
-}: { 
-  date: Date | string; 
+export function ClientDateTime({
+  date,
+  format = "locale"
+}: {
+  date: Date | string;
   format?: "locale" | "relative" | "time" | "date";
 }) {
   const [mounted, setMounted] = useState(false);
@@ -24,15 +25,15 @@ export function ClientDateTime({
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
   if (format === "locale") {
-    return <span suppressHydrationWarning>{dateObj.toLocaleString('tr-TR')}</span>;
+    return <span suppressHydrationWarning>{formatDate(dateObj)}</span>;
   }
 
   if (format === "time") {
-    return <span suppressHydrationWarning>{dateObj.toLocaleTimeString('tr-TR')}</span>;
+    return <span suppressHydrationWarning>{formatTime(dateObj)}</span>;
   }
 
   if (format === "date") {
-    return <span suppressHydrationWarning>{dateObj.toLocaleDateString('tr-TR')}</span>;
+    return <span suppressHydrationWarning>{formatDate(dateObj, { hour: undefined, minute: undefined })}</span>;
   }
 
   if (format === "relative") {
@@ -73,6 +74,6 @@ export function ClientNow({ refreshInterval = 1000 }: { refreshInterval?: number
     return <span className="text-neutral-500">--:--:--</span>;
   }
 
-  return <span suppressHydrationWarning>{now.toLocaleTimeString('tr-TR')}</span>;
+  return <span suppressHydrationWarning>{formatTime(now)}</span>;
 }
 

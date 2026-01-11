@@ -27,7 +27,7 @@ export const StrategyControls: React.FC<StrategyControlsProps> = ({
             >
               Yeni Strateji
             </Button>
-            
+
             <Button
               variant="outline"
               onClick={onRefresh}
@@ -36,8 +36,8 @@ export const StrategyControls: React.FC<StrategyControlsProps> = ({
               {loading ? 'Yükleniyor...' : 'Yenile'}
             </Button>
           </div>
-          
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+
+          <div className="text-sm text-neutral-400">
             Stratejilerinizi yönetin ve performanslarını takip edin
           </div>
         </div>

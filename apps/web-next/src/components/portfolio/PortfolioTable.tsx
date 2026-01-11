@@ -14,32 +14,34 @@ export default function PortfolioTable({ rows }: { rows: AssetRow[] }) {
 
   return (
     <div className="overflow-x-auto rounded-2xl border bg-white">
-      <table className="w-full min-w-[560px] text-sm">
-        <thead className="bg-neutral-50 text-neutral-600">
-          <tr>
-            <th className="px-4 py-3 text-left">Varlık</th>
-            <th className="px-4 py-3 text-right">Miktar</th>
-            <th className="px-4 py-3 text-right">Fiyat (USD)</th>
-            <th className="px-4 py-3 text-right">Değer (USD)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.asset} className="border-t">
-              <td className="px-4 py-3 font-medium">{r.asset}</td>
-              <td className="px-4 py-3 text-right font-mono">
-                {fmtNumberTR(r.amount)}
-              </td>
-              <td className="px-4 py-3 text-right font-mono">
-                {r.priceUsd != null ? fmtCurrencyTR(r.priceUsd) : "—"}
-              </td>
-              <td className="px-4 py-3 text-right font-mono">
-                {r.valueUsd != null ? fmtCurrencyTR(r.valueUsd) : "—"}
-              </td>
+      <div className="max-h-[600px] overflow-y-auto">
+        <table className="w-full min-w-[560px] text-sm">
+          <thead className="bg-neutral-50 text-neutral-600 sticky top-0 z-10">
+            <tr>
+              <th scope="col" className="px-4 py-3 text-left">Varlık</th>
+              <th scope="col" className="px-4 py-3 text-right tabular-nums">Miktar</th>
+              <th scope="col" className="px-4 py-3 text-right tabular-nums">Fiyat (USD)</th>
+              <th scope="col" className="px-4 py-3 text-right tabular-nums">Değer (USD)</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((r, idx) => (
+              <tr key={r.asset} className={`border-t ${idx % 2 === 0 ? 'bg-white' : 'bg-neutral-50'}`}>
+                <td className="px-4 py-3 font-medium">{r.asset}</td>
+                <td className="px-4 py-3 text-right font-mono tabular-nums">
+                  {fmtNumberTR(r.amount)}
+                </td>
+                <td className="px-4 py-3 text-right font-mono tabular-nums">
+                  {r.priceUsd != null ? fmtCurrencyTR(r.priceUsd) : "—"}
+                </td>
+                <td className="px-4 py-3 text-right font-mono tabular-nums">
+                  {r.valueUsd != null ? fmtCurrencyTR(r.valueUsd) : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

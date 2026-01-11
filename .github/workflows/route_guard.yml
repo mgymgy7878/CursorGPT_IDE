@@ -25,7 +25,7 @@ jobs:
       - name: Enable pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@10.0.0 --activate
+          corepack prepare pnpm@10.18.3 --activate
       - name: Setup pnpm cache
         uses: actions/setup-node@v4
         with:
@@ -37,7 +37,7 @@ jobs:
           pnpm -v
           printenv | grep -E "(CI|NODE|NEXT|PNPM)" | sort
       - name: Install (verbose)
-        run: pnpm -w i --frozen-lockfile=false 2>&1 | tee install.log
+        run: pnpm -w install --frozen-lockfile 2>&1 | tee install.log
       - name: Upload install logs on failure
         if: failure()
         uses: actions/upload-artifact@v4

@@ -40,6 +40,38 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': 'warn',
       'prefer-const': 'error',
+      // Shell Anayasası: Shell component'leri sadece AppFrame'de import edilmeli
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/components/status-bar',
+              message: 'Shell sadece AppFrame\'de. StatusBar\'ı doğrudan import etme, AppFrame kullan.',
+            },
+            {
+              name: '@/components/left-nav',
+              message: 'Shell sadece AppFrame\'de. LeftNav\'ı doğrudan import etme, AppFrame kullan.',
+            },
+            {
+              name: '@/components/layout/AppFrame',
+              message: 'AppFrame sadece root layout\'ta kullanılır. Sayfa layout\'larında kullanma.',
+            },
+            // SSOT: Chart oluşturma createSparkChart üzerinden olmalı
+            {
+              name: 'lightweight-charts',
+              importNames: ['createChart'],
+              message: 'Chart creation must go through createSparkChart (SSOT). Use createSparkChart() from @/lib/charts/createSparkChart instead.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['@/components/status-bar', '@/components/left-nav'],
+              message: 'Shell component\'leri sadece AppFrame\'de import edilmeli.',
+            },
+          ],
+        },
+      ],
       // Token-only v1: Tailwind arbitrary values ([]) yasak
       'regex/invalid': [
         'error',
@@ -51,6 +83,13 @@ export default [
           }
         ]
       ]
+    },
+  },
+  // SSOT override: createSparkChart.ts içinde createChart importuna izin ver
+  {
+    files: ['src/lib/charts/createSparkChart.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   ...compat.extends('next/core-web-vitals'),

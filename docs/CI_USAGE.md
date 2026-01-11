@@ -109,7 +109,7 @@ Affected nodes: 2
   /* Önce: */
   background: #666;
   color: #999;
-  
+
   /* Sonra (4.5:1 kontrast): */
   background: #333;
   color: #fff;
@@ -298,9 +298,10 @@ lhci server --storage.storageMethod=sql --storage.sqlDatabasePath=./lhci.db
 - [Lighthouse Scoring Calculator](https://googlechrome.github.io/lighthouse/scorecalc/)
 - [Axe Rules Reference](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md)
 - [Nielsen Norman Group Heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)
+- **[PR Smoke RCA Decision Tree](CI/PR_SMOKE_RCA_DECISION_TREE.md)** - CI fail'lerini 1-2 dakikada sınıflandırma rehberi
 
 ---
 
-**Son güncelleme:** 2025-10-27  
+**Son güncelleme:** 2025-10-27
 **Maintainer:** Spark Trading Team
 

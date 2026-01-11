@@ -1,0 +1,83 @@
+/**
+ * Design Tokens - Figma Parity
+ *
+ * Figma'daki tasarım sistemine uygun token'lar.
+ * Radius, border, padding, typography, muted text, glow/shadow hepsi burada.
+ */
+
+:root {
+  /* Border Radius (Figma: ~16px for cards, ~8px for buttons) */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem;   /* 8px */
+  --radius-lg: 1rem;     /* 16px */
+  --radius-xl: 1.5rem;   /* 24px */
+  --radius-full: 9999px;
+
+  /* Border Width */
+  --border-width: 1px;
+  --border-width-thick: 2px;
+
+  /* Spacing (Figma: consistent 4px grid) */
+  --spacing-xs: 0.25rem;  /* 4px */
+  --spacing-sm: 0.5rem;   /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+
+  /* Panel Backgrounds (Figma: subtle gradients, muted backgrounds) */
+  --bg-panel: rgba(17, 17, 17, 0.6);
+  --bg-panel-hover: rgba(23, 23, 23, 0.8);
+  --bg-card: rgba(20, 20, 20, 0.8);
+  --bg-card-hover: rgba(28, 28, 28, 0.9);
+
+  /* Border Colors */
+  --border-default: rgba(38, 38, 38, 0.8);
+  --border-muted: rgba(38, 38, 38, 0.4);
+  --border-hover: rgba(64, 64, 64, 0.8);
+
+  /* Text Colors (Figma: muted text hierarchy) */
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --text-disabled: rgba(255, 255, 255, 0.3);
+
+  /* Status Colors */
+  --status-success: rgba(16, 185, 129, 1);
+  --status-warning: rgba(245, 158, 11, 1);
+  --status-danger: rgba(239, 68, 68, 1);
+  --status-info: rgba(59, 130, 246, 1);
+
+  /* Glow/Shadow (Figma: subtle glows for active states) */
+  --glow-success: 0 0 8px rgba(16, 185, 129, 0.3);
+  --glow-warning: 0 0 8px rgba(245, 158, 11, 0.3);
+  --glow-danger: 0 0 8px rgba(239, 68, 68, 0.3);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+
+  /* Shell Dimensions (Figma: fixed widths) */
+  --left-nav-width: 280px;
+  --right-rail-width: 380px;
+}
+
+/* Utility Classes */
+.panel-bg {
+  background: var(--bg-panel);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.card-bg {
+  background: var(--bg-card);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+

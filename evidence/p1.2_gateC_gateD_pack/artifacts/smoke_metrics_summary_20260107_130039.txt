@@ -1,0 +1,14 @@
+﻿Gate D Metrics Delta Summary
+=============================
+Timestamp: 20260107_130039
+MetricsUrl: http://localhost:3003/api/public/metrics.prom
+Before: artifacts\gateD\metrics_before_20260107_130039.prom
+After : artifacts\gateD\metrics_after_20260107_130039.prom
+
+WARNING: No metric changes detected!
+Possible reasons:
+  - Mock stream not active (check server logs for '[MOCK SSE]')
+  - Env vars set in wrong terminal or server not restarted
+  - SSE stream not triggered (run .\tools\gate-d-test-mock-sse.ps1 to test)
+  - Metrics endpoint incorrect
+  - Registry was reset (HMR/dev reload)

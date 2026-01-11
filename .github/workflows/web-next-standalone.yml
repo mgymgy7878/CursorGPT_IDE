@@ -21,35 +21,35 @@ jobs:
       NEXT_PUBLIC_MARKETDATA_URL: "http://127.0.0.1:5001"
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20.11.1'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-      
+
       - name: Verify pnpm version (from packageManager)
         run: |
           EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
           ACTUAL=$(pnpm -v)
           echo "Expected: $EXPECTED, Actual: $ACTUAL"
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm version mismatch"; exit 1; }
-      
+
       - name: Print env + versions
         run: |
           node -v
           pnpm -v
           printenv | grep -E "(CI|NODE|NEXT|PNPM)" | sort
-      
+
       - name: Fetch dependencies (pre-warm store)
         run: pnpm fetch --prod=false
-      
+
       - name: Install deps (offline mode)
         run: pnpm -w i --offline --frozen-lockfile --strict-peer-dependencies 2>&1 | tee install.log
       - name: Upload install logs on failure
@@ -59,13 +59,43 @@ jobs:
           name: standalone-install-logs
           path: install.log
       - name: Build web-next (standalone)
-        run: pnpm -w --filter web-next build 2>&1 | tee build.log
-      - name: Upload build logs on failure
-        if: failure()
+        run: |
+          set -euo pipefail
+          echo "[build] Starting web-next build (standalone mode)..."
+          # Pre-create log file to ensure it exists even on fast failures
+          : > build.log
+          # Run build and capture output
+          pnpm -w --filter web-next build 2>&1 | tee -a build.log || {
+            BUILD_EXIT=${PIPESTATUS[0]}
+            echo "::error::Build failed with exit code $BUILD_EXIT"
+            echo "[build] ---- build.log tail (last 200 lines) ----"
+            tail -n 200 build.log || cat build.log || true
+            echo "[build] ---- end of build.log tail ----"
+            exit $BUILD_EXIT
+          }
+          echo "[build] ✅ Build completed successfully"
+      - name: Upload build log (always)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: standalone-build-logs
+          name: web-next-build-log
           path: build.log
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Verify standalone output exists
+        run: |
+          if [ ! -d "apps/web-next/.next/standalone" ]; then
+            echo "::error::Standalone output directory not found"
+            echo "Build may have failed or standalone output is not enabled"
+            ls -la apps/web-next/.next/ || echo ".next directory not found"
+            exit 1
+          fi
+          if [ ! -f "apps/web-next/.next/standalone/server.js" ] && [ ! -f "apps/web-next/.next/standalone/apps/web-next/server.js" ]; then
+            echo "::error::Standalone server.js not found"
+            find apps/web-next/.next/standalone -name "server.js" || echo "No server.js found"
+            exit 1
+          fi
+          echo "✅ Standalone output verified"
       - name: Pack standalone artefact
         run: |
           tar -czf web-next-standalone.tgz -C apps/web-next/.next/standalone .
