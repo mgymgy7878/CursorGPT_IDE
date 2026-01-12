@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-import CommandPalette from "@/components/ui/CommandPalette";
+// CommandPalette removed - now handled globally in app/layout.tsx via portal
 const AlarmCard = dynamic(() => import("@/components/dashboard/AlarmCard"), {
   ssr: false,
 });
@@ -47,7 +47,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             placeholder="Ara…"
             className="hidden md:block px-3 py-1.5 rounded-lg border border-neutral-800 bg-black w-72"
           />
-          <CommandPalette />
+          {/* CommandPalette removed - handled globally in app/layout.tsx */}
           <div
             aria-label="Profile"
             className="w-8 h-8 rounded-full bg-neutral-800"
