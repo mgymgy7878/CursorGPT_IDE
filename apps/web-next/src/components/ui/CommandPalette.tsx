@@ -88,8 +88,12 @@ export default function CommandPalette() {
       aria-label="Komut paleti"
     >
       <div
-        className="bg-popover text-popover-foreground border border-border rounded-xl w-full max-w-[720px] min-w-[min(640px,calc(100vw-32px))] shadow-2xl overflow-hidden flex flex-col"
-        style={{ maxHeight: 'min(70vh, 640px)' }}
+        className="border border-border rounded-xl w-full max-w-[720px] min-w-[min(640px,calc(100vw-32px))] shadow-2xl overflow-hidden flex flex-col"
+        style={{
+          maxHeight: 'min(70vh, 640px)',
+          backgroundColor: 'hsl(var(--popover))',
+          color: 'hsl(var(--popover-foreground))'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -99,7 +103,8 @@ export default function CommandPalette() {
             placeholder="Komut ara..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-popover-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-muted border border-border rounded-lg px-4 py-2 placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ color: 'hsl(var(--popover-foreground))' }}
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Escape") {
@@ -110,15 +115,22 @@ export default function CommandPalette() {
         </div>
 
         {/* Commands List */}
-        <div className="overflow-y-auto bg-popover text-popover-foreground flex-1 min-h-0" style={{ maxHeight: '360px' }}>
+        <div
+          className="overflow-y-auto flex-1 min-h-0"
+          style={{
+            maxHeight: '360px',
+            backgroundColor: 'hsl(var(--popover))',
+            color: 'hsl(var(--popover-foreground))'
+          }}
+        >
           {filteredCommands.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="text-sm font-medium mb-1 text-popover-foreground">Sonuç yok</div>
-              <div className="text-xs text-muted-foreground/70 mt-2">
+              <div className="text-sm font-medium mb-1" style={{ color: 'hsl(var(--popover-foreground))' }}>Sonuç yok</div>
+              <div className="text-xs mt-2" style={{ color: 'hsl(var(--muted-foreground))' }}>
                 Yazmaya başlayın veya farklı bir terim deneyin
               </div>
               {search.length === 0 && (
-                <div className="text-xs text-muted-foreground/50 mt-4">
+                <div className="text-xs mt-4" style={{ color: 'hsl(var(--muted-foreground))', opacity: 0.7 }}>
                   Örnek: "BTCUSDT", "BIST:THYAO", "canary", "health"
                 </div>
               )}
@@ -165,7 +177,7 @@ export default function CommandPalette() {
                 {result.success ? "✅" : "❌"}
               </span>
               <div className="flex-1">
-                <div className="font-medium text-popover-foreground">{result.message}</div>
+                <div className="font-medium" style={{ color: 'hsl(var(--popover-foreground))' }}>{result.message}</div>
                 {result.details && (
                   <pre className="mt-2 text-xs text-muted-foreground bg-muted/30 rounded p-2 overflow-auto max-h-32">
                     {JSON.stringify(result.details, null, 2)}
