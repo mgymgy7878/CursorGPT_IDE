@@ -18,11 +18,13 @@ import { useExecutorHealth } from '@/hooks/useExecutorHealth'
 import { useMarketDataHealth, getFeedStatusLabel, getFeedStatusTone } from '@/hooks/useMarketDataHealth'
 import { useCheckpointStatus } from '@/hooks/useCheckpointStatus'
 import { getSparkMode } from '@/lib/spark/config'
-// CommandButton kaldırıldı - Figma parity: hotkey hint ComposerBar'da
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { uiCopy } from '@/lib/uiCopy'
+import { useCommandPalette } from '@/hooks/useCommandPalette'
+import { OpsDrawer } from './layout/OpsDrawer'
+import { t } from '@/lib/i18n'
 
 // Healthz endpoint'inden SLO metrics al
 function useHealthzMetrics() {
@@ -79,6 +81,12 @@ export default function StatusBar() {
   const metrics = useHealthzMetrics()
   const breadcrumb = getBreadcrumb(pathname)
   const barRef = useRef<HTMLDivElement>(null)
+  const { open: openCommandPalette } = useCommandPalette()
+  const [opsDrawerOpen, setOpsDrawerOpen] = useState(false)
+  
+  // Mac/Windows mod tuşu belirleme
+  const isMac = typeof window !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
+  const modKey = isMac ? '⌘' : 'Ctrl'
 
   // PATCH I: Runtime topbar height measurement (SSR-safe)
   useLayoutEffect(() => {
@@ -193,7 +201,7 @@ export default function StatusBar() {
         </div>
 
         {/* MIDDLE: Health indicators + Metrics (flex-1, overflow-safe with edge fade) */}
-        <div className="min-w-0 flex-1 relative">
+        <div className="min-w-0 flex-1 relative overflow-hidden">
           {/* Edge fade mask (left) */}
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#0B0F14] to-transparent pointer-events-none z-10" />
           {/* Edge fade mask (right) */}
@@ -289,10 +297,10 @@ export default function StatusBar() {
           </div>
         </div>
 
-        {/* RIGHT: Metrics + Actions (shrink-0) */}
-        <div className="flex shrink-0 items-center gap-3">
+        {/* RIGHT: Metrics + Actions + Ctrl+K Hint + Ops (shrink-0, whitespace-nowrap) */}
+        <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
           {/* İşlem · Hacim · Uyarılar (Figma separator style, consistent typography) */}
-          <div className="flex items-center gap-1.5 text-[13px] text-white/70 font-medium">
+          <div className="flex items-center gap-1.5 text-[13px] text-white/70 font-medium shrink-0">
             <span className="tabular-nums whitespace-nowrap">İşlem: {metrics.transactions}</span>
             <span className="text-white/35">·</span>
             <span className="tabular-nums whitespace-nowrap">Hacim: {metrics.volume}</span>
@@ -303,54 +311,85 @@ export default function StatusBar() {
           {/* Action Buttons - Dashboard'da gizli (Figma parity: terminal tarzı minimal bar) */}
           {!isDashboard && (
             <>
-          {/* Divider */}
-          <div className="w-px h-4 bg-white/10 shrink-0" />
+              {/* Divider */}
+              <div className="w-px h-4 bg-white/10 shrink-0" />
 
-          {/* PATCH U: "+ Oluştur" dropdown (Strateji Oluştur + Uyarı Oluştur tek menüde) */}
-          <div className="relative shrink-0">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const menu = document.getElementById('create-menu');
-                if (menu) {
-                  menu.classList.toggle('hidden');
-                }
-              }}
-              className="rounded-full bg-white/5 hover:bg-white/8 border border-white/10 px-3 py-[3px] text-[13px] font-medium text-white/90 transition-colors h-8 whitespace-nowrap leading-none flex items-center gap-1.5"
-              aria-label="Oluştur"
-            >
-              <span>+</span>
-              <span>Oluştur</span>
-            </button>
-            <div
-              id="create-menu"
-              className="hidden absolute right-0 top-full mt-1 w-48 bg-neutral-900 border border-white/10 rounded-lg shadow-lg z-50 overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => {
-                  window.location.href = '/strategy-lab';
-                  document.getElementById('create-menu')?.classList.add('hidden');
-                }}
-                className="w-full text-left px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 transition-colors"
-              >
-                {uiCopy.create.strategy}
-              </button>
-              <button
-                onClick={() => {
-                  console.log('Create alert');
-                  document.getElementById('create-menu')?.classList.add('hidden');
-                }}
-                className="w-full text-left px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 transition-colors"
-              >
-                {uiCopy.create.alert}
-              </button>
-            </div>
-          </div>
+              {/* PATCH U: "+ Oluştur" dropdown (Strateji Oluştur + Uyarı Oluştur tek menüde) */}
+              <div className="relative shrink-0">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const menu = document.getElementById('create-menu');
+                    if (menu) {
+                      menu.classList.toggle('hidden');
+                    }
+                  }}
+                  className="rounded-full bg-white/5 hover:bg-white/8 border border-white/10 px-3 py-[3px] text-[13px] font-medium text-white/90 transition-colors h-8 whitespace-nowrap leading-none flex items-center gap-1.5"
+                  aria-label="Oluştur"
+                >
+                  <span>+</span>
+                  <span>Oluştur</span>
+                </button>
+                <div
+                  id="create-menu"
+                  className="hidden absolute right-0 top-full mt-1 w-48 bg-neutral-900 border border-white/10 rounded-lg shadow-lg z-50 overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => {
+                      window.location.href = '/strategy-lab';
+                      document.getElementById('create-menu')?.classList.add('hidden');
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 transition-colors"
+                  >
+                    {uiCopy.create.strategy}
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Create alert');
+                      document.getElementById('create-menu')?.classList.add('hidden');
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 transition-colors"
+                  >
+                    {uiCopy.create.alert}
+                  </button>
+                </div>
+              </div>
             </>
           )}
 
-          {/* Right Icons - Figma parity: CommandButton yok, hotkey (Ctrl+K) ComposerBar'da */}
+          {/* Divider */}
+          <div className="w-px h-4 bg-white/10 shrink-0" />
+
+          {/* Ctrl+K Hint - küçük ghost chip */}
+          <button
+            onClick={openCommandPalette}
+            className="flex items-center gap-1 px-2 py-[3px] rounded border border-white/10 bg-white/5 hover:bg-white/8 text-[11px] text-white/60 hover:text-white/80 transition-colors shrink-0 whitespace-nowrap"
+            title={isMac ? t('common.cmdk_mac') : t('common.cmdk_win')}
+            aria-label={isMac ? t('common.cmdk_mac') : t('common.cmdk_win')}
+          >
+            <kbd className="px-1 py-0.5 rounded text-[10px] font-mono border border-white/10 bg-white/5">
+              {modKey}
+            </kbd>
+            <span className="text-white/30">+</span>
+            <kbd className="px-1 py-0.5 rounded text-[10px] font-mono border border-white/10 bg-white/5">
+              K
+            </kbd>
+            <span className="hidden sm:inline ml-1">Komutlar</span>
+          </button>
+
+          {/* Ops Hızlı Yardım - kompakt buton */}
+          <button
+            onClick={() => setOpsDrawerOpen(true)}
+            className="px-2 py-[3px] rounded border border-sky-500/30 bg-sky-600/20 hover:bg-sky-600/30 text-[11px] font-medium text-sky-200 transition-colors shrink-0 whitespace-nowrap"
+            title="Ops Hızlı Yardım"
+            aria-label="Ops Hızlı Yardım"
+          >
+            <span className="hidden sm:inline">Ops</span>
+            <span className="sm:hidden">🚑</span>
+          </button>
+
+          {/* Right Icons */}
           <div className="flex items-center gap-2 shrink-0">
             {/* PATCH D: Help icon - deep-link to guide */}
             <button
@@ -374,6 +413,13 @@ export default function StatusBar() {
               <span className="text-xs">👤</span>
             </button>
           </div>
+
+          {/* OpsDrawer */}
+          <OpsDrawer
+            open={opsDrawerOpen}
+            onOpenChange={setOpsDrawerOpen}
+            showButton={false}
+          />
         </div>
       </div>
     </div>

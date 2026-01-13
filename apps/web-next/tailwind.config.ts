@@ -8,6 +8,12 @@ const config: Config = {
     '../../packages/**/*.{js,ts,jsx,tsx,mdx}',
     '../../apps/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    // Popover token classes (ensure they're always generated)
+    'bg-popover',
+    'text-popover-foreground',
+    'text-muted-foreground',
+  ],
   darkMode: 'class',
   theme: {
     extend: {

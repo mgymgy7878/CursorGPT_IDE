@@ -1,0 +1,200 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - img [ref=e7]
+          - generic [ref=e9]: Spark Trading
+        - generic [ref=e10]: Canary
+        - 'generic "Spark Mode: TESTNET" [ref=e11]': TESTNET
+      - generic [ref=e13]:
+        - 'generic "API Status: DOWN" [ref=e14]':
+          - generic [ref=e16]: API
+        - 'generic "Market Data Feed: Disconnected Source: unknown Age: 0s Reconnects: 0" [ref=e17]':
+          - generic [ref=e19]: Feed
+        - 'generic "Executor (port 4001) Status: DOWN Latency: N/A Last OK: Never Click to open health endpoint" [ref=e20] [cursor=pointer]':
+          - generic [ref=e22]: Executor
+        - generic "Development Mode" [ref=e23]:
+          - generic [ref=e25]: DEV
+        - generic [ref=e27]: "P95: —"
+        - generic [ref=e28]: ·
+        - generic [ref=e29]: "RT Delay: —"
+        - generic [ref=e30]: ·
+        - generic [ref=e31]: "Feed: —"
+        - generic [ref=e32]: ·
+        - generic [ref=e33]: "OrderBus: Sağlıklı"
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]: "İşlem: 42"
+          - generic [ref=e37]: ·
+          - generic [ref=e38]: "Hacim: 1.2M$"
+          - generic [ref=e39]: ·
+          - generic [ref=e40]: "Uyarılar: 1/3"
+        - button "Ctrl+K Komutlar" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]: Ctrl
+          - generic [ref=e44]: +
+          - generic [ref=e45]: K
+          - generic [ref=e46]: Komutlar
+        - button "Ops Hızlı Yardım" [ref=e47] [cursor=pointer]: Ops
+        - generic [ref=e48]:
+          - button "Yardım (F1)" [ref=e49] [cursor=pointer]:
+            - generic [ref=e50]: ❓
+          - button "Bildirimler" [ref=e51] [cursor=pointer]:
+            - generic [ref=e52]: 🔔
+          - button "Kullanıcı menüsü" [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]: 👤
+    - generic [ref=e55]:
+      - complementary [ref=e56]:
+        - complementary [ref=e58]:
+          - navigation [ref=e59]:
+            - generic [ref=e60]:
+              - 'link "Status: warning Ana Sayfa" [ref=e61] [cursor=pointer]':
+                - /url: /dashboard
+                - generic [ref=e62]:
+                  - img [ref=e63]
+                  - 'generic "Status: warning" [ref=e66]'
+                - generic [ref=e67]: Ana Sayfa
+              - link "Piyasa Verileri" [ref=e68] [cursor=pointer]:
+                - /url: /market-data
+                - img [ref=e70]
+                - generic [ref=e71]: Piyasa Verileri
+              - link "Stratejilerim" [ref=e72] [cursor=pointer]:
+                - /url: /strategies
+                - img [ref=e74]
+                - generic [ref=e76]: Stratejilerim
+              - link "Çalışan Stratejiler" [ref=e77] [cursor=pointer]:
+                - /url: /running
+                - img [ref=e79]
+                - generic [ref=e81]: Çalışan Stratejiler
+              - 'link "Status: warning Operasyon Merkezi" [ref=e82] [cursor=pointer]':
+                - /url: /control
+                - generic [ref=e83]:
+                  - img [ref=e84]
+                  - 'generic "Status: warning" [ref=e87]'
+                - generic [ref=e88]: Operasyon Merkezi
+              - link "Ayarlar" [ref=e89] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e91]
+                - generic [ref=e94]: Ayarlar
+      - button "Menüyü daralt" [ref=e98] [cursor=pointer]:
+        - generic [ref=e99]: ◀
+      - main [ref=e100]:
+        - generic [ref=e102]:
+          - generic [ref=e104]:
+            - link "SPARK" [ref=e105] [cursor=pointer]:
+              - /url: /
+            - textbox "Global Search" [ref=e107]:
+              - /placeholder: Ara…
+            - generic "Profile" [ref=e108]
+          - generic [ref=e109]:
+            - complementary [ref=e110]:
+              - navigation [ref=e111]:
+                - link "Dashboard" [ref=e112] [cursor=pointer]:
+                  - /url: /dashboard
+                - link "Strategy Lab" [ref=e113] [cursor=pointer]:
+                  - /url: /strategy-lab
+                - link "Audit" [ref=e114] [cursor=pointer]:
+                  - /url: /audit
+                - link "Portfolio" [ref=e115] [cursor=pointer]:
+                  - /url: /portfolio
+                - link "Settings" [ref=e116] [cursor=pointer]:
+                  - /url: /settings
+            - main [ref=e117]:
+              - generic [ref=e118]:
+                - generic:
+                  - generic:
+                    - img
+                - generic [ref=e119]:
+                  - generic [ref=e120]:
+                    - heading "Spark Trading EB 0.0%" [level=1] [ref=e121]:
+                      - generic [ref=e122]:
+                        - text: Spark Trading
+                        - generic "Error rate 0.000% / allowed 0.0%" [ref=e123]: EB 0.0%
+                    - paragraph [ref=e124]: Dashboard
+                    - generic [ref=e125]:
+                      - generic [ref=e126]: "Hedef: 1200 ms"
+                      - generic [ref=e127]: "Eşik: 30 sn"
+                  - generic [ref=e128]:
+                    - button "Strateji Oluştur" [ref=e129] [cursor=pointer]
+                    - button "Uyarı Oluştur" [ref=e130] [cursor=pointer]
+                - generic [ref=e132]:
+                  - generic [ref=e133]: "Ortam: Deneme"
+                  - generic [ref=e134]: "Veri Akışı: Çalışmıyor"
+                  - generic [ref=e135]: "Aracı: Çevrimdışı"
+                - generic [ref=e136]:
+                  - generic [ref=e137]:
+                    - generic [ref=e138]:
+                      - generic [ref=e139]:
+                        - generic: P95 gecikme
+                        - generic: 58 ms
+                        - generic: "Hedef: 1200 ms"
+                      - generic [ref=e140]:
+                        - generic: Güncellik gecikmesi
+                        - generic: 0 ms
+                        - generic: "Eşik: 30 sn"
+                    - generic [ref=e141]:
+                      - generic [ref=e142]:
+                        - generic: Alarm Taslakları
+                      - generic [ref=e143]:
+                        - generic: Canary Testleri
+                    - generic [ref=e144]:
+                      - generic [ref=e145]:
+                        - generic [ref=e146]:
+                          - heading "BTCUSDT" [level=3]
+                        - generic [ref=e147]:
+                          - generic: Bağlanıyor...
+                      - generic [ref=e148]:
+                        - generic [ref=e149]:
+                          - heading "ETHUSDT" [level=3]
+                        - generic [ref=e150]:
+                          - generic: Bağlanıyor...
+                  - complementary [ref=e151]:
+                    - generic [ref=e152]:
+                      - generic [ref=e153]: Son Alarm Durumu
+                      - generic [ref=e154]: Henüz veri yok.
+                    - generic [ref=e155]:
+                      - generic [ref=e156]: Son Canary Testi
+                      - generic [ref=e157]: Henüz veri yok.
+            - complementary [ref=e158]
+          - link "İçeriğe atla" [ref=e161] [cursor=pointer]:
+            - /url: "#main"
+      - button "Copilot panelini kapat" [ref=e164] [cursor=pointer]:
+        - generic [ref=e165]: ▶
+      - complementary [ref=e166]:
+        - generic [ref=e168]:
+          - generic [ref=e170]:
+            - generic [ref=e171]:
+              - img [ref=e173]
+              - heading "SPARK COPILOT" [level=2] [ref=e175]
+              - generic [ref=e176]: Canlı
+            - generic [ref=e177]: GPT-5.1
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - generic [ref=e181]: "Sistem:"
+              - generic [ref=e182]: Normal
+            - generic [ref=e183]:
+              - generic [ref=e184]: "Strateji:"
+              - generic [ref=e185]: BTCUSDT – Trend Follower v1
+            - generic [ref=e186]:
+              - generic [ref=e187]: "Mod:"
+              - generic [ref=e188]: Gölge
+          - generic [ref=e190]:
+            - button "Portföy riskini analiz et" [ref=e191] [cursor=pointer]
+            - button "Çalışan stratejileri özetle" [ref=e192] [cursor=pointer]
+            - button "Bugün için işlem önerisi" [ref=e193] [cursor=pointer]
+          - generic [ref=e195]:
+            - generic [ref=e196]:
+              - textbox "Copilot'a bir şey sor..." [ref=e197]
+              - button "Gönder" [disabled] [ref=e198]:
+                - img [ref=e199]
+                - generic [ref=e201]: Gönder
+            - generic [ref=e202]:
+              - generic [ref=e203]: Komutlar
+              - generic [ref=e204]: /
+  - generic "Hızlı komutlar" [ref=e205]:
+    - button "Ctrl+K Komutlar" [ref=e206] [cursor=pointer]
+    - button "Operasyon yardımı" [ref=e207] [cursor=pointer]: Ops Hızlı Yardım
+```
