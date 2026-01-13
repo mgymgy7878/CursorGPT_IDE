@@ -112,7 +112,7 @@ export default function CommandPalette() {
         {/* Commands List */}
         <div className="overflow-y-auto bg-popover text-popover-foreground flex-1 min-h-0" style={{ maxHeight: '360px' }}>
           {filteredCommands.length === 0 ? (
-            <div className="p-8 text-center text-popover-foreground">
+            <div className="p-8 text-center">
               <div className="text-sm font-medium mb-1 text-popover-foreground">Sonuç yok</div>
               <div className="text-xs text-muted-foreground/70 mt-2">
                 Yazmaya başlayın veya farklı bir terim deneyin
@@ -130,17 +130,18 @@ export default function CommandPalette() {
                   key={cmd.id}
                   onClick={() => handleExecute(cmd.id)}
                   disabled={executing}
-                  className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-popover-foreground"
+                  className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ color: 'hsl(var(--popover-foreground))' }}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{cmd.icon}</span>
                     <div className="flex-1">
-                      <div className="font-medium text-popover-foreground">{cmd.label}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-medium" style={{ color: 'hsl(var(--popover-foreground))' }}>{cmd.label}</div>
+                      <div className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
                         {cmd.description}
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground uppercase">
+                    <span className="text-xs uppercase" style={{ color: 'hsl(var(--muted-foreground))' }}>
                       {cmd.category}
                     </span>
                   </div>

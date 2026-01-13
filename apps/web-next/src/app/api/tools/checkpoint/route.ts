@@ -93,22 +93,22 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "pre":
         scriptFile = join(scriptPath, "checkpoint.ps1");
-        args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile, "-Message", `PRE: ${message || "checkpoint"}`];
+        args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile, "-Message", `PRE: ${message || "checkpoint"}`];
         break;
       case "post":
         scriptFile = join(scriptPath, "checkpoint.ps1");
-        args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile, "-Message", `POST: ${message || "checkpoint"}`];
+        args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile, "-Message", `POST: ${message || "checkpoint"}`];
         if (verifyUi) {
           args.push("-VerifyUi");
         }
         break;
       case "rollback":
         scriptFile = join(scriptPath, "rollback.ps1");
-        args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile];
+        args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile];
         break;
       case "rollback-golden":
         scriptFile = join(scriptPath, "rollback.ps1");
-        args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile, "-Tag", "ui/golden-master/v1"];
+        args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptFile, "-Tag", "ui/golden-master/v1"];
         break;
       default:
         return NextResponse.json(

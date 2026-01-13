@@ -10,6 +10,11 @@ param(
   [Parameter(Mandatory=$false)][switch]$NoPushTags
 )
 
+# Encoding hardening: UTF-8 without BOM (PowerShell 5.1 compatible)
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+$OutputEncoding = [Console]::OutputEncoding
+$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
+
 $ErrorActionPreference = "Stop"
 
 # Repo root: bu script -> tools/windows/ -> repo
@@ -48,9 +53,14 @@ $uiTouchPatterns = @(
 $hasUiTouch = $false
 # Hem staged hem unstaged değişiklikleri kontrol et
 $changedFiles = @()
-$changedFiles += git diff --name-only --cached 2>$null
-$changedFiles += git diff --name-only HEAD 2>$null
-$changedFiles = $changedFiles | Where-Object { $_ } | Select-Object -Unique
+try {
+  $stagedFiles = git diff --name-only --cached 2>&1 | Where-Object { $_ -and $_ -notmatch 'warning:' -and $_ -notmatch 'LF will be replaced' }
+  $unstagedFiles = git diff --name-only HEAD 2>&1 | Where-Object { $_ -and $_ -notmatch 'warning:' -and $_ -notmatch 'LF will be replaced' }
+  $changedFiles = @($stagedFiles) + @($unstagedFiles) | Where-Object { $_ -and $_ -notmatch '^$' } | Select-Object -Unique
+} catch {
+  # Git komutu başarısız olursa devam et
+  $changedFiles = @()
+}
 
 foreach ($file in $changedFiles) {
   # UI-touch pattern kontrolü
@@ -85,7 +95,7 @@ foreach ($file in $changedFiles) {
 
 # UI dokunuşu varsa otomatik VerifyUi ekle
 if ($hasUiTouch -and -not $VerifyUi) {
-  Write-Host "`n🔍 UI-touch detected! Auto-enabling VerifyUi..." -ForegroundColor Yellow
+  Write-Host "`n[INFO] UI-touch detected! Auto-enabling VerifyUi..." -ForegroundColor Yellow
   $VerifyUi = $true
 }
 
@@ -96,20 +106,20 @@ if ($VerifyUi) {
     Write-Host "  - Token lockdown check..." -ForegroundColor Gray
     pnpm check:ui-tokens 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) {
-      Write-Host "  ⚠️  Token check failed (non-blocking)" -ForegroundColor Yellow
+      Write-Host "  [WARN] Token check failed (non-blocking)" -ForegroundColor Yellow
     } else {
-      Write-Host "  ✅ Token check passed" -ForegroundColor Green
+      Write-Host "  [OK] Token check passed" -ForegroundColor Green
     }
 
     Write-Host "  - Visual smoke tests..." -ForegroundColor Gray
     pnpm ui:test:visual 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) {
-      Write-Host "  ⚠️  Visual tests failed (non-blocking)" -ForegroundColor Yellow
+      Write-Host "  [WARN] Visual tests failed (non-blocking)" -ForegroundColor Yellow
     } else {
-      Write-Host "  ✅ Visual tests passed" -ForegroundColor Green
+      Write-Host "  [OK] Visual tests passed" -ForegroundColor Green
     }
   } catch {
-    Write-Host "  ⚠️  UI checks failed: $_ (non-blocking)" -ForegroundColor Yellow
+    Write-Host "  [WARN] UI checks failed: $_ (non-blocking)" -ForegroundColor Yellow
   }
 }
 
@@ -130,7 +140,7 @@ $commitMsg = "cp: $Message [$ts]`n`nEvidence: $evidenceRelativePath"
 git commit -m $commitMsg | Out-Null
 
 if ($LASTEXITCODE -ne 0) {
-  Write-Host "❌ Commit failed!" -ForegroundColor Red
+  Write-Host "[ERROR] Commit failed!" -ForegroundColor Red
   exit 1
 }
 
@@ -192,7 +202,9 @@ $(git diff --name-only HEAD~1..HEAD | ForEach-Object { "  - $_" })
 $(if ($hasUiTouch) { "UI-related files detected - VerifyUi auto-enabled" } else { "No UI-touch detected" })
 "@
 
-$evidenceContent | Out-File -Encoding utf8 $evidenceFile
+# BOM'suz UTF-8 yazım (PowerShell 5.1 compatible)
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($evidenceFile, $evidenceContent, $utf8NoBom)
 
 # Annotated tag oluştur
 $tagPrefix = $(if ($Daily) { "daily" } else { "cp" })
@@ -216,45 +228,45 @@ Timestamp: $ts
 git tag -a $tag -m $tagMessage
 
 if ($LASTEXITCODE -ne 0) {
-  Write-Host "❌ Tag failed!" -ForegroundColor Red
+  Write-Host "[ERROR] Tag failed!" -ForegroundColor Red
   exit 1
 }
 
 # Evidence dosyasını güncelle (tag bilgisi ile)
 $evidenceContent = $evidenceContent -replace "tag:       \(will be created\)", "tag:       $tag"
-$evidenceContent | Out-File -Encoding utf8 $evidenceFile
+[System.IO.File]::WriteAllText($evidenceFile, $evidenceContent, $utf8NoBom)
 
-Write-Host "`n✅ Checkpoint OK" -ForegroundColor Green
+Write-Host "`n[OK] Checkpoint OK" -ForegroundColor Green
 Write-Host "   Tag:  $tag" -ForegroundColor Cyan
 Write-Host "   Hash: $shortHash" -ForegroundColor Gray
 Write-Host "   Evidence: $evidenceFile" -ForegroundColor Gray
 
 # Tag'leri push et (varsayılan davranış)
 if (-not $NoPushTags) {
-  Write-Host "`n📤 Pushing tags to remote..." -ForegroundColor Cyan
+  Write-Host "`n[INFO] Pushing tags to remote..." -ForegroundColor Cyan
   git push --tags 2>&1 | Out-Null
   if ($LASTEXITCODE -eq 0) {
-    Write-Host "   ✅ Tags pushed successfully" -ForegroundColor Green
+    Write-Host "   [OK] Tags pushed successfully" -ForegroundColor Green
   } else {
-    Write-Host "   ⚠️  Tag push failed (non-blocking)" -ForegroundColor Yellow
-    Write-Host "   💡 Run manually: git push --tags" -ForegroundColor Gray
+    Write-Host "   [WARN] Tag push failed (non-blocking)" -ForegroundColor Yellow
+    Write-Host "   [TIP] Run manually: git push --tags" -ForegroundColor Gray
   }
 } else {
-  Write-Host "`n💡 Tags not pushed (use -NoPushTags to skip)" -ForegroundColor Gray
+  Write-Host "`n[INFO] Tags not pushed (use -NoPushTags to skip)" -ForegroundColor Gray
   Write-Host "   Remember to push: git push --tags" -ForegroundColor Yellow
 }
 
 # Son checkpoint'i göster
-Write-Host "`n📋 Recent checkpoints:" -ForegroundColor Cyan
+Write-Host "`n[INFO] Recent checkpoints:" -ForegroundColor Cyan
 git tag --list "cp/*" --sort=-creatordate | Select-Object -First 5 | ForEach-Object {
   $tagHash = git rev-parse --short $_
   Write-Host "   $_ ($tagHash)" -ForegroundColor Gray
 }
 
 if ($Daily) {
-  Write-Host "`n📅 Daily checkpoint created" -ForegroundColor Green
+  Write-Host "`n[INFO] Daily checkpoint created" -ForegroundColor Green
 }
 
 if ($hasUiTouch) {
-  Write-Host "`n🎨 UI-touch checkpoint (VerifyUi enabled)" -ForegroundColor Green
+  Write-Host "`n[INFO] UI-touch checkpoint (VerifyUi enabled)" -ForegroundColor Green
 }
