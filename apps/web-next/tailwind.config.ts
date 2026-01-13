@@ -11,20 +11,32 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
-      borderRadius: { 
-        xl: '16px', 
-        '2xl': '24px' 
+      borderRadius: {
+        xl: '16px',
+        '2xl': '24px'
       },
-      spacing: { 
-        4: '1rem', 
-        6: '1.5rem', 
-        8: '2rem' 
+      spacing: {
+        4: '1rem',
+        6: '1.5rem',
+        8: '2rem'
       },
       colors: {
-        background: 'var(--background)',
-        foreground: 'var(--foreground)',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
         surface: 'hsl(var(--surface))',
-        card: 'hsl(var(--card))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        border: 'hsl(var(--border))',
         success: 'hsl(var(--success))',
         warn: 'hsl(var(--warn))',
         danger: 'hsl(var(--danger))',

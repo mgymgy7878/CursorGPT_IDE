@@ -1,0 +1,491 @@
+﻿­şöı Scanning 393 files for hardcode UI classes...
+
+node : ÔØî Found 199 violation(s):
+At C:\Users\mscor\AppData\Local\Temp\ps-script-7d0e3d22-9bb0-4a50-8b18-d32f1d1ef285.ps1:86 char:26
++ ... sorGPT_IDE; node scripts/check-ui-tokens.js apps/web-next/src 2>&1 |  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ÔØî Found 199 violation(s)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+
+­şôä apps\web-next\src\app\dashboard\page-old.tsx:
+  Line 140: <div className="p-4 text-center text-gray-500">
+    Pattern: /\btext-gray-\d+\b/
+  Line 181: <div className="p-4 text-center text-gray-500">
+    Pattern: /\btext-gray-\d+\b/
+
+­şôä apps\web-next\src\components\common\BreachHistory.tsx:
+  Line 75: ? f === "critical" ? "bg-red-500 text-white" : f === "warning" ? "bg-yellow-500 text-black" : "bg-blue-500 t
+ext-white"
+    Pattern: /\btext-black\b/
+
+­şôä apps\web-next\src\components\copilot\CopilotDock.tsx:
+  Line 285: className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
+    Pattern: /\bbg-white\b/
+  Line 372: ? "border-white/20 hover:border-white/30 hover:bg-white/10 cursor-pointer transition-colors"
+    Pattern: /\bbg-white\b/
+  Line 395: "bg-transparent hover:bg-white/5",
+    Pattern: /\bbg-white\b/
+  Line 419: ? "bg-white/[0.02] border-white/10 p-2"
+    Pattern: /\bbg-white\b/
+  Line 440: <div className="bg-white/[0.02] rounded-lg p-2 border border-white/10">
+    Pattern: /\bbg-white\b/
+  Line 526: <kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/5 font-mono text-[10px]">
+    Pattern: /\bbg-white\b/
+  Line 532: <kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/5 font-mono text-[10px]">
+    Pattern: /\bbg-white\b/
+  Line 535: <kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/5 font-mono text-[10px]">
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\copilot\CopilotPanel.tsx:
+  Line 56: <Card className="w-full max-w-2xl h-[600px] flex flex-col bg-white dark:bg-gray-900">
+    Pattern: /\bbg-white\b/
+  Line 56: <Card className="w-full max-w-2xl h-[600px] flex flex-col bg-white dark:bg-gray-900">
+    Pattern: /\bbg-gray-\d+\b/
+  Line 56: <Card className="w-full max-w-2xl h-[600px] flex flex-col bg-white dark:bg-gray-900">
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 57: <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    Pattern: /\bborder-gray-\d+\b/
+  Line 57: <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 58: <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+    Pattern: /\btext-gray-\d+\b/
+  Line 63: className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+    Pattern: /\btext-gray-\d+\b/
+  Line 63: className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 71: <div className="text-center text-gray-500 dark:text-gray-400">
+    Pattern: /\btext-gray-\d+\b/
+  Line 71: <div className="text-center text-gray-500 dark:text-gray-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 85: : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+    Pattern: /\bbg-gray-\d+\b/
+  Line 85: : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+    Pattern: /\btext-gray-\d+\b/
+  Line 85: : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 98: <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+    Pattern: /\bbg-gray-\d+\b/
+  Line 98: <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 100: <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+    Pattern: /\bbg-gray-\d+\b/
+  Line 101: <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+    Pattern: /\bbg-gray-\d+\b/
+  Line 102: <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+    Pattern: /\bbg-gray-\d+\b/
+  Line 109: <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+    Pattern: /\bborder-gray-\d+\b/
+  Line 109: <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 117: className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus
+:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+    Pattern: /\bborder-gray-\d+\b/
+  Line 117: className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus
+:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+    Pattern: /\bbg-gray-\d+\b/
+  Line 117: className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus
+:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 117: className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus
+:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+    Pattern: /\bdark:border-\w+-\d+\b/
+
+­şôä apps\web-next\src\components\dashboard\CanaryCard.tsx:
+  Line 30: return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-gre
+en-800';
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 30: return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-gre
+en-800';
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 30: return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-gre
+en-800';
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 32: return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:borde
+r-yellow-800';
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 32: return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:borde
+r-yellow-800';
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 32: return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:borde
+r-yellow-800';
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 34: return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 34: return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 34: return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 36: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800
+';
+    Pattern: /\bborder-gray-\d+\b/
+  Line 36: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800
+';
+    Pattern: /\bbg-gray-\d+\b/
+  Line 36: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800
+';
+    Pattern: /\btext-gray-\d+\b/
+  Line 36: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800
+';
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 36: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800
+';
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 36: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800
+';
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 71: <h3 className="font-semibold text-gray-900 dark:text-white">Canary Evidence</h3>
+    Pattern: /\btext-gray-\d+\b/
+  Line 80: <span className="text-sm text-gray-600 dark:text-gray-400">Test Ge├ğme Oran─▒</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 80: <span className="text-sm text-gray-600 dark:text-gray-400">Test Ge├ğme Oran─▒</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 82: <span className="text-lg font-bold text-gray-900 dark:text-white">
+    Pattern: /\btext-gray-\d+\b/
+  Line 85: <span className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\btext-gray-\d+\b/
+  Line 85: <span className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 93: <span className="text-sm text-gray-600 dark:text-gray-400">P95 Latency</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 93: <span className="text-sm text-gray-600 dark:text-gray-400">P95 Latency</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 95: p95Latency < 1000 ? 'text-green-600 dark:text-green-400' :
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 96: p95Latency < 2000 ? 'text-yellow-600 dark:text-yellow-400' :
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 97: 'text-red-600 dark:text-red-400'
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 106: <span className="text-sm text-gray-600 dark:text-gray-400">Staleness</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 106: <span className="text-sm text-gray-600 dark:text-gray-400">Staleness</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 108: staleness < 30 ? 'text-green-600 dark:text-green-400' :
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 109: staleness < 60 ? 'text-yellow-600 dark:text-yellow-400' :
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 110: 'text-red-600 dark:text-red-400'
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 119: <span className="text-sm text-gray-600 dark:text-gray-400">Exit Code</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 119: <span className="text-sm text-gray-600 dark:text-gray-400">Exit Code</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 121: exitCode === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 129: <span className="text-sm text-gray-600 dark:text-gray-400">Son Test</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 129: <span className="text-sm text-gray-600 dark:text-gray-400">Son Test</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 130: <span className="text-sm text-gray-900 dark:text-white">
+    Pattern: /\btext-gray-\d+\b/
+  Line 136: <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+    Pattern: /\bborder-gray-\d+\b/
+  Line 136: <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 141: <button className="flex-1 px-3 py-2 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 transition-col
+ors">
+    Pattern: /\bbg-gray-\d+\b/
+
+­şôä apps\web-next\src\components\lab\ResultPanel.tsx:
+  Line 17: <div className="mt-3 h-24 bg-gray-100 rounded-md flex items-center justify-center">
+    Pattern: /\bbg-gray-\d+\b/
+  Line 18: <span className="text-xs text-gray-500">Equity Curve (mock)</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 25: <div className="p-2 bg-gray-50 rounded-md border text-center">
+    Pattern: /\bbg-gray-\d+\b/
+  Line 26: <div className="text-[10px] text-gray-500">{label}</div>
+    Pattern: /\btext-gray-\d+\b/
+
+­şôä apps\web-next\src\components\layout\AppFrame.tsx:
+  Line 113: <kbd className="px-1.5 py-0.5 rounded border border-white/10 bg-white/5 font-mono">
+    Pattern: /\bbg-white\b/
+  Line 117: <kbd className="px-1.5 py-0.5 rounded border border-white/10 bg-white/5 font-mono">
+    Pattern: /\bbg-white\b/
+  Line 437: isActive && "bg-white/5 ring-1 ring-white/10"
+    Pattern: /\bbg-white\b/
+  Line 555: <button className="h-7 px-2.5 rounded-md text-[11px] font-medium bg-white/5 hover:bg-white/8 border border-
+white/10 text-white/70 hover:text-white/90 transition-colors">
+    Pattern: /\bbg-white\b/
+  Line 558: <button className="h-7 px-2.5 rounded-md text-[11px] font-medium bg-white/5 hover:bg-white/8 border border-
+white/10 text-white/70 hover:text-white/90 transition-colors">
+    Pattern: /\bbg-white\b/
+  Line 561: <button className="h-7 px-2.5 rounded-md text-[11px] font-medium bg-white/5 hover:bg-white/8 border border-
+white/10 text-white/70 hover:text-white/90 transition-colors">
+    Pattern: /\bbg-white\b/
+  Line 570: <div className="bg-white/[0.02] rounded-lg p-2.5 border border-white/10">
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\layout\RailHandle.tsx:
+  Line 39: "hover:bg-white/5 hover:border-white/15 active:bg-white/10",
+    Pattern: /\bbg-white\b/
+  Line 74: <div className="absolute inset-y-0 w-px bg-white/6 hover:bg-white/12 transition-colors" />
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\left-nav.tsx:
+  Line 88: : "hover:bg-white/[0.04]"
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\market\MarketChartWorkspace.tsx:
+  Line 715: <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10">Regime: Trend</span>
+    Pattern: /\bbg-white\b/
+  Line 716: <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10">Vol: High</span>
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\marketdata\MarketCard.tsx:
+  Line 67: <Card className="p-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 67: <Card className="p-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 70: <h3 className="font-semibold text-red-800 dark:text-red-200">{exchange}</h3>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 72: <p className="text-sm text-red-600 dark:text-red-400 mt-2">{error}</p>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 78: <Card className="p-4 bg-white dark:bg-gray-800">
+    Pattern: /\bbg-white\b/
+  Line 78: <Card className="p-4 bg-white dark:bg-gray-800">
+    Pattern: /\bbg-gray-\d+\b/
+  Line 78: <Card className="p-4 bg-white dark:bg-gray-800">
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 82: <h3 className="font-semibold text-gray-900 dark:text-white">{exchange}</h3>
+    Pattern: /\btext-gray-\d+\b/
+  Line 84: <div className="text-xs text-gray-500 dark:text-gray-400">
+    Pattern: /\btext-gray-\d+\b/
+  Line 84: <div className="text-xs text-gray-500 dark:text-gray-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 92: <span className="text-sm text-gray-600 dark:text-gray-400">Fiyat</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 92: <span className="text-sm text-gray-600 dark:text-gray-400">Fiyat</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 93: <span className="text-lg font-bold text-gray-900 dark:text-white">
+    Pattern: /\btext-gray-\d+\b/
+  Line 99: <span className="text-sm text-gray-600 dark:text-gray-400">24s De─şi┼şim</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 99: <span className="text-sm text-gray-600 dark:text-gray-400">24s De─şi┼şim</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 101: ticker.change24h >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 108: <span className="text-sm text-gray-600 dark:text-gray-400">Hacim</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 108: <span className="text-sm text-gray-600 dark:text-gray-400">Hacim</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 109: <span className="text-sm text-gray-900 dark:text-white">
+    Pattern: /\btext-gray-\d+\b/
+  Line 116: <span className="text-gray-500 dark:text-gray-400">Y├╝ksek</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 116: <span className="text-gray-500 dark:text-gray-400">Y├╝ksek</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 117: <p className="text-gray-900 dark:text-white">{formatPrice(ticker.high24h)}</p>
+    Pattern: /\btext-gray-\d+\b/
+  Line 120: <span className="text-gray-500 dark:text-gray-400">D├╝┼ş├╝k</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 120: <span className="text-gray-500 dark:text-gray-400">D├╝┼ş├╝k</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 121: <p className="text-gray-900 dark:text-white">{formatPrice(ticker.low24h)}</p>
+    Pattern: /\btext-gray-\d+\b/
+  Line 129: <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Order Book</h4>
+    Pattern: /\btext-gray-\d+\b/
+  Line 129: <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Order Book</h4>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 132: <div className="text-green-600 dark:text-green-400 font-medium mb-1">Al─▒┼ş</div>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 135: <span className="text-gray-600 dark:text-gray-400">{formatPrice(bid.price)}</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 135: <span className="text-gray-600 dark:text-gray-400">{formatPrice(bid.price)}</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 136: <span className="text-gray-900 dark:text-white">{bid.amount.toFixed(4)}</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 141: <div className="text-red-600 dark:text-red-400 font-medium mb-1">Sat─▒┼ş</div>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 144: <span className="text-gray-600 dark:text-gray-400">{formatPrice(ask.price)}</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 144: <span className="text-gray-600 dark:text-gray-400">{formatPrice(ask.price)}</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 145: <span className="text-gray-900 dark:text-white">{ask.amount.toFixed(4)}</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 155: <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Son ─░┼şlemler</h4>
+    Pattern: /\btext-gray-\d+\b/
+  Line 155: <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Son ─░┼şlemler</h4>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 161: ? 'text-green-600 dark:text-green-400'
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 162: : 'text-red-600 dark:text-red-400'
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 166: <span className="text-gray-600 dark:text-gray-400">{trade.amount.toFixed(4)}</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 166: <span className="text-gray-600 dark:text-gray-400">{trade.amount.toFixed(4)}</span>
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 167: <span className="text-gray-500 dark:text-gray-500">
+    Pattern: /\btext-gray-\d+\b/
+  Line 167: <span className="text-gray-500 dark:text-gray-500">
+    Pattern: /\bdark:text-\w+-\d+\b/
+
+­şôä apps\web-next\src\components\optimizer\ProgressBar.tsx:
+  Line 21: <div className="h-2 bg-gray-700 rounded overflow-hidden">
+    Pattern: /\bbg-gray-\d+\b/
+  Line 22: <div className="h-2 bg-gray-300" style={{ width: `${p}%` }} />
+    Pattern: /\bbg-gray-\d+\b/
+
+­şôä apps\web-next\src\components\portfolio\AllocationDonut.tsx:
+  Line 29: <div className="rounded-2xl border bg-white p-4">
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\portfolio\ExchangeTabs.tsx:
+  Line 14: <div className="flex gap-2 rounded-2xl border p-1 bg-white">
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\portfolio\PortfolioTable.tsx:
+  Line 16: <div className="overflow-x-auto rounded-2xl border bg-white">
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\portfolio\SummaryCards.tsx:
+  Line 30: <div className="rounded-2xl border bg-white p-4">
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\status-bar.tsx:
+  Line 162: <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-[3px] text-[13px] font-medium text-
+white/90 border border-white/10 leading-none">
+    Pattern: /\bbg-white\b/
+  Line 223: <div className="w-px h-4 bg-white/10 shrink-0" />
+    Pattern: /\bbg-white\b/
+  Line 267: <div className="w-px h-4 bg-white/10 shrink-0" />
+    Pattern: /\bbg-white\b/
+  Line 279: className="rounded-full bg-white/5 hover:bg-white/8 border border-white/10 px-3 py-[3px] text-[13px] font-m
+edium text-white/90 transition-colors h-8 whitespace-nowrap leading-none flex items-center gap-1.5"
+    Pattern: /\bbg-white\b/
+  Line 318: className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10 transition-colors"
+    Pattern: /\bbg-white\b/
+  Line 325: className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10 transition-colors"
+    Pattern: /\bbg-white\b/
+  Line 331: className="w-6 h-6 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-c
+olors"
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\status-pill.tsx:
+  Line 22: const baseClasses = "flex items-center gap-1.5 shrink-0 rounded-full bg-white/5 px-2 py-[3px] text-[13px] fo
+nt-medium text-white/80 leading-none"
+    Pattern: /\bbg-white\b/
+  Line 23: const interactiveClasses = onClick ? "cursor-pointer hover:bg-white/8 transition-colors" : ""
+    Pattern: /\bbg-white\b/
+
+­şôä apps\web-next\src\components\strategies\StrategyDetailPanel.tsx:
+  Line 105: <span className="text-sm text-gray-500">Olu┼şturulma:</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 111: <span className="text-sm text-gray-500">Son G├╝ncelleme:</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 120: <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
+    Pattern: /\btext-gray-\d+\b/
+  Line 120: <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 125: <span className="text-sm text-gray-500">Toplam Kar/Zarar:</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 133: <span className="text-sm text-gray-500">Ortalama ─░┼şlem:</span>
+    Pattern: /\btext-gray-\d+\b/
+  Line 142: <span className="text-sm text-gray-500">Ba┼şar─▒ Oran─▒:</span>
+    Pattern: /\btext-gray-\d+\b/
+
+­şôä apps\web-next\src\components\strategies\StrategyList.tsx:
+  Line 123: <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+    Pattern: /\btext-gray-\d+\b/
+  Line 123: <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 131: <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+    Pattern: /\btext-gray-\d+\b/
+  Line 131: <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 141: <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+    Pattern: /\btext-gray-\d+\b/
+  Line 141: <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+    Pattern: /\bdark:text-\w+-\d+\b/
+
+­şôä apps\web-next\src\components\ui\Input.tsx:
+  Line 22: className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+    Pattern: /\btext-gray-\d+\b/
+  Line 22: className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 32: 'flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600',
+    Pattern: /\bborder-gray-\d+\b/
+  Line 32: 'flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600',
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 33: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bbg-white\b/
+  Line 33: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bbg-gray-\d+\b/
+  Line 33: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 34: 'placeholder:text-gray-400 dark:placeholder:text-gray-500',
+    Pattern: /\btext-gray-\d+\b/
+  Line 48: <p id={errorId} className="text-sm text-red-600 dark:text-red-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 53: <p id={helperId} className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\btext-gray-\d+\b/
+  Line 53: <p id={helperId} className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+
+­şôä apps\web-next\src\components\ui\Select.tsx:
+  Line 30: className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+    Pattern: /\btext-gray-\d+\b/
+  Line 30: className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 40: 'flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600',
+    Pattern: /\bborder-gray-\d+\b/
+  Line 40: 'flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600',
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 41: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bbg-white\b/
+  Line 41: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bbg-gray-\d+\b/
+  Line 41: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 71: <p id={errorId} className="text-sm text-red-600 dark:text-red-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 76: <p id={helperId} className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\btext-gray-\d+\b/
+  Line 76: <p id={helperId} className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+
+­şôä apps\web-next\src\components\ui\Textarea.tsx:
+  Line 23: className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+    Pattern: /\btext-gray-\d+\b/
+  Line 23: className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 34: 'flex min-h-[80px] w-full rounded-md border border-gray-300 dark:border-gray-600',
+    Pattern: /\bborder-gray-\d+\b/
+  Line 34: 'flex min-h-[80px] w-full rounded-md border border-gray-300 dark:border-gray-600',
+    Pattern: /\bdark:border-\w+-\d+\b/
+  Line 35: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bbg-white\b/
+  Line 35: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bbg-gray-\d+\b/
+  Line 35: 'bg-white dark:bg-gray-800 px-3 py-2 text-sm',
+    Pattern: /\bdark:bg-\w+-\d+\b/
+  Line 36: 'placeholder:text-gray-400 dark:placeholder:text-gray-500',
+    Pattern: /\btext-gray-\d+\b/
+  Line 51: <p id={errorId} className="text-sm text-red-600 dark:text-red-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+  Line 56: <p id={helperId} className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\btext-gray-\d+\b/
+  Line 56: <p id={helperId} className="text-sm text-gray-500 dark:text-gray-400">
+    Pattern: /\bdark:text-\w+-\d+\b/
+
+­şôä apps\web-next\src\styles\uiTokens.ts:
+  Line 49: export const navItemInactive = 'text-white/70 hover:bg-white/[0.04] hover:text-white';
+    Pattern: /\bbg-white\b/
+  Line 52: export const navItemActive = 'bg-white/[0.05] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]';
+    Pattern: /\bbg-white\b/
+  Line 59: export const miniStatCard = 'min-w-0 overflow-hidden rounded-xl bg-white/[0.02] p-3 shadow-[inset_0_0_0_1px_
+rgba(255,255,255,0.08)]';
+    Pattern: /\bbg-white\b/
+  Line 102: default: 'bg-white/5 hover:bg-white/8 border border-white/10 text-white/80',
+    Pattern: /\bbg-white\b/
+  Line 104: subtle: 'bg-white/[0.02] hover:bg-white/[0.04] text-white/70',
+    Pattern: /\bbg-white\b/
+
+ÔØî Token Lockdown Failed: 199 violation(s) found.
+
+­şÆí Fix: Replace hardcode classes with theme tokens:
+   - bg-white ÔåÆ bg-card or bg-background
+   - text-black ÔåÆ text-card-foreground or text-foreground
+   - border-gray-* ÔåÆ border-border or border-neutral-*
+   - dark:bg-* ÔåÆ Remove, use token instead
+   - dark:text-* ÔåÆ Remove, use token instead

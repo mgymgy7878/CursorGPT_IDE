@@ -28,7 +28,7 @@ export const CreateStrategyModal: React.FC<CreateStrategyModalProps> = ({
   loading = false,
 }) => {
   const [error, setError] = useState<string | null>(null);
-  
+
   const {
     register,
     handleSubmit,
@@ -103,7 +103,7 @@ export const CreateStrategyModal: React.FC<CreateStrategyModalProps> = ({
             />
 
             {error && (
-              <div className="text-red-600 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
+              <div className="text-red-400 text-sm bg-red-950/20 border border-red-800 p-3 rounded-md">
                 {error}
               </div>
             )}

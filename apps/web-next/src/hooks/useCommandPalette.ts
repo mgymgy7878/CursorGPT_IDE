@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 /**
  * Global Command Palette State Hook
- * 
+ *
  * Single source of truth for Command Palette open/close state.
  * Used by CommandPalette component and trigger buttons.
  */

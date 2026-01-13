@@ -1,11 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 import { useCommandPalette } from "@/hooks/useCommandPalette";
 import { COMMANDS, executeCommand, type CommandResult } from "@/lib/command-palette";
 
 export default function CommandPalette() {
   const { isOpen, close } = useCommandPalette();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState("");
   const [executing, setExecuting] = useState(false);
@@ -26,10 +28,10 @@ export default function CommandPalette() {
     }
   }, [isOpen]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     close();
     setResult(null);
-  };
+  }, [close]);
 
   const filteredCommands = COMMANDS.filter(
     (cmd) =>
@@ -63,6 +65,13 @@ export default function CommandPalette() {
   if (!isOpen) {
     return null;
   }
+
+  // Route change handler - close on route change
+  useEffect(() => {
+    if (isOpen) {
+      handleClose();
+    }
+  }, [pathname, isOpen, handleClose]); // Close when route changes
 
   // Portal to document.body for global modal layer
   const modalContent = (
@@ -101,11 +110,18 @@ export default function CommandPalette() {
         </div>
 
         {/* Commands List */}
-        <div className="overflow-y-auto bg-popover flex-1 min-h-0" style={{ maxHeight: 'calc(min(70vh, 640px) - 200px)' }}>
+        <div className="overflow-y-auto bg-popover text-popover-foreground flex-1 min-h-0" style={{ maxHeight: '360px' }}>
           {filteredCommands.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <div className="text-sm font-medium mb-1">Komut bulunamadı</div>
-              <div className="text-xs text-muted-foreground/70">Yazmaya başlayın veya farklı bir terim deneyin</div>
+            <div className="p-8 text-center text-popover-foreground">
+              <div className="text-sm font-medium mb-1 text-popover-foreground">Sonuç yok</div>
+              <div className="text-xs text-muted-foreground/70 mt-2">
+                Yazmaya başlayın veya farklı bir terim deneyin
+              </div>
+              {search.length === 0 && (
+                <div className="text-xs text-muted-foreground/50 mt-4">
+                  Örnek: "BTCUSDT", "BIST:THYAO", "canary", "health"
+                </div>
+              )}
             </div>
           ) : (
             <div className="divide-y divide-border">

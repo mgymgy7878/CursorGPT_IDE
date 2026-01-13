@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 // CommandPalette removed - now handled globally in app/layout.tsx via portal
 const AlarmCard = dynamic(() => import("@/components/dashboard/AlarmCard"), {
@@ -23,6 +24,53 @@ type RouteItem = (typeof ROUTES)[number];
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchPopoverRef = useRef<HTMLDivElement>(null);
+
+  // Close search on route change
+  useEffect(() => {
+    setIsSearchOpen(false);
+  }, [pathname]);
+
+  // Close on ESC
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isSearchOpen) {
+        setIsSearchOpen(false);
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen]);
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        isSearchOpen &&
+        searchPopoverRef.current &&
+        !searchPopoverRef.current.contains(e.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(e.target as Node)
+      ) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSearchOpen]);
+
+  // Mock search results (replace with real search logic)
+  const searchResults = searchQuery.length > 0
+    ? ROUTES.filter((route) =>
+        route.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
+
   const NavItem = ({ href, label }: { href: string; label: string }) => {
     const active = pathname?.startsWith(href) ?? false;
     return (
@@ -42,11 +90,62 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             SPARK
           </Link>
           <div className="flex-1" />
-          <input
-            aria-label="Global Search"
-            placeholder="Ara…"
-            className="hidden md:block px-3 py-1.5 rounded-lg border border-neutral-800 bg-black w-72"
-          />
+          <div className="hidden md:block relative">
+            <input
+              ref={searchInputRef}
+              aria-label="Global Search"
+              placeholder="Ara…"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearchOpen(e.target.value.length > 0 || false);
+              }}
+              onFocus={() => {
+                if (searchQuery.length > 0) {
+                  setIsSearchOpen(true);
+                }
+              }}
+              className="px-3 py-1.5 rounded-lg border border-neutral-800 bg-black w-72 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {/* Search Popover */}
+            {isSearchOpen && (
+              <div
+                ref={searchPopoverRef}
+                className="absolute top-full left-0 mt-1 w-72 bg-popover text-popover-foreground border border-border rounded-lg shadow-lg z-[100] max-h-[360px] overflow-y-auto"
+              >
+                {searchQuery.length === 0 ? (
+                  <div className="p-4 text-sm text-muted-foreground">
+                    <div className="font-medium text-popover-foreground mb-2">Son aramalar</div>
+                    <div className="text-xs text-muted-foreground/70">Yazmaya başlayın...</div>
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-4 text-sm text-center text-popover-foreground">
+                    <div className="font-medium mb-1">Sonuç yok</div>
+                    <div className="text-xs text-muted-foreground/70 mt-2">
+                      Örnek: "BTCUSDT", "BIST:THYAO"
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-2">
+                    {searchResults.map((route) => (
+                      <Link
+                        key={route.path}
+                        href={route.path}
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          setSearchQuery("");
+                        }}
+                        className="block px-4 py-2 hover:bg-muted/50 transition-colors text-popover-foreground"
+                      >
+                        <div className="font-medium">{route.name}</div>
+                        <div className="text-xs text-muted-foreground">{route.path}</div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           {/* CommandPalette removed - handled globally in app/layout.tsx */}
           <div
             aria-label="Profile"

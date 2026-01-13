@@ -8,7 +8,7 @@ export interface CommandAction {
   label: string;
   description: string;
   icon: string;
-  category: "test" | "health" | "deploy" | "dev";
+  category: "test" | "health" | "deploy" | "dev" | "checkpoint";
   handler: () => Promise<CommandResult>;
 }
 
@@ -231,7 +231,7 @@ export const dailyRiskReport: CommandAction = {
   handler: async () => {
     try {
       const response = await fetch("/api/tools/risk-report?emitZip=true");
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -311,11 +311,11 @@ export const widgetsSmoke: CommandAction = {
       // For browser execution, we do a quick check instead
       const response = await fetch("/api/healthz");
       const health = await response.json();
-      
+
       const venueOk =
         (health.venues?.btcturk?.stalenessSec ?? 999) < 30 &&
         (health.venues?.bist?.stalenessSec ?? 999) < 30;
-      
+
       return {
         success: venueOk,
         message: venueOk
@@ -374,11 +374,11 @@ export const showVenueMetrics: CommandAction = {
     try {
       const response = await fetch("/api/tools/metrics?format=prometheus");
       const metrics = await response.text();
-      
+
       // Extract key metrics
       const lines = metrics.split('\n');
-      const venueMetrics = lines.filter(line => 
-        line.includes('venue_staleness_') || 
+      const venueMetrics = lines.filter(line =>
+        line.includes('venue_staleness_') ||
         line.includes('venue_http_429_total') ||
         line.includes('ws_reconnects_total')
       );
@@ -397,6 +397,202 @@ export const showVenueMetrics: CommandAction = {
   },
 };
 
+// Checkpoint: PRE
+export const checkpointPre: CommandAction = {
+  id: "checkpoint.pre",
+  label: "Checkpoint: PRE",
+  description: "Create checkpoint before starting work (safety backup)",
+  icon: "💾",
+  category: "checkpoint",
+  handler: async () => {
+    const message = prompt("Task description (optional):") || "checkpoint";
+    try {
+      const response = await fetch("/api/tools/checkpoint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pre", message }),
+      });
+
+      const result = await response.json();
+
+      return {
+        success: result.success,
+        message: result.message,
+        details: result.output,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Checkpoint PRE failed: ${err}`,
+      };
+    }
+  },
+};
+
+// Checkpoint: POST (with VerifyUi)
+export const checkpointPost: CommandAction = {
+  id: "checkpoint.post",
+  label: "Checkpoint: POST (VerifyUi)",
+  description: "Create checkpoint after work (auto VerifyUi if UI-touch detected)",
+  icon: "✅",
+  category: "checkpoint",
+  handler: async () => {
+    const message = prompt("Task description (optional):") || "checkpoint";
+    const verifyUi = confirm("Run VerifyUi checks? (Auto-enabled if UI-touch detected)");
+
+    try {
+      const response = await fetch("/api/tools/checkpoint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "post", message, verifyUi }),
+      });
+
+      const result = await response.json();
+
+      return {
+        success: result.success,
+        message: result.message,
+        details: result.output,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Checkpoint POST failed: ${err}`,
+      };
+    }
+  },
+};
+
+// Rollback: Last Checkpoint
+export const rollbackLast: CommandAction = {
+  id: "checkpoint.rollback",
+  label: "Rollback: Last Checkpoint",
+  description: "Rollback to last checkpoint (uncommitted changes will be stashed)",
+  icon: "⏪",
+  category: "checkpoint",
+  handler: async () => {
+    const confirmed = confirm(
+      "⚠️ This will reset your working directory to the last checkpoint.\n\n" +
+      "Uncommitted changes will be automatically stashed and backed up.\n\n" +
+      "Continue?"
+    );
+
+    if (!confirmed) {
+      return {
+        success: false,
+        message: "Rollback cancelled",
+      };
+    }
+
+    try {
+      const response = await fetch("/api/tools/checkpoint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "rollback" }),
+      });
+
+      const result = await response.json();
+
+      return {
+        success: result.success,
+        message: result.message,
+        details: result.output,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Rollback failed: ${err}`,
+      };
+    }
+  },
+};
+
+// Rollback: Golden Master
+export const rollbackGolden: CommandAction = {
+  id: "checkpoint.rollback-golden",
+  label: "Rollback: Golden Master",
+  description: "Rollback to golden master (ui/golden-master/v1)",
+  icon: "🏆",
+  category: "checkpoint",
+  handler: async () => {
+    const confirmed = confirm(
+      "⚠️ This will reset your working directory to golden master (ui/golden-master/v1).\n\n" +
+      "Uncommitted changes will be automatically stashed and backed up.\n\n" +
+      "Continue?"
+    );
+
+    if (!confirmed) {
+      return {
+        success: false,
+        message: "Rollback cancelled",
+      };
+    }
+
+    try {
+      const response = await fetch("/api/tools/checkpoint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "rollback-golden" }),
+      });
+
+      const result = await response.json();
+
+      return {
+        success: result.success,
+        message: result.message,
+        details: result.output,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Rollback failed: ${err}`,
+      };
+    }
+  },
+};
+
+// UI: Reset Layout
+export const resetUILayout: CommandAction = {
+  id: "ui.reset-layout",
+  label: "UI: Reset Layout",
+  description: "Clear localStorage layout/panel states (panels, last page, open popovers)",
+  icon: "🔄",
+  category: "dev",
+  handler: async () => {
+    try {
+      // Clear layout-related localStorage keys
+      const layoutKeys = [
+        "ui.copilotRecentCommands.v1",
+        "copilot.greeting.shown",
+        "ui.rightRail.collapsed",
+        "ui.sidebar.collapsed",
+        "ui.lastPage",
+        "ui.openPopovers",
+      ];
+
+      layoutKeys.forEach((key) => {
+        localStorage.removeItem(key);
+      });
+
+      // Soft refresh
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
+
+      return {
+        success: true,
+        message: "UI layout reset successfully. Page will refresh.",
+        details: { clearedKeys: layoutKeys },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Reset failed: ${err}`,
+      };
+    }
+  },
+};
+
 // All commands
 export const COMMANDS: CommandAction[] = [
   runCanaryMock,
@@ -409,6 +605,11 @@ export const COMMANDS: CommandAction[] = [
   widgetsSmoke,
   toggleKillSwitch,
   showVenueMetrics,
+  checkpointPre,
+  checkpointPost,
+  rollbackLast,
+  rollbackGolden,
+  resetUILayout,
 ];
 
 // Get commands by category
