@@ -5,7 +5,7 @@
 ## Quick Links / Docs
 
 - [**UI/UX Guide**](docs/UI_UX_GUIDE.md) — UI standartları, erişilebilirlik kuralları, bileşen standartları ve 2 haftalık uygulama planı
-- [UI & UX Planı](docs/UI_UX_PLAN.md)
+- [Docs/UI & UX Planı](docs/UI_UX_PLAN.md)
 - **Raporlar**: [2025-01-14 Detaylı Proje Analizi](docs/reports/PROJE_ANALIZ_2025_01_14_DETAYLI_TAM_RAPOR.md)
 
 ### GREEN Receipt (v1.6-p1)
