@@ -1,0 +1,1002 @@
+{
+  "version": "1.0.0",
+  "createdAt": "2026-01-11T22:44:16.718Z",
+  "violations": [
+    {
+      "file": "apps\\web-next\\src\\components\\common\\BreachHistory.tsx",
+      "line": 75,
+      "pattern": "/\\btext-black\\b/",
+      "hash": "1aa9683e0d2d80f139d0612fcd2924d5"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 56,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "5ebb0bda9d4bb049678ca2e6c5f208e5"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 56,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "5b012000bc2e392a2d63faf37cb4a134"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 56,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "3c310da86d8a2cd7a5ddcd2f0ee0dd66"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 57,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "c57f0e1df5fcb729c248a0205a5a7182"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 57,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "742d9f0427b528be349523c5c0760799"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 58,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "91b17424a1d82893a1b47f8513d135eb"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 63,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "6de203a304391d233850d967d80083b7"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 63,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "283dfafc1a87bec88444194764fe5dfc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 71,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "6de203a304391d233850d967d80083b7"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 71,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "283dfafc1a87bec88444194764fe5dfc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 85,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "705d8718eab3ab1101f894fe491c830d"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 85,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "91b17424a1d82893a1b47f8513d135eb"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 85,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "69be8996de838a6789d5a6a7e33e1b86"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 98,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "705d8718eab3ab1101f894fe491c830d"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 98,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "69be8996de838a6789d5a6a7e33e1b86"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 100,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "879500e6dbaf1b7ddd9121c2006cc04e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 101,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "879500e6dbaf1b7ddd9121c2006cc04e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 102,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "879500e6dbaf1b7ddd9121c2006cc04e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 109,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "c57f0e1df5fcb729c248a0205a5a7182"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 109,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "742d9f0427b528be349523c5c0760799"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 117,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "496b1fb68ec1c772ee241564d5ffa799"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 117,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "69e1a0da60375639867ec3f6e4145462"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 117,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "69be8996de838a6789d5a6a7e33e1b86"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\copilot\\CopilotPanel.tsx",
+      "line": 117,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "d89d5360a2979467b6dba522c82ce355"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 30,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "f4b76ea9916b5bd097d551505b609d4c"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 30,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "606279a57eeae822d72ed02daaf5df80"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 30,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "69ad03b5d1b7afbeee572a9c0a8b67cf"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 32,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "413b03f5de19052fde749f4bb0b410e1"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 32,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "ec41217088526ab08357091514d9500b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 32,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "b7745a330b08ab0a4957f4d8bf496e2c"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 34,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "68ca7106bb152cbed631718bb44c3f69"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 34,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "737110bdcc536a007c10fcfff0065715"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 34,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "faca3288c8ce3a4fbde5adb0de8274db"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 36,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "bd799893b3be7bd4bfc861d3f569e34f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 36,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "20d0e34671e7a0c43ce898450268a299"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 36,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "f119b80d8e0791f9f7d2c118055cd5d9"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 36,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "ab79b5fdc88716b3812d9d0f2073bfaf"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 36,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "0093dfd2e94fa06eab7ba316c243df7a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 36,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "27bf2d67fc876804a78507755b031fa8"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 71,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "8aff7f28966b616d0fe4ff20a0e09979"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 80,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "f119b80d8e0791f9f7d2c118055cd5d9"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 80,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "0093dfd2e94fa06eab7ba316c243df7a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 82,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "8aff7f28966b616d0fe4ff20a0e09979"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 85,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "4f154f6d702e142e09037a746d873628"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 85,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "0093dfd2e94fa06eab7ba316c243df7a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 93,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "f119b80d8e0791f9f7d2c118055cd5d9"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 93,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "0093dfd2e94fa06eab7ba316c243df7a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 95,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "606279a57eeae822d72ed02daaf5df80"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 96,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "ec41217088526ab08357091514d9500b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 97,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "737110bdcc536a007c10fcfff0065715"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 106,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "f119b80d8e0791f9f7d2c118055cd5d9"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 106,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "0093dfd2e94fa06eab7ba316c243df7a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 108,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "606279a57eeae822d72ed02daaf5df80"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 109,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "ec41217088526ab08357091514d9500b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 110,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "737110bdcc536a007c10fcfff0065715"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 119,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "f119b80d8e0791f9f7d2c118055cd5d9"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 119,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "0093dfd2e94fa06eab7ba316c243df7a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 121,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "606279a57eeae822d72ed02daaf5df80"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 129,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "f119b80d8e0791f9f7d2c118055cd5d9"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 129,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "0093dfd2e94fa06eab7ba316c243df7a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 130,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "8aff7f28966b616d0fe4ff20a0e09979"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 136,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "bd799893b3be7bd4bfc861d3f569e34f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 136,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "61ab1ce30a6b62295e2293dee6ae4d91"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\dashboard\\CanaryCard.tsx",
+      "line": 141,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "45b0c71e5849c4201bd75a6ae4fc4587"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\lab\\ResultPanel.tsx",
+      "line": 17,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "ec2d1e137c2f41256583da9907aa8163"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\lab\\ResultPanel.tsx",
+      "line": 18,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "d98c9a2d2fa4c65bad885cc0355109fb"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\lab\\ResultPanel.tsx",
+      "line": 25,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "250296688a57d8f02be72cf80870d280"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\lab\\ResultPanel.tsx",
+      "line": 26,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "d98c9a2d2fa4c65bad885cc0355109fb"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\left-nav.tsx",
+      "line": 88,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "af36b266777edacced7cf5daa44cca24"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 67,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "a596744b0337ad0041dac52ffcb80ed0"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 67,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "37e2468da8b540f13bec6f344688b70b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 70,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "62667a8d434c5392d84f1daba52f12fd"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 72,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "406c19337c85056c57d5f4b6e449a0c3"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 78,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "fc579978af0813e41360abf3fda5c79f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 78,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "551da199b1ed235dd45aafef5c44dadc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 78,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "11ccd3244e770b847f85f794ff40c1ea"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 82,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "35febd8df645de8738812e1fedbed67f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 84,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9310953453a39947cfe967b2336401dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 84,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 92,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "2125e319bd2d9e53ba10ad5ebc29b0dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 92,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 93,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "35febd8df645de8738812e1fedbed67f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 99,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "2125e319bd2d9e53ba10ad5ebc29b0dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 99,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 101,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "4ca23ec6174d912d030251a3558ca10b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 108,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "2125e319bd2d9e53ba10ad5ebc29b0dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 108,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 109,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "35febd8df645de8738812e1fedbed67f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 116,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9310953453a39947cfe967b2336401dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 116,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 117,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "35febd8df645de8738812e1fedbed67f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 120,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9310953453a39947cfe967b2336401dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 120,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 121,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "35febd8df645de8738812e1fedbed67f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 129,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "bdc2b0a938ad7decc568c65add813e2b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 129,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "6022f89b020ec10cb92c4e295073cf3e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 132,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "4ca23ec6174d912d030251a3558ca10b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 135,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "2125e319bd2d9e53ba10ad5ebc29b0dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 135,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 136,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "35febd8df645de8738812e1fedbed67f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 141,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "406c19337c85056c57d5f4b6e449a0c3"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 144,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "2125e319bd2d9e53ba10ad5ebc29b0dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 144,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 145,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "35febd8df645de8738812e1fedbed67f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 155,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "bdc2b0a938ad7decc568c65add813e2b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 155,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "6022f89b020ec10cb92c4e295073cf3e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 161,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "4ca23ec6174d912d030251a3558ca10b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 162,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "406c19337c85056c57d5f4b6e449a0c3"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 166,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "2125e319bd2d9e53ba10ad5ebc29b0dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 166,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "22dc302afd9eba272148ff6e742cee8e"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 167,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9310953453a39947cfe967b2336401dc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\marketdata\\MarketCard.tsx",
+      "line": 167,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "eb4e268e95ac2ee0707888a070379589"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\optimizer\\ProgressBar.tsx",
+      "line": 21,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "7c8272724e93c29f5be59fd71a83c1cd"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\optimizer\\ProgressBar.tsx",
+      "line": 22,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "d6853c1590787775824208bf0c5ddc75"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\portfolio\\AllocationDonut.tsx",
+      "line": 29,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "dcde2cb89c42d7e7890e1221a2b8b94a"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\portfolio\\ExchangeTabs.tsx",
+      "line": 14,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "79cd3f88a2122444ab960289cdff34f3"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\portfolio\\PortfolioTable.tsx",
+      "line": 16,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "ff5752d1d71bac47da802658a25b5965"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\portfolio\\SummaryCards.tsx",
+      "line": 30,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "d3cc0be8a2ec05d748c2c9f903f2e406"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyDetailPanel.tsx",
+      "line": 105,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9e91a6168aae2efabf9c6dc367bf6c29"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyDetailPanel.tsx",
+      "line": 111,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9e91a6168aae2efabf9c6dc367bf6c29"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyDetailPanel.tsx",
+      "line": 120,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "732dacdb28ca4be4e1aa7a7b8ad58bef"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyDetailPanel.tsx",
+      "line": 120,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "ae27ad7e648ad2280b794a0d052ca593"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyDetailPanel.tsx",
+      "line": 125,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9e91a6168aae2efabf9c6dc367bf6c29"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyDetailPanel.tsx",
+      "line": 133,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9e91a6168aae2efabf9c6dc367bf6c29"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyDetailPanel.tsx",
+      "line": 142,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "9e91a6168aae2efabf9c6dc367bf6c29"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyList.tsx",
+      "line": 123,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "1500d1caedfb5d3b4e36ffe11df12659"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyList.tsx",
+      "line": 123,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "879e1d5fd7f36c7d2ee6f56d0aed4f57"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyList.tsx",
+      "line": 131,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "1500d1caedfb5d3b4e36ffe11df12659"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyList.tsx",
+      "line": 131,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "879e1d5fd7f36c7d2ee6f56d0aed4f57"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyList.tsx",
+      "line": 141,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "1500d1caedfb5d3b4e36ffe11df12659"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\strategies\\StrategyList.tsx",
+      "line": 141,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "879e1d5fd7f36c7d2ee6f56d0aed4f57"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 22,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "40a83b66c61b829821beaed790d773b7"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 22,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "b82a3a49e5cd58f4e185ebc4190fbbd0"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 32,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "f84f1135759f591e1dc985c3345a2606"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 32,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "5918fe7dd0fcdc1b8c5c1287b21d9d90"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 33,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "969066ced6443878ea5c7809bd16b1f0"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 33,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "e086efb6bcaa1a0f658a68d9d67b39cc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 33,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "d7b9ed9383b0fb24b96b8295271e5c07"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 34,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "92eedc7a424c52617a2f31376c190791"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 48,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "ffffea387be473786156e9d3f80e3a46"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 53,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "0b3b78dae1f531239d912fc085d462f4"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Input.tsx",
+      "line": 53,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "e22b29ce4c021e1c41b6e57d6cc68fe9"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 30,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "3846938e4dfeeab43f1e27029b39b26b"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 30,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "3201df5f86cc2ed9581a27187b48cc18"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 40,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "8cd7547bdd76608be36c1b750c73d008"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 40,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "008fbe7881749a9190c26b0dbddfd5ec"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 41,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "d3f7dd54bc4c50ff00726080730ec114"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 41,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "87dfc0b838db56fad969814c10077dc4"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 41,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "1ab105742ede51bb3995f8edc16de6de"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 71,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "01d548e44e86995d4e67ac0544b03806"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 76,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "c215b7dbbd05b7813843484dde3e1c46"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Select.tsx",
+      "line": 76,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "518f6f65e81b8b158ff44295babf1ee0"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 23,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "01ac4f29366f359c28df860997e6d3e2"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 23,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "d50a84771fa83c04a2c3b3e15e9dc445"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 34,
+      "pattern": "/\\bborder-gray-\\d+\\b/",
+      "hash": "ea3abcd94691185565c03b01dfa38ecb"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 34,
+      "pattern": "/\\bdark:border-\\w+-\\d+\\b/",
+      "hash": "64791d855bf555b56d5d1ee895f38e7f"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 35,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "695aa235c0cad4436fc866df3d5a5580"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 35,
+      "pattern": "/\\bbg-gray-\\d+\\b/",
+      "hash": "4f800900a92862b672e4ce7754041746"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 35,
+      "pattern": "/\\bdark:bg-\\w+-\\d+\\b/",
+      "hash": "97fc2ec37f9266e8c50bd188610f36c8"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 36,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "b9dd06e88f9bb58fdefd736b70dbef47"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 51,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "cd661e42a4e946947dee585663e28cbc"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 56,
+      "pattern": "/\\btext-gray-\\d+\\b/",
+      "hash": "8537ddbde296970af41277fe66b776c1"
+    },
+    {
+      "file": "apps\\web-next\\src\\components\\ui\\Textarea.tsx",
+      "line": 56,
+      "pattern": "/\\bdark:text-\\w+-\\d+\\b/",
+      "hash": "5856f91663cea9efde9261ebd0971d26"
+    },
+    {
+      "file": "apps\\web-next\\src\\styles\\uiTokens.ts",
+      "line": 52,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "1673173f7b4b8ee1e0ce44f28c46c494"
+    },
+    {
+      "file": "apps\\web-next\\src\\styles\\uiTokens.ts",
+      "line": 59,
+      "pattern": "/\\bbg-white\\b/",
+      "hash": "1673173f7b4b8ee1e0ce44f28c46c494"
+    }
+  ]
+}

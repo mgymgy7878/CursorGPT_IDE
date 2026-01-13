@@ -1,0 +1,2 @@
+# Visual smoke test snapshots will be generated here
+# Run: pnpm ui:test:update

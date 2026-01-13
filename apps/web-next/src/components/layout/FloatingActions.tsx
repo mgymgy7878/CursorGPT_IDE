@@ -1,26 +1,30 @@
 'use client';
 
+import { useState } from 'react';
 import { t } from '@/lib/i18n';
+import { useCommandPalette } from '@/hooks/useCommandPalette';
+import { OpsDrawer } from './OpsDrawer';
 
 const isMac = () => typeof window !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
 
 export default function FloatingActions() {
+  const [opsDrawerOpen, setOpsDrawerOpen] = useState(false);
+  const { open: openCommandPalette } = useCommandPalette();
+
   const handleCommandK = () => {
-    // TODO: Open command palette
-    console.log('Command palette');
+    openCommandPalette();
   };
 
   const handleOpsHelp = () => {
-    // TODO: Open ops help modal
-    console.log('Ops help');
+    setOpsDrawerOpen(true);
   };
 
   const cmdLabel = isMac() ? t('common.cmdk_mac') : t('common.cmdk_win');
 
   return (
-    <div 
+    <div
       className="fixed right-6 md:right-10 z-40 hidden md:flex gap-3 pointer-events-auto"
-      style={{ 
+      style={{
         bottom: 'max(24px, env(safe-area-inset-bottom, 24px))'
       }}
       aria-label="Hızlı komutlar"
@@ -39,6 +43,11 @@ export default function FloatingActions() {
         title="Operasyon yardımı (Ops)">
         Ops Hızlı Yardım
       </button>
+      <OpsDrawer
+        open={opsDrawerOpen}
+        onOpenChange={setOpsDrawerOpen}
+        showButton={false}
+      />
     </div>
   );
 }

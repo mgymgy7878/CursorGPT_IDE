@@ -1,0 +1,110 @@
+name: UI Guardrails
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web-next/src/**/*.{ts,tsx,js,jsx}'
+      - 'apps/web-next/src/**/*.css'
+      - 'scripts/check-ui-tokens.js'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/web-next/src/**/*.{ts,tsx,js,jsx}'
+      - 'apps/web-next/src/**/*.css'
+
+jobs:
+  token-lockdown:
+    name: Token Lockdown Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check UI Tokens (Baseline Mode)
+        run: pnpm check:ui-tokens
+        continue-on-error: false
+
+  visual-smoke:
+    name: Visual Smoke Test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter web-next exec playwright install --with-deps chromium
+
+      - name: Build web-next
+        run: pnpm --filter web-next build
+        env:
+          NEXT_DISABLE_ESLINT: 1
+
+      - name: Start web-next server
+        run: pnpm --filter web-next start
+        shell: pwsh
+        env:
+          PORT: 3003
+        continue-on-error: false
+
+      - name: Wait for server
+        run: |
+          $timeout = 60
+          $elapsed = 0
+          while ($true) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:3003" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+              Write-Host "Server is ready"
+              break
+            } catch {
+              if ($elapsed -ge $timeout) {
+                Write-Host "Server failed to start"
+                exit 1
+              }
+              Start-Sleep -Seconds 2
+              $elapsed += 2
+            }
+          }
+        shell: pwsh
+
+      - name: Run visual smoke tests
+        run: pnpm ui:test:visual
+        env:
+          CI: true
+          # Snapshot update yapma (sadece compare)
+          UPDATE_SNAPSHOTS: false
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-smoke-screenshots
+          path: apps/web-next/test-results/
+          retention-days: 7

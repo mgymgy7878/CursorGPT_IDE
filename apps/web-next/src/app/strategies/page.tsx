@@ -78,13 +78,13 @@ export default function StrategiesPage() {
       />
 
       {error && (
-        <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div className="mb-6 bg-red-950/20 border border-red-800 rounded-lg p-4">
           <div className="flex">
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+              <h3 className="text-sm font-medium text-red-400">
                 Hata
               </h3>
-              <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+              <div className="mt-2 text-sm text-red-300">
                 {error}
               </div>
             </div>

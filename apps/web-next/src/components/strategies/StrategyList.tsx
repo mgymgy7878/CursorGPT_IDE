@@ -57,13 +57,13 @@ export const StrategyList: React.FC<StrategyListProps> = ({
         {[1, 2, 3].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
-              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-4 bg-neutral-800 rounded w-1/3"></div>
+              <div className="h-3 bg-neutral-800 rounded w-1/2"></div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="h-3 bg-gray-200 rounded"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-3 bg-neutral-800 rounded"></div>
+                <div className="h-3 bg-neutral-800 rounded w-2/3"></div>
               </div>
             </CardContent>
           </Card>
@@ -77,10 +77,10 @@ export const StrategyList: React.FC<StrategyListProps> = ({
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="text-lg font-medium text-neutral-100 mb-2">
               Henüz strateji bulunmuyor
             </h3>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-neutral-400">
               İlk stratejinizi oluşturmak için yukarıdaki "Yeni Strateji" butonuna tıklayın.
             </p>
           </div>
@@ -98,7 +98,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
               <div className="flex-1">
                 <CardTitle className="text-lg">{strategy.name}</CardTitle>
                 {strategy.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-neutral-400 mt-1">
                     {strategy.description}
                   </p>
                 )}
@@ -112,7 +112,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <p className="text-xs text-neutral-500 uppercase tracking-wide">
                   Tip
                 </p>
                 <p className="text-sm font-medium">
@@ -146,12 +146,12 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                 </p>
               </div>
             </div>
-            
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+
+            <div className="flex items-center justify-between pt-4 border-t border-neutral-800">
+              <div className="text-xs text-neutral-500">
                 Oluşturulma: {formatDate(strategy.createdAt)}
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 {strategy.status === 'active' && (
                   <Button
@@ -189,7 +189,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                     Durdur
                   </Button>
                 )}
-                
+
                 <Button
                   size="sm"
                   variant="outline"
@@ -197,7 +197,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                 >
                   Düzenle
                 </Button>
-                
+
                 <Button
                   size="sm"
                   variant="outline"
