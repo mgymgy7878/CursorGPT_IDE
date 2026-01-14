@@ -23,7 +23,7 @@ export default function FloatingActions() {
 
   return (
     <div
-      className="fixed right-6 md:right-10 z-40 hidden md:flex gap-3 pointer-events-auto"
+      className="fixed right-6 md:right-10 z-40 hidden md:flex lg:hidden gap-3 pointer-events-auto"
       style={{
         bottom: 'max(24px, env(safe-area-inset-bottom, 24px))'
       }}

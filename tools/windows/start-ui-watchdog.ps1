@@ -51,9 +51,33 @@ if ($portCheck) {
     }
 }
 
-# Find pnpm executable
+# Find pnpm executable (prefer .cmd over .ps1 for Process.Start compatibility)
 try {
-    $pnpmPath = (Get-Command pnpm -ErrorAction Stop).Source
+    # Try to find pnpm.cmd first
+    $pnpmCmd = Get-Command pnpm.cmd -ErrorAction SilentlyContinue
+    if ($pnpmCmd) {
+        $pnpmPath = $pnpmCmd.Source
+        $useCmdWrapper = $true
+    } else {
+        # Fallback to pnpm (might be .ps1)
+        $pnpmPath = (Get-Command pnpm -ErrorAction Stop).Source
+        if ($pnpmPath -like "*.ps1") {
+            # Try to find .cmd in same directory
+            $pnpmDir = Split-Path -Parent $pnpmPath
+            $pnpmCmdPath = Join-Path $pnpmDir "pnpm.cmd"
+            if (Test-Path $pnpmCmdPath) {
+                $pnpmPath = $pnpmCmdPath
+                $useCmdWrapper = $true
+            } else {
+                # Use PowerShell wrapper for .ps1
+                $useCmdWrapper = $false
+                $pnpmPath = "powershell.exe"
+                $pnpmArgs = "-NoProfile -ExecutionPolicy Bypass -Command `"& '$pnpmPath' --filter web-next dev -- --hostname 127.0.0.1 --port 3003`""
+            }
+        } else {
+            $useCmdWrapper = $false
+        }
+    }
     Write-Host "[OK] Found pnpm: $pnpmPath" -ForegroundColor Green
 } catch {
     Write-Host "[ERROR] pnpm not found in PATH. Please install pnpm or add it to PATH." -ForegroundColor Red
@@ -70,66 +94,35 @@ Write-Host ""
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Add-Content -Path $logFile -Value "`n=== UI Dev Server Start: $timestamp ===`n"
 
-# Start process with output redirection
-$processStartInfo = New-Object System.Diagnostics.ProcessStartInfo
-$processStartInfo.FileName = $pnpmPath
-$processStartInfo.Arguments = "--filter web-next dev -- --hostname 127.0.0.1 --port 3003"
-$processStartInfo.WorkingDirectory = $repoRoot
-$processStartInfo.UseShellExecute = $false
-$processStartInfo.RedirectStandardOutput = $true
-$processStartInfo.RedirectStandardError = $true
-$processStartInfo.CreateNoWindow = $false
+# Build command - use pnpm directly with proper argument separation
+$pnpmCommand = "--filter web-next dev -- --hostname 127.0.0.1 --port 3003"
 
-$process = New-Object System.Diagnostics.Process
-$process.StartInfo = $processStartInfo
-
-# Redirect output to log file and console
-$process.add_OutputDataReceived({
-    param($sender, $e)
-    if ($e.Data) {
-        $line = $e.Data
-        Add-Content -Path $logFile -Value $line
-        Write-Host $line
-    }
-})
-
-$process.add_ErrorDataReceived({
-    param($sender, $e)
-    if ($e.Data) {
-        $line = $e.Data
-        Add-Content -Path $logFile -Value "ERROR: $line"
-        Write-Host "ERROR: $line" -ForegroundColor Red
-    }
-})
-
+# Use direct execution with output redirection (simplest and most reliable)
 try {
-    $process.Start() | Out-Null
-    $process.BeginOutputReadLine()
-    $process.BeginErrorReadLine()
-
-    Write-Host "[OK] Dev server started (PID: $($process.Id))" -ForegroundColor Green
-    Write-Host "[INFO] Logging to: $logFile" -ForegroundColor Gray
-    Write-Host "[INFO] Press Ctrl+C to stop" -ForegroundColor Gray
+    Write-Host "[INFO] Executing: $pnpmPath $pnpmCommand" -ForegroundColor Gray
+    Write-Host "[INFO] Working directory: $repoRoot" -ForegroundColor Gray
     Write-Host ""
 
-    # Wait for process to exit
-    $process.WaitForExit()
+    # Change to repo root
+    Set-Location $repoRoot
 
-    $exitCode = $process.ExitCode
+    # Execute pnpm command - use package.json script as-is (already has -p 3003)
+    # No additional parameters needed, package.json handles port
+    $fullCmd = "`"$pnpmPath`" --filter web-next dev"
+
+    Write-Host "[DEBUG] Executing: $fullCmd" -ForegroundColor Gray
+    Write-Host "[INFO] Using package.json dev script (port 3003 already configured)" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "[WARN] Dev server exited with code: $exitCode" -ForegroundColor Yellow
-    Write-Host "[INFO] Check log file for details: $logFile" -ForegroundColor Gray
 
-    # Show last 20 lines of log on crash
-    if ($exitCode -ne 0) {
-        Write-Host ""
-        Write-Host "=== Last 20 lines of log ===" -ForegroundColor Yellow
-        Get-Content $logFile -Tail 20 | ForEach-Object { Write-Host $_ }
-    }
+    # Execute via cmd.exe with output redirection
+    cmd.exe /c $fullCmd *>&1 | Tee-Object -FilePath $logFile -Append
 
-    exit $exitCode
+    # Note: This will block until server stops (Ctrl+C)
+    # Exit code will be from pnpm process
+    exit $LASTEXITCODE
 } catch {
     Write-Host "[ERROR] Failed to start dev server: $_" -ForegroundColor Red
     Add-Content -Path $logFile -Value "FATAL ERROR: $_"
+    Write-Host "[ERROR] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
     exit 1
 }

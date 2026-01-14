@@ -1,219 +1,147 @@
-# Spark Trading Platform — UI/UX Planı ve Uygulama Talimatları (Playbook)
+# Spark Trading Platform — UI/UX Planı ve Uygulama Talimatları
 
-**Amaç:** Spark arayüzünde erişilebilirlik (WCAG 2.2 AA), kullanılabilirlik (NN/g heuristics), tutarlı bilgi mimarisi, güven veren "sistem durumu görünürlüğü" ve trading'e uygun veri görselleştirme standardını tek yerde tanımlamak.
+**Amaç:** Spark'ın mevcut + planlanan sayfalarında erişilebilirlik (WCAG 2.2 AA), kullanılabilirlik (NN/g heuristics), veri görselleştirme ve operasyonel "durum görünürlüğü" standartlarını tek bir kaynakta toplamak.
 
-> Bu doküman hem "tasarım kuralı" hem "uygulama backlog'u"dur: yeni sayfa/özellik çıkarken buradaki checklist'ler DoD'nin parçasıdır.
-
----
-
-## 1) Tasarım İlkeleri (Golden Rules)
-
-### 1.1 Sistem Durumu Görünürlüğü (Trading UI için kritik)
-- **Bağlantı durumu** (API/WS/Executor/DEV) üst bar'da her zaman görünür.
-- "Veri akışı durdu" durumunda ekranda **boşluk değil**, açıklayıcı **empty/error state** göster.
-- Realtime panellerde "son güncelleme zamanı / staleness" net olmalı.
-
-### 1.2 Dil ve Terminoloji Tutarlılığı
-- Sol menü + sayfa başlıkları + butonlar **tek dil** (TR) standardında.
-- İngilizce terim gerekiyorsa: UI'da TR, tooltip'te EN açıklama.
-
-### 1.3 Navigasyon ve Konum
-- Sol menüde aktif öğe vurgusu + sayfa içinde breadcrumb (varsa).
-- Kullanıcı "Neredeyim?" sorusunu 1 saniyede cevaplamalı.
-
-### 1.4 Klavye ile Tam Kullanım (WCAG)
-- Tüm interaktif öğeler TAB ile erişilebilir.
-- Drawer/Modal açılınca focus trap + ESC ile kapanış.
-- Kısayollar: Command Palette (Ctrl/⌘ + K), işlem odaklı kısayollar (örn. Strategy Lab run).
-
-### 1.5 Kontrast ve Okunabilirlik
-- Metin/arka plan kontrastı **WCAG AA ≥ 4.5:1** hedefi.
-- Sayısal değerler için **tabular numbers** (PnL, fiyat, oranlar).
-
-### 1.6 Performans Algısı
-- Ağır panellerde **skeleton** + "yükleniyor" durumları.
-- Realtime güncellemelerde render-throttle (rafBatch) ve minimal re-render.
+**Kapsam:** Dashboard (Ana Sayfa), Piyasa Verileri, Strategy Lab, Stratejilerim, Çalışan Stratejiler, Portföy, Ayarlar, Alerts (plan), Market Analysis (plan), News (plan), sağ rail Copilot paneli.
 
 ---
 
-## 2) Layout Standardı (Spark "3 Kolon" Sistemi)
+## 1) Tasarım İlkeleri (Non-negotiables)
 
-- **Sol:** Navigation (sabit)
-- **Orta:** Page content (scroll container)
-- **Sağ:** Copilot/Right rail (persist edilebilir)
-- **Üst bar:** Sağlık/çevre rozetleri + hızlı aksiyonlar
-- **Floating Actions:** Ekran daralınca kritik aksiyonlara kısa yol
+### 1.1 Sistem Durumu Görünürlüğü (NN/g)
+- Her kritik akışta durum görünür olacak: **loading / empty / error / success / stale**.
+- WS/Feed/Executor/Engine sağlık göstergeleri: üst bar + sayfa içi kartlarda tutarlı rozetler.
+- "Belirsizlik yok": kullanıcı "şu an ne oluyor?" sorusuna 1 saniyede cevap bulmalı.
 
-**Kural:** Root scrollbar yerine içerik container scroll (layout jitter'ı azaltır).
+### 1.2 Erişilebilirlik (WCAG 2.2 AA)
+- Kontrast: metin/arka plan **≥ 4.5:1** (AA).
+- Klavye: tüm interaktif öğeler **TAB ile erişilebilir**, odak halkası net.
+- Formlar: label + aria-describedby + inline hata mesajı.
+- Tooltip/ikon-only butonlar: **aria-label zorunlu**.
+
+### 1.3 Tutarlılık ve Terminoloji
+- Dil karmaşası yok: TR UI etiketleri tek sözlükten.
+- "Primary CTA" (ör. Kaydet/Çalıştır) her sayfada aynı stil ve hiyerarşiyle.
+
+### 1.4 Veri-Viz (Tableau best practice yaklaşımı)
+- Her grafik: **başlık + açıklama + eksen etiketleri + birim**.
+- Renk sadece "anlam" taşır; salt süs değil.
+- Tablo: zebra + kolon başlığı scope + (varsa) sıralama ikonları.
 
 ---
 
-## 3) Bileşen Kuralları (Design System Contract)
+## 2) Layout Standardı (3-kolon zihniyeti)
+
+Spark temel yerleşim: **Sol Nav / Orta içerik / Sağ Copilot (ops panel)**
+
+- Sol Nav: tek navigasyon kaynağı (legacy nav yok).
+- Orta: ana görev alanı (formlar, tablolar, grafikler).
+- Sağ: Copilot + hızlı aksiyonlar (Ops / öneri / özet).
+- Dar ekranlarda: sağ rail collapsible / overlay; içerik öncelikli.
+
+**Kural:** "Önemli bilgi" 1080p'de mümkünse ilk ekranda; değilse net başlıklar ve bölüm ayrımı.
+
+---
+
+## 3) Bileşen Kuralları
 
 ### 3.1 Butonlar
-- Primary / Secondary / Danger ayrımı net.
-- Icon-only butonlarda **aria-label zorunlu**.
-- Focus ring görünür olmalı.
+- Primary: tek, net (mavi). Focus halkası zorunlu.
+- Secondary: gri ton.
+- Destructive: kırmızı (onay diyaloğu ile).
+- Icon-only: aria-label zorunlu.
 
 ### 3.2 Formlar
-- Her input: `label` + `id/for` bağlanacak.
-- Zorunlu alanlar: `*` + açıklama (`aria-describedby`).
-- Validasyon: inline, alanın yanında; submit sırasında disabled + spinner.
+- Zorunlu alan: `*`
+- Inline validasyon: alan altında net mesaj ("Bu alan zorunlu", "Geçersiz format").
+- Submit anında: disabled + spinner.
+- Başarılı işlem: toast + (varsa) ilgili kartta "success" state.
 
-### 3.3 Drawer / Modal (Ops Drawer dahil)
-- Controlled open state (store veya parent state).
-- ESC ile kapanış + overlay click + close button.
-- Açılınca focus içeri alınır, kapanınca tetikleyiciye geri döner.
+### 3.3 Durum Rozetleri (StatusBadge)
+- Tek kaynak bileşen.
+- Durumlar: `connected / paused / stale / error / mock / canary / testnet`
+- Her rozetin tooltip'i: kısa açıklama + (varsa) son olay zamanı.
 
-### 3.4 Skeleton / Loading
-- Dashboard, Market Data, Portfolio gibi sayfalarda en az 1 skeleton örneği.
-- "Loading" sadece spinner değil, içerik iskeleti ile gelmeli.
-
-### 3.5 Empty State / Error State
-- Boş liste: "Henüz yok" + CTA.
-- Hata: kısa açıklama + retry + (opsiyonel) "Detaylar" (log id).
-
-### 3.6 Tablo & Grafik
-- Tablo: `thead > th[scope="col"]`, zebra pattern, column sort iconları.
-- Grafik: başlık + eksen etiketleri + birim + tooltip'te net format (TR).
-- Realtime grafiklerde "son update" (staleness) görsel olarak hissedilmeli.
+### 3.4 Loading / Empty / Error Şablonları
+- Loading: skeleton (layout jitter yok).
+- Empty: "Henüz veri yok" + net CTA.
+- Error: kısa sebep + "tekrar dene" + (opsiyonel) "kopyala: requestId".
 
 ---
 
-## 4) Sayfa Bazlı Backlog (D1–D3 sonrası)
+## 4) Sayfa Bazlı İş Listesi (D1–D3 Sonrası)
 
-### 🏠 Ana Sayfa (Dashboard)
-- [ ] Ticker/strateji kartlarında skeleton
-- [ ] Menüde aktif sayfa vurgusu (highlight)
-- [ ] WS bağlantı göstergesi (üst bar + tooltip)
+> Bu liste "iş" değil "standart". Her madde uygulanınca sayfa UI parity kazanır.
 
-### 🧪 Strategy Lab
-- [ ] Kaydet/Backtest spinner + başarı/toast
-- [ ] Kod hataları için inline açıklama (editor yakınında)
-- [ ] Run sonrası "son loglar & status"
-- [ ] Kısayollar: Ctrl+Enter (backtest), Ctrl+Shift+O (optimize)
+### 4.1 Ana Sayfa (Dashboard)
+- [ ] Ticker/strateji panellerinde skeleton loading
+- [ ] Üst barda WS bağlantı durumu göstergesi (Feed/Executor/Engine)
+- [ ] Boş durum mesajları + CTA (alarm yoksa "Alarm oluştur")
 
-### 📋 Stratejilerim
-- [ ] Sayfalama / sonsuz scroll
-- [ ] Silme/Düzenle için confirm modal
+### 4.2 Piyasa Verileri
+- [ ] Grafik başlık/açıklama/eksen/birim zorunlu
+- [ ] Tooltip birim/format standardı
+- [ ] Staleness görsel uyarı + "pause/resume" davranışı net
 
-### 🏃‍♂️ Çalışan Stratejiler
+### 4.3 Strategy Lab
+- [ ] Kaydet/Backtest/Optimize için spinner + başarı/toast
+- [ ] Monaco hata çıktısı: inline ve "satıra git" aksiyonu
+- [ ] "Run sonrası son loglar" paneli + status (PASS/ATTN/FAIL)
+- [ ] Kısayollar: Ctrl+Enter backtest, Ctrl+Shift+O optimize (çakışma kontrol)
+
+### 4.4 Stratejilerim
+- [ ] Sayfalama veya sonsuz kaydırma
+- [ ] Sil/Düzenle için onay diyaloğu (geri alma opsiyonlu)
+
+### 4.5 Çalışan Stratejiler
 - [ ] Sparkline büyüt + tooltip
-- [ ] Pause/Resume ikon+metin
+- [ ] Pause/Resume ikon + metin (ambiguous yok)
 - [ ] Durum rozeti: running/paused/error
 
-### 💼 Portföy
-- [ ] Sticky header
-- [ ] Zebra + sıralama ikonları
-- [ ] Güncellenen satırda hafif animasyon vurgusu
+### 4.6 Portföy
+- [ ] Tablo header fixed (scroll'da kaybolmasın)
+- [ ] Zebra + kolon sıralama ikonları
+- [ ] Güncellenen satır: hafif animasyon vurgusu
 
-### ⚙️ Ayarlar
+### 4.7 Ayarlar
 - [ ] Label + aria-describedby tam
-- [ ] Tema/dil seçimi TAB ile tam gezilebilir
-- [ ] Kaydet butonu altında spinner
+- [ ] Tema/dil seçimi tam klavye erişilebilir
+- [ ] Kaydet butonu spinner + "son kaydedilme zamanı"
 
-### 🔔 Alerts (Planlanan)
-- [ ] Empty state + CTA ("Yeni alarm oluştur")
-- [ ] Form validasyon + onay
+### 4.8 Alerts (Planlanan)
+- [ ] Empty state + CTA
+- [ ] Alarm oluşturma: inline validasyon + onay akışı
 
-### 📊 Market Analysis (Planlanan)
-- [ ] Grid düzeni sade
-- [ ] Grafiklerde başlık/açıklama/etiket zorunlu
-- [ ] Tooltip'te birim + değer formatı
+### 4.9 Market Analysis (Planlanan)
+- [ ] Grid düzeni: "az ama net" (kafa karıştıran 10 grafik yok)
+- [ ] Her grafikte açıklama + metrik tanımı
+- [ ] Tooltip: değer + birim + kısa yorum
 
----
-
-## 5) Erişilebilirlik Checklist (DoD'ye girer)
-
-- [ ] Tüm interaktif öğeler TAB ile ulaşılabilir
-- [ ] Focus ring görünür
-- [ ] Drawer/Modal: ESC ile kapanır, focus trap var
-- [ ] Kontrast: AA hedefi
-- [ ] Form hataları alan bazında ve anlaşılır
-- [ ] Icon-only butonlar aria-label içerir
+### 4.10 News (Planlanan)
+- [ ] Başlık/özet/haber kaynağı hiyerarşisi net
+- [ ] "Etkisi" etiketi (volatilite/risk) opsiyonel
 
 ---
 
-## 6) UI Definition of Done (DoD) Checklist
+## 5) Test ve Kabul Kriterleri (DoD)
 
-Her UI değişikliği için aşağıdaki checklist'i kontrol edin:
-
-### ✅ Token Kullanımı
-- [ ] Hardcode renk sınıfları (`bg-white`, `text-black`, `border-gray-*`) kullanılmadı
-- [ ] Theme token'ları kullanıldı (`bg-card`, `text-card-foreground`, `border-border`)
-- [ ] Dark mode için `dark:` prefix'li hardcode sınıflar kullanılmadı
-- [ ] `pnpm check:ui-tokens` script'i geçti
-
-### ✅ Empty/Error States
-- [ ] Empty state component'i (`EmptyState`) kullanıldı
-- [ ] Error state component'i (`ErrorState`) kullanıldı
-- [ ] Loading state için `Skeleton` component'i kullanıldı
-- [ ] Boş durumlar için kullanıcıya net mesaj verildi
-
-### ✅ Keyboard Navigation
-- [ ] ESC tuşu ile modal/drawer kapatılabiliyor
-- [ ] Tab ile focus sırası mantıklı
-- [ ] Enter/Space ile butonlar çalışıyor
-- [ ] Focus ring görünür (`focus-visible`)
-
-### ✅ Accessibility
-- [ ] `aria-label` veya `aria-labelledby` kullanıldı (gerekli yerlerde)
-- [ ] `role` attribute'ları doğru kullanıldı
-- [ ] Kontrast oranları yeterli (WCAG AA minimum)
-- [ ] Screen reader test edildi (opsiyonel ama önerilir)
-
-### ✅ Responsive Design
-- [ ] Mobile görünüm test edildi (< 768px)
-- [ ] Tablet görünüm test edildi (768px - 1024px)
-- [ ] Desktop görünüm test edildi (> 1024px)
-- [ ] Overflow durumları handle edildi
-
-### ✅ Visual Consistency
-- [ ] Spacing token'ları kullanıldı (`--space-*`)
-- [ ] Border radius tutarlı (`rounded-xl`, `rounded-2xl`)
-- [ ] Shadow tutarlı (`shadow-sm`, `shadow-lg`)
-- [ ] Typography scale tutarlı (`text-sm`, `text-lg`, `text-2xl`)
-
-### ✅ Performance
-- [ ] Lazy loading kullanıldı (büyük component'ler için)
-- [ ] Image optimization yapıldı (`next/image` kullanıldı)
-- [ ] Unnecessary re-render'lar önlendi (`useMemo`, `useCallback`)
-- [ ] Bundle size artışı kontrol edildi
-
-### ✅ Testing
-- [ ] Visual smoke test geçti (`pnpm ui:test:visual`)
-- [ ] E2E test eklendi (kritik user flow'lar için)
-- [ ] TypeScript type errors yok (`pnpm typecheck`)
-- [ ] Linter errors yok (`pnpm lint`)
-
-### ✅ Documentation
-- [ ] Component props dokümante edildi (JSDoc)
-- [ ] Kullanım örneği eklendi (gerekirse)
-- [ ] Breaking changes dokümante edildi (varsa)
-
-**Not:** Bu checklist her PR'da kontrol edilmeli. CI otomatik olarak token lockdown ve visual smoke testlerini çalıştırır. Detaylar için: [UI_GUARDRAILS.md](./UI_GUARDRAILS.md)
-
-## 7) Test ve Kabul Kriterleri (Ölçülebilir)
-
-| Test | Kriter |
-|---|---|
-| WCAG AA Kontrast | Metin kontrastı ≥ 4.5:1 |
-| Klavye Erişimi | Tüm işlevler klavye ile yapılır |
-| Form Validasyon | 5/5 hatalı senaryo yakalanır |
-| Yükleme (P95) | < 3s ve skeleton gösterimi var |
-| Skeleton/Empty State | Her kritik sayfada en az 1 örnek |
+- WCAG AA Kontrast: kritik metinler ≥ 4.5:1
+- Klavye: tüm interaktif öğeler TAB ile erişilebilir + odak görünür
+- Form validasyonu: en az 5 hatalı senaryoda doğru alan altı mesajı
+- P95 algılanan yükleme: < 3s; skeleton ile "boş ekran" yok
+- Her sayfada en az 1 loading + 1 empty örneği
 
 ---
 
-## 8) Kanıt (Evidence) Standardı
+## 6) Evidence (Kanıt) Rutini
 
-UI değişikliklerinde aşağıdaki kanıtlar eklenir:
-- `evidence/ui/<tarih>_<konu>_before.png`
-- `evidence/ui/<tarih>_<konu>_after.png`
-- `evidence/ui/<tarih>_<konu>.md` (ne değişti + hangi checklist PASS)
+Her UI parity PR'ında:
+- 2 ekran görüntüsü (before/after) veya kısa gif
+- 1 "smoke notu": hangi sayfada ne doğrulandı
+- (Varsa) metrik snapshot: staleness, reconnect, msgs_total delta
 
 ---
 
-## 9) Kaynaklar (iç referans)
-- NN/g Heuristics, WCAG 2.2 quickref, Tableau DataViz best practices
-- Proje içi UI/UX plan ve araştırma çıktıları (repo'da arşivlenir)
+## 7) Sonraki Adım (Önerilen)
+- UI parity işleri için "P0/P1" etiketli backlog issue seti aç.
+- Strategy Lab ve Dashboard'dan başla (en kritik kullanıcı akışı).

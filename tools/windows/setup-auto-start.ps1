@@ -55,14 +55,24 @@ $action = New-ScheduledTaskAction `
     -WorkingDirectory $repoRoot
 
 # Create trigger (at startup, with delay to allow system to stabilize)
-$trigger = New-ScheduledTaskTrigger -AtStartup
-$trigger.Delay = "PT30S"  # 30 second delay
-
-# Create principal (run as current user, highest privileges)
-$principal = New-ScheduledTaskPrincipal `
-    -UserId "$env:USERDOMAIN\$env:USERNAME" `
-    -LogonType Interactive `
-    -RunLevel Highest
+# Use AtLogOn by default (more reliable, no admin required)
+# AtLogOn doesn't require admin privileges and is more reliable for user tasks
+$useAtLogOn = $true  # Default to AtLogOn (no admin required, more reliable)
+if ($useAtLogOn) {
+    $trigger = New-ScheduledTaskTrigger -AtLogOn
+    $trigger.Delay = "PT10S"  # 10 second delay after login
+    $principal = New-ScheduledTaskPrincipal `
+        -UserId "$env:USERDOMAIN\$env:USERNAME" `
+        -LogonType Interactive `
+        -RunLevel Limited  # No admin required (Limited = LeastPrivilege)
+} else {
+    $trigger = New-ScheduledTaskTrigger -AtStartup
+    $trigger.Delay = "PT30S"  # 30 second delay
+    $principal = New-ScheduledTaskPrincipal `
+        -UserId "$env:USERDOMAIN\$env:USERNAME" `
+        -LogonType Interactive `
+        -RunLevel Highest
+}
 
 # Create settings (allow start on battery, restart on failure)
 $settings = New-ScheduledTaskSettingsSet `
@@ -84,6 +94,7 @@ try {
         -Description "Starts Spark Trading UI dev server on system startup with logging and crash detection"
 
     Write-Host "[OK] Task '$taskName' created successfully!" -ForegroundColor Green
+    Write-Host "[INFO] Trigger mode: $(if ($useAtLogOn) { 'AtLogOn (no admin required)' } else { 'AtStartup (admin may be required)' })" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Task Details:" -ForegroundColor Cyan
     Write-Host "  Name: $taskName" -ForegroundColor Gray
@@ -104,5 +115,10 @@ try {
     Write-Host "  powershell -ExecutionPolicy Bypass -File tools\windows\check-ui-status.ps1" -ForegroundColor Gray
 } catch {
     Write-Host "[ERROR] Failed to create task: $_" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "[INFO] If you got 'Access denied', try one of these:" -ForegroundColor Yellow
+    Write-Host "  1. Run PowerShell as Administrator and use: tools\windows\setup-auto-start-admin.ps1" -ForegroundColor Gray
+    Write-Host "  2. Edit this script and set `$useAtLogOn = `$true (no admin required)" -ForegroundColor Gray
+    Write-Host "  3. Use AtLogOn + LeastPrivilege mode (edit script: set useAtLogOn = true)" -ForegroundColor Gray
     exit 1
 }

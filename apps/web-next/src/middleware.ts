@@ -104,19 +104,9 @@ export function middleware(request: NextRequest) {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
 
-  const csp = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https:",
-    "font-src 'self' data:",
-    "connect-src 'self'",
-    "frame-ancestors 'none'"
-  ].join('; ');
+  // CSP artık next.config.mjs'de tanımlı, middleware'de sadece report-only için set ediyoruz
   const reportOnly = process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === '1';
-  if (!reportOnly) {
-    // Enforce başlığını next.config.mjs headers() üretecek; burada set etmiyoruz
-  }
+  // CSP başlığı next.config.mjs headers() tarafından set ediliyor, middleware'de tekrar set etmiyoruz
 
   // Report-Only sıkı CSP (kırmadan telemetri topla)
   const cspStrict = [

@@ -152,16 +152,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           />
         </div>
       </header>
-      <div className="mx-auto max-w-[1400px] px-4 py-4 grid grid-cols-1 md:grid-cols-[240px_1fr_360px] gap-4">
-        <aside className="md:sticky md:top-16 h-max border border-neutral-800 rounded-2xl p-3">
-          <nav className="space-y-1">
-            <NavItem href="/dashboard" label="Dashboard" />
-            <NavItem href="/strategy-lab" label="Strategy Lab" />
-            <NavItem href="/audit" label="Audit" />
-            <NavItem href="/portfolio" label="Portfolio" />
-            <NavItem href="/settings" label="Settings" />
-          </nav>
-        </aside>
+      {/* PATCH: Legacy nav sidebar kaldırıldı (sol sidebar zaten nav sağlıyor) - Figma parity */}
+      <div className="mx-auto max-w-[1400px] px-4 py-4 grid grid-cols-1 md:grid-cols-[1fr_360px] gap-4">
         <main id="main" className="min-h-[60vh]">
           {children}
         </main>

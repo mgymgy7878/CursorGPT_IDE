@@ -89,7 +89,7 @@ export default function DashboardPage({
   };
 
   return (
-    <div className="relative px-6 py-4 min-h-screen bg-neutral-950 overflow-hidden">
+    <div className="relative px-6 py-4 min-h-screen bg-neutral-950 overflow-hidden" data-page="dashboard">
       {/* Watermark Background - Spark Mark */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

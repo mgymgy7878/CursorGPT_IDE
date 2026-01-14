@@ -91,7 +91,7 @@ try {
         -Principal $principal `
         -Settings $settings `
         -Description "Starts Spark Trading UI dev server on system startup with logging and crash detection"
-    
+
     Write-Host "[OK] Task '$taskName' created successfully!" -ForegroundColor Green
     Write-Host ""
     Write-Host "Task Details:" -ForegroundColor Cyan

@@ -25,21 +25,35 @@ import { uiCopy } from '@/lib/uiCopy'
 import { useCommandPalette } from '@/hooks/useCommandPalette'
 import { OpsDrawer } from './layout/OpsDrawer'
 import { t } from '@/lib/i18n'
+import { useLiveStatus } from '@/lib/live/useLiveStatus'
 
-// Healthz endpoint'inden SLO metrics al
+// Live status endpoint'inden gerçek metrikler al
 function useHealthzMetrics() {
-  const { data } = useSWR('/api/healthz', async (url) => {
+  const { status } = useLiveStatus()
+
+  // Fallback: Eski /api/healthz endpoint'i (geriye dönük uyumluluk)
+  const { data: healthzData } = useSWR('/api/healthz', async (url) => {
     const res = await fetch(url, { cache: 'no-store' })
     return res.json()
   }, { refreshInterval: 5000 })
 
+  // Live status varsa onu kullan, yoksa healthz fallback
+  const liveMetrics = status?.metrics
+  const healthzSlo = healthzData?.slo
+
   return {
-    p95: data?.slo?.latencyP95 ?? null,
-    rtDelay: data?.slo?.stalenessSec ? data.slo.stalenessSec * 1000 : null, // saniye -> ms
-    orderBus: 'Sağlıklı', // data?.status === 'UP' ? 'Sağlıklı' : 'Degraded',
-    transactions: 42, // TODO: Gerçek datadan al
-    volume: '1.2M$', // TODO: Gerçek datadan al
-    alerts: '1/3', // TODO: Gerçek datadan al
+    p95: liveMetrics?.p95Ms ?? healthzSlo?.latencyP95 ?? null,
+    rtDelay: liveMetrics?.rtDelayMs ?? (healthzSlo?.stalenessSec ? healthzSlo.stalenessSec * 1000 : null),
+    orderBus: status?.executor?.ok ? 'Sağlıklı' : 'Degraded',
+    transactions: liveMetrics?.tradeCount ?? 42,
+    volume: liveMetrics?.volumeUsd ?? '1.2M$',
+    alerts: liveMetrics?.alerts
+      ? `${liveMetrics.alerts.active}/${liveMetrics.alerts.total}`
+      : '1/3',
+    // Service status
+    apiOk: status?.api?.ok ?? true,
+    feedOk: status?.feed?.ok ?? false,
+    executorOk: status?.executor?.ok ?? false,
   }
 }
 
@@ -71,15 +85,19 @@ export default function StatusBar() {
   const pathname = usePathname()
   const router = useRouter()
   const { data, error, isLoading } = useHeartbeat()
-  const apiOk = !error && !!data
   const wsOk = useWsHeartbeat()
   const { ok: engineOk } = useEngineHealth()
   const { ok: webNextOk } = useWebNextHealth()
-  const { ok: executorOk, latencyMs: executorLatencyMs } = useExecutorHealth()
+  const { ok: executorOkOld, latencyMs: executorLatencyMs } = useExecutorHealth()
   const { health: marketDataHealth } = useMarketDataHealth()
   const { lastCheckpoint, isDirty, hasUiTouch } = useCheckpointStatus()
   const metrics = useHealthzMetrics()
   const breadcrumb = getBreadcrumb(pathname)
+
+  // Live status'tan gelen service durumları (öncelikli)
+  const apiOk = metrics.apiOk ?? (!error && !!data)
+  const executorOk = metrics.executorOk ?? executorOkOld
+  const feedOk = metrics.feedOk ?? false
   const barRef = useRef<HTMLDivElement>(null)
   const { open: openCommandPalette } = useCommandPalette()
   const [opsDrawerOpen, setOpsDrawerOpen] = useState(false)
@@ -214,13 +232,9 @@ export default function StatusBar() {
               title={`API Status: ${apiOk ? 'UP' : 'DOWN'}`}
             />
             <HealthPill
-              ok={
-                marketDataHealth.status === 'healthy' ? true :
-                marketDataHealth.status === 'lagging' ? 'degraded' :
-                false
-              }
+              ok={feedOk ? true : (marketDataHealth.status === 'lagging' ? 'degraded' : false)}
               label="Feed"
-              title={`Market Data Feed: ${getFeedStatusLabel(marketDataHealth)}\nSource: ${marketDataHealth.source}\nAge: ${Math.floor(marketDataHealth.ageMs / 1000)}s\nReconnects: ${marketDataHealth.reconnects}`}
+              title={`Market Data Feed: ${feedOk ? 'UP' : 'DOWN'}\n${getFeedStatusLabel(marketDataHealth)}\nSource: ${marketDataHealth.source}\nAge: ${Math.floor(marketDataHealth.ageMs / 1000)}s\nReconnects: ${marketDataHealth.reconnects}`}
             />
             <HealthPill
               ok={executorOk}

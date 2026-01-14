@@ -37,12 +37,24 @@ const nextConfig = {
   },
   headers: async () => {
     const reportOnly = process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === "1";
+    const isDev = process.env.NODE_ENV === "development";
+
+    // Development modunda Next.js'in inline script'leri için unsafe-inline ve unsafe-eval gerekiyor
+    const scriptSrc = isDev
+      ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+      : "script-src 'self' 'unsafe-eval' 'unsafe-inline'"; // Production'da da Next.js için gerekli
+
+    const styleSrc = isDev
+      ? "style-src 'self' 'unsafe-inline'"
+      : "style-src 'self' 'unsafe-inline'"; // Tailwind ve Next.js için gerekli
+
     const csp = [
       "default-src 'self'",
       "base-uri 'self'",
+      scriptSrc,
+      styleSrc,
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      // script/style will be governed by middleware nonce/report-only
       "connect-src 'self' http: https: ws: wss:",
       "frame-ancestors 'none'",
     ].join("; ");

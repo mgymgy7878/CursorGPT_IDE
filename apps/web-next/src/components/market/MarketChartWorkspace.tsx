@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 // SSOT: createChart import sadece type'lar için (CrosshairMode, ColorType, Series types)
 // Chart oluşturma createSparkChart helper'ı üzerinden yapılmalı (attributionLogo zorunlu false)
 import { CrosshairMode, ColorType, CandlestickSeries, HistogramSeries, LineSeries } from 'lightweight-charts';
@@ -89,27 +89,30 @@ export default function MarketChartWorkspace({
 
   const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W', '1M'];
 
-  // MVL: Live market data (with mock fallback)
+  // MVL: Live market data (with mock fallback + SSE stream)
   const binanceSymbol = symbol.replace("/", ""); // BTC/USDT -> BTCUSDT
   const live = useMarketCandles({
     exchange: "binance",
     symbol: binanceSymbol,
     tf: selectedTimeframe.toLowerCase(), // "1m"
     limit: 500,
+    enableStream: true, // SSE stream aktif
   });
 
-  // Use live data if available, fallback to mock
-  const candlesForChart = (live.candles && live.candles.length > 0
-    ? live.candles.map(c => ({
-        time: Math.floor(c.t / 1000) as any, // ms -> unix timestamp (seconds)
-        open: c.o,
-        high: c.h,
-        low: c.l,
-        close: c.c,
-        volume: c.v,
-      }))
-    : generateMockCandles(symbol, 200)
-  );
+  // Use live data if available, fallback to mock (memoized to prevent infinite loops)
+  const candlesForChart = useMemo(() => {
+    return (live.candles && live.candles.length > 0
+      ? live.candles.map(c => ({
+          time: Math.floor(c.t / 1000) as any, // ms -> unix timestamp (seconds)
+          open: c.o,
+          high: c.h,
+          low: c.l,
+          close: c.c,
+          volume: c.v,
+        }))
+      : generateMockCandles(symbol, 200)
+    );
+  }, [live.candles, symbol]);
 
   // Initialize chart
   useEffect(() => {
@@ -345,7 +348,7 @@ export default function MarketChartWorkspace({
   };
   }, [symbol, selectedTimeframe]);
 
-  // MVL: Update chart data when live candles change
+  // MVL: Update chart data when live candles change (memoized candlesForChart prevents infinite loops)
   useEffect(() => {
     if (!candleSeriesRef.current || !volumeSeriesRef.current || candlesForChart.length === 0) {
       // If RSI chart exists but no candle data, clear RSI
@@ -567,9 +570,14 @@ export default function MarketChartWorkspace({
               </div>
             </div>
 
-            {/* Mode badge */}
-            <span className="text-[10px] text-neutral-500 px-2 py-1 rounded bg-white/5 border border-white/10">
-              Mock Data
+            {/* Mode badge - Live/Mock indicator */}
+            <span className={cn(
+              "text-[10px] px-2 py-1 rounded border",
+              live.source === 'feed' || live.source === 'binance'
+                ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/30"
+                : "text-neutral-500 bg-white/5 border-white/10"
+            )}>
+              {live.source === 'feed' ? 'Live' : live.source === 'binance' ? 'Live (Binance)' : 'Mock Data'}
             </span>
           </div>
         </div>

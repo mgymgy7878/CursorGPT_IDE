@@ -9,15 +9,15 @@ export default function Settings() {
   const handleSave = async (provider: string, values: Record<string, string>) => {
     // This would call /api/settings/save with encrypted values
     console.log(`Saving ${provider}:`, values);
-    
+
     // Audit log
     // await fetch("/api/audit/push", {
     //   method: "POST",
     //   body: JSON.stringify({ action: `settings.${provider}.save` }),
     // });
 
-    toast({ 
-      type: "success", 
+    toast({
+      type: "success",
       title: "Ayarlar Kaydedildi",
       description: `${provider} bağlantı bilgileri güvenli şekilde kaydedildi.`
     });
@@ -26,17 +26,17 @@ export default function Settings() {
   const handleTest = async (provider: string, values: Record<string, string>) => {
     // This would call /api/settings/test to verify credentials
     console.log(`Testing ${provider}:`, values);
-    
-    toast({ 
-      type: "info", 
+
+    toast({
+      type: "info",
       title: "Bağlantı Test Ediliyor",
       description: `${provider} bağlantısı kontrol ediliyor...`
     });
 
     // Simulate test
     setTimeout(() => {
-      toast({ 
-        type: "success", 
+      toast({
+        type: "success",
         title: "Bağlantı Başarılı",
         description: `${provider} API bağlantısı doğrulandı.`
       });
@@ -46,7 +46,7 @@ export default function Settings() {
   return (
     <AppShell>
       <PageHeader title="Ayarlar" subtitle="API anahtarları ve bağlantı ayarları" />
-      <div className="px-6 pb-10">
+      <div className="max-w-4xl mx-auto px-6 pb-10">
         <Tabs defaultValue="exchange">
           <TabsList>
             <TabsTrigger value="exchange">Borsa API</TabsTrigger>
@@ -55,8 +55,8 @@ export default function Settings() {
 
           <TabsContent value="exchange">
             <div className="space-y-6">
-              <ApiForm 
-                title="Binance" 
+              <ApiForm
+                title="Binance"
                 fields={[
                   { name: "API Key", envKey: "BINANCE_API_KEY" },
                   { name: "Secret Key", envKey: "BINANCE_SECRET_KEY" }
@@ -64,9 +64,9 @@ export default function Settings() {
                 onSave={(values) => handleSave("Binance", values)}
                 onTest={(values) => handleTest("Binance", values)}
               />
-              
-              <ApiForm 
-                title="BTCTurk" 
+
+              <ApiForm
+                title="BTCTurk"
                 fields={[
                   { name: "API Key", envKey: "BTCTURK_API_KEY" },
                   { name: "Secret Key", envKey: "BTCTURK_SECRET_KEY" }
@@ -79,17 +79,17 @@ export default function Settings() {
 
           <TabsContent value="ai">
             <div className="space-y-6">
-              <ApiForm 
-                title="OpenAI" 
+              <ApiForm
+                title="OpenAI"
                 fields={[
                   { name: "API Key", envKey: "OPENAI_API_KEY" }
                 ]}
                 onSave={(values) => handleSave("OpenAI", values)}
                 onTest={(values) => handleTest("OpenAI", values)}
               />
-              
-              <ApiForm 
-                title="Anthropic" 
+
+              <ApiForm
+                title="Anthropic"
                 fields={[
                   { name: "API Key", envKey: "ANTHROPIC_API_KEY" }
                 ]}

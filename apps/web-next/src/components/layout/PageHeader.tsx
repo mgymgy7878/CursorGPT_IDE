@@ -24,9 +24,9 @@ export default function PageHeader({
                       'text-neutral-400';
 
   return (
-    <div className="flex items-start justify-between gap-4 pb-4">
-      <div>
-        <h1 className="text-2xl font-semibold">{title}</h1>
+    <div className="flex items-start justify-between gap-4 pb-4 flex-wrap">
+      <div className="min-w-0 flex-1">
+        <h1 className="text-2xl font-semibold truncate">{title}</h1>
         {subtitle && <p className="text-sm text-neutral-400 mt-1">{subtitle}</p>}
         {chips.length > 0 && (
           <div className="mt-3 flex gap-2 flex-wrap">
@@ -41,12 +41,12 @@ export default function PageHeader({
         )}
       </div>
       {actions.length > 0 && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0 flex-wrap">
           {actions.map((a, i) => (
             <button
               key={i}
               onClick={a.onClick}
-              className={`px-3 py-2 rounded-xl transition
+              className={`px-3 py-2 rounded-xl transition shrink-0
                 ${a.variant === 'ghost'
                   ? 'bg-transparent hover:bg-card'
                   : 'bg-sky-600 hover:bg-sky-700 text-white'}`}>

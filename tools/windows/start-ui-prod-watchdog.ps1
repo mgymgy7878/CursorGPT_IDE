@@ -125,27 +125,27 @@ try {
     $process.Start() | Out-Null
     $process.BeginOutputReadLine()
     $process.BeginErrorReadLine()
-    
+
     Write-Host "[OK] Production server started (PID: $($process.Id))" -ForegroundColor Green
     Write-Host "[INFO] Logging to: $logFile" -ForegroundColor Gray
     Write-Host "[INFO] Press Ctrl+C to stop" -ForegroundColor Gray
     Write-Host ""
-    
+
     # Wait for process to exit
     $process.WaitForExit()
-    
+
     $exitCode = $process.ExitCode
     Write-Host ""
     Write-Host "[WARN] Production server exited with code: $exitCode" -ForegroundColor Yellow
     Write-Host "[INFO] Check log file for details: $logFile" -ForegroundColor Gray
-    
+
     # Show last 20 lines of log on crash
     if ($exitCode -ne 0) {
         Write-Host ""
         Write-Host "=== Last 20 lines of log ===" -ForegroundColor Yellow
         Get-Content $logFile -Tail 20 | ForEach-Object { Write-Host $_ }
     }
-    
+
     exit $exitCode
 } catch {
     Write-Host "[ERROR] Failed to start production server: $_" -ForegroundColor Red
