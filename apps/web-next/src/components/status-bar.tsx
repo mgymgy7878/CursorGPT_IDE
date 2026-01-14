@@ -83,7 +83,7 @@ export default function StatusBar() {
   const barRef = useRef<HTMLDivElement>(null)
   const { open: openCommandPalette } = useCommandPalette()
   const [opsDrawerOpen, setOpsDrawerOpen] = useState(false)
-  
+
   // Mac/Windows mod tuşu belirleme
   const isMac = typeof window !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
   const modKey = isMac ? '⌘' : 'Ctrl'
@@ -297,8 +297,8 @@ export default function StatusBar() {
           </div>
         </div>
 
-        {/* RIGHT: Metrics + Actions + Ctrl+K Hint + Ops (shrink-0, whitespace-nowrap) */}
-        <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+        {/* RIGHT: Metrics + Actions + Ctrl+K Hint + Ops (shrink-0, whitespace-nowrap, min-width protection) */}
+        <div className="flex shrink-0 items-center gap-2.5 whitespace-nowrap min-w-[fit-content]">
           {/* İşlem · Hacim · Uyarılar (Figma separator style, consistent typography) */}
           <div className="flex items-center gap-1.5 text-[13px] text-white/70 font-medium shrink-0">
             <span className="tabular-nums whitespace-nowrap">İşlem: {metrics.transactions}</span>
@@ -361,32 +361,32 @@ export default function StatusBar() {
           {/* Divider */}
           <div className="w-px h-4 bg-white/10 shrink-0" />
 
-          {/* Ctrl+K Hint - küçük ghost chip */}
+          {/* Ctrl+K Hint - küçük ghost chip (responsive: text hidden on small screens) */}
           <button
             onClick={openCommandPalette}
-            className="flex items-center gap-1 px-2 py-[3px] rounded border border-white/10 bg-white/5 hover:bg-white/8 text-[11px] text-white/60 hover:text-white/80 transition-colors shrink-0 whitespace-nowrap"
+            className="flex items-center gap-1 px-1.5 py-[3px] rounded border border-white/10 bg-white/5 hover:bg-white/8 text-[11px] text-white/60 hover:text-white/80 transition-colors shrink-0 whitespace-nowrap"
             title={isMac ? t('common.cmdk_mac') : t('common.cmdk_win')}
             aria-label={isMac ? t('common.cmdk_mac') : t('common.cmdk_win')}
           >
-            <kbd className="px-1 py-0.5 rounded text-[10px] font-mono border border-white/10 bg-white/5">
+            <kbd className="px-1 py-0.5 rounded text-[10px] font-mono border border-white/10 bg-white/5 shrink-0">
               {modKey}
             </kbd>
-            <span className="text-white/30">+</span>
-            <kbd className="px-1 py-0.5 rounded text-[10px] font-mono border border-white/10 bg-white/5">
+            <span className="text-white/30 shrink-0">+</span>
+            <kbd className="px-1 py-0.5 rounded text-[10px] font-mono border border-white/10 bg-white/5 shrink-0">
               K
             </kbd>
-            <span className="hidden sm:inline ml-1">Komutlar</span>
+            <span className="hidden md:inline ml-1 shrink-0">Komutlar</span>
           </button>
 
-          {/* Ops Hızlı Yardım - kompakt buton */}
+          {/* Ops Hızlı Yardım - kompakt buton (responsive: icon only on small screens) */}
           <button
             onClick={() => setOpsDrawerOpen(true)}
-            className="px-2 py-[3px] rounded border border-sky-500/30 bg-sky-600/20 hover:bg-sky-600/30 text-[11px] font-medium text-sky-200 transition-colors shrink-0 whitespace-nowrap"
+            className="px-1.5 py-[3px] rounded border border-sky-500/30 bg-sky-600/20 hover:bg-sky-600/30 text-[11px] font-medium text-sky-200 transition-colors shrink-0 whitespace-nowrap"
             title="Ops Hızlı Yardım"
             aria-label="Ops Hızlı Yardım"
           >
-            <span className="hidden sm:inline">Ops</span>
-            <span className="sm:hidden">🚑</span>
+            <span className="hidden md:inline">Ops</span>
+            <span className="md:hidden">🚑</span>
           </button>
 
           {/* Right Icons */}

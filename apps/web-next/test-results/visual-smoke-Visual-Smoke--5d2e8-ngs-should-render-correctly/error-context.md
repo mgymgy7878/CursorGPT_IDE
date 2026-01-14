@@ -100,7 +100,7 @@
                 - option "Aydınlık"
                 - option "Karanlık"
                 - option "Gün ışığı (Auto)" [selected]
-              - generic [ref=e119]: (dark)
+              - generic [ref=e119]: (light)
           - generic [ref=e121]:
             - generic [ref=e122]:
               - generic [ref=e123]:
