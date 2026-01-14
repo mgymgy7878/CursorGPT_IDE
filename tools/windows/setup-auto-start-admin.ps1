@@ -1,8 +1,18 @@
-# Spark Trading - Auto-Start Setup Script (Improved)
-# Creates a Windows Task Scheduler task to start UI dev server on system startup
-# Uses PowerShell watchdog script with proper PATH resolution and logging
-# Usage: powershell -ExecutionPolicy Bypass -File setup-auto-start.ps1
+# Spark Trading - Auto-Start Setup Script (Admin Version)
+# Run this script as Administrator to create Task Scheduler task
+# Usage: Right-click PowerShell → "Run as Administrator" → powershell -ExecutionPolicy Bypass -File setup-auto-start-admin.ps1
 
+# Check if running as admin
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $isAdmin) {
+    Write-Host "[ERROR] This script must be run as Administrator!" -ForegroundColor Red
+    Write-Host "[INFO] Right-click PowerShell and select 'Run as Administrator'" -ForegroundColor Yellow
+    Write-Host "[INFO] Then run: powershell -ExecutionPolicy Bypass -File tools\windows\setup-auto-start-admin.ps1" -ForegroundColor Yellow
+    exit 1
+}
+
+# Import setup script logic
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Resolve-Path "$scriptPath\..\.."
 
@@ -16,7 +26,7 @@ if ($useProdLike) {
     $mode = "dev"
 }
 
-Write-Host "[INFO] Setting up auto-start for Spark Trading UI server..." -ForegroundColor Cyan
+Write-Host "[INFO] Setting up auto-start for Spark Trading UI server (Admin Mode)..." -ForegroundColor Cyan
 Write-Host "[INFO] Mode: $mode" -ForegroundColor $(if ($useProdLike) { "Green" } else { "Yellow" })
 Write-Host "[INFO] Repo root: $repoRoot" -ForegroundColor Gray
 Write-Host "[INFO] Watchdog script: $watchdogScript" -ForegroundColor Gray
@@ -24,7 +34,7 @@ Write-Host ""
 
 # Check if script exists
 if (-not (Test-Path $watchdogScript)) {
-    Write-Host "[ERROR] start-ui-watchdog.ps1 not found at: $watchdogScript" -ForegroundColor Red
+    Write-Host "[ERROR] Watchdog script not found at: $watchdogScript" -ForegroundColor Red
     exit 1
 }
 
@@ -48,13 +58,12 @@ if ($existingTask) {
 }
 
 # Create task action (PowerShell with watchdog script)
-# Use -NoProfile for faster startup, -ExecutionPolicy Bypass for script execution
 $action = New-ScheduledTaskAction `
     -Execute "powershell.exe" `
     -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$watchdogScript`"" `
     -WorkingDirectory $repoRoot
 
-# Create trigger (at startup, with delay to allow system to stabilize)
+# Create trigger (at startup, with delay)
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $trigger.Delay = "PT30S"  # 30 second delay
 
@@ -64,14 +73,14 @@ $principal = New-ScheduledTaskPrincipal `
     -LogonType Interactive `
     -RunLevel Highest
 
-# Create settings (allow start on battery, restart on failure)
+# Create settings
 $settings = New-ScheduledTaskSettingsSet `
     -AllowStartIfOnBatteries `
     -DontStopIfGoingOnBatteries `
     -StartWhenAvailable `
     -RestartCount 3 `
     -RestartInterval (New-TimeSpan -Minutes 1) `
-    -ExecutionTimeLimit (New-TimeSpan -Hours 0)  # No time limit
+    -ExecutionTimeLimit (New-TimeSpan -Hours 0)
 
 # Register task
 try {
@@ -82,7 +91,7 @@ try {
         -Principal $principal `
         -Settings $settings `
         -Description "Starts Spark Trading UI dev server on system startup with logging and crash detection"
-
+    
     Write-Host "[OK] Task '$taskName' created successfully!" -ForegroundColor Green
     Write-Host ""
     Write-Host "Task Details:" -ForegroundColor Cyan
@@ -97,11 +106,11 @@ try {
     Write-Host "To test manually:" -ForegroundColor Cyan
     Write-Host "  Start-ScheduledTask -TaskName '$taskName'" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "To remove:" -ForegroundColor Cyan
-    Write-Host "  Unregister-ScheduledTask -TaskName '$taskName' -Confirm:`$false" -ForegroundColor Gray
-    Write-Host ""
     Write-Host "To check status:" -ForegroundColor Cyan
     Write-Host "  powershell -ExecutionPolicy Bypass -File tools\windows\check-ui-status.ps1" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "To remove:" -ForegroundColor Cyan
+    Write-Host "  Unregister-ScheduledTask -TaskName '$taskName' -Confirm:`$false" -ForegroundColor Gray
 } catch {
     Write-Host "[ERROR] Failed to create task: $_" -ForegroundColor Red
     exit 1

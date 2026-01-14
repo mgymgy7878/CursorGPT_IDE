@@ -60,17 +60,37 @@ tools\windows\start-ui-prod.cmd
 
 ## Otomatik Başlatma (Task Scheduler)
 
-### Kurulum
+### Kurulum (Admin Gerekli)
 
+**ÖNEMLİ:** Task Scheduler görevleri oluşturmak için Administrator yetkisi gereklidir.
+
+**Yöntem 1: PowerShell'i Admin olarak aç**
+1. Windows tuşu → "PowerShell" yaz
+2. Sağ tık → "Run as Administrator"
+3. Şu komutu çalıştır:
+```powershell
+cd C:\dev\CursorGPT_IDE
+powershell -ExecutionPolicy Bypass -File tools\windows\setup-auto-start-admin.ps1
+```
+
+**Yöntem 2: Normal PowerShell'den (deneme)**
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools\windows\setup-auto-start.ps1
 ```
+*Not: İzin hatası alırsanız Yöntem 1'i kullanın.*
 
 **Ne Yapar:**
 - Windows Task Scheduler'a görev ekler
 - Sistem başlangıcında (30s delay) UI dev server'ı başlatır
-- Watchdog script'i kullanır (log + crash detection)
+- Watchdog script'i kullanır (log + crash detection + log rotate)
 - pnpm PATH sorunlarını çözer
+- **Prod-like mode seçeneği:** `setup-auto-start-admin.ps1` içinde `$useProdLike = $true` yaparak daha stabil mod
+
+**Prod-Like Mode (Önerilen - Reboot sonrası):**
+- `setup-auto-start-admin.ps1` dosyasını aç
+- `$useProdLike = $false` → `$useProdLike = $true` yap
+- Admin olarak çalıştır
+- Build + start kullanır (HMR yok ama çok daha stabil)
 
 **Task Detayları:**
 - **Ad:** `SparkTrading-UI-DevServer`
@@ -197,7 +217,7 @@ Get-Content evidence\ui_dev.log -Tail 1000 | Set-Content evidence\ui_dev.log
    ```powershell
    # Durum kontrolü
    powershell -ExecutionPolicy Bypass -File tools\windows\check-ui-status.ps1
-   
+
    # Başlat
    powershell -ExecutionPolicy Bypass -File tools\windows\start-ui-watchdog.ps1
    ```

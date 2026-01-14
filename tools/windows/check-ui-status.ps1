@@ -36,19 +36,19 @@ if ($portCheck) {
 Write-Host "[2] Checking log file..." -ForegroundColor Yellow
 if (Test-Path $logFile) {
     Write-Host "[OK] Log file exists: $logFile" -ForegroundColor Green
-    
+
     $logSize = (Get-Item $logFile).Length
     Write-Host "     Size: $([math]::Round($logSize / 1KB, 2)) KB" -ForegroundColor Gray
-    
+
     $lastModified = (Get-Item $logFile).LastWriteTime
     Write-Host "     Last modified: $lastModified" -ForegroundColor Gray
-    
+
     # Check for errors in last 50 lines
     Write-Host ""
     Write-Host "[3] Checking for errors in log..." -ForegroundColor Yellow
     $logContent = Get-Content $logFile -Tail 50 -ErrorAction SilentlyContinue
     $errors = $logContent | Select-String -Pattern "error|Error|ERROR|failed|Failed|FAILED|crash|Crash|CRASH" -CaseSensitive:$false
-    
+
     if ($errors) {
         Write-Host "[WARN] Found potential errors in log:" -ForegroundColor Yellow
         $errors | Select-Object -First 10 | ForEach-Object {
@@ -59,7 +59,7 @@ if (Test-Path $logFile) {
     } else {
         Write-Host "[OK] No obvious errors in last 50 lines" -ForegroundColor Green
     }
-    
+
     # Show last 10 lines
     Write-Host ""
     Write-Host "[4] Last 10 lines of log:" -ForegroundColor Yellow
@@ -76,4 +76,22 @@ Write-Host "=== Quick Actions ===" -ForegroundColor Cyan
 Write-Host "  Start dev server:  tools\windows\start-ui-watchdog.ps1" -ForegroundColor Gray
 Write-Host "  Start prod-like:   tools\windows\start-ui-prod.cmd" -ForegroundColor Gray
 Write-Host "  View full log:     type $logFile | more" -ForegroundColor Gray
+Write-Host ""
+
+# Check Task Scheduler status
+Write-Host "[5] Checking Task Scheduler..." -ForegroundColor Yellow
+$task = Get-ScheduledTask -TaskName "SparkTrading-UI-DevServer" -ErrorAction SilentlyContinue
+if ($task) {
+    $taskInfo = Get-ScheduledTaskInfo -TaskName "SparkTrading-UI-DevServer"
+    Write-Host "[OK] Task exists: SparkTrading-UI-DevServer" -ForegroundColor Green
+    Write-Host "     State: $($task.State)" -ForegroundColor Gray
+    Write-Host "     Last Run: $($taskInfo.LastRunTime)" -ForegroundColor Gray
+    Write-Host "     Last Result: $($taskInfo.LastTaskResult)" -ForegroundColor $(if ($taskInfo.LastTaskResult -eq 0) { "Green" } else { "Yellow" })
+    if ($taskInfo.LastTaskResult -ne 0 -and $taskInfo.LastTaskResult -ne 267014) {
+        Write-Host "     [WARN] Last run had errors. Check Event Viewer for details." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[WARN] Task Scheduler task not found" -ForegroundColor Yellow
+    Write-Host "     To create: Run as Admin → tools\windows\setup-auto-start-admin.ps1" -ForegroundColor Gray
+}
 Write-Host ""

@@ -1,6 +1,6 @@
-# Spark Trading - UI Dev Server Watchdog Script
-# Starts UI dev server with logging and crash detection
-# Usage: powershell -ExecutionPolicy Bypass -File start-ui-watchdog.ps1
+# Spark Trading - UI Prod-Like Server Watchdog Script
+# Builds and starts UI server in production mode (more stable, no HMR)
+# Usage: powershell -ExecutionPolicy Bypass -File start-ui-prod-watchdog.ps1
 
 $ErrorActionPreference = "Stop"
 
@@ -8,30 +8,17 @@ $ErrorActionPreference = "Stop"
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Resolve-Path "$scriptPath\..\.."
 $logDir = "$repoRoot\evidence"
-$logFile = "$logDir\ui_dev.log"
+$logFile = "$logDir\ui_prod.log"
 
 # Ensure log directory exists
 if (-not (Test-Path $logDir)) {
     New-Item -ItemType Directory -Path $logDir -Force | Out-Null
 }
 
-# Rotate log if > 5MB
-if (Test-Path $logFile) {
-    $logSize = (Get-Item $logFile).Length
-    $maxSize = 5MB
-    if ($logSize -gt $maxSize) {
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $rotatedLog = "$logDir\ui_dev_$timestamp.log"
-        Write-Host "[INFO] Rotating log ($([math]::Round($logSize / 1MB, 2)) MB > 5 MB)..." -ForegroundColor Yellow
-        Move-Item -Path $logFile -Destination $rotatedLog -Force
-        Write-Host "[INFO] Rotated to: $rotatedLog" -ForegroundColor Gray
-    }
-}
-
 # Change to repo root
 Set-Location $repoRoot
 
-Write-Host "[INFO] Starting UI dev server watchdog..." -ForegroundColor Cyan
+Write-Host "[INFO] Starting UI server in prod-like mode (watchdog)..." -ForegroundColor Cyan
 Write-Host "[INFO] Repo root: $repoRoot" -ForegroundColor Gray
 Write-Host "[INFO] Log file: $logFile" -ForegroundColor Gray
 Write-Host ""
@@ -61,19 +48,51 @@ try {
     exit 1
 }
 
-# Start dev server with logging
-Write-Host "[INFO] Starting dev server..." -ForegroundColor Cyan
-Write-Host "[INFO] Command: pnpm --filter web-next dev -- --hostname 127.0.0.1 --port 3003" -ForegroundColor Gray
+# Rotate log if > 5MB
+if (Test-Path $logFile) {
+    $logSize = (Get-Item $logFile).Length
+    $maxSize = 5MB
+    if ($logSize -gt $maxSize) {
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $rotatedLog = "$logDir\ui_prod_$timestamp.log"
+        Write-Host "[INFO] Rotating log ($([math]::Round($logSize / 1MB, 2)) MB > 5 MB)..." -ForegroundColor Yellow
+        Move-Item -Path $logFile -Destination $rotatedLog -Force
+        Write-Host "[INFO] Rotated to: $rotatedLog" -ForegroundColor Gray
+    }
+}
+
+# Build step
+Write-Host "[INFO] Building web-next..." -ForegroundColor Cyan
+$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+Add-Content -Path $logFile -Value "`n=== UI Prod Build Start: $timestamp ===`n"
+
+$buildProcess = Start-Process -FilePath $pnpmPath -ArgumentList "--filter web-next build" -WorkingDirectory $repoRoot -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$logDir\build_output.tmp" -RedirectStandardError "$logDir\build_error.tmp"
+
+if ($buildProcess.ExitCode -ne 0) {
+    Write-Host "[ERROR] Build failed with exit code: $($buildProcess.ExitCode)" -ForegroundColor Red
+    Add-Content -Path $logFile -Value "BUILD FAILED: Exit code $($buildProcess.ExitCode)"
+    Get-Content "$logDir\build_error.tmp" | ForEach-Object { Add-Content -Path $logFile -Value $_; Write-Host $_ -ForegroundColor Red }
+    Remove-Item "$logDir\build_output.tmp" -ErrorAction SilentlyContinue
+    Remove-Item "$logDir\build_error.tmp" -ErrorAction SilentlyContinue
+    exit 1
+}
+
+Write-Host "[OK] Build successful" -ForegroundColor Green
+Get-Content "$logDir\build_output.tmp" | ForEach-Object { Add-Content -Path $logFile -Value $_ }
+Remove-Item "$logDir\build_output.tmp" -ErrorAction SilentlyContinue
+Remove-Item "$logDir\build_error.tmp" -ErrorAction SilentlyContinue
+
 Write-Host ""
 
-# Append timestamp to log
+# Start production server
+Write-Host "[INFO] Starting production server..." -ForegroundColor Cyan
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-Add-Content -Path $logFile -Value "`n=== UI Dev Server Start: $timestamp ===`n"
+Add-Content -Path $logFile -Value "`n=== UI Prod Server Start: $timestamp ===`n"
 
 # Start process with output redirection
 $processStartInfo = New-Object System.Diagnostics.ProcessStartInfo
 $processStartInfo.FileName = $pnpmPath
-$processStartInfo.Arguments = "--filter web-next dev -- --hostname 127.0.0.1 --port 3003"
+$processStartInfo.Arguments = "--filter web-next start -- --hostname 127.0.0.1 --port 3003"
 $processStartInfo.WorkingDirectory = $repoRoot
 $processStartInfo.UseShellExecute = $false
 $processStartInfo.RedirectStandardOutput = $true
@@ -106,30 +125,30 @@ try {
     $process.Start() | Out-Null
     $process.BeginOutputReadLine()
     $process.BeginErrorReadLine()
-
-    Write-Host "[OK] Dev server started (PID: $($process.Id))" -ForegroundColor Green
+    
+    Write-Host "[OK] Production server started (PID: $($process.Id))" -ForegroundColor Green
     Write-Host "[INFO] Logging to: $logFile" -ForegroundColor Gray
     Write-Host "[INFO] Press Ctrl+C to stop" -ForegroundColor Gray
     Write-Host ""
-
+    
     # Wait for process to exit
     $process.WaitForExit()
-
+    
     $exitCode = $process.ExitCode
     Write-Host ""
-    Write-Host "[WARN] Dev server exited with code: $exitCode" -ForegroundColor Yellow
+    Write-Host "[WARN] Production server exited with code: $exitCode" -ForegroundColor Yellow
     Write-Host "[INFO] Check log file for details: $logFile" -ForegroundColor Gray
-
+    
     # Show last 20 lines of log on crash
     if ($exitCode -ne 0) {
         Write-Host ""
         Write-Host "=== Last 20 lines of log ===" -ForegroundColor Yellow
         Get-Content $logFile -Tail 20 | ForEach-Object { Write-Host $_ }
     }
-
+    
     exit $exitCode
 } catch {
-    Write-Host "[ERROR] Failed to start dev server: $_" -ForegroundColor Red
+    Write-Host "[ERROR] Failed to start production server: $_" -ForegroundColor Red
     Add-Content -Path $logFile -Value "FATAL ERROR: $_"
     exit 1
 }
