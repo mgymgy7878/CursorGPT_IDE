@@ -24,6 +24,7 @@
 		"capture:dashboard-v2-step3-2": "node scripts/capture-dashboard-v2-step3-2.cjs",
 		"capture:dashboard-v2-step3-3": "node scripts/capture-dashboard-v2-step3-3.cjs",
 		"capture:dashboard-v2-step3-4": "node scripts/capture-dashboard-v2-step3-4.cjs",
+		"capture:dashboard-v2-step3-5": "node scripts/capture-dashboard-v2-step3-5.cjs",
 		"i18n:check": "node ../../scripts/i18n-check.mjs"
 	},
 	"dependencies": {

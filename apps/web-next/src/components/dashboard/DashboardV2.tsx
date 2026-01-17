@@ -60,14 +60,14 @@ export default function DashboardV2() {
   const decisionRows = (data.aiDecisions?.recent ?? []).slice(0, 2);
 
   const renderNotice = (message: string) => (
-    <div className="mt-1 rounded border border-neutral-800 bg-neutral-900/40 px-1.5 py-0.5 text-[9px] text-neutral-400 leading-none">
+    <div className="mt-1 rounded border border-neutral-800 bg-neutral-900/40 px-1.5 py-0.5 text-[9px] text-neutral-400 leading-none data-[viewport=short]:hidden">
       {message}
     </div>
   );
 
   return (
     <div
-      className="relative h-full min-h-0 px-1 py-0.5 bg-neutral-950 overflow-hidden flex flex-col"
+      className="relative h-full min-h-0 px-1 py-0.5 bg-neutral-950 overflow-hidden flex flex-col data-[viewport=short]:px-0.5 data-[viewport=short]:py-0.5"
       data-page="dashboard-v2"
       data-testid="dashboard-v2-root"
       style={{ height: 'calc(100% - 48px)' }}
@@ -96,8 +96,8 @@ export default function DashboardV2() {
       {/* Header */}
       <div className="mb-0 min-w-0">
         <div className="flex items-center justify-between gap-2 h-6 overflow-hidden">
-          <h1 className="text-[11px] font-semibold truncate min-w-0 leading-none">Spark</h1>
-          <div className="flex items-center gap-1 text-[8px] text-neutral-400 whitespace-nowrap overflow-hidden leading-none">
+          <h1 className="text-[11px] font-semibold truncate min-w-0 leading-none data-[viewport=short]:text-[10px]">Spark</h1>
+          <div className="flex items-center gap-1 text-[8px] text-neutral-400 whitespace-nowrap overflow-hidden leading-none data-[viewport=short]:text-[7.5px]">
             <span className="px-1.5 py-0.5 rounded shrink-0 bg-neutral-800 text-neutral-300">
               V2: ON
             </span>
@@ -140,9 +140,9 @@ export default function DashboardV2() {
       </div>
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-12 grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-0.5 flex-1 min-h-0">
+      <div className="grid grid-cols-12 grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-0.5 flex-1 min-h-0 data-[viewport=short]:gap-0.5">
         {/* Portfolio Summary */}
-        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden" data-testid="ai-decisions-card">
+        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden data-[viewport=short]:p-0.5">
           <div className="text-[8px] font-semibold mb-0.5">Portföy Özeti</div>
           {status === 'loading' ? (
             <Skeleton className="h-6" />
@@ -176,7 +176,7 @@ export default function DashboardV2() {
         </div>
 
         {/* Market Status */}
-        <div className="col-span-12 xl:col-span-5 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+        <div className="col-span-12 xl:col-span-5 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden data-[viewport=short]:p-0.5">
           <div className="flex items-center justify-between mb-0.5 gap-2">
             <div className="text-[8px] font-semibold truncate min-w-0">Piyasa Durumu</div>
             <div className="flex items-center gap-2 shrink-0">
@@ -390,7 +390,7 @@ export default function DashboardV2() {
         </div>
 
         {/* AI Decisions */}
-        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden data-[viewport=short]:p-0.5" data-testid="ai-decisions-card">
           <div className="flex items-center justify-between mb-0.5 gap-2">
             <div className="text-[8px] font-semibold truncate min-w-0">Son Yapay Zeka Kararları</div>
             <div className="flex items-center gap-2 shrink-0">
@@ -447,7 +447,7 @@ export default function DashboardV2() {
         </div>
 
         {/* System Health */}
-        <div className="col-span-12 xl:col-span-5 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+        <div className="col-span-12 xl:col-span-5 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden data-[viewport=short]:p-0.5">
           <div className="text-[8px] font-semibold mb-0.5">Sistem Sağlığı</div>
           {status !== 'live' && renderNotice('Sistem metrikleri kısmi veya gecikmeli olabilir.')}
           {status === 'loading' ? (
