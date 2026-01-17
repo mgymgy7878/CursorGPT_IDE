@@ -142,7 +142,7 @@ export default function DashboardV2() {
       {/* Cards Grid */}
       <div className="grid grid-cols-12 grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-0.5 flex-1 min-h-0">
         {/* Portfolio Summary */}
-        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden" data-testid="ai-decisions-card">
           <div className="text-[8px] font-semibold mb-0.5">Portföy Özeti</div>
           {status === 'loading' ? (
             <Skeleton className="h-6" />
@@ -425,7 +425,7 @@ export default function DashboardV2() {
             <div className="space-y-0.5">
               {decisionRows.length > 0 ? (
                 decisionRows.map((d, idx) => (
-                  <div key={idx} className="flex items-center justify-between gap-2 text-xs min-w-0">
+                  <div key={idx} className="flex items-center justify-between gap-2 text-xs min-w-0" data-testid="ai-decision-item">
                     <span className="text-neutral-300 font-medium truncate min-w-0 shrink-0" style={{ minWidth: '100px' }}>
                       {d.action} {formatSymbol(d.symbol)}
                     </span>
@@ -438,7 +438,9 @@ export default function DashboardV2() {
                   </div>
                 ))
               ) : (
-                <div className="text-xs text-neutral-500">Henüz karar yok.</div>
+                <div className="text-xs text-neutral-500 min-h-[12px] leading-tight" data-testid="ai-decisions-empty">
+                  Henüz karar yok.
+                </div>
               )}
             </div>
           )}
