@@ -7,6 +7,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { useDashboardSummary } from '@/lib/dashboard/useDashboardSummary';
 import { Skeleton } from '@/components/ui/states';
 import { formatMoney, formatPct, formatSymbol } from '@/lib/format';
@@ -27,6 +28,24 @@ export default function DashboardV2() {
     });
   }, [data.market?.symbols]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const prevPadX = root.style.getPropertyValue('--page-px');
+    const prevPadTop = root.style.getPropertyValue('--page-pt');
+    const prevPadBottom = root.style.getPropertyValue('--page-pb');
+    root.style.setProperty('--page-px', '2px');
+    root.style.setProperty('--page-pt', '0px');
+    root.style.setProperty('--page-pb', '0px');
+    return () => {
+      if (prevPadX) root.style.setProperty('--page-px', prevPadX);
+      else root.style.removeProperty('--page-px');
+      if (prevPadTop) root.style.setProperty('--page-pt', prevPadTop);
+      else root.style.removeProperty('--page-pt');
+      if (prevPadBottom) root.style.setProperty('--page-pb', prevPadBottom);
+      else root.style.removeProperty('--page-pb');
+    };
+  }, []);
+
   const sparkPointsBySymbol = useMemo(() => {
     const map = new Map<string, string | null>();
     (data.market?.symbols ?? []).forEach((s) => {
@@ -36,8 +55,23 @@ export default function DashboardV2() {
     return map;
   }, [data.market?.symbols]);
 
+  const marketRows = (data.market?.symbols ?? []).slice(0, 3);
+  const strategyRows = (data.strategies?.top ?? []).slice(0, 3);
+  const decisionRows = (data.aiDecisions?.recent ?? []).slice(0, 2);
+
+  const renderNotice = (message: string) => (
+    <div className="mt-1 rounded border border-neutral-800 bg-neutral-900/40 px-1.5 py-0.5 text-[9px] text-neutral-400 leading-none">
+      {message}
+    </div>
+  );
+
   return (
-    <div className="relative px-6 py-4 min-h-screen bg-neutral-950 overflow-hidden" data-page="dashboard-v2">
+    <div
+      className="relative h-full min-h-0 px-1 py-0.5 bg-neutral-950 overflow-hidden flex flex-col"
+      data-page="dashboard-v2"
+      data-testid="dashboard-v2-root"
+      style={{ height: 'calc(100% - 48px)' }}
+    >
       {/* Watermark Background - Spark Mark (only show when empty/degraded) */}
       {status === 'loading' || status === 'degraded' ? (
         <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
@@ -60,46 +94,44 @@ export default function DashboardV2() {
       ) : null}
 
       {/* Header */}
-      <div className="mb-6 min-w-0">
-        <h1 className="text-2xl font-semibold mb-2 truncate min-w-0">Dashboard V2</h1>
-        <div className="flex items-center gap-2 text-sm flex-wrap">
-          <span className="px-2 py-1 rounded text-xs shrink-0 bg-neutral-800 text-neutral-300">
-            V2: ON
-          </span>
-          <span className={`px-2 py-1 rounded text-xs shrink-0 ${
-            status === 'live' ? 'bg-emerald-500/20 text-emerald-300' :
-            status === 'degraded' ? 'bg-amber-500/20 text-amber-300' :
-            'bg-neutral-800 text-neutral-400'
-          }`}>
-            {status === 'live' ? 'Live' : status === 'degraded' ? 'Degraded' : 'Loading'}
-          </span>
-          {data._meta && (
-            <>
-              <span className="text-xs text-neutral-500 shrink-0">
-                {data._meta.fetchTimeMs}ms
-              </span>
-              {data._meta.sourceHealth && (
-                <span className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${
-                  data._meta.sourceHealth.binance === 'ok' ? 'bg-emerald-500/20 text-emerald-300' :
-                  data._meta.sourceHealth.binance === 'timeout' ? 'bg-amber-500/20 text-amber-300' :
-                  'bg-red-500/20 text-red-300'
-                }`}>
-                  Binance: {data._meta.sourceHealth.binance}
-                </span>
-              )}
-            </>
-          )}
-          {error && (
-            <span className="text-xs text-red-400 shrink-0">Error: {error.message}</span>
-          )}
-          {data._meta?.errors && data._meta.errors.length > 0 && (
-            <span className="text-xs text-amber-300 shrink-0">
-              Degraded: {data._meta.errors[0]}
+      <div className="mb-0 min-w-0">
+        <div className="flex items-center justify-between gap-2 h-6 overflow-hidden">
+          <h1 className="text-[11px] font-semibold truncate min-w-0 leading-none">Spark</h1>
+          <div className="flex items-center gap-1 text-[8px] text-neutral-400 whitespace-nowrap overflow-hidden leading-none">
+            <span className="px-1.5 py-0.5 rounded shrink-0 bg-neutral-800 text-neutral-300">
+              V2: ON
             </span>
-          )}
+            <span className={`px-1.5 py-0.5 rounded shrink-0 ${
+              status === 'live' ? 'bg-emerald-500/20 text-emerald-300' :
+              status === 'degraded' ? 'bg-amber-500/20 text-amber-300' :
+              'bg-neutral-800 text-neutral-400'
+            }`}>
+              {status === 'live' ? 'Live' : status === 'degraded' ? 'Degraded' : 'Loading'}
+            </span>
+            {data.latency?.p95Ms !== null && (
+              <span className="shrink-0">P95 {data.latency.p95Ms}ms</span>
+            )}
+            <span className="shrink-0">Feed {data.system.feed.ok ? 'OK' : 'DOWN'}</span>
+            <span className="shrink-0">Exec {data.system.executor.ok ? 'OK' : 'DOWN'}</span>
+            {data._meta?.fetchTimeMs !== undefined && (
+              <span className="shrink-0">{data._meta.fetchTimeMs}ms</span>
+            )}
+            {data._meta?.sourceHealth?.binance && (
+              <span className={`px-1.5 py-0.5 rounded shrink-0 ${
+                data._meta.sourceHealth.binance === 'ok' ? 'bg-emerald-500/20 text-emerald-300' :
+                data._meta.sourceHealth.binance === 'timeout' ? 'bg-amber-500/20 text-amber-300' :
+                'bg-red-500/20 text-red-300'
+              }`}>
+                Binance: {data._meta.sourceHealth.binance}
+              </span>
+            )}
+            {error && (
+              <span className="text-red-400 shrink-0">Error: {error.message}</span>
+            )}
+          </div>
         </div>
         {status !== 'live' && (
-          <div className="mt-3 rounded-lg border border-neutral-800 bg-neutral-900/40 px-3 py-2 text-xs text-neutral-400">
+          <div className="mt-0.5 rounded border border-neutral-800 bg-neutral-900/40 px-1 py-0.5 text-[8px] text-neutral-400 leading-none">
             {status === 'loading'
               ? 'Veriler yükleniyor…'
               : 'Veri bekleniyor (seed/degraded).'}
@@ -108,54 +140,46 @@ export default function DashboardV2() {
       </div>
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Portfolio Summary Card - Figma Parity: 3 KPIs */}
-        <div className="rounded-2xl bg-card/60 p-4">
-          <div className="text-sm font-medium mb-3">Portföy Özeti</div>
+      <div className="grid grid-cols-12 grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-0.5 flex-1 min-h-0">
+        {/* Portfolio Summary */}
+        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+          <div className="text-[8px] font-semibold mb-0.5">Portföy Özeti</div>
           {status === 'loading' ? (
-            <Skeleton className="h-20" />
+            <Skeleton className="h-6" />
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-1">
               <div>
-                <div className="text-xs text-neutral-500 mb-0.5">Toplam Varlık</div>
-                <div className="text-lg font-semibold tabular-nums">
+                <div className="text-[8px] text-neutral-500 mb-0.5">Toplam Varlık</div>
+                <div className="text-[9px] font-semibold tabular-nums leading-none">
                   {formatMoney(data.portfolio?.totalAsset)}
                 </div>
-                {data.portfolio && data.portfolio.totalAsset && data.portfolio.totalAsset > 0 && (
-                  <div className="text-xs text-emerald-400 mt-0.5">
-                    {formatPct(0.024, { showSign: true })} {/* TODO: Get from portfolio history */}
-                  </div>
-                )}
               </div>
               <div>
-                <div className="text-xs text-neutral-500 mb-0.5">Günlük PnL</div>
-                <div className={`text-base font-medium tabular-nums ${
+                <div className="text-[8px] text-neutral-500 mb-0.5">Günlük PnL</div>
+                <div className={`text-[9px] font-semibold tabular-nums leading-none ${
                   data.portfolio && data.portfolio.dailyPnL !== null && data.portfolio.dailyPnL >= 0 ? 'text-emerald-400' : 'text-red-400'
                 }`}>
                   {data.portfolio && data.portfolio.dailyPnL !== null ? formatMoney(data.portfolio.dailyPnL) : '—'}
                 </div>
-                <div className="text-xs text-neutral-500 mt-0.5">Last 24h</div>
               </div>
               <div>
-                <div className="text-xs text-neutral-500 mb-0.5">Margin Level</div>
-                <div className={`text-base font-medium tabular-nums ${
+                <div className="text-[8px] text-neutral-500 mb-0.5">Margin Level</div>
+                <div className={`text-[9px] font-semibold tabular-nums leading-none ${
                   data.portfolio && data.portfolio.marginLevel !== null && data.portfolio.marginLevel >= 100 ? 'text-emerald-400' : 'text-amber-400'
                 }`}>
                   {data.portfolio && data.portfolio.marginLevel !== null ? `${data.portfolio.marginLevel}%` : '—'}
                 </div>
-                {data.portfolio && data.portfolio.marginLevel && data.portfolio.marginLevel >= 100 && (
-                  <div className="text-xs text-emerald-400 mt-0.5">Healthy</div>
-                )}
               </div>
             </div>
           )}
+          {!data.portfolio && renderNotice('Portföy verisi henüz hazır değil.')}
         </div>
 
-        {/* Market Status Card - Figma Parity: Single card with list */}
-        <div className="rounded-2xl bg-card/60 p-4 relative min-w-0">
-          <div className="flex items-center justify-between mb-3 gap-2">
-            <div className="text-sm font-medium truncate min-w-0">Piyasa Durumu</div>
-            <div className="flex items-center gap-1.5 shrink-0">
+        {/* Market Status */}
+        <div className="col-span-12 xl:col-span-5 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+          <div className="flex items-center justify-between mb-0.5 gap-2">
+            <div className="text-[8px] font-semibold truncate min-w-0">Piyasa Durumu</div>
+            <div className="flex items-center gap-2 shrink-0">
               {data._meta?.dataQuality?.market === 'seed' && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
                   Seed
@@ -175,19 +199,23 @@ export default function DashboardV2() {
                   {data._meta.sourceHealth.binance}
                 </span>
               )}
+              <Link href="/market-data" className="text-[11px] text-neutral-500 hover:text-neutral-300">
+                Tümünü gör
+              </Link>
             </div>
           </div>
+          {data._meta?.dataQuality?.market === 'seed' && renderNotice('Piyasa verisi seed/degraded modunda.')}
           {status === 'loading' ? (
-            <Skeleton className="h-20" />
+            <Skeleton className="h-6" />
           ) : (
-            <div className="space-y-2.5">
-              {data.market?.symbols && data.market.symbols.length > 0 ? (
-                data.market.symbols.map((s) => (
+            <div className="space-y-0.5">
+              {marketRows.length > 0 ? (
+                marketRows.map((s) => (
                   <div
                     key={s.symbol}
                     className="flex items-center justify-between gap-2 text-xs min-w-0"
                   >
-                    <span className="text-neutral-300 font-medium truncate min-w-0 shrink-0" style={{ minWidth: '80px' }}>
+                    <span className="text-neutral-300 font-medium truncate min-w-0 shrink-0" style={{ minWidth: '70px' }}>
                       {formatSymbol(s.symbol)}
                     </span>
                     <span className="text-neutral-400 tabular-nums shrink-0">
@@ -211,12 +239,14 @@ export default function DashboardV2() {
                         </svg>
                       )}
                     </span>
-                    {s.change24h !== null && (
+                    {s.change24h !== null ? (
                       <span className={`tabular-nums shrink-0 font-medium ${
                         s.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
                         {formatPct(s.change24h)}
                       </span>
+                    ) : (
+                      <span className="text-neutral-500 shrink-0">—</span>
                     )}
                   </div>
                 ))
@@ -227,48 +257,13 @@ export default function DashboardV2() {
           )}
         </div>
 
-        {/* System Health Card */}
-        <div className="rounded-2xl bg-card/60 p-4">
-          <div className="text-sm font-medium mb-2">Sistem Sağlığı</div>
-          {status === 'loading' ? (
-            <Skeleton className="h-20" />
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs">
-                <span className={`w-2 h-2 rounded-full ${
-                  data.system.api.ok ? 'bg-emerald-500' : 'bg-red-500'
-                }`} />
-                <span className="text-neutral-400">API: {data.system.api.ok ? 'OK' : 'DOWN'}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <span className={`w-2 h-2 rounded-full ${
-                  data.system.feed.ok ? 'bg-emerald-500' : 'bg-red-500'
-                }`} />
-                <span className="text-neutral-400">
-                  Feed: {data.system.feed.ok ? 'OK' : 'DOWN'}
-                  {data.system.feed.stalenessSec && ` (${data.system.feed.stalenessSec}s)`}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <span className={`w-2 h-2 rounded-full ${
-                  data.system.executor.ok ? 'bg-emerald-500' : 'bg-red-500'
-                }`} />
-                <span className="text-neutral-400">
-                  Executor: {data.system.executor.ok ? 'OK' : 'DOWN'}
-                  {data.system.executor.latencyMs !== null && ` (${data.system.executor.latencyMs}ms)`}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Active Strategies Card - Figma Parity: Count + Top 3 rows */}
-        <div className="rounded-2xl bg-card/60 p-4">
-          <div className="flex items-center justify-between mb-3 gap-2">
-            <div className="text-sm font-medium truncate min-w-0">Aktif Stratejiler</div>
-            <div className="flex items-center gap-1.5 shrink-0">
+        {/* Active Strategies */}
+        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+          <div className="flex items-center justify-between mb-0.5 gap-2">
+            <div className="text-[8px] font-semibold truncate min-w-0">Aktif Stratejiler</div>
+            <div className="flex items-center gap-2 shrink-0">
               {data.strategies && data.strategies.active !== null && data.strategies.active > 0 && (
-                <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
                   {data.strategies.active} Running
                 </span>
               )}
@@ -291,14 +286,18 @@ export default function DashboardV2() {
                   {data.strategies.sourceHealth}
                 </span>
               )}
+              <Link href="/strategies" className="text-[11px] text-neutral-500 hover:text-neutral-300">
+                Tümünü gör
+              </Link>
             </div>
           </div>
+          {data.strategies?.dataQuality === 'seed' && renderNotice('Strateji verisi seed/degraded modunda.')}
           {status === 'loading' ? (
-            <Skeleton className="h-20" />
+            <Skeleton className="h-6" />
           ) : (
-            <div className="space-y-2">
-              {data.strategies?.top && data.strategies.top.length > 0 ? (
-                data.strategies.top.map((s, idx) => (
+            <div className="space-y-0.5">
+              {strategyRows.length > 0 ? (
+                strategyRows.map((s, idx) => (
                   <div
                     key={idx}
                     className="flex items-center justify-between gap-2 text-xs min-w-0"
@@ -325,25 +324,16 @@ export default function DashboardV2() {
               ) : (
                 <div className="text-xs text-neutral-500">Henüz çalışan strateji yok.</div>
               )}
-              {data.strategies && data.strategies.totalPnL24h !== null && (
-                <div className="text-xs text-neutral-500 mt-2 pt-2 border-t border-neutral-800">
-                  24h PnL: <span className={`tabular-nums font-medium ${
-                    data.strategies.totalPnL24h >= 0 ? 'text-emerald-400' : 'text-red-400'
-                  }`}>
-                    {formatMoney(data.strategies.totalPnL24h)}
-                  </span>
-                </div>
-              )}
             </div>
           )}
         </div>
 
-        {/* Risk Status Card - Figma Parity: Bar + Label */}
-        <div className="rounded-2xl bg-card/60 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-medium">Risk Durumu</div>
+        {/* Risk Status */}
+        <div className="col-span-12 xl:col-span-5 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+          <div className="flex items-center justify-between mb-0.5 gap-2">
+            <div className="text-[8px] font-semibold">Risk Durumu</div>
             {data.risk?.level && (
-              <span className={`text-xs px-2 py-0.5 rounded ${
+              <span className={`text-[9px] px-1.5 py-0.5 rounded ${
                 data.risk.level === 'low' ? 'bg-emerald-500/20 text-emerald-300' :
                 data.risk.level === 'moderate' ? 'bg-amber-500/20 text-amber-300' :
                 'bg-red-500/20 text-red-300'
@@ -352,10 +342,11 @@ export default function DashboardV2() {
               </span>
             )}
           </div>
+          {!data.risk && renderNotice('Risk verisi henüz hazır değil.')}
           {status === 'loading' ? (
-            <Skeleton className="h-20" />
+            <Skeleton className="h-6" />
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-0.5">
               <div>
                 <div className="flex items-center justify-between text-xs mb-1">
                   <span className="text-neutral-500">Daily Drawdown</span>
@@ -398,56 +389,100 @@ export default function DashboardV2() {
           )}
         </div>
 
-      {/* AI Decisions Card */}
-      <div className="rounded-2xl bg-card/60 p-4">
-        <div className="flex items-center justify-between mb-3 gap-2">
-          <div className="text-sm font-medium truncate min-w-0">Son Yapay Zeka Kararları</div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {data.aiDecisions?.dataQuality === 'seed' && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
-                Seed
-              </span>
-            )}
-            {data.aiDecisions?.dataQuality === 'live' && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-                Live
-              </span>
-            )}
-            {data.aiDecisions?.sourceHealth && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                data.aiDecisions.sourceHealth === 'ok' ? 'bg-emerald-500/20 text-emerald-300' :
-                data.aiDecisions.sourceHealth === 'timeout' ? 'bg-amber-500/20 text-amber-300' :
-                'bg-red-500/20 text-red-300'
-              }`}>
-                {data.aiDecisions.sourceHealth}
-              </span>
-            )}
+        {/* AI Decisions */}
+        <div className="col-span-12 xl:col-span-7 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+          <div className="flex items-center justify-between mb-0.5 gap-2">
+            <div className="text-[8px] font-semibold truncate min-w-0">Son Yapay Zeka Kararları</div>
+            <div className="flex items-center gap-2 shrink-0">
+              {data.aiDecisions?.dataQuality === 'seed' && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                  Seed
+                </span>
+              )}
+              {data.aiDecisions?.dataQuality === 'live' && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                  Live
+                </span>
+              )}
+              {data.aiDecisions?.sourceHealth && (
+                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                  data.aiDecisions.sourceHealth === 'ok' ? 'bg-emerald-500/20 text-emerald-300' :
+                  data.aiDecisions.sourceHealth === 'timeout' ? 'bg-amber-500/20 text-amber-300' :
+                  'bg-red-500/20 text-red-300'
+                }`}>
+                  {data.aiDecisions.sourceHealth}
+                </span>
+              )}
+              <Link href="/audit" className="text-[11px] text-neutral-500 hover:text-neutral-300">
+                Tümünü gör
+              </Link>
+            </div>
           </div>
+          {data.aiDecisions?.dataQuality === 'seed' && renderNotice('AI kararları seed/degraded modunda.')}
+          {status === 'loading' ? (
+            <Skeleton className="h-6" />
+          ) : (
+            <div className="space-y-0.5">
+              {decisionRows.length > 0 ? (
+                decisionRows.map((d, idx) => (
+                  <div key={idx} className="flex items-center justify-between gap-2 text-xs min-w-0">
+                    <span className="text-neutral-300 font-medium truncate min-w-0 shrink-0" style={{ minWidth: '100px' }}>
+                      {d.action} {formatSymbol(d.symbol)}
+                    </span>
+                    <span className="text-neutral-400 truncate min-w-0">
+                      {d.reason ?? '—'}
+                    </span>
+                    <span className="text-neutral-300 shrink-0 tabular-nums">
+                      {d.confidence !== null ? `${Math.round(d.confidence)}%` : '—'}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-neutral-500">Henüz karar yok.</div>
+              )}
+            </div>
+          )}
         </div>
-        {status === 'loading' ? (
-          <Skeleton className="h-20" />
-        ) : (
-          <div className="space-y-2">
-            {data.aiDecisions?.recent && data.aiDecisions.recent.length > 0 ? (
-              data.aiDecisions.recent.map((d, idx) => (
-                <div key={idx} className="flex items-center justify-between gap-2 text-xs min-w-0">
-                  <span className="text-neutral-300 font-medium truncate min-w-0 shrink-0" style={{ minWidth: '100px' }}>
-                    {d.action} {formatSymbol(d.symbol)}
-                  </span>
-                  <span className="text-neutral-400 truncate min-w-0">
-                    {d.reason ?? '—'}
-                  </span>
-                  <span className="text-neutral-300 shrink-0 tabular-nums">
-                    {d.confidence !== null ? `${Math.round(d.confidence)}% Conf.` : '—'}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <div className="text-xs text-neutral-500">Henüz karar yok.</div>
-            )}
-          </div>
-        )}
-      </div>
+
+        {/* System Health */}
+        <div className="col-span-12 xl:col-span-5 rounded-lg bg-card/60 p-0.5 min-h-0 h-full overflow-hidden">
+          <div className="text-[8px] font-semibold mb-0.5">Sistem Sağlığı</div>
+          {status !== 'live' && renderNotice('Sistem metrikleri kısmi veya gecikmeli olabilir.')}
+          {status === 'loading' ? (
+            <Skeleton className="h-6" />
+          ) : (
+            <div className="space-y-0.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-neutral-500">API Latency</span>
+                <span className="text-neutral-300 tabular-nums font-medium">
+                  {data.latency?.p95Ms !== null ? `${data.latency.p95Ms}ms` : '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-neutral-500">WS / Feed</span>
+                <span className={`tabular-nums font-medium ${
+                  data.system.feed.ok ? 'text-emerald-400' : 'text-red-400'
+                }`}>
+                  {data.system.feed.ok ? 'OK' : 'DOWN'}
+                  {data.system.feed.stalenessSec ? ` (${data.system.feed.stalenessSec}s)` : ''}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-neutral-500">Executor</span>
+                <span className={`tabular-nums font-medium ${
+                  data.system.executor.ok ? 'text-emerald-400' : 'text-red-400'
+                }`}>
+                  {data.system.executor.ok ? 'OK' : 'DOWN'}
+                  {data.system.executor.latencyMs !== null ? ` (${data.system.executor.latencyMs}ms)` : ''}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-neutral-500">OrderBus</span>
+                <span className="text-neutral-300 tabular-nums font-medium">—</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

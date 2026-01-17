@@ -1,6 +1,8 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
+import { getFeatureFlag } from '@/lib/features/featureFlags';
+import DashboardV2 from '@/components/dashboard/DashboardV2';
 import PageHeader from '@/components/layout/PageHeader';
 import StatusPills from '@/components/layout/StatusPills';
 import Metric from '@/components/ui/Metric';
@@ -31,6 +33,15 @@ export default function DashboardPage({
 }: {
   searchParams?: { state?: string };
 }) {
+  // Feature flag: Dashboard V2
+  const isV2Enabled = getFeatureFlag('SPARK_DASHBOARD_V2');
+
+  // If V2 enabled, render V2 component
+  if (isV2Enabled) {
+    return <DashboardV2 />;
+  }
+
+  // Legacy dashboard (default)
   // Dev toggle: ?state=loading|empty|error (GIF çekmek ve regression test için)
   const devState = resolveDevState(searchParams);
 
@@ -88,8 +99,16 @@ export default function DashboardPage({
     }, 1000);
   };
 
+  const chips: Array<{ label: string; tone?: 'success' | 'warn' | 'info' | 'muted' }> = [
+    { label: `${t('dashboard.target')}: 1200 ms`, tone: 'muted' },
+    { label: `${t('dashboard.threshold')}: 30 sn`, tone: 'muted' },
+  ];
+  if (process.env.NODE_ENV !== 'production') {
+    chips.push({ label: 'V2: OFF', tone: 'warn' as const });
+  }
+
   return (
-    <div className="relative px-6 py-4 min-h-screen bg-neutral-950 overflow-hidden" data-page="dashboard">
+    <div className="relative px-6 py-4 min-h-screen bg-neutral-950 overflow-hidden" data-page="dashboard" data-testid="dashboard-v1-root">
       {/* Watermark Background - Spark Mark */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -110,16 +129,13 @@ export default function DashboardPage({
       </div>
       <PageHeader
         title={
-          <div className="flex items-center gap-2">
-            Spark Trading
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="truncate">Spark Trading</span>
             <ErrorBudgetBadge />
           </div>
         }
         subtitle="Dashboard"
-        chips={[
-          { label: `${t('dashboard.target')}: 1200 ms`, tone: 'muted' },
-          { label: `${t('dashboard.threshold')}: 30 sn`, tone: 'muted' },
-        ]}
+        chips={chips}
         actions={[
           { label: t('actions.createStrategy'), onClick: handleCreateStrategy },
           { label: t('actions.createAlert'), variant: 'ghost', onClick: handleCreateAlert },

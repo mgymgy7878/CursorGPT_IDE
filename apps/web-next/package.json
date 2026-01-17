@@ -22,6 +22,7 @@
 		"test:dashboard": "jest --testPathPatterns='dashboard' --passWithNoTests",
 		"test:e2e": "playwright test --reporter=list",
 		"capture:dashboard-v2-step3-2": "node scripts/capture-dashboard-v2-step3-2.cjs",
+		"capture:dashboard-v2-step3-3": "node scripts/capture-dashboard-v2-step3-3.cjs",
 		"i18n:check": "node ../../scripts/i18n-check.mjs"
 	},
 	"dependencies": {
