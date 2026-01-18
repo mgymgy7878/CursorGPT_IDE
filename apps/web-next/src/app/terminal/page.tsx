@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTerminalState } from '@/lib/terminal/useTerminalState';
 import TerminalTopBar from '@/components/terminal/TerminalTopBar';
 import IconSidebar from '@/components/terminal/IconSidebar';
 import MarketWatchPanel from '@/components/terminal/MarketWatchPanel';
@@ -10,6 +11,7 @@ import RightPanel from '@/components/terminal/RightPanel';
 const RIGHT_PANEL_KEY = 'ui.terminal.rightPanelOpen';
 
 export default function TerminalPage() {
+  const { setSelectedSymbol } = useTerminalState();
   const [rightOpen, setRightOpen] = useState(true);
 
   useEffect(() => {
@@ -17,6 +19,10 @@ export default function TerminalPage() {
     const stored = localStorage.getItem(RIGHT_PANEL_KEY);
     if (stored !== null) {
       setRightOpen(stored === '1' || stored === 'true');
+    }
+    const symbol = new URLSearchParams(window.location.search).get('symbol');
+    if (symbol) {
+      setSelectedSymbol(symbol.toUpperCase());
     }
   }, []);
 
