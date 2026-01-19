@@ -20,7 +20,7 @@ import { useRightRail } from "./RightRailContext";
 import { DividerWithHandle } from "./RailHandle";
 import { IconSpark } from "@/components/ui/LocalIcons";
 import CopilotDock from "@/components/copilot/CopilotDock";
-import { ReactNode, useRef, useEffect } from "react";
+import { ReactNode, useRef, useEffect, useState } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import {
   pillButtonVariant,
@@ -30,7 +30,7 @@ import {
 } from "@/styles/uiTokens";
 import { cn } from "@/lib/utils";
 import { useDeferredLocalStorageState } from "@/hooks/useDeferredLocalStorageState";
-import { useDensityMode } from "@/hooks/useDensityMode";
+import { useUiChrome } from "@/hooks/useUiChrome";
 import {
   SIDEBAR_EXPANDED,
   SIDEBAR_COLLAPSED,
@@ -38,12 +38,10 @@ import {
   RIGHT_RAIL_COLLAPSED,
   RIGHT_RAIL_DOCK,
   PANEL_TRANSITION_MS,
-  LS_SIDEBAR_COLLAPSED,
-  LS_RIGHT_RAIL_OPEN,
   DEFAULT_SIDEBAR_COLLAPSED,
-  DEFAULT_RIGHT_RAIL_OPEN,
   TOPBAR_HEIGHT,
   LS_COPILOT_DOCK_COLLAPSED,
+  OVERLAY_BREAKPOINT,
 } from "./layout-tokens";
 import { IconShield, IconBell, IconBarChart } from "@/components/ui/LocalIcons";
 import { useNavIndicators } from "@/hooks/useNavIndicators";
@@ -130,14 +128,12 @@ export default function AppFrame({ children }: AppFrameProps) {
   const rightRail = useRightRail();
   const router = useRouter();
 
-  // PATCH K: Density mode (runtime toggle)
-  const [density] = useDensityMode();
-
-  // PATCH O/Q: Viewport="short" + Glance otomatiği
+  // PATCH O/Q: Viewport="short" + Glance otomatiği + ekran genişliği etiketi
   useEffect(() => {
     const updateViewport = () => {
       if (typeof window !== 'undefined') {
         const height = window.innerHeight;
+        const width = window.innerWidth;
         if (height < 820) {
           document.documentElement.setAttribute('data-viewport', 'short');
         } else {
@@ -149,6 +145,13 @@ export default function AppFrame({ children }: AppFrameProps) {
         } else {
           document.documentElement.removeAttribute('data-glance');
         }
+        if (width < 1280) {
+          document.documentElement.setAttribute('data-screen', 'narrow');
+        } else if (width < 1440) {
+          document.documentElement.setAttribute('data-screen', 'compact');
+        } else {
+          document.documentElement.removeAttribute('data-screen');
+        }
       }
     };
 
@@ -157,25 +160,25 @@ export default function AppFrame({ children }: AppFrameProps) {
     return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
-  // Panel state'leri (HYDRATION SAFE: ilk render default, mount sonrası localStorage)
-  // DEFAULT: Her iki panel de collapsed (overlay modu)
-  const [sidebarCollapsed, setSidebarCollapsed] = useDeferredLocalStorageState(
-    LS_SIDEBAR_COLLAPSED,
-    DEFAULT_SIDEBAR_COLLAPSED
-  );
-  // PATCH X: 10 Ocak 2026 görünümü - Sağ panel varsayılan açık (tüm sayfalarda)
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isMarketData = pathname?.includes('/market-data');
-  const defaultRightOpen = DEFAULT_RIGHT_RAIL_OPEN; // 10 Ocak görünümü: tüm sayfalarda varsayılan açık
+  const isTerminal = pathname?.startsWith('/terminal');
 
   // PATCH: Gerçek fullscreen - view=full olduğunda chrome'u gizle
   const isMarketFullscreen = pathname?.startsWith('/market-data') && searchParams?.get('view') === 'full';
 
-  const [rightOpen, setRightOpen] = useDeferredLocalStorageState(
-    LS_RIGHT_RAIL_OPEN,
-    defaultRightOpen
-  );
+  const {
+    leftOpen,
+    rightDockMode,
+    setLeftOpen,
+    setRightDockMode,
+  } = useUiChrome({
+    leftDefaultOpen: !DEFAULT_SIDEBAR_COLLAPSED,
+    leftCollapseBelow: 1440,
+    rightDefaultOpen: isTerminal ? false : undefined,
+    rightCollapseBelow: 1440,
+    rightDockModeDefault: isTerminal ? "closed" : "open",
+  });
 
   // PATCH: Paneller tamamen bağımsız - auto-collapse kaldırıldı (Figma parity)
   // Sidebar ve RightDock state'leri birbirini etkilemez
@@ -189,16 +192,24 @@ export default function AppFrame({ children }: AppFrameProps) {
   // Pinned mod: layout shift kabul edilir, normal genişlik
   // Unpinned mod: overlay hover/focus genişleme
   // Figma parity: Sidebar default expanded (icon+label), RightRail default closed (dock launcher)
-  const leftPinned = !sidebarCollapsed;
-  const rightPinned = rightOpen;
+  const [rightMode, setRightMode] = useState<'inline' | 'overlay'>('inline');
+  const leftPinned = leftOpen;
+  const rightDockOpen = rightDockMode === 'open';
+  const rightDockClosed = rightDockMode === 'closed';
+  const rightDockCollapsed = rightDockMode === 'collapsed';
+  const rightPinned = rightDockOpen && rightMode === 'inline';
 
   // PATCH: Responsive panel genişlikleri (clamp) - iki panel aynı anda açık kalabilir
   // Sidebar expanded: clamp(220px, 18vw, 280px)
   // Sidebar collapsed: 72px (icon-only)
   // RightDock open: clamp(340px, 26vw, 460px)
   // RightDock collapsed: 72px (rail)
-  const sidebarW = sidebarCollapsed ? "w-[72px]" : "w-[clamp(220px,18vw,280px)]";
-  const rightW = rightOpen ? "w-[clamp(340px,26vw,460px)]" : "w-[72px]";
+  const sidebarW = leftOpen ? "w-[clamp(216px,16vw,240px)]" : "w-[56px]";
+  const rightW = rightDockOpen
+    ? "w-[clamp(360px,24vw,420px)]"
+    : rightDockCollapsed
+    ? "w-[56px]"
+    : "w-0";
 
   // PATCH I: Hover davranışı kaldırıldı - sadece pin/toggle butonu ile kontrol
   // Sidebar artık hover ile açılıp kapanmıyor, sadece toggle butonu ile kontrol ediliyor
@@ -212,6 +223,49 @@ export default function AppFrame({ children }: AppFrameProps) {
       };
     }
   }, [isMarketFullscreen]);
+
+  // Global chrome state markers (dashboard layout mode uses these)
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('data-right-open', rightDockOpen ? '1' : '0');
+    root.setAttribute('data-left-open', leftOpen ? '1' : '0');
+    root.setAttribute('data-right-mode', rightMode);
+    window.dispatchEvent(new CustomEvent('ui:chrome'));
+  }, [leftOpen, rightDockOpen, rightMode]);
+
+  useEffect(() => {
+    const updateRightMode = () => {
+      if (typeof window === 'undefined') return;
+      const width = window.innerWidth;
+      // OVERLAY_BREAKPOINT = 1280 - below this, right rail is overlay (not inline)
+      setRightMode(width < OVERLAY_BREAKPOINT ? 'overlay' : 'inline');
+    };
+    updateRightMode();
+    window.addEventListener('resize', updateRightMode);
+    return () => window.removeEventListener('resize', updateRightMode);
+  }, []);
+
+  useEffect(() => {
+    if (!rightDockOpen || rightMode !== 'overlay') return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setRightDockMode('closed');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [rightDockOpen, rightMode, setRightDockMode]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key === 'ArrowRight') {
+        e.preventDefault();
+        setRightDockMode(rightDockOpen ? 'closed' : 'open');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [rightDockOpen, setRightDockMode]);
 
   // ESC key handler for fullscreen exit - router.push kullan (window.location yerine)
   useEffect(() => {
@@ -265,7 +319,7 @@ export default function AppFrame({ children }: AppFrameProps) {
             >
               {/* Sidebar sadece pin/toggle butonu ile kontrol ediliyor */}
               <div className="relative z-10">
-                <LeftNav collapsed={!leftPinned} />
+              <LeftNav collapsed={!leftPinned} />
               </div>
             </aside>
 
@@ -273,7 +327,7 @@ export default function AppFrame({ children }: AppFrameProps) {
             <DividerWithHandle
               side="left"
               isOpen={leftPinned}
-              onToggle={() => setSidebarCollapsed((v) => !v)}
+              onToggle={() => setLeftOpen((v) => !v)}
             />
           </>
         )}
@@ -294,7 +348,7 @@ export default function AppFrame({ children }: AppFrameProps) {
               paddingTop: 'var(--page-pt, 10px)',
               // PATCH W.5b: Bottom padding - density mode'a göre dinamik + safe-area desteği
               paddingBottom: 'calc(var(--page-pb, 32px) + env(safe-area-inset-bottom, 0px))',
-              overflowY: 'auto', // PATCH U: İç container scroll alır, body scroll yok
+              overflowY: 'hidden',
               scrollbarGutter: 'stable', // PATCH HARDENING: Prevent layout jitter
             } as React.CSSProperties}
           >
@@ -308,39 +362,64 @@ export default function AppFrame({ children }: AppFrameProps) {
             <DividerWithHandle
               side="right"
               isOpen={rightPinned}
-              onToggle={() => setRightOpen((v) => !v)}
+              onToggle={() => setRightDockMode(rightDockOpen ? 'collapsed' : 'open')}
               showDivider={rightPinned}
             />
 
-            {/* RIGHT: RightRail - Pin/Toggle Only (PATCH I: hover kaldırıldı) */}
+            {/* RIGHT: RightRail - inline (grid) or overlay */}
             <aside
               className={cn("flex-shrink-0 relative", rightW)}
               style={{
                 transition: `width var(--transition-duration) ease-out`,
               }}
             >
-          {/* Pinned mod: normal expanded görünüm (PATCH F: CopilotDock) */}
-          {rightPinned ? (
-            <div className="relative z-10 h-full">
-              {rightRail || (
-                <CopilotDock
-                  collapsed={copilotCollapsed}
-                  onToggle={() => setCopilotCollapsed(v => !v)}
-                />
+              {rightPinned ? (
+                <div className="relative z-10 h-full">
+                  {rightRail || (
+                    <CopilotDock
+                      collapsed={copilotCollapsed}
+                      onToggle={() => setCopilotCollapsed(v => !v)}
+                    />
+                  )}
+                </div>
+              ) : rightDockClosed ? null : (
+                <div className="relative z-10">
+                  <RightRailDock
+                    onOpenPanel={() => setRightDockMode('open')}
+                    onClosePanel={() => setRightDockMode('closed')}
+                  />
+                </div>
               )}
-            </div>
-          ) : (
-            <>
-              {/* Dock (unpinned modda her zaman görünür) */}
-              <div className="relative z-10">
-                <RightRailDock onOpenPanel={() => setRightOpen(true)} />
-              </div>
-            </>
-          )}
-        </aside>
+            </aside>
           </>
         )}
       </div>
+
+      {/* RIGHT: Overlay rail for narrow viewports */}
+      {!isMarketFullscreen && rightDockOpen && rightMode === 'overlay' && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/40 z-[60]"
+            onClick={() => setRightDockMode('closed')}
+            aria-hidden="true"
+          />
+          <aside
+            className="fixed right-0 z-[70] border-l border-white/10 bg-neutral-950/95 backdrop-blur"
+            style={{
+              top: 'var(--app-topbar-h,48px)',
+              bottom: 0,
+              width: 'clamp(360px, 24vw, 420px)',
+            }}
+          >
+            {rightRail || (
+              <CopilotDock
+                collapsed={copilotCollapsed}
+                onToggle={() => setCopilotCollapsed(v => !v)}
+              />
+            )}
+          </aside>
+        </>
+      )}
     </div>
   );
 }
@@ -355,11 +434,13 @@ export default function AppFrame({ children }: AppFrameProps) {
  */
 interface RightRailDockProps {
   onOpenPanel: () => void;
+  onClosePanel: () => void;
   activeTab?: "copilot" | "risk" | "alerts" | "metrics";
 }
 
 function RightRailDock({
   onOpenPanel,
+  onClosePanel,
   activeTab = "copilot",
 }: RightRailDockProps) {
   // PATCH 8: Right Rail Indicators - useNavIndicators hook'undan badge'leri al
@@ -418,6 +499,20 @@ function RightRailDock({
       role="toolbar"
       aria-label="Panel kısayolları"
     >
+      <button
+        onClick={onClosePanel}
+        className={cn(
+          "w-10 h-8 mb-2 flex items-center justify-center rounded-lg transition-all duration-150 group",
+          "bg-white/5 hover:bg-white/10 border border-white/10",
+          "text-white/60 hover:text-white/90",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 focus-visible:ring-blue-500"
+        )}
+        title="Paneli kapat"
+        aria-label="Paneli kapat"
+        type="button"
+      >
+        <span className="text-[12px] font-semibold">X</span>
+      </button>
       {dockItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;
