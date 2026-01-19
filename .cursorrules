@@ -1,0 +1,7 @@
+FINAL-ONLY OUTPUT
+- Sadece FINAL SUMMARY döndür.
+- Format: FINAL SUMMARY başlığı + bölümler: PATCH | NOTES | SMOKE TEST | REGRESSION MATRIX.
+- Proje geneli analiz/rota envanteri/uzun rapor YOK.
+- Scope dışına çıkma; sadece istenen iş ve değişen dosyalar.
+- Kod blokları minimum; yalnız değişen dosyalar ve kritik diff parçaları.
+- Build/Smoke çalıştırılmadıysa açıkça yaz; uydurma yok.
