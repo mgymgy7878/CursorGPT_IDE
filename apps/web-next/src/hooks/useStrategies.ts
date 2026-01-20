@@ -68,8 +68,18 @@ export const useStrategies = () => {
       setStrategies(data.strategies || data.items || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch strategies');
-      // Set mock data on error
+      // Set mock data on error (MVP: include ema_rsi_v1)
       setStrategies([
+        {
+          id: 'ema_rsi_v1',
+          name: 'EMA+RSI v1',
+          description: 'EMA(12/26) crossover with RSI(14) filter. Long entry: EMA12 > EMA26 AND RSI < 70. Exit: EMA12 < EMA26 OR RSI > 75.',
+          status: 'inactive',
+          type: 'automated',
+          riskLevel: 'medium',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
         {
           id: '1',
           name: 'Sample Strategy 1',

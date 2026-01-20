@@ -23,7 +23,7 @@ export default function MarketData() {
   // Normal workspace modu: Figma parity market workspace
   // PATCH: Layout fix - chart alanı Copilot'a kadar genişlesin (boş kolon yok)
   return (
-    <div className="h-full flex flex-col min-h-0 min-w-0 flex-1">
+    <div className="h-full w-full flex flex-col min-h-0 min-w-0 flex-1 bg-neutral-950">
       <MarketChartWorkspace
         symbol={symbol}
         timeframe={timeframe}
