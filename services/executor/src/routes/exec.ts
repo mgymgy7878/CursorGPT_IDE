@@ -11,11 +11,13 @@ type RunState = {
   startedAt: number;
   running: boolean;
   lastTickTs?: number;
+  lastCandleTs?: number;
   lastDecisionTs?: number;
   lastSignal?: { type: "long" | "short" | "exit"; ts: number; price: number; reason: string };
   position?: { side: "long" | "short"; qty: number; entryPrice: number; entryTs: number };
   pnl: number;
   equity: number;
+  lastError?: string;
 };
 
 let currentRun: RunState | null = null;
@@ -69,10 +71,13 @@ function calculateRSI(prices: number[], period: number = 14): number {
 // Strategy: EMA+RSI
 async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
   try {
+    run.lastError = undefined;
     // Get latest candle
     const response = await fetch(`${marketdataUrl}/api/marketdata/latest?symbol=${run.symbol}&timeframe=${run.timeframe}`);
     if (!response.ok) {
-      emitEvent("error", { message: "Failed to fetch market data" });
+      const errMsg = "Failed to fetch market data";
+      run.lastError = errMsg;
+      emitEvent("error", { message: errMsg });
       return;
     }
     const candle = await response.json();
@@ -81,6 +86,7 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
     }
 
     run.lastTickTs = candle.ts;
+    run.lastCandleTs = Date.now();
 
     // Get historical candles for indicators (simplified: use last 30)
     const histResponse = await fetch(`https://api.binance.com/api/v3/klines?symbol=${run.symbol}&interval=${run.timeframe}&limit=30`);
@@ -149,13 +155,18 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       timeframe: run.timeframe,
       mode: run.mode,
       lastTickTs: run.lastTickTs,
+      lastCandleTs: run.lastCandleTs,
       lastDecisionTs: run.lastDecisionTs,
       position: run.position,
       pnl: run.pnl,
       equity: run.equity,
+      loopIntervalMs: 5000,
+      lastError: run.lastError,
     });
   } catch (err: any) {
-    emitEvent("error", { message: String(err?.message || err) });
+    const errMsg = String(err?.message || err);
+    run.lastError = errMsg;
+    emitEvent("error", { message: errMsg });
   }
 }
 
@@ -212,10 +223,13 @@ export default async function execRoute(app: FastifyInstance) {
           timeframe: currentRun.timeframe,
           mode: currentRun.mode,
           lastTickTs: currentRun.lastTickTs,
+          lastCandleTs: currentRun.lastCandleTs,
           lastDecisionTs: currentRun.lastDecisionTs,
           position: currentRun.position,
           pnl: currentRun.pnl,
           equity: currentRun.equity,
+          loopIntervalMs: 5000,
+          lastError: currentRun.lastError,
         });
       } else {
         if (heartbeatInterval) {
@@ -253,10 +267,13 @@ export default async function execRoute(app: FastifyInstance) {
       timeframe: currentRun.timeframe,
       mode: currentRun.mode,
       lastTickTs: currentRun.lastTickTs,
+      lastCandleTs: currentRun.lastCandleTs,
       lastDecisionTs: currentRun.lastDecisionTs,
       position: currentRun.position,
       pnl: currentRun.pnl,
       equity: currentRun.equity,
+      loopIntervalMs: 5000,
+      lastError: currentRun.lastError,
     });
 
     const stoppedAt = Date.now();
@@ -279,11 +296,14 @@ export default async function execRoute(app: FastifyInstance) {
       timeframe: currentRun.timeframe,
       mode: currentRun.mode,
       lastTickTs: currentRun.lastTickTs,
+      lastCandleTs: currentRun.lastCandleTs,
       lastDecisionTs: currentRun.lastDecisionTs,
       lastSignal: currentRun.lastSignal,
       pnl: currentRun.pnl,
       position: currentRun.position,
       equity: currentRun.equity,
+      loopIntervalMs: 5000,
+      lastError: currentRun.lastError,
     };
   });
 

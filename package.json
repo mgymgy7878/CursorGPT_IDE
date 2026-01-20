@@ -5,7 +5,8 @@
   "packageManager": "pnpm@10.18.3",
   "scripts": {
     "dev": "pnpm --filter web-next dev",
-    "dev:all": "pnpm --parallel --filter ./services/* dev",
+    "dev:all": "pnpm --parallel --filter ./services/* --filter web-next dev",
+    "smoke:mvp": "node tools/smoke-mvp.mjs",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",

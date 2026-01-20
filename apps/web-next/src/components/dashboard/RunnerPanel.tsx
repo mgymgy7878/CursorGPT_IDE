@@ -12,11 +12,14 @@ type Status = {
   timeframe?: string;
   mode?: string;
   lastTickTs?: number;
+  lastCandleTs?: number;
   lastDecisionTs?: number;
   lastSignal?: { type: string; ts: number; price: number; reason: string };
   pnl?: number;
   position?: { side: string; qty: number; entryPrice: number };
   equity?: number;
+  loopIntervalMs?: number;
+  lastError?: string;
 };
 
 type Event = {
@@ -242,6 +245,26 @@ export default function RunnerPanel() {
         </div>
       </div>
 
+      {/* Quick Health */}
+      {status.running && (
+        <div className="mb-3 p-2 rounded bg-neutral-950/40 border border-white/5 text-[10px]">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-neutral-400">Health:</span>
+            <div className="flex gap-3">
+              <span className={status.lastCandleTs && Date.now() - status.lastCandleTs < 90000 ? "text-emerald-400" : "text-red-400"}>
+                marketdata: {status.lastCandleTs && Date.now() - status.lastCandleTs < 90000 ? "OK" : "STALE"}
+              </span>
+              <span className={status.lastDecisionTs && Date.now() - status.lastDecisionTs < 30000 ? "text-emerald-400" : status.lastDecisionTs ? "text-yellow-400" : "text-neutral-500"}>
+                executor: {status.lastDecisionTs && Date.now() - status.lastDecisionTs < 30000 ? "OK" : status.lastDecisionTs ? "STALE" : "WAIT"}
+              </span>
+            </div>
+          </div>
+          {status.lastError && (
+            <div className="text-red-400 mt-1">Error: {status.lastError}</div>
+          )}
+        </div>
+      )}
+
       {/* Controls */}
       <div className="flex gap-2 mb-4">
         <button
@@ -257,6 +280,13 @@ export default function RunnerPanel() {
           className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
         >
           Stop
+        </button>
+        <button
+          disabled
+          title="Kill-switch + audit + keys vault olmadan açılmaz."
+          className="px-3 py-2 text-xs font-medium bg-neutral-700 text-neutral-400 cursor-not-allowed rounded opacity-50"
+        >
+          LIVE (Disabled)
         </button>
       </div>
 
@@ -289,16 +319,26 @@ export default function RunnerPanel() {
             <span className="text-neutral-400">Equity:</span>
             <span className="text-neutral-100">{status.equity?.toFixed(2) || "10000.00"} USDT</span>
           </div>
-          {status.lastTickTs && (
+          {status.lastCandleTs && (
             <div className="flex justify-between">
               <span className="text-neutral-400">Last Candle:</span>
-              <span className="text-neutral-100">{new Date(status.lastTickTs).toLocaleTimeString()}</span>
+              <span className="text-neutral-100">
+                {new Date(status.lastCandleTs).toLocaleTimeString()} ({Math.floor((Date.now() - status.lastCandleTs) / 1000)}s ago)
+              </span>
             </div>
           )}
-          {status.lastSignal && (
+          {status.lastDecisionTs && (
             <div className="flex justify-between">
               <span className="text-neutral-400">Last Decision:</span>
-              <span className="text-neutral-100">{new Date(status.lastSignal.ts).toLocaleTimeString()}</span>
+              <span className="text-neutral-100">
+                {new Date(status.lastDecisionTs).toLocaleTimeString()} ({Math.floor((Date.now() - status.lastDecisionTs) / 1000)}s ago)
+              </span>
+            </div>
+          )}
+          {status.loopIntervalMs && (
+            <div className="flex justify-between">
+              <span className="text-neutral-400">Loop Interval:</span>
+              <span className="text-neutral-100">{status.loopIntervalMs}ms</span>
             </div>
           )}
         </div>
