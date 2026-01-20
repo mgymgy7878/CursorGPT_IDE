@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const EXECUTOR_URL = process.env.NEXT_PUBLIC_EXECUTOR_URL || "http://localhost:4001";
-
 type Status = {
   running: boolean;
   runId?: string;
@@ -62,7 +60,7 @@ export default function RunnerPanel() {
   // Fetch status helper
   const fetchStatus = async () => {
     try {
-      const res = await fetch(`${EXECUTOR_URL}/api/exec/status`);
+      const res = await fetch("/api/exec/status");
       const data = await res.json();
       setStatus(data);
       if (data.runId) setRunId(data.runId);
@@ -88,7 +86,7 @@ export default function RunnerPanel() {
 
   // SSE events
   useEffect(() => {
-    const es = new EventSource(`${EXECUTOR_URL}/api/exec/events`);
+    const es = new EventSource("/api/exec/events");
     esRef.current = es;
 
     es.onmessage = (ev) => {
@@ -145,7 +143,7 @@ export default function RunnerPanel() {
     setLastStartInfo(null);
 
     try {
-      const res = await fetch(`${EXECUTOR_URL}/api/exec/start`, {
+      const res = await fetch("/api/exec/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -204,7 +202,7 @@ export default function RunnerPanel() {
     setUiError(null);
 
     try {
-      const res = await fetch(`${EXECUTOR_URL}/api/exec/stop`, {
+      const res = await fetch("/api/exec/stop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ runId }),
@@ -265,7 +263,7 @@ export default function RunnerPanel() {
               <span className="text-yellow-400 font-semibold">{lastClickTime}</span>
             </div>
           )}
-          <div>Executor: {EXECUTOR_URL}</div>
+          <div>Proxy: /api/exec/* → {process.env.NEXT_PUBLIC_EXECUTOR_URL || "http://127.0.0.1:4001"}</div>
           {lastStartInfo && (
             <div>Last start: {lastStartInfo.status} @ {lastStartInfo.time}</div>
           )}
