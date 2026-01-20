@@ -20,6 +20,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  actions-lint:
+    name: Actions Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rhysd/actionlint@v1
+
   paths:
     runs-on: ubuntu-latest
     outputs:
