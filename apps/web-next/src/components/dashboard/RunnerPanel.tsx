@@ -42,6 +42,8 @@ export default function RunnerPanel() {
   const [isStopping, setIsStopping] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
   const [lastStartInfo, setLastStartInfo] = useState<{ status?: number; time?: string } | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [lastClickTime, setLastClickTime] = useState<string | null>(null);
   const eventsEndRef = useRef<HTMLDivElement>(null);
   const esRef = useRef<EventSource | null>(null);
 
@@ -74,6 +76,7 @@ export default function RunnerPanel() {
   // Hydration kanıtı
   useEffect(() => {
     console.info("[RunnerPanel] hydrated");
+    setIsHydrated(true);
   }, []);
 
   // Poll status
@@ -250,6 +253,18 @@ export default function RunnerPanel() {
 
         {/* Debug info */}
         <div className="text-[9px] text-neutral-500 mb-2 space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span>Hydrated:</span>
+            <span className={isHydrated ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold"}>
+              {isHydrated ? "YES" : "NO"}
+            </span>
+          </div>
+          {lastClickTime && (
+            <div className="flex items-center gap-2">
+              <span>Last Click:</span>
+              <span className="text-yellow-400 font-semibold">{lastClickTime}</span>
+            </div>
+          )}
           <div>Executor: {EXECUTOR_URL}</div>
           {lastStartInfo && (
             <div>Last start: {lastStartInfo.status} @ {lastStartInfo.time}</div>
@@ -281,6 +296,7 @@ export default function RunnerPanel() {
             }}
             onClick={(e) => {
               console.info("[RunnerPanel] start click", { status, isStarting, isStopping });
+              setLastClickTime(new Date().toLocaleTimeString());
               e.preventDefault();
               e.stopPropagation();
               handleStart();
@@ -297,6 +313,7 @@ export default function RunnerPanel() {
             }}
             onClick={(e) => {
               console.info("[RunnerPanel] stop click", { runId, status, isStopping });
+              setLastClickTime(new Date().toLocaleTimeString());
               e.preventDefault();
               e.stopPropagation();
               handleStop();
