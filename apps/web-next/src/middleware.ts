@@ -44,6 +44,21 @@ function pickToken(req: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // CRITICAL: Next static + API must never be rewritten/intercepted
+  if (pathname.startsWith("/_next/")) {
+    return NextResponse.next();
+  }
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+  if (pathname === "/favicon.ico") {
+    return NextResponse.next();
+  }
+  // Static assets
+  if (/\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|woff2?)$/.test(pathname)) {
+    return NextResponse.next();
+  }
+
   // Centralized redirects (single-source from config/routes.ts)
   const hit = redirects.find(r => pathname === r.from);
   if (hit) {
@@ -137,6 +152,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/healthz).*)'],
+  matcher: ['/((?!_next/|api/|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|woff2?)$).*)'],
 };
 
