@@ -36,27 +36,45 @@ export default function RunnerPanel() {
   const [filter, setFilter] = useState<"all" | "signal" | "trade" | "error" | "status">("all");
   const [form, setForm] = useState({ symbol: "BTCUSDT", timeframe: "1m", qty: "0.001", strategyId: "ema_rsi_v1" });
   const [risk, setRisk] = useState<"low" | "med" | "high">("med");
-  const [params, setParams] = useState<Record<string, any>>({});
+  const [params, setParams] = useState<Record<string, any>>({ rsiEntry: 70, rsiExit: 75 });
   const [runId, setRunId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
+  const [lastStartInfo, setLastStartInfo] = useState<{ status?: number; time?: string } | null>(null);
   const eventsEndRef = useRef<HTMLDivElement>(null);
   const esRef = useRef<EventSource | null>(null);
 
+  // Apply default risk preset on mount
+  useEffect(() => {
+    const presets = {
+      low: { qty: "0.0005", rsiEntry: 65, rsiExit: 75 },
+      med: { qty: "0.001", rsiEntry: 70, rsiExit: 75 },
+      high: { qty: "0.002", rsiEntry: 75, rsiExit: 80 },
+    };
+    const preset = presets[risk];
+    setForm(prev => ({ ...prev, qty: preset.qty }));
+    setParams({ rsiEntry: preset.rsiEntry, rsiExit: preset.rsiExit });
+  }, []); // Only on mount
+
+  // Fetch status helper
+  const fetchStatus = async () => {
+    try {
+      const res = await fetch(`${EXECUTOR_URL}/api/exec/status`);
+      const data = await res.json();
+      setStatus(data);
+      if (data.runId) setRunId(data.runId);
+      return data;
+    } catch (err) {
+      console.error("Status poll error:", err);
+      return null;
+    }
+  };
+
   // Poll status
   useEffect(() => {
-    const poll = async () => {
-      try {
-        const res = await fetch(`${EXECUTOR_URL}/api/exec/status`);
-        const data = await res.json();
-        setStatus(data);
-        if (data.runId) setRunId(data.runId);
-      } catch (err) {
-        console.error("Status poll error:", err);
-      }
-    };
-    poll();
-    const interval = setInterval(poll, 5000);
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -104,8 +122,20 @@ export default function RunnerPanel() {
   };
 
   const handleStart = async () => {
-    setLoading(true);
+    // Validation
+    if (!form.symbol || !form.timeframe || !form.strategyId) {
+      setUiError("Missing required fields: symbol, timeframe, or strategyId");
+      return;
+    }
+    if (!form.qty || parseFloat(form.qty) <= 0) {
+      setUiError("Invalid quantity: must be > 0");
+      return;
+    }
+
+    setIsStarting(true);
     setUiError(null);
+    setLastStartInfo(null);
+
     try {
       const res = await fetch(`${EXECUTOR_URL}/api/exec/start`, {
         method: "POST",
@@ -118,14 +148,32 @@ export default function RunnerPanel() {
           params: { qty: parseFloat(form.qty) || 0.001, ...params },
         }),
       });
+
+      const status = res.status;
+      const time = new Date().toLocaleTimeString();
+      setLastStartInfo({ status, time });
+
       if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
+        let errorText = "";
+        try {
+          errorText = await res.text();
+        } catch {
+          errorText = `HTTP ${status}`;
+        }
+        throw new Error(`HTTP ${status}: ${errorText || "Unknown error"}`);
       }
-      const data = await res.json();
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid JSON response");
+      }
+
       if (data.ok) {
         setRunId(data.runId);
-        setStatus({ ...status, running: true, runId: data.runId });
+        // Immediately fetch status to get latest state
+        await fetchStatus();
       } else {
         setUiError(data.error || "Failed to start");
       }
@@ -134,14 +182,19 @@ export default function RunnerPanel() {
       setUiError(errorMsg);
       console.error("Start error:", err);
     } finally {
-      setLoading(false);
+      setIsStarting(false);
     }
   };
 
   const handleStop = async () => {
-    if (!runId) return;
-    setLoading(true);
+    if (!runId) {
+      setUiError("No runId available");
+      return;
+    }
+
+    setIsStopping(true);
     setUiError(null);
+
     try {
       const res = await fetch(`${EXECUTOR_URL}/api/exec/stop`, {
         method: "POST",
@@ -149,12 +202,17 @@ export default function RunnerPanel() {
         body: JSON.stringify({ runId }),
       });
       if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
+        let errorText = "";
+        try {
+          errorText = await res.text();
+        } catch {
+          errorText = `HTTP ${res.status}`;
+        }
+        throw new Error(`HTTP ${res.status}: ${errorText || "Unknown error"}`);
       }
       const data = await res.json();
       if (data.ok) {
-        setStatus({ ...status, running: false });
+        await fetchStatus();
       } else {
         setUiError(data.error || "Failed to stop");
       }
@@ -163,7 +221,7 @@ export default function RunnerPanel() {
       setUiError(errorMsg);
       console.error("Stop error:", err);
     } finally {
-      setLoading(false);
+      setIsStopping(false);
     }
   };
 
@@ -173,7 +231,7 @@ export default function RunnerPanel() {
     <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] flex flex-col min-h-0 max-h-[calc(100vh-200px)]">
       {/* Header with sticky controls */}
       <div className="sticky top-0 z-10 bg-neutral-900/70 backdrop-blur-sm -m-4 p-4 pb-3 border-b border-white/5 mb-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div>
             <div className="text-sm font-semibold text-neutral-100">Strategy Runner</div>
             <div className="text-[11px] text-neutral-400 mt-0.5">Paper Trading</div>
@@ -182,23 +240,48 @@ export default function RunnerPanel() {
             {status.running ? "RUNNING" : "STOPPED"}
           </div>
         </div>
+
+        {/* Debug info */}
+        <div className="text-[9px] text-neutral-500 mb-2 space-y-0.5">
+          <div>Executor: {EXECUTOR_URL}</div>
+          {lastStartInfo && (
+            <div>Last start: {lastStartInfo.status} @ {lastStartInfo.time}</div>
+          )}
+        </div>
+
+        {/* Error Banner (sticky header içinde) */}
+        {uiError && (
+          <div className="mb-2 p-2 rounded bg-red-950/40 border border-red-800 text-[10px] text-red-400">
+            <div className="flex items-center justify-between">
+              <span>{uiError}</span>
+              <button
+                type="button"
+                onClick={() => setUiError(null)}
+                className="ml-2 text-red-300 hover:text-red-200 text-xs"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Controls moved to header */}
         <div className="flex gap-2">
           <button
             type="button"
             onClick={handleStart}
-            disabled={status.running || loading}
+            disabled={status.running || isStarting || isStopping}
             className="flex-1 px-3 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
           >
-            Start
+            {isStarting ? "Starting..." : "Start"}
           </button>
           <button
             type="button"
             onClick={handleStop}
-            disabled={!status.running || !runId || loading}
+            disabled={!status.running || !runId || isStarting || isStopping}
             className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
           >
-            Stop
+            {isStopping ? "Stopping..." : "Stop"}
           </button>
           <button
             type="button"
@@ -210,22 +293,6 @@ export default function RunnerPanel() {
           </button>
         </div>
       </div>
-
-      {/* Error Banner */}
-      {uiError && (
-        <div className="mb-3 p-2 rounded bg-red-950/40 border border-red-800 text-[11px] text-red-400">
-          <div className="flex items-center justify-between">
-            <span>{uiError}</span>
-            <button
-              type="button"
-              onClick={() => setUiError(null)}
-              className="ml-2 text-red-300 hover:text-red-200"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Scrollable content area */}
       <div className="flex-1 min-h-0 overflow-y-auto space-y-3 -mx-4 px-4">

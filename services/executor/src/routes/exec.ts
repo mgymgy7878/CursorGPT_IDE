@@ -174,19 +174,19 @@ export default async function execRoute(app: FastifyInstance) {
   const marketdataUrl = process.env.MARKETDATA_URL || "http://localhost:5001";
 
   // Start runner
-  app.post("/api/exec/start", async (req: FastifyRequest<{ Body: { strategyId: string; symbol?: string; timeframe?: string; mode?: string; params?: Record<string, any> } }>) => {
+  app.post("/api/exec/start", async (req: FastifyRequest<{ Body: { strategyId: string; symbol?: string; timeframe?: string; mode?: string; params?: Record<string, any> } }>, reply) => {
     if (currentRun?.running) {
-      return { ok: false, error: "Runner already running" };
+      return reply.code(400).send({ ok: false, error: "Runner already running" });
     }
 
     const { strategyId, symbol = "BTCUSDT", timeframe = "1m", mode = "paper", params = {} } = req.body;
 
     if (mode !== "paper") {
-      return { ok: false, error: "LIVE mode is disabled" };
+      return reply.code(400).send({ ok: false, error: "LIVE mode is disabled" });
     }
 
     if (strategyId !== "ema_rsi_v1") {
-      return { ok: false, error: `Unknown strategy: ${strategyId}` };
+      return reply.code(400).send({ ok: false, error: `Unknown strategy: ${strategyId}` });
     }
 
     const runId = `run_${Date.now()}`;
@@ -284,8 +284,17 @@ export default async function execRoute(app: FastifyInstance) {
 
   // Get status
   app.get("/api/exec/status", async () => {
+    const buildInfo = {
+      pid: process.pid,
+      startedAt: new Date(Date.now() - (process.uptime() * 1000)).toISOString(),
+      version: "1.0.0", // From package.json
+    };
+
     if (!currentRun) {
-      return { running: false };
+      return { 
+        running: false,
+        build: buildInfo,
+      };
     }
 
     return {
@@ -304,6 +313,7 @@ export default async function execRoute(app: FastifyInstance) {
       equity: currentRun.equity,
       loopIntervalMs: 5000,
       lastError: currentRun.lastError,
+      build: buildInfo,
     };
   });
 
