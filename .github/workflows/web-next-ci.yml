@@ -1,0 +1,127 @@
+name: Web-Next CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/web-next/**'
+      - '.github/workflows/web-next-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/web-next/**'
+      - '.github/workflows/web-next-ci.yml'
+
+env:
+  NODE_VERSION: '20.10.0'
+  PNPM_VERSION: '10.18.3'
+
+jobs:
+  lint-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -C apps/web-next typecheck
+
+      - name: Lint (advisory)
+        run: pnpm -C apps/web-next lint:advisory
+        continue-on-error: true
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -C apps/web-next build:direct
+        env:
+          NEXT_DISABLE_ESLINT: '1'
+
+  ui-regression:
+    name: UI Regression Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Playwright browser install - CI'da zorunlu
+      # --with-deps: OS bağımlılıklarını da kurar (fonts, libs vs.)
+      - name: Install Playwright browsers
+        run: |
+          pnpm -C apps/web-next exec playwright install chromium --with-deps
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: 0
+
+      - name: Build for production
+        run: pnpm -C apps/web-next build:direct
+        env:
+          NEXT_DISABLE_ESLINT: '1'
+
+      # Next.js production server'ı başlat (dev değil)
+      - name: Start production server
+        run: |
+          pnpm -C apps/web-next start &
+          # Server'ın hazır olmasını bekle
+          npx wait-on http://localhost:3003 --timeout 30000
+        env:
+          PORT: 3003
+
+      - name: RightDock Layout Regression Test
+        run: pnpm -C apps/web-next test:rightdock-layout
+        env:
+          UI_URL: 'http://localhost:3003/dashboard'
+
+      - name: Upload evidence artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-regression-evidence
+          path: evidence/ui/
+          retention-days: 7
