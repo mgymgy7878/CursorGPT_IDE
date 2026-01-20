@@ -8,10 +8,6 @@ on:
       - 'apps/**'
       - 'services/**'
       - 'deploy/nginx/**'
-    paths-ignore:
-      - '**/*.md'
-      - '.github/**'
-      - 'apps/web-next/**'
   workflow_dispatch:
 
 concurrency:

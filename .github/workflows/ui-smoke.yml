@@ -4,8 +4,6 @@ on:
   pull_request:
     paths:
       - "apps/web-next/**"
-    paths-ignore:
-      - "apps/web-next/**/*.md"
   workflow_dispatch:
 
 concurrency:

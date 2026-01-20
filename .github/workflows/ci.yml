@@ -13,11 +13,6 @@ on:
       - 'apps/**'
       - 'services/**'
       - 'packages/**'
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.github/**'
-      - 'apps/web-next/**'
   workflow_dispatch:
 
 concurrency:
