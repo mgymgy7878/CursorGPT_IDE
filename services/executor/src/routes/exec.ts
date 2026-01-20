@@ -19,6 +19,7 @@ type RunState = {
 
 let currentRun: RunState | null = null;
 let runnerInterval: NodeJS.Timeout | null = null;
+let heartbeatInterval: NodeJS.Timeout | null = null;
 
 // Event ring buffer (son 500 event)
 const eventBuffer: Array<{ v: number; seq: number; ts: number; type: string; data: any }> = [];
@@ -194,7 +195,7 @@ export default async function execRoute(app: FastifyInstance) {
     }, 5000);
 
     // Heartbeat
-    const heartbeatInterval = setInterval(() => {
+    heartbeatInterval = setInterval(() => {
       if (currentRun?.running) {
         emitEvent("status", {
           running: currentRun.running,
@@ -209,7 +210,10 @@ export default async function execRoute(app: FastifyInstance) {
           equity: currentRun.equity,
         });
       } else {
-        clearInterval(heartbeatInterval);
+        if (heartbeatInterval) {
+          clearInterval(heartbeatInterval);
+          heartbeatInterval = null;
+        }
       }
     }, 15000);
 
@@ -225,6 +229,10 @@ export default async function execRoute(app: FastifyInstance) {
     if (runnerInterval) {
       clearInterval(runnerInterval);
       runnerInterval = null;
+    }
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+      heartbeatInterval = null;
     }
 
     currentRun.running = false;
