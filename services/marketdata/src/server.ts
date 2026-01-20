@@ -32,6 +32,10 @@ btcturkClient.subscribe("ticker", (data) => {
   observeTick("BTCTURK", now);
 });
 
+// Latest endpoint
+import latestRoute from "./routes/latest.js";
+await app.register(latestRoute);
+
 // (gelecekte: /ohlcv, /ws feed vs.)
 
 const PORT = Number(process.env.PORT || 5001);
