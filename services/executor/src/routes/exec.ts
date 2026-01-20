@@ -282,6 +282,8 @@ export default async function execRoute(app: FastifyInstance) {
     reply.raw.setHeader("Content-Type", "text/event-stream");
     reply.raw.setHeader("Cache-Control", "no-cache");
     reply.raw.setHeader("Connection", "keep-alive");
+    reply.raw.setHeader("Access-Control-Allow-Origin", "*");
+    reply.raw.setHeader("Access-Control-Allow-Methods", "GET");
 
     // Send last 50 events to new client
     const last50 = eventBuffer.slice(-50);

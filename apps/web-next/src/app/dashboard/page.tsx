@@ -1,31 +1,48 @@
-'use client';
-export const dynamic = 'force-dynamic';
+import React from "react";
+import RunnerPanel from "@/components/dashboard/RunnerPanel";
 
-import { getFeatureFlag } from '@/lib/features/featureFlags';
-import DashboardV2 from '@/components/dashboard/DashboardV2';
-import PageHeader from '@/components/layout/PageHeader';
-import StatusPills from '@/components/layout/StatusPills';
-import Metric from '@/components/ui/Metric';
-import LiveMarketCard from '@/components/marketdata/LiveMarketCard';
-import ErrorBudgetBadge from '@/components/ops/ErrorBudgetBadge';
-import { Skeleton, EmptyState, ErrorState } from '@/components/ui/states';
-import { formatDuration } from '@/lib/format';
-import { t } from '@/lib/i18n';
-import { useMarketStore } from '@/stores/marketStore';
-import React, { useState, useEffect } from 'react';
+export const dynamic = "force-dynamic";
 
-type DevState = 'loading' | 'empty' | 'error' | 'data';
+const kpiCards = [
+  { label: "Portfolio Value", value: "$12.84M", trend: "+1.8%" },
+  { label: "24h Volume", value: "$3.21M", trend: "+4.2%" },
+  { label: "Open Interest", value: "$812K", trend: "-0.9%" },
+  { label: "Active Orders", value: "124", trend: "+6" },
+];
 
-// SSR-safe dev state resolver (production'da otomatik pasif)
-function resolveDevState(searchParams?: { state?: string }): DevState | null {
-  // Production'da dev toggle pasif
-  if (process.env.NODE_ENV === 'production') return null;
+const skeletonRows = Array.from({ length: 7 }).map((_, idx) => idx);
 
-  const state = searchParams?.state;
-  if (state === 'loading' || state === 'empty' || state === 'error' || state === 'data') {
-    return state;
-  }
-  return null;
+function SkeletonLine({ width = "w-full" }: { width?: string }) {
+  return (
+    <div className={`h-3 rounded bg-white/10 ${width}`} />
+  );
+}
+
+function PanelShell({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] flex flex-col min-h-0">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-sm font-semibold text-neutral-100">{title}</div>
+          {subtitle && (
+            <div className="text-[11px] text-neutral-400 mt-0.5">
+              {subtitle}
+            </div>
+          )}
+        </div>
+        <div className="text-[10px] text-neutral-400">Placeholder</div>
+      </div>
+      <div className="mt-3 min-h-0">{children}</div>
+    </div>
+  );
 }
 
 export default function DashboardPage({
@@ -33,217 +50,130 @@ export default function DashboardPage({
 }: {
   searchParams?: { state?: string };
 }) {
-  // Feature flag: Dashboard V2
-  const isV2Enabled = getFeatureFlag('SPARK_DASHBOARD_V2');
-
-  // If V2 enabled, render V2 component
-  if (isV2Enabled) {
-    return <DashboardV2 />;
-  }
-
-  // Legacy dashboard (default)
-  // Dev toggle: ?state=loading|empty|error (GIF çekmek ve regression test için)
-  const devState = resolveDevState(searchParams);
-
-  // Get WS status from market store
-  const wsStatus = useMarketStore(s => s.status);
-
-  const env = 'Mock';
-  const feed = wsStatus === 'healthy' ? 'Healthy' : wsStatus === 'degraded' ? 'Degraded' : 'Down';
-  const broker = 'Offline';
-
-  const p95Ms = 58;
-  const stalenessMs = 0;
-
-  // Dev toggle: Panel state'i query param'dan al veya normal akıştan belirle
-  const [panelState, setPanelState] = useState<DevState>('data');
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  const [hasData, setHasData] = useState(false);
-
-  useEffect(() => {
-    if (devState) {
-      // Dev toggle aktif: query param'dan state'i al
-      setPanelState(devState);
-      setIsLoading(devState === 'loading');
-      setHasError(devState === 'error');
-      setHasData(devState === 'data');
-    } else {
-      // Normal akış: gerçek data durumuna göre belirle
-      // TODO: Gerçek API çağrıları burada yapılacak
-      setTimeout(() => {
-        setIsLoading(false);
-        setHasError(false);
-        setHasData(true); // Şimdilik mock data var
-        setPanelState('data');
-      }, 1000);
-    }
-  }, [devState]);
-
-  const handleCreateStrategy = () => {
-    window.location.href = '/strategy-lab';
-  };
-
-  const handleCreateAlert = () => {
-    // TODO: Open alert creation modal
-    console.log('Create alert');
-  };
-
-  const handleRetry = () => {
-    setIsLoading(true);
-    setHasError(false);
-    setTimeout(() => {
-      setIsLoading(false);
-      setHasData(true);
-      setPanelState('data');
-    }, 1000);
-  };
-
-  const chips: Array<{ label: string; tone?: 'success' | 'warn' | 'info' | 'muted' }> = [
-    { label: `${t('dashboard.target')}: 1200 ms`, tone: 'muted' },
-    { label: `${t('dashboard.threshold')}: 30 sn`, tone: 'muted' },
-  ];
-  if (process.env.NODE_ENV !== 'production') {
-    chips.push({ label: 'V2: OFF', tone: 'warn' as const });
-  }
+  const showWatermark =
+    searchParams?.state === "loading" || searchParams?.state === "degraded";
 
   return (
-    <div className="relative px-6 py-4 min-h-screen bg-neutral-950 overflow-hidden" data-page="dashboard" data-testid="dashboard-v1-root">
-      {/* Watermark Background - Spark Mark */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <svg
-            className="w-[900px] h-[900px] opacity-[0.06]"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
+    <div
+      className="relative h-full min-h-0 overflow-hidden flex flex-col gap-4"
+      data-testid="dashboard-north-star"
+    >
+      {showWatermark && (
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.012]">
+          <div className="absolute right-8 top-6 text-[180px] font-bold text-white/20">
+            SPARK
+          </div>
+        </div>
+      )}
+
+      <header className="flex items-center justify-between gap-4">
+        <div>
+          <div className="text-lg font-semibold text-neutral-100">
+            Komuta Paneli
+          </div>
+          <div className="text-[12px] text-neutral-400">
+            Market Overview
+          </div>
+        </div>
+        <div className="text-[11px] text-neutral-500">
+          Dashboard / North-Star
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        {kpiCards.map((card) => (
+          <div
+            key={card.label}
+            className="rounded-xl border border-white/10 bg-neutral-900/70 px-4 py-3"
           >
-            <path
-              d="M8 2L9.5 5.5L13 6L10.5 8.5L11.5 12L8 10L4.5 12L5.5 8.5L3 6L6.5 5.5L8 2Z"
-              fill="currentColor"
-              fillRule="evenodd"
-            />
-          </svg>
-        </div>
-      </div>
-      <PageHeader
-        title={
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="truncate">Spark Trading</span>
-            <ErrorBudgetBadge />
-          </div>
-        }
-        subtitle="Dashboard"
-        chips={chips}
-        actions={[
-          { label: t('actions.createStrategy'), onClick: handleCreateStrategy },
-          { label: t('actions.createAlert'), variant: 'ghost', onClick: handleCreateAlert },
-        ]}
-      />
-
-      <div className="mb-4">
-        <StatusPills env={env} feed={feed} broker={broker} />
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
-        {/* Left column - Main content */}
-        <div className="grid gap-4">
-          {/* Metrics row */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <Metric
-              label={t('dashboard.p95')}
-              value={formatDuration(p95Ms)}
-              hint={`${t('dashboard.target')}: 1200 ms`}
-              className="num-tight"
-            />
-            <Metric
-              label={t('dashboard.staleness')}
-              value={formatDuration(stalenessMs)}
-              hint={`${t('dashboard.threshold')}: 30 sn`}
-              className="num-tight"
-            />
-          </div>
-
-          {/* Cards row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Alarm Drafts Card - UIStates Kit kullanımı */}
-            <div className="rounded-2xl bg-card/60 p-4 min-h-[200px]">
-              <div className="text-sm font-medium mb-2">{t('dashboard.alarmDrafts')}</div>
-              {isLoading ? (
-                <Skeleton className="mt-2" />
-              ) : hasError ? (
-                <ErrorState
-                  error="Alarm taslakları yüklenirken bir hata oluştu"
-                  onRetry={handleRetry}
-                />
-              ) : !hasData ? (
-                <EmptyState
-                  title="Henüz alarm taslağı yok"
-                  description="Yeni bir alarm oluşturmak için butona tıklayın"
-                  action={
-                    <button
-                      onClick={handleCreateAlert}
-                      className="px-4 py-2 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                    >
-                      Alarm Oluştur
-                    </button>
-                  }
-                />
-              ) : (
-                <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
-              )}
-            </div>
-
-            {/* Canary Tests Card - UIStates Kit kullanımı */}
-            <div className="rounded-2xl bg-card/60 p-4 min-h-[200px]">
-              <div className="text-sm font-medium mb-2">{t('dashboard.canaryTests')}</div>
-              {isLoading ? (
-                <Skeleton className="mt-2" />
-              ) : hasError ? (
-                <ErrorState
-                  error="Canary testleri yüklenirken bir hata oluştu"
-                  onRetry={handleRetry}
-                />
-              ) : !hasData ? (
-                <EmptyState
-                  title="Henüz canary testi yok"
-                  description="Yeni bir canary testi oluşturmak için butona tıklayın"
-                  action={
-                    <button
-                      onClick={() => console.log('Create canary test')}
-                      className="px-4 py-2 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                    >
-                      Test Oluştur
-                    </button>
-                  }
-                />
-              ) : (
-                <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
-              )}
+            <div className="text-[11px] text-neutral-400">{card.label}</div>
+            <div className="mt-1 flex items-baseline justify-between gap-2">
+              <div className="text-base font-semibold text-neutral-100">
+                {card.value}
+              </div>
+              <div className="text-[11px] text-emerald-300/80">
+                {card.trend}
+              </div>
             </div>
           </div>
+        ))}
+      </div>
 
-          {/* Live Market Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <LiveMarketCard symbol="BTCUSDT" />
-            <LiveMarketCard symbol="ETHUSDT" />
-          </div>
+      <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-3">
+        <div className="flex flex-col min-h-0 gap-3">
+          <PanelShell title="Portfolio Performance" subtitle="12 saatlik özet">
+            <div className="flex-1 min-h-[220px] rounded-xl border border-white/5 bg-neutral-950/40 flex items-center justify-center text-xs text-neutral-500">
+              Chart placeholder
+            </div>
+            <div className="mt-3 text-[11px] text-neutral-400">
+              Performans metriği ve risk dağılımı burada görünecek.
+            </div>
+          </PanelShell>
+
+          <PanelShell title="Working Set" subtitle="Açık pozisyonlar">
+            <div className="flex-1 min-h-0 overflow-auto">
+              <div className="grid gap-2">
+                {skeletonRows.map((row) => (
+                  <div
+                    key={row}
+                    className="flex items-center justify-between rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2 text-[12px]"
+                  >
+                    <div className="text-neutral-200">BTCUSDT</div>
+                    <div className="text-emerald-300/80">+1.24%</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </PanelShell>
+
+          <PanelShell title="News / AI" subtitle="Haber · AI · Alarmlar · Sistem">
+            <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+              {["Haber", "AI", "Alarmlar", "Sistem"].map((tab) => (
+                <div
+                  key={tab}
+                  className="rounded-full border border-white/10 px-2 py-1 bg-white/5"
+                >
+                  {tab}
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 flex-1 min-h-0 overflow-auto">
+              <div className="grid gap-2">
+                {skeletonRows.map((row) => (
+                  <div key={row} className="rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2">
+                    <div className="text-[12px] text-neutral-200">
+                      {row + 1}. Placeholder başlık
+                    </div>
+                    <div className="text-[11px] text-neutral-500 mt-1">
+                      Kısa açıklama alanı.
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </PanelShell>
         </div>
 
-        {/* Right column - Sticky sidebar */}
-        <aside className="w-full lg:w-[360px] shrink-0 sticky top-24 self-start pb-40 md:pb-44 pr-2 grid gap-4 [scroll-padding-bottom:120px]">
-          {/* Last Alarm Status */}
-          <div className="rounded-2xl bg-card/60 p-4">
-            <div className="text-sm font-medium mb-2">{t('dashboard.lastAlarm')}</div>
-            <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
-          </div>
-
-          {/* Last Canary Test */}
-          <div className="rounded-2xl bg-card/60 p-4">
-            <div className="text-sm font-medium mb-2">{t('dashboard.lastCanary')}</div>
-            <div className="text-xs text-neutral-500">{t('dashboard.noData')}</div>
-          </div>
+        <aside className="flex flex-col min-h-0 gap-3">
+          <RunnerPanel />
+          <PanelShell title="Top Gainers" subtitle="Top-N">
+            <div className="flex-1 min-h-0 overflow-auto">
+              <div className="grid gap-2">
+                {skeletonRows.map((row) => (
+                  <div
+                    key={row}
+                    className="flex items-center justify-between rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2 text-[12px]"
+                  >
+                    <div className="text-neutral-200">SOLUSDT</div>
+                    <div className="text-emerald-300/80">+{row + 2.4}%</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 text-[11px] text-neutral-400">
+              Liste gerçek veri geldiğinde otomatik güncellenecek.
+            </div>
+          </PanelShell>
         </aside>
       </div>
     </div>
