@@ -70,13 +70,13 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-      
+
       - name: Verify pnpm version
         run: |
           EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
           ACTUAL=$(pnpm -v)
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
-      
+
       - name: Fetch dependencies
         run: pnpm fetch --prod=false
 
@@ -171,13 +171,13 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-      
+
       - name: Verify pnpm version
         run: |
           EXPECTED=$(node -p "require('./package.json').packageManager.split('@')[1]")
           ACTUAL=$(pnpm -v)
           test "$ACTUAL" = "$EXPECTED" || { echo "::error::pnpm mismatch"; exit 1; }
-      
+
       - name: Fetch dependencies
         run: pnpm fetch --prod=false
 
@@ -279,28 +279,28 @@ jobs:
         run: |
           cat > resilience-report.md << 'EOF'
           # Resilience Test Report
-          
+
           **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
           **Commit:** ${{ github.sha }}
           **Branch:** ${{ github.ref_name }}
-          
+
           ## Contract Tests
-          
+
           ${{ needs.contract-tests.result == 'success' && '✅ PASS' || '❌ FAIL' }}
-          
+
           ## Chaos Tests
-          
+
           ${{ needs.chaos-tests.result == 'success' && '✅ PASS' || (needs.chaos-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAIL') }}
-          
+
           ## Summary
-          
+
           - Contract Tests: ${{ needs.contract-tests.result }}
           - Chaos Tests: ${{ needs.chaos-tests.result }}
-          
+
           ## Recommendations
-          
+
           ${{ needs.chaos-tests.result == 'failure' && '⚠️ System showed resilience issues under chaos. Review logs and improve error handling, retries, and circuit breakers.' || '✅ System demonstrated good resilience under adverse conditions.' }}
-          
+
           EOF
 
       - name: Upload resilience report
@@ -317,7 +317,7 @@ jobs:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('resilience-report.md', 'utf8');
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
