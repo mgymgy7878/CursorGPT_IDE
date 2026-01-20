@@ -7,10 +7,6 @@ on:
       - 'packages/**'
       - 'tests/contract/**'
       - 'tests/chaos/**'
-    paths-ignore:
-      - '**/*.md'
-      - '.github/**'
-      - 'apps/web-next/**'
   push:
     branches: [main]
   schedule:
