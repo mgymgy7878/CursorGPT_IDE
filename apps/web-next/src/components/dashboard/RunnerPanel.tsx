@@ -39,6 +39,7 @@ export default function RunnerPanel() {
   const [params, setParams] = useState<Record<string, any>>({});
   const [runId, setRunId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uiError, setUiError] = useState<string | null>(null);
   const eventsEndRef = useRef<HTMLDivElement>(null);
   const esRef = useRef<EventSource | null>(null);
 
@@ -104,6 +105,7 @@ export default function RunnerPanel() {
 
   const handleStart = async () => {
     setLoading(true);
+    setUiError(null);
     try {
       const res = await fetch(`${EXECUTOR_URL}/api/exec/start`, {
         method: "POST",
@@ -116,15 +118,21 @@ export default function RunnerPanel() {
           params: { qty: parseFloat(form.qty) || 0.001, ...params },
         }),
       });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
       const data = await res.json();
       if (data.ok) {
         setRunId(data.runId);
         setStatus({ ...status, running: true, runId: data.runId });
       } else {
-        alert(`Error: ${data.error}`);
+        setUiError(data.error || "Failed to start");
       }
     } catch (err: any) {
-      alert(`Error: ${err?.message || err}`);
+      const errorMsg = err?.message || String(err);
+      setUiError(errorMsg);
+      console.error("Start error:", err);
     } finally {
       setLoading(false);
     }
@@ -133,20 +141,27 @@ export default function RunnerPanel() {
   const handleStop = async () => {
     if (!runId) return;
     setLoading(true);
+    setUiError(null);
     try {
       const res = await fetch(`${EXECUTOR_URL}/api/exec/stop`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ runId }),
       });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
       const data = await res.json();
       if (data.ok) {
         setStatus({ ...status, running: false });
       } else {
-        alert(`Error: ${data.error}`);
+        setUiError(data.error || "Failed to stop");
       }
     } catch (err: any) {
-      alert(`Error: ${err?.message || err}`);
+      const errorMsg = err?.message || String(err);
+      setUiError(errorMsg);
+      console.error("Stop error:", err);
     } finally {
       setLoading(false);
     }
@@ -170,6 +185,7 @@ export default function RunnerPanel() {
         {/* Controls moved to header */}
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={handleStart}
             disabled={status.running || loading}
             className="flex-1 px-3 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
@@ -177,6 +193,7 @@ export default function RunnerPanel() {
             Start
           </button>
           <button
+            type="button"
             onClick={handleStop}
             disabled={!status.running || !runId || loading}
             className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
@@ -184,6 +201,7 @@ export default function RunnerPanel() {
             Stop
           </button>
           <button
+            type="button"
             disabled
             title="Kill-switch + audit + keys vault olmadan açılmaz."
             className="px-3 py-2 text-xs font-medium bg-neutral-700 text-neutral-400 cursor-not-allowed rounded opacity-50"
@@ -192,6 +210,22 @@ export default function RunnerPanel() {
           </button>
         </div>
       </div>
+
+      {/* Error Banner */}
+      {uiError && (
+        <div className="mb-3 p-2 rounded bg-red-950/40 border border-red-800 text-[11px] text-red-400">
+          <div className="flex items-center justify-between">
+            <span>{uiError}</span>
+            <button
+              type="button"
+              onClick={() => setUiError(null)}
+              className="ml-2 text-red-300 hover:text-red-200"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Scrollable content area */}
       <div className="flex-1 min-h-0 overflow-y-auto space-y-3 -mx-4 px-4">

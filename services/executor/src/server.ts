@@ -4,7 +4,11 @@ import { Registry, collectDefaultMetrics } from "prom-client";
 
 // --- Server bootstrap
 const app = Fastify({ logger: true });
-await app.register(cors, { origin: true });
+await app.register(cors, {
+  origin: ["http://127.0.0.1:3003", "http://localhost:3003"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+});
 
 // --- Metrics
 const register = new Registry();
