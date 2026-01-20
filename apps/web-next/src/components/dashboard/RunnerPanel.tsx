@@ -12,6 +12,7 @@ type Status = {
   timeframe?: string;
   mode?: string;
   lastTickTs?: number;
+  lastDecisionTs?: number;
   lastSignal?: { type: string; ts: number; price: number; reason: string };
   pnl?: number;
   position?: { side: string; qty: number; entryPrice: number };
@@ -31,6 +32,8 @@ export default function RunnerPanel() {
   const [events, setEvents] = useState<Event[]>([]);
   const [filter, setFilter] = useState<"all" | "signal" | "trade" | "error" | "status">("all");
   const [form, setForm] = useState({ symbol: "BTCUSDT", timeframe: "1m", qty: "0.001", strategyId: "ema_rsi_v1" });
+  const [risk, setRisk] = useState<"low" | "med" | "high">("med");
+  const [params, setParams] = useState<Record<string, any>>({});
   const [runId, setRunId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const eventsEndRef = useRef<HTMLDivElement>(null);
@@ -84,6 +87,18 @@ export default function RunnerPanel() {
     eventsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [events]);
 
+  // Apply risk preset
+  const applyRiskPreset = () => {
+    const presets = {
+      low: { qty: "0.0005", rsiEntry: 65, rsiExit: 75 },
+      med: { qty: "0.001", rsiEntry: 70, rsiExit: 75 },
+      high: { qty: "0.002", rsiEntry: 75, rsiExit: 80 },
+    };
+    const preset = presets[risk];
+    setForm({ ...form, qty: preset.qty });
+    setParams({ rsiEntry: preset.rsiEntry, rsiExit: preset.rsiExit });
+  };
+
   const handleStart = async () => {
     setLoading(true);
     try {
@@ -95,7 +110,7 @@ export default function RunnerPanel() {
           symbol: form.symbol,
           timeframe: form.timeframe,
           mode: "paper",
-          params: { qty: parseFloat(form.qty) || 0.001 },
+          params: { qty: parseFloat(form.qty) || 0.001, ...params },
         }),
       });
       const data = await res.json();
@@ -145,6 +160,35 @@ export default function RunnerPanel() {
         </div>
         <div className={`px-2 py-1 text-xs rounded ${status.running ? "bg-green-900 text-green-300" : "bg-neutral-800 text-neutral-400"}`}>
           {status.running ? "RUNNING" : "STOPPED"}
+        </div>
+      </div>
+
+      {/* Risk Preset */}
+      <div className="mb-3 p-2 rounded bg-neutral-950/40 border border-white/5">
+        <div className="flex items-center gap-2 mb-2">
+          <label className="text-[11px] text-neutral-400">Risk:</label>
+          <select
+            value={risk}
+            onChange={(e) => setRisk(e.target.value as "low" | "med" | "high")}
+            disabled={status.running}
+            className="flex-1 px-2 py-1 text-xs bg-neutral-900 border border-white/10 rounded text-neutral-100 disabled:opacity-50"
+          >
+            <option value="low">Low (Conservative)</option>
+            <option value="med">Med (Balanced)</option>
+            <option value="high">High (Aggressive)</option>
+          </select>
+          <button
+            onClick={applyRiskPreset}
+            disabled={status.running}
+            className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
+          >
+            Apply
+          </button>
+        </div>
+        <div className="text-[10px] text-neutral-500">
+          {risk === "low" && "Qty: 0.0005, RSI Entry: <65, Exit: >75"}
+          {risk === "med" && "Qty: 0.001, RSI Entry: <70, Exit: >75"}
+          {risk === "high" && "Qty: 0.002, RSI Entry: <75, Exit: >80"}
         </div>
       </div>
 
@@ -245,6 +289,18 @@ export default function RunnerPanel() {
             <span className="text-neutral-400">Equity:</span>
             <span className="text-neutral-100">{status.equity?.toFixed(2) || "10000.00"} USDT</span>
           </div>
+          {status.lastTickTs && (
+            <div className="flex justify-between">
+              <span className="text-neutral-400">Last Candle:</span>
+              <span className="text-neutral-100">{new Date(status.lastTickTs).toLocaleTimeString()}</span>
+            </div>
+          )}
+          {status.lastSignal && (
+            <div className="flex justify-between">
+              <span className="text-neutral-400">Last Decision:</span>
+              <span className="text-neutral-100">{new Date(status.lastSignal.ts).toLocaleTimeString()}</span>
+            </div>
+          )}
         </div>
       )}
 

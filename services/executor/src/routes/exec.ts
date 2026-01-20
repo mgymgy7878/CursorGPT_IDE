@@ -11,6 +11,7 @@ type RunState = {
   startedAt: number;
   running: boolean;
   lastTickTs?: number;
+  lastDecisionTs?: number;
   lastSignal?: { type: "long" | "short" | "exit"; ts: number; price: number; reason: string };
   position?: { side: "long" | "short"; qty: number; entryPrice: number; entryTs: number };
   pnl: number;
@@ -102,9 +103,12 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
     const rsiOverbought = rsi > 70;
     const rsiNeutral = rsi >= 30 && rsi <= 70;
 
+    const rsiEntry = run.params.rsiEntry || 70;
+    const rsiExit = run.params.rsiExit || 75;
+
     if (!hasPosition) {
-      // Long entry: EMA12 > EMA26 AND RSI < 70
-      if (emaCrossUp && rsi < 70) {
+      // Long entry: EMA12 > EMA26 AND RSI < rsiEntry
+      if (emaCrossUp && rsi < rsiEntry) {
         const qty = run.params.qty || 0.001;
         run.position = {
           side: "long",
@@ -112,19 +116,21 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
           entryPrice: currentPrice,
           entryTs: Date.now(),
         };
-        const signal = { type: "long" as const, ts: Date.now(), price: currentPrice, reason: `EMA cross up (${ema12.toFixed(2)} > ${ema26.toFixed(2)}) and RSI ${rsi.toFixed(2)} < 70` };
+        const signal = { type: "long" as const, ts: Date.now(), price: currentPrice, reason: `EMA cross up (${ema12.toFixed(2)} > ${ema26.toFixed(2)}) and RSI ${rsi.toFixed(2)} < ${rsiEntry}` };
         run.lastSignal = signal;
+        run.lastDecisionTs = Date.now();
         emitEvent("signal", signal);
         emitEvent("trade", { action: "open", side: "long", qty, price: currentPrice });
       }
     } else {
-      // Exit: EMA12 < EMA26 OR RSI > 75
-      if (emaCrossDown || rsi > 75) {
+      // Exit: EMA12 < EMA26 OR RSI > rsiExit
+      if (emaCrossDown || rsi > rsiExit) {
         const pnl = (currentPrice - run.position!.entryPrice) * run.position!.qty;
         run.pnl += pnl;
         run.equity = 10000 + run.pnl;
-        const signal = { type: "exit" as const, ts: Date.now(), price: currentPrice, reason: emaCrossDown ? `EMA cross down (${ema12.toFixed(2)} < ${ema26.toFixed(2)})` : `RSI overbought (${rsi.toFixed(2)} > 75)` };
+        const signal = { type: "exit" as const, ts: Date.now(), price: currentPrice, reason: emaCrossDown ? `EMA cross down (${ema12.toFixed(2)} < ${ema26.toFixed(2)})` : `RSI overbought (${rsi.toFixed(2)} > ${rsiExit})` };
         run.lastSignal = signal;
+        run.lastDecisionTs = Date.now();
         emitEvent("signal", signal);
         emitEvent("trade", { action: "close", side: run.position!.side, qty: run.position!.qty, price: currentPrice, pnl });
         run.position = undefined;
@@ -143,6 +149,7 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       timeframe: run.timeframe,
       mode: run.mode,
       lastTickTs: run.lastTickTs,
+      lastDecisionTs: run.lastDecisionTs,
       position: run.position,
       pnl: run.pnl,
       equity: run.equity,
@@ -205,6 +212,7 @@ export default async function execRoute(app: FastifyInstance) {
           timeframe: currentRun.timeframe,
           mode: currentRun.mode,
           lastTickTs: currentRun.lastTickTs,
+          lastDecisionTs: currentRun.lastDecisionTs,
           position: currentRun.position,
           pnl: currentRun.pnl,
           equity: currentRun.equity,
@@ -245,6 +253,7 @@ export default async function execRoute(app: FastifyInstance) {
       timeframe: currentRun.timeframe,
       mode: currentRun.mode,
       lastTickTs: currentRun.lastTickTs,
+      lastDecisionTs: currentRun.lastDecisionTs,
       position: currentRun.position,
       pnl: currentRun.pnl,
       equity: currentRun.equity,
@@ -270,6 +279,7 @@ export default async function execRoute(app: FastifyInstance) {
       timeframe: currentRun.timeframe,
       mode: currentRun.mode,
       lastTickTs: currentRun.lastTickTs,
+      lastDecisionTs: currentRun.lastDecisionTs,
       lastSignal: currentRun.lastSignal,
       pnl: currentRun.pnl,
       position: currentRun.position,
