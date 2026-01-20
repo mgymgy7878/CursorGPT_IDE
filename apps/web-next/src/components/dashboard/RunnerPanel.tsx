@@ -228,9 +228,9 @@ export default function RunnerPanel() {
   const filteredEvents = events.filter((e) => filter === "all" || e.type === filter);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] flex flex-col min-h-0 max-h-[calc(100vh-200px)]">
+    <div className="relative z-0 rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] flex flex-col min-h-0 max-h-[calc(100vh-200px)]">
       {/* Header with sticky controls */}
-      <div className="sticky top-0 z-10 bg-neutral-900/70 backdrop-blur-sm -m-4 p-4 pb-3 border-b border-white/5 mb-4">
+      <div className="sticky top-0 z-50 pointer-events-auto bg-neutral-900/70 backdrop-blur-sm -m-4 p-4 pb-3 border-b border-white/5 mb-4">
         <div className="flex items-center justify-between mb-2">
           <div>
             <div className="text-sm font-semibold text-neutral-100">Strategy Runner</div>
@@ -266,10 +266,15 @@ export default function RunnerPanel() {
         )}
 
         {/* Controls moved to header */}
-        <div className="flex gap-2">
+        <div className="relative z-50 pointer-events-auto flex gap-2">
           <button
             type="button"
-            onClick={handleStart}
+            onClick={(e) => {
+              console.info("[RunnerPanel] start click", { status, isStarting, isStopping });
+              e.preventDefault();
+              e.stopPropagation();
+              handleStart();
+            }}
             disabled={status.running || isStarting || isStopping}
             className="flex-1 px-3 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
           >
@@ -277,7 +282,12 @@ export default function RunnerPanel() {
           </button>
           <button
             type="button"
-            onClick={handleStop}
+            onClick={(e) => {
+              console.info("[RunnerPanel] stop click", { runId, status, isStopping });
+              e.preventDefault();
+              e.stopPropagation();
+              handleStop();
+            }}
             disabled={!status.running || !runId || isStarting || isStopping}
             className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
           >
