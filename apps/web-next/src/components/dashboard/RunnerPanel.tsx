@@ -155,19 +155,48 @@ export default function RunnerPanel() {
   const filteredEvents = events.filter((e) => filter === "all" || e.type === filter);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] flex flex-col min-h-0">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="text-sm font-semibold text-neutral-100">Strategy Runner</div>
-          <div className="text-[11px] text-neutral-400 mt-0.5">Paper Trading</div>
+    <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] flex flex-col min-h-0 max-h-[calc(100vh-200px)]">
+      {/* Header with sticky controls */}
+      <div className="sticky top-0 z-10 bg-neutral-900/70 backdrop-blur-sm -m-4 p-4 pb-3 border-b border-white/5 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="text-sm font-semibold text-neutral-100">Strategy Runner</div>
+            <div className="text-[11px] text-neutral-400 mt-0.5">Paper Trading</div>
+          </div>
+          <div className={`px-2 py-1 text-xs rounded ${status.running ? "bg-green-900 text-green-300" : "bg-neutral-800 text-neutral-400"}`}>
+            {status.running ? "RUNNING" : "STOPPED"}
+          </div>
         </div>
-        <div className={`px-2 py-1 text-xs rounded ${status.running ? "bg-green-900 text-green-300" : "bg-neutral-800 text-neutral-400"}`}>
-          {status.running ? "RUNNING" : "STOPPED"}
+        {/* Controls moved to header */}
+        <div className="flex gap-2">
+          <button
+            onClick={handleStart}
+            disabled={status.running || loading}
+            className="flex-1 px-3 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
+          >
+            Start
+          </button>
+          <button
+            onClick={handleStop}
+            disabled={!status.running || !runId || loading}
+            className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
+          >
+            Stop
+          </button>
+          <button
+            disabled
+            title="Kill-switch + audit + keys vault olmadan açılmaz."
+            className="px-3 py-2 text-xs font-medium bg-neutral-700 text-neutral-400 cursor-not-allowed rounded opacity-50"
+          >
+            LIVE (Disabled)
+          </button>
         </div>
       </div>
 
-      {/* Risk Preset */}
-      <div className="mb-3 p-2 rounded bg-neutral-950/40 border border-white/5">
+      {/* Scrollable content area */}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-3 -mx-4 px-4">
+        {/* Risk Preset */}
+        <div className="p-2 rounded bg-neutral-950/40 border border-white/5">
         <div className="flex items-center gap-2 mb-2">
           <label className="text-[11px] text-neutral-400">Risk:</label>
           <select
@@ -193,10 +222,10 @@ export default function RunnerPanel() {
           {risk === "med" && "Qty: 0.001, RSI Entry: <70, Exit: >75"}
           {risk === "high" && "Qty: 0.002, RSI Entry: <75, Exit: >80"}
         </div>
-      </div>
+        </div>
 
-      {/* Form */}
-      <div className="grid grid-cols-2 gap-2 mb-4">
+        {/* Form */}
+        <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="text-[11px] text-neutral-400">Symbol</label>
           <input
@@ -243,11 +272,11 @@ export default function RunnerPanel() {
             <option value="ema_rsi_v1">EMA+RSI v1</option>
           </select>
         </div>
-      </div>
+        </div>
 
-      {/* Quick Health */}
-      {status.running && (
-        <div className="mb-3 p-2 rounded bg-neutral-950/40 border border-white/5 text-[10px]">
+        {/* Quick Health */}
+        {status.running && (
+          <div className="p-2 rounded bg-neutral-950/40 border border-white/5 text-[10px]">
           <div className="flex justify-between items-center mb-1">
             <span className="text-neutral-400">Health:</span>
             <div className="flex gap-3">
@@ -265,30 +294,6 @@ export default function RunnerPanel() {
         </div>
       )}
 
-      {/* Controls */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={handleStart}
-          disabled={status.running || loading}
-          className="flex-1 px-3 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
-        >
-          Start
-        </button>
-        <button
-          onClick={handleStop}
-          disabled={!status.running || !runId || loading}
-          className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white"
-        >
-          Stop
-        </button>
-        <button
-          disabled
-          title="Kill-switch + audit + keys vault olmadan açılmaz."
-          className="px-3 py-2 text-xs font-medium bg-neutral-700 text-neutral-400 cursor-not-allowed rounded opacity-50"
-        >
-          LIVE (Disabled)
-        </button>
-      </div>
 
       {/* Status */}
       {status.running && (
@@ -341,11 +346,11 @@ export default function RunnerPanel() {
               <span className="text-neutral-100">{status.loopIntervalMs}ms</span>
             </div>
           )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Event Filters */}
-      <div className="flex gap-1 mb-2">
+        {/* Event Filters */}
+        <div className="flex gap-1">
         {(["all", "signal", "trade", "error", "status"] as const).map((f) => (
           <button
             key={f}
@@ -357,33 +362,34 @@ export default function RunnerPanel() {
             {f}
           </button>
         ))}
-      </div>
+        </div>
 
-      {/* Events Log */}
-      <div className="flex-1 min-h-0 overflow-auto rounded bg-neutral-950/40 border border-white/5 p-2">
-        <div className="space-y-1">
-          {filteredEvents.length === 0 ? (
-            <div className="text-[11px] text-neutral-500 text-center py-4">No events</div>
-          ) : (
-            filteredEvents.map((event, idx) => (
-              <div key={`${event.seq}-${idx}`} className="text-[10px] font-mono">
-                <span className="text-neutral-500">[{new Date(event.ts).toLocaleTimeString()}]</span>
-                <span className={`ml-2 ${
-                  event.type === "signal" ? "text-emerald-400" :
-                  event.type === "trade" ? "text-blue-400" :
-                  event.type === "error" ? "text-red-400" :
-                  event.type === "status" ? "text-yellow-400" :
-                  "text-neutral-300"
-                }`}>
-                  [{event.type}]
-                </span>
-                <span className="ml-2 text-neutral-200">
-                  {typeof event.data === "object" ? JSON.stringify(event.data, null, 0) : String(event.data)}
-                </span>
-              </div>
-            ))
-          )}
-          <div ref={eventsEndRef} />
+        {/* Events Log */}
+        <div className="rounded bg-neutral-950/40 border border-white/5 p-2 max-h-[300px] overflow-y-auto">
+          <div className="space-y-1">
+            {filteredEvents.length === 0 ? (
+              <div className="text-[11px] text-neutral-500 text-center py-4">No events</div>
+            ) : (
+              filteredEvents.map((event, idx) => (
+                <div key={`${event.seq}-${idx}`} className="text-[10px] font-mono">
+                  <span className="text-neutral-500">[{new Date(event.ts).toLocaleTimeString()}]</span>
+                  <span className={`ml-2 ${
+                    event.type === "signal" ? "text-emerald-400" :
+                    event.type === "trade" ? "text-blue-400" :
+                    event.type === "error" ? "text-red-400" :
+                    event.type === "status" ? "text-yellow-400" :
+                    "text-neutral-300"
+                  }`}>
+                    [{event.type}]
+                  </span>
+                  <span className="ml-2 text-neutral-200">
+                    {typeof event.data === "object" ? JSON.stringify(event.data, null, 0) : String(event.data)}
+                  </span>
+                </div>
+              ))
+            )}
+            <div ref={eventsEndRef} />
+          </div>
         </div>
       </div>
     </div>
