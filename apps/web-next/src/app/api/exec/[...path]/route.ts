@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 const BASE =
   process.env.EXECUTOR_URL ||
   process.env.NEXT_PUBLIC_EXECUTOR_URL ||
-  "http://127.0.0.1:4001";
+  "http://localhost:4001";
 
 async function proxy(req: NextRequest, pathParts: string[]) {
   const path = pathParts.join("/");
