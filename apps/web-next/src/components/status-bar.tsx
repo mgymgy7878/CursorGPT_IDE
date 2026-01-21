@@ -93,7 +93,7 @@ export default function StatusBar() {
   const { lastCheckpoint, isDirty, hasUiTouch } = useCheckpointStatus()
   const metrics = useHealthzMetrics()
   const breadcrumb = getBreadcrumb(pathname)
-  
+
   // SSE state (simplified: use wsOk as proxy for SSE connection)
   const sseState = wsOk ? 'connected' : 'disconnected'
 
@@ -287,9 +287,36 @@ export default function StatusBar() {
               <span className="text-emerald-300">{metrics.orderBus}</span>
             </span>
 
-            {/* System Status (SSE + MD + Executor) */}
+            {/* System Status (SSE + MD + Executor) - Mini Cockpit */}
             <span className="text-white/35 shrink-0">·</span>
-            <span className="text-[13px] whitespace-nowrap shrink-0 font-medium">
+            <span 
+              className="text-[13px] whitespace-nowrap shrink-0 font-medium cursor-help"
+              title={`SSE: ${sseState}\nMD: ${marketDataHealth.status} (${Math.floor(marketDataHealth.ageMs / 1000)}s, source: ${marketDataHealth.source})\nEX: ${executorOk ? 'UP' : 'DOWN'}${executorLatencyMs ? ` (${executorLatencyMs}ms)` : ''}`}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                const diagnostics = {
+                  timestamp: new Date().toISOString(),
+                  sse: { state: sseState },
+                  marketdata: {
+                    status: marketDataHealth.status,
+                    ageSec: Math.floor(marketDataHealth.ageMs / 1000),
+                    source: marketDataHealth.source,
+                    reconnects: marketDataHealth.reconnects,
+                  },
+                  executor: {
+                    ok: executorOk,
+                    latencyMs: executorLatencyMs,
+                  },
+                };
+                navigator.clipboard.writeText(JSON.stringify(diagnostics, null, 2));
+                // Visual feedback (optional: could use toast here)
+                const original = e.currentTarget.textContent;
+                e.currentTarget.textContent = "Copied!";
+                setTimeout(() => {
+                  if (e.currentTarget) e.currentTarget.textContent = original;
+                }, 1000);
+              }}
+            >
               <span className="hidden sm:inline text-white/60">System: </span>
               <span className={`${sseState === 'connected' ? 'text-emerald-300' : sseState === 'reconnecting' ? 'text-amber-400' : 'text-red-400'}`}>
                 SSE

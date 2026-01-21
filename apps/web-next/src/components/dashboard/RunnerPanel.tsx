@@ -86,34 +86,47 @@ export default function RunnerPanel() {
     setIsHydrated(true);
   }, []);
 
-  // Track previous degraded state to detect transitions
-  const prevDegradedRef = useRef<{ degraded?: boolean; degradedReason?: string }>({});
+  // Track previous degraded state to detect transitions + dedupe warnings
+  const prevDegradedRef = useRef<{ degraded?: boolean; degradedReason?: string; lastWarningTs?: number }>({});
+  const WARNING_DEDUPE_MS = 5 * 60 * 1000; // 5 minutes
 
   // Poll status
   useEffect(() => {
     const poll = async () => {
       const data = await fetchStatus();
       if (data) {
-        // Detect degraded state transition (normal -> degraded)
-        if (data.degraded && data.degradedReason && 
+        // Detect degraded state transition (normal -> degraded) with dedupe
+        if (data.degraded && data.degradedReason &&
             (!prevDegradedRef.current.degraded || prevDegradedRef.current.degradedReason !== data.degradedReason)) {
-          // Emit warning event to Event Console
-          const warningEvent: Event = {
-            v: 1,
-            seq: Date.now(),
-            ts: Date.now(),
-            type: "warning",
-            data: {
-              message: `System degraded: ${data.degradedReason}`,
-              reason: data.degradedReason,
-              marketdataAgeSec: data.marketdataAgeSec,
-              marketdataCandleTs: data.marketdataCandleTs,
-            },
-          };
-          setEvents((prev) => {
-            const next = [...prev, warningEvent];
-            return next.slice(-200);
-          });
+          const now = Date.now();
+          const lastWarningTs = prevDegradedRef.current.lastWarningTs || 0;
+          
+          // Dedupe: Only emit if same reason wasn't warned in last 5 minutes
+          if (now - lastWarningTs > WARNING_DEDUPE_MS || prevDegradedRef.current.degradedReason !== data.degradedReason) {
+            // Emit warning event to Event Console with full context
+            const warningEvent: Event = {
+              v: 1,
+              seq: Date.now(),
+              ts: now,
+              type: "warning",
+              data: {
+                message: `System degraded: ${data.degradedReason}`,
+                reason: data.degradedReason,
+                marketdataAgeSec: data.marketdataAgeSec,
+                marketdataCandleTs: data.marketdataCandleTs,
+                threshold: 125, // maxAgeSec for 1m timeframe
+                source: "executor_guardrail",
+              },
+            };
+            setEvents((prev) => {
+              const next = [...prev, warningEvent];
+              return next.slice(-200);
+            });
+            prevDegradedRef.current.lastWarningTs = now;
+          }
+        } else if (!data.degraded && prevDegradedRef.current.degraded) {
+          // Cleared degraded state - reset lastWarningTs
+          prevDegradedRef.current.lastWarningTs = undefined;
         }
         // Update previous state
         prevDegradedRef.current = {
@@ -188,6 +201,18 @@ export default function RunnerPanel() {
   };
 
   const handleStart = async () => {
+    // Guard: Already running
+    if (status.running) {
+      setUiError(null); // Clear any previous error
+      // Show info message instead of error
+      const infoMsg = status.runId 
+        ? `Runner already running (${status.strategyId || "ema_rsi_v1"} • ${status.symbol || "BTCUSDT"} • ${status.timeframe || "1m"} • runId: ${status.runId.substring(0, 12)}...). Use Stop to stop it first.`
+        : "Runner already running. Use Stop to stop it first.";
+      // Use info banner instead of error banner
+      setUiError(infoMsg);
+      return;
+    }
+
     // Validation
     if (!form.symbol || !form.timeframe || !form.strategyId) {
       setUiError("Missing required fields: symbol, timeframe, or strategyId");
@@ -215,18 +240,30 @@ export default function RunnerPanel() {
         }),
       });
 
-      const status = res.status;
+      const statusCode = res.status;
       const time = new Date().toLocaleTimeString();
-      setLastStartInfo({ status, time });
+      setLastStartInfo({ status: statusCode, time });
 
       if (!res.ok) {
         let errorText = "";
         try {
           errorText = await res.text();
         } catch {
-          errorText = `HTTP ${status}`;
+          errorText = `HTTP ${statusCode}`;
         }
-        throw new Error(`HTTP ${status}: ${errorText || "Unknown error"}`);
+
+        // Handle 400 "already running" as info, not error
+        if (statusCode === 400 && errorText.includes("already running")) {
+          const parsed = JSON.parse(errorText);
+          const infoMsg = parsed.runId 
+            ? `Runner already running (runId: ${parsed.runId.substring(0, 12)}...). Use Stop to stop it first.`
+            : "Runner already running. Use Stop to stop it first.";
+          setUiError(infoMsg); // Info banner (will be styled differently)
+          await fetchStatus(); // Refresh status
+          return;
+        }
+
+        throw new Error(`HTTP ${statusCode}: ${errorText || "Unknown error"}`);
       }
 
       let data;
@@ -240,12 +277,19 @@ export default function RunnerPanel() {
         setRunId(data.runId);
         // Immediately fetch status to get latest state
         await fetchStatus();
+        // Success: clear any error
+        setUiError(null);
       } else {
         setUiError(data.error || "Failed to start");
       }
     } catch (err: any) {
       const errorMsg = err?.message || String(err);
-      setUiError(errorMsg);
+      // Only show as error if it's not "already running"
+      if (!errorMsg.includes("already running")) {
+        setUiError(errorMsg);
+      } else {
+        setUiError(`Runner already running. Use Stop to stop it first.`);
+      }
       console.error("Start error:", err);
     } finally {
       setIsStarting(false);
@@ -395,18 +439,44 @@ export default function RunnerPanel() {
           )}
         </div>
 
-        {/* Error Banner (sticky header içinde) */}
+        {/* Error/Info Banner (sticky header içinde) */}
         {uiError && (
-          <div className="mb-2 p-2 rounded bg-red-950/40 border border-red-800 text-[10px] text-red-400">
+          <div className={`mb-2 p-2 rounded border text-[10px] ${
+            uiError.includes("already running") || uiError.includes("Runner already")
+              ? "bg-blue-950/40 border-blue-800 text-blue-300"
+              : "bg-red-950/40 border-red-800 text-red-400"
+          }`}>
             <div className="flex items-center justify-between">
               <span>{uiError}</span>
               <button
                 type="button"
                 onClick={() => setUiError(null)}
-                className="ml-2 text-red-300 hover:text-red-200 text-xs"
+                className={`ml-2 text-xs ${
+                  uiError.includes("already running") || uiError.includes("Runner already")
+                    ? "text-blue-200 hover:text-blue-100"
+                    : "text-red-300 hover:text-red-200"
+                }`}
               >
                 ×
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Running Info (when running) */}
+        {status.running && status.runId && (
+          <div className="mb-2 p-2 rounded bg-neutral-950/40 border border-white/5 text-[10px] text-neutral-300">
+            <div className="flex items-center gap-2">
+              <span className="text-neutral-400">Run:</span>
+              <span className="text-emerald-300">{status.strategyId || "ema_rsi_v1"}</span>
+              <span className="text-neutral-500">•</span>
+              <span className="text-neutral-300">{status.symbol || "BTCUSDT"}</span>
+              <span className="text-neutral-500">•</span>
+              <span className="text-neutral-300">{status.timeframe || "1m"}</span>
+              <span className="text-neutral-500">•</span>
+              <span className="text-neutral-400">{status.mode || "paper"}</span>
+              <span className="text-neutral-500">•</span>
+              <span className="text-neutral-400 font-mono">runId: {status.runId.substring(0, 12)}...</span>
             </div>
           </div>
         )}
@@ -427,8 +497,9 @@ export default function RunnerPanel() {
             }}
             disabled={status.running || isStarting || isStopping}
             className="flex-1 px-3 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white relative z-[9999]"
+            title={status.running ? `Runner already running (${status.runId ? status.runId.substring(0, 12) + "..." : "unknown"}). Use Stop first.` : undefined}
           >
-            {isStarting ? "Starting..." : "Start"}
+            {isStarting ? "Starting..." : status.running ? "Running" : "Start"}
           </button>
           <button
             type="button"
@@ -444,8 +515,9 @@ export default function RunnerPanel() {
             }}
             disabled={!status.running || !runId || isStarting || isStopping}
             className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white relative z-[9999]"
+            title={!status.running ? "Runner is not running" : undefined}
           >
-            {isStopping ? "Stopping..." : "Stop"}
+            {isStopping ? "Stopping..." : !status.running ? "Already Stopped" : "Stop"}
           </button>
           <button
             type="button"
