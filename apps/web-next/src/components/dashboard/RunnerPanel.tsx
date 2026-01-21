@@ -291,27 +291,51 @@ export default function RunnerPanel() {
 
             {/* Marketdata Freshness */}
             {status.marketdataAgeSec !== undefined && (
-              <div className={`px-2 py-0.5 rounded border ${
-                status.degraded || (status.marketdataAgeSec > 125)
-                  ? "bg-red-500/15 text-red-300 border-red-400/30"
-                  : status.marketdataAgeSec > 90
-                  ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
-                  : "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
-              }`} title={`Source: ${status.degradedReason || "OK"}, Age: ${status.marketdataAgeSec}s`}>
+              <div 
+                className={`px-2 py-0.5 rounded border cursor-help ${
+                  status.degraded || (status.marketdataAgeSec > 125)
+                    ? "bg-red-500/15 text-red-300 border-red-400/30"
+                    : status.marketdataAgeSec > 90
+                    ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
+                    : "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
+                }`}
+                title={
+                  status.degraded && status.degradedReason
+                    ? `Degraded: ${status.degradedReason}\nAge: ${status.marketdataAgeSec}s (max: 125s for 1m)\nSource: cache/binance_rest`
+                    : `Age: ${status.marketdataAgeSec}s (max: 125s for 1m)\nSource: cache/binance_rest`
+                }
+              >
                 MD: {status.marketdataAgeSec}s {status.degraded ? "(STALE)" : ""}
+                {status.degraded && status.degradedReason && (
+                  <span className="ml-1 text-[9px] opacity-70" title={`Reason: ${status.degradedReason}`}>
+                    ⚠
+                  </span>
+                )}
               </div>
             )}
 
             {/* Decision Age */}
             {status.lastDecisionTs && (
-              <div className={`px-2 py-0.5 rounded border ${
-                status.degraded
-                  ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
-                  : Date.now() - status.lastDecisionTs < 60000
-                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
-                  : "bg-yellow-500/15 text-yellow-300 border-yellow-400/30"
-              }`} title={`Last decision: ${new Date(status.lastDecisionTs).toLocaleTimeString()}`}>
+              <div 
+                className={`px-2 py-0.5 rounded border cursor-help ${
+                  status.degraded
+                    ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
+                    : Date.now() - status.lastDecisionTs < 60000
+                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
+                    : "bg-yellow-500/15 text-yellow-300 border-yellow-400/30"
+                }`}
+                title={
+                  status.degraded && status.degradedReason
+                    ? `Degraded: ${status.degradedReason}\nLast decision: ${new Date(status.lastDecisionTs).toLocaleTimeString()}\nAge: ${Math.floor((Date.now() - status.lastDecisionTs) / 1000)}s`
+                    : `Last decision: ${new Date(status.lastDecisionTs).toLocaleTimeString()}\nAge: ${Math.floor((Date.now() - status.lastDecisionTs) / 1000)}s`
+                }
+              >
                 Decision: {Math.floor((Date.now() - status.lastDecisionTs) / 1000)}s
+                {status.degraded && status.degradedReason && (
+                  <span className="ml-1 text-[9px] opacity-70" title={`Reason: ${status.degradedReason}`}>
+                    ⚠
+                  </span>
+                )}
               </div>
             )}
           </div>
