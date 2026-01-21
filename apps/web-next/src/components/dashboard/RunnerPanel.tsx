@@ -11,6 +11,7 @@ type Status = {
   mode?: string;
   lastTickTs?: number;
   lastCandleTs?: number;
+  lastLoopTs?: number;
   lastDecisionTs?: number;
   lastSignal?: { type: string; ts: number; price: number; reason: string };
   pnl?: number;
@@ -18,20 +19,28 @@ type Status = {
   equity?: number;
   loopIntervalMs?: number;
   lastError?: string;
+  // Freshness metrics
+  marketdataCandleTs?: number;
+  marketdataAgeSec?: number;
+  loopLagMs?: number;
+  // Degraded state
+  degraded?: boolean;
+  degradedReason?: string;
 };
 
 type Event = {
   v: number;
   seq: number;
   ts: number;
-  type: "log" | "signal" | "trade" | "status" | "error";
+  type: "log" | "signal" | "trade" | "status" | "error" | "decision" | "warning";
   data: any;
 };
 
 export default function RunnerPanel() {
   const [status, setStatus] = useState<Status>({ running: false });
   const [events, setEvents] = useState<Event[]>([]);
-  const [filter, setFilter] = useState<"all" | "signal" | "trade" | "error" | "status">("all");
+  const [filter, setFilter] = useState<"all" | "signal" | "trade" | "error" | "status" | "decision" | "warning">("all");
+  const [sseConnected, setSseConnected] = useState(false);
   const [form, setForm] = useState({ symbol: "BTCUSDT", timeframe: "1m", qty: "0.001", strategyId: "ema_rsi_v1" });
   const [risk, setRisk] = useState<"low" | "med" | "high">("med");
   const [params, setParams] = useState<Record<string, any>>({ rsiEntry: 70, rsiExit: 75 });
@@ -88,6 +97,7 @@ export default function RunnerPanel() {
   useEffect(() => {
     const es = new EventSource("/api/exec/events");
     esRef.current = es;
+    setSseConnected(true);
 
     es.onmessage = (ev) => {
       try {
@@ -102,10 +112,16 @@ export default function RunnerPanel() {
     };
 
     es.onerror = () => {
+      setSseConnected(false);
       es.close();
     };
 
+    es.onopen = () => {
+      setSseConnected(true);
+    };
+
     return () => {
+      setSseConnected(false);
       es.close();
     };
   }, []);
@@ -248,6 +264,46 @@ export default function RunnerPanel() {
             {status.running ? "RUNNING" : "STOPPED"}
           </div>
         </div>
+
+        {/* Status Rozetleri (3 rozet: SSE, MD Freshness, Decision) */}
+        {status.running && (
+          <div className="flex items-center gap-2 mb-2 text-[10px]">
+            {/* SSE Connected */}
+            <div className={`px-2 py-0.5 rounded border ${
+              sseConnected 
+                ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30" 
+                : "bg-red-500/15 text-red-300 border-red-400/30"
+            }`}>
+              SSE: {sseConnected ? "Connected" : "Disconnected"}
+            </div>
+            
+            {/* Marketdata Freshness */}
+            {status.marketdataAgeSec !== undefined && (
+              <div className={`px-2 py-0.5 rounded border ${
+                status.degraded || (status.marketdataAgeSec > 125)
+                  ? "bg-red-500/15 text-red-300 border-red-400/30"
+                  : status.marketdataAgeSec > 90
+                  ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
+                  : "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
+              }`} title={`Source: ${status.degradedReason || "OK"}, Age: ${status.marketdataAgeSec}s`}>
+                MD: {status.marketdataAgeSec}s {status.degraded ? "(STALE)" : ""}
+              </div>
+            )}
+            
+            {/* Decision Age */}
+            {status.lastDecisionTs && (
+              <div className={`px-2 py-0.5 rounded border ${
+                status.degraded
+                  ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
+                  : Date.now() - status.lastDecisionTs < 60000
+                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
+                  : "bg-yellow-500/15 text-yellow-300 border-yellow-400/30"
+              }`} title={`Last decision: ${new Date(status.lastDecisionTs).toLocaleTimeString()}`}>
+                Decision: {Math.floor((Date.now() - status.lastDecisionTs) / 1000)}s
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Debug info */}
         <div className="text-[9px] text-neutral-500 mb-2 space-y-0.5">
@@ -489,8 +545,8 @@ export default function RunnerPanel() {
         )}
 
         {/* Event Filters */}
-        <div className="flex gap-1">
-        {(["all", "signal", "trade", "error", "status"] as const).map((f) => (
+        <div className="flex gap-1 flex-wrap">
+        {(["all", "status", "decision", "signal", "trade", "warning", "error"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -503,29 +559,45 @@ export default function RunnerPanel() {
         ))}
         </div>
 
-        {/* Events Log */}
+        {/* Event Console (Mini) */}
         <div className="rounded bg-neutral-950/40 border border-white/5 p-2 max-h-[300px] overflow-y-auto">
+          <div className="text-[10px] text-neutral-400 mb-1 font-semibold">Event Console (last 50)</div>
           <div className="space-y-1">
             {filteredEvents.length === 0 ? (
               <div className="text-[11px] text-neutral-500 text-center py-4">No events</div>
             ) : (
-              filteredEvents.map((event, idx) => (
-                <div key={`${event.seq}-${idx}`} className="text-[10px] font-mono">
-                  <span className="text-neutral-500">[{new Date(event.ts).toLocaleTimeString()}]</span>
-                  <span className={`ml-2 ${
-                    event.type === "signal" ? "text-emerald-400" :
-                    event.type === "trade" ? "text-blue-400" :
-                    event.type === "error" ? "text-red-400" :
-                    event.type === "status" ? "text-yellow-400" :
-                    "text-neutral-300"
-                  }`}>
-                    [{event.type}]
-                  </span>
-                  <span className="ml-2 text-neutral-200">
-                    {typeof event.data === "object" ? JSON.stringify(event.data, null, 0) : String(event.data)}
-                  </span>
-                </div>
-              ))
+              filteredEvents.slice(-50).map((event, idx) => {
+                const summary = event.type === "decision" 
+                  ? `candleTs: ${event.data.candleTs || "N/A"}, reason: ${event.data.reason || "N/A"}`
+                  : event.type === "warning"
+                  ? event.data.message || JSON.stringify(event.data)
+                  : event.type === "status"
+                  ? `running: ${event.data.running}, ageSec: ${event.data.marketdataAgeSec || "N/A"}`
+                  : typeof event.data === "object" 
+                  ? JSON.stringify(event.data).substring(0, 80) + (JSON.stringify(event.data).length > 80 ? "..." : "")
+                  : String(event.data).substring(0, 80);
+                
+                return (
+                  <div key={`${event.seq}-${idx}`} className="text-[10px] font-mono border-l-2 pl-2 border-white/5">
+                    <span className="text-neutral-500">{new Date(event.ts).toLocaleTimeString()}</span>
+                    <span className="text-neutral-400 mx-1">•</span>
+                    <span className={`${
+                      event.type === "signal" ? "text-emerald-400" :
+                      event.type === "trade" ? "text-blue-400" :
+                      event.type === "error" ? "text-red-400" :
+                      event.type === "warning" ? "text-amber-400" :
+                      event.type === "decision" ? "text-cyan-400" :
+                      event.type === "status" ? "text-yellow-400" :
+                      "text-neutral-300"
+                    }`}>
+                      {event.type}
+                    </span>
+                    <span className="ml-2 text-neutral-200 text-[9px]">
+                      {summary}
+                    </span>
+                  </div>
+                );
+              })
             )}
             <div ref={eventsEndRef} />
           </div>
