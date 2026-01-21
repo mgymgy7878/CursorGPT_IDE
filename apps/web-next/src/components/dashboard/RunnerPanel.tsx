@@ -40,7 +40,7 @@ export default function RunnerPanel() {
   const [status, setStatus] = useState<Status>({ running: false });
   const [events, setEvents] = useState<Event[]>([]);
   const [filter, setFilter] = useState<"all" | "signal" | "trade" | "error" | "status" | "decision" | "warning">("all");
-  const [sseConnected, setSseConnected] = useState(false);
+  const [sseState, setSseState] = useState<"connected" | "reconnecting" | "disconnected">("disconnected");
   const [form, setForm] = useState({ symbol: "BTCUSDT", timeframe: "1m", qty: "0.001", strategyId: "ema_rsi_v1" });
   const [risk, setRisk] = useState<"low" | "med" | "high">("med");
   const [params, setParams] = useState<Record<string, any>>({ rsiEntry: 70, rsiExit: 75 });
@@ -93,13 +93,22 @@ export default function RunnerPanel() {
     return () => clearInterval(interval);
   }, []);
 
-  // SSE events
+  // SSE events (3-state: connected/reconnecting/disconnected)
   useEffect(() => {
     const es = new EventSource("/api/exec/events");
     esRef.current = es;
-    setSseConnected(true);
+    setSseState("reconnecting");
+
+    es.onopen = () => {
+      setSseState("connected");
+    };
 
     es.onmessage = (ev) => {
+      // Ignore ping comments
+      if (ev.data.trim() === "" || ev.data.startsWith(":")) {
+        return;
+      }
+
       try {
         const event = JSON.parse(ev.data) as Event;
         setEvents((prev) => {
@@ -112,16 +121,17 @@ export default function RunnerPanel() {
     };
 
     es.onerror = () => {
-      setSseConnected(false);
-      es.close();
-    };
-
-    es.onopen = () => {
-      setSseConnected(true);
+      // Only mark as disconnected if connection is fully closed
+      if (es.readyState === EventSource.CLOSED) {
+        setSseState("disconnected");
+      } else {
+        // CONNECTING or OPEN - treat as reconnecting
+        setSseState("reconnecting");
+      }
     };
 
     return () => {
-      setSseConnected(false);
+      setSseState("disconnected");
       es.close();
     };
   }, []);
@@ -268,15 +278,17 @@ export default function RunnerPanel() {
         {/* Status Rozetleri (3 rozet: SSE, MD Freshness, Decision) */}
         {status.running && (
           <div className="flex items-center gap-2 mb-2 text-[10px]">
-            {/* SSE Connected */}
+            {/* SSE Status (3-state) */}
             <div className={`px-2 py-0.5 rounded border ${
-              sseConnected 
-                ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30" 
+              sseState === "connected"
+                ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/30"
+                : sseState === "reconnecting"
+                ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
                 : "bg-red-500/15 text-red-300 border-red-400/30"
             }`}>
-              SSE: {sseConnected ? "Connected" : "Disconnected"}
+              SSE: {sseState === "connected" ? "Connected" : sseState === "reconnecting" ? "Reconnecting" : "Disconnected"}
             </div>
-            
+
             {/* Marketdata Freshness */}
             {status.marketdataAgeSec !== undefined && (
               <div className={`px-2 py-0.5 rounded border ${
@@ -289,7 +301,7 @@ export default function RunnerPanel() {
                 MD: {status.marketdataAgeSec}s {status.degraded ? "(STALE)" : ""}
               </div>
             )}
-            
+
             {/* Decision Age */}
             {status.lastDecisionTs && (
               <div className={`px-2 py-0.5 rounded border ${
@@ -567,16 +579,16 @@ export default function RunnerPanel() {
               <div className="text-[11px] text-neutral-500 text-center py-4">No events</div>
             ) : (
               filteredEvents.slice(-50).map((event, idx) => {
-                const summary = event.type === "decision" 
+                const summary = event.type === "decision"
                   ? `candleTs: ${event.data.candleTs || "N/A"}, reason: ${event.data.reason || "N/A"}`
                   : event.type === "warning"
                   ? event.data.message || JSON.stringify(event.data)
                   : event.type === "status"
                   ? `running: ${event.data.running}, ageSec: ${event.data.marketdataAgeSec || "N/A"}`
-                  : typeof event.data === "object" 
+                  : typeof event.data === "object"
                   ? JSON.stringify(event.data).substring(0, 80) + (JSON.stringify(event.data).length > 80 ? "..." : "")
                   : String(event.data).substring(0, 80);
-                
+
                 return (
                   <div key={`${event.seq}-${idx}`} className="text-[10px] font-mono border-l-2 pl-2 border-white/5">
                     <span className="text-neutral-500">{new Date(event.ts).toLocaleTimeString()}</span>

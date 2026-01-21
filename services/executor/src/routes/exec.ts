@@ -432,14 +432,17 @@ export default async function execRoute(app: FastifyInstance) {
 
   // SSE events stream
   app.get("/api/exec/events", async (req: FastifyRequest, reply: FastifyReply) => {
-    reply.raw.setHeader("Content-Type", "text/event-stream");
-    reply.raw.setHeader("Cache-Control", "no-cache");
+    // SSE headers (critical for streaming)
+    reply.raw.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+    reply.raw.setHeader("Cache-Control", "no-cache, no-transform");
     reply.raw.setHeader("Connection", "keep-alive");
+    reply.raw.setHeader("X-Accel-Buffering", "no");
     reply.raw.setHeader("Access-Control-Allow-Origin", "*");
     reply.raw.setHeader("Access-Control-Allow-Methods", "GET");
 
     // Send last 50 events to new client
     const last50 = eventBuffer.slice(-50);
+    let lastSeq = last50[last50.length - 1]?.seq || -1;
     for (const event of last50) {
       reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
     }
@@ -448,25 +451,39 @@ export default async function execRoute(app: FastifyInstance) {
     const sendEvent = (event: { v: number; seq: number; ts: number; type: string; data: any }) => {
       try {
         reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
+        return true;
       } catch (err) {
         // Client disconnected
         return false;
       }
-      return true;
     };
 
-    // Listen for new events (simple: check buffer every second)
+    // Ping interval (keep connection alive, prevent proxy/antivirus timeouts)
+    const pingInterval = setInterval(() => {
+      try {
+        reply.raw.write(`: ping\n\n`);
+      } catch (err) {
+        clearInterval(pingInterval);
+        clearInterval(checkInterval);
+        return;
+      }
+    }, 15000); // Every 15 seconds
+
+    // Listen for new events (check buffer every second)
     const checkInterval = setInterval(() => {
-      const newEvents = eventBuffer.filter(e => e.seq > (last50[last50.length - 1]?.seq || -1));
+      const newEvents = eventBuffer.filter(e => e.seq > lastSeq);
       for (const event of newEvents) {
         if (!sendEvent(event)) {
+          clearInterval(pingInterval);
           clearInterval(checkInterval);
           return;
         }
+        lastSeq = event.seq;
       }
     }, 1000);
 
     req.raw.on("close", () => {
+      clearInterval(pingInterval);
       clearInterval(checkInterval);
     });
   });
