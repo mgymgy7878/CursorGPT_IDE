@@ -91,7 +91,19 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       return;
     }
 
+    // New candle detected - update timestamps and emit decision event
     run.lastTickTs = candle.ts;
+    run.lastDecisionTs = Date.now();
+    
+    // Emit decision event (proof that loop is processing new candles)
+    emitEvent("decision", {
+      ts: run.lastDecisionTs,
+      symbol: run.symbol,
+      timeframe: run.timeframe,
+      reason: "new_candle_received",
+      candleTs: candle.ts,
+      price: candle.close,
+    });
 
     // Get historical candles for indicators (simplified: use last 30)
     const histResponse = await fetch(`https://api.binance.com/api/v3/klines?symbol=${run.symbol}&interval=${run.timeframe}&limit=30`);
