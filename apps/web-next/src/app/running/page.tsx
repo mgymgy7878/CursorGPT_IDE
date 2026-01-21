@@ -5,7 +5,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import DataModeBadge from "@/components/ui/DataModeBadge";
 import { Button } from "@/components/ui/button";
 
-const EXECUTOR_URL = process.env.NEXT_PUBLIC_EXECUTOR_URL || "http://localhost:4001";
+// Use same-origin proxy (no CORS)
 
 type ExecutorStatus = {
   running: boolean;
@@ -32,7 +32,7 @@ export default function RunningPage() {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch(`${EXECUTOR_URL}/api/exec/status`);
+      const res = await fetch("/api/exec/status");
       if (!res.ok) throw new Error("Failed to fetch status");
       const data = await res.json();
       setStatus(data);
@@ -53,7 +53,7 @@ export default function RunningPage() {
     if (!status?.runId) return;
     setBusy(true);
     try {
-      const res = await fetch(`${EXECUTOR_URL}/api/exec/stop`, {
+      const res = await fetch("/api/exec/stop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ runId: status.runId }),
