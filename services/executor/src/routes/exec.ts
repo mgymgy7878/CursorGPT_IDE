@@ -23,6 +23,9 @@ type RunState = {
   marketdataCandleTs?: number;
   marketdataAgeSec?: number;
   loopLagMs?: number;
+  // Degraded state
+  degraded?: boolean;
+  degradedReason?: string;
 };
 
 let currentRun: RunState | null = null;
@@ -73,6 +76,21 @@ function calculateRSI(prices: number[], period: number = 14): number {
   return 100 - (100 / (1 + rs));
 }
 
+// Timeframe to interval seconds (same as marketdata)
+function timeframeToIntervalSec(timeframe: string): number {
+  const map: Record<string, number> = {
+    "1m": 60,
+    "5m": 300,
+    "15m": 900,
+    "1h": 3600,
+    "4h": 14400,
+    "1d": 86400,
+    "1w": 604800,
+    "1M": 2592000,
+  };
+  return map[timeframe.toLowerCase()] || 60;
+}
+
 // Strategy: EMA+RSI
 async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
   try {
@@ -95,6 +113,36 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
     run.marketdataCandleTs = candle.candleTs || candle.ts;
     run.marketdataAgeSec = candle.ageSec;
     run.loopLagMs = now - (run.lastLoopTs || now);
+
+    // Stale guardrail: check if marketdata is too old
+    const intervalSec = timeframeToIntervalSec(run.timeframe);
+    const maxAgeSec = intervalSec * 2 + 5; // e.g., 1m => 125s
+    
+    if (run.marketdataAgeSec !== undefined && run.marketdataAgeSec > maxAgeSec) {
+      // Marketdata is stale - enter degraded mode
+      run.degraded = true;
+      run.degradedReason = "MARKETDATA_STALE";
+      
+      // Emit warning event
+      emitEvent("warning", {
+        message: `Marketdata stale: ageSec=${run.marketdataAgeSec}, maxAgeSec=${maxAgeSec}`,
+        reason: "MARKETDATA_STALE",
+        ageSec: run.marketdataAgeSec,
+        maxAgeSec,
+        source: candle.source || "unknown",
+      });
+      
+      // Skip decision/trade logic
+      emitEvent("log", { message: `Skipping decision loop: marketdata stale (${run.marketdataAgeSec}s > ${maxAgeSec}s)` });
+      return;
+    }
+    
+    // Marketdata is fresh - clear degraded state
+    if (run.degraded && run.degradedReason === "MARKETDATA_STALE") {
+      run.degraded = false;
+      run.degradedReason = undefined;
+      emitEvent("log", { message: `Marketdata fresh again: ageSec=${run.marketdataAgeSec}` });
+    }
 
     // Update lastCandleTs to actual candle timestamp (semantic fix)
     if (candle.ts) {
@@ -200,6 +248,8 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       marketdataCandleTs: run.marketdataCandleTs,
       marketdataAgeSec: run.marketdataAgeSec,
       loopLagMs: run.loopLagMs,
+      degraded: run.degraded,
+      degradedReason: run.degradedReason,
     });
   } catch (err: any) {
     const errMsg = String(err?.message || err);
@@ -277,6 +327,8 @@ export default async function execRoute(app: FastifyInstance) {
           marketdataCandleTs: currentRun.marketdataCandleTs,
           marketdataAgeSec: currentRun.marketdataAgeSec,
           loopLagMs: currentRun.loopLagMs,
+          degraded: currentRun.degraded,
+          degradedReason: currentRun.degradedReason,
         });
       } else {
         if (heartbeatInterval) {
@@ -325,6 +377,8 @@ export default async function execRoute(app: FastifyInstance) {
       marketdataCandleTs: currentRun.marketdataCandleTs,
       marketdataAgeSec: currentRun.marketdataAgeSec,
       loopLagMs: currentRun.loopLagMs,
+      degraded: currentRun.degraded,
+      degradedReason: currentRun.degradedReason,
     });
 
     const stoppedAt = Date.now();
@@ -369,6 +423,9 @@ export default async function execRoute(app: FastifyInstance) {
       marketdataCandleTs: currentRun.marketdataCandleTs,
       marketdataAgeSec: currentRun.marketdataAgeSec,
       loopLagMs: currentRun.loopLagMs,
+      // Degraded state
+      degraded: currentRun.degraded,
+      degradedReason: currentRun.degradedReason,
       build: buildInfo,
     };
   });
