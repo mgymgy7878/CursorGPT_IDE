@@ -110,19 +110,19 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
     run.lastLoopTs = now;
 
     // Extract freshness metrics from marketdata response
-    run.marketdataCandleTs = candle.candleTs || candle.ts;
-    run.marketdataAgeSec = candle.ageSec;
+    run.marketdataCandleTs = candle.candleTs;
+    run.marketdataAgeSec = candle.candleAgeSec || candle.ageSec; // Support both old and new format
     run.loopLagMs = now - (run.lastLoopTs || now);
 
     // Stale guardrail: check if marketdata is too old
     const intervalSec = timeframeToIntervalSec(run.timeframe);
     const maxAgeSec = intervalSec * 2 + 5; // e.g., 1m => 125s
-    
+
     if (run.marketdataAgeSec !== undefined && run.marketdataAgeSec > maxAgeSec) {
       // Marketdata is stale - enter degraded mode
       run.degraded = true;
       run.degradedReason = "MARKETDATA_STALE";
-      
+
       // Emit warning event
       emitEvent("warning", {
         message: `Marketdata stale: ageSec=${run.marketdataAgeSec}, maxAgeSec=${maxAgeSec}`,
@@ -131,12 +131,12 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
         maxAgeSec,
         source: candle.source || "unknown",
       });
-      
+
       // Skip decision/trade logic
       emitEvent("log", { message: `Skipping decision loop: marketdata stale (${run.marketdataAgeSec}s > ${maxAgeSec}s)` });
       return;
     }
-    
+
     // Marketdata is fresh - clear degraded state
     if (run.degraded && run.degradedReason === "MARKETDATA_STALE") {
       run.degraded = false;
@@ -145,19 +145,19 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
     }
 
     // Update lastCandleTs to actual candle timestamp (semantic fix)
-    if (candle.ts) {
-      run.lastCandleTs = candle.ts;
+    if (candle.candleTs) {
+      run.lastCandleTs = candle.candleTs;
     }
 
-    if (!candle.ts || candle.ts === run.lastTickTs) {
+    if (!candle.candleTs || candle.candleTs === run.lastTickTs) {
       // No new candle, but emit heartbeat log
       emitEvent("log", { message: `Waiting for new candle (current: ${run.lastTickTs || "none"})` });
       return;
     }
 
     // New candle detected - update timestamps and emit decision event
-    run.lastTickTs = candle.ts;
-    run.lastCandleTs = candle.ts; // Semantic: lastCandleTs = actual candle timestamp
+    run.lastTickTs = candle.candleTs;
+    run.lastCandleTs = candle.candleTs; // Semantic: lastCandleTs = actual candle timestamp
     run.lastDecisionTs = now;
 
     // Emit decision event (proof that loop is processing new candles)
@@ -166,7 +166,7 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       symbol: run.symbol,
       timeframe: run.timeframe,
       reason: "new_candle_received",
-      candleTs: candle.ts,
+      candleTs: candle.candleTs,
       price: candle.close,
     });
 

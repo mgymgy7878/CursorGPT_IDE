@@ -47,17 +47,23 @@ export default async function latestRoute(app: FastifyInstance) {
     // Check cache
     const cached = latestCache.get(key);
     if (cached) {
-      const ageSec = Math.floor((serverNow - cached.ts) / 1000);
-      
+      const candleAgeSec = Math.floor((serverNow - cached.ts) / 1000);
+      const fetchAgeSec = cached.fetchedAt ? Math.floor((serverNow - cached.fetchedAt) / 1000) : 0;
+
       // If cache is fresh enough, return it
-      if (ageSec <= maxAgeSec) {
+      if (candleAgeSec <= maxAgeSec) {
         return {
-          ...cached,
+          open: cached.open,
+          high: cached.high,
+          low: cached.low,
+          close: cached.close,
+          volume: cached.volume,
           serverNow,
           candleTs: cached.ts,
-          ageSec,
-          source: "cache",
           fetchedAt: cached.fetchedAt || serverNow,
+          candleAgeSec,
+          fetchAgeSec,
+          source: "cache",
           stale: false,
         };
       }
@@ -81,17 +87,18 @@ export default async function latestRoute(app: FastifyInstance) {
         const interval = timeframe;
         const endTime = serverNow;
         const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=2&endTime=${endTime}`);
-        
+
         if (!response.ok) {
           throw new Error(`Binance API error: ${response.status} ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         if (Array.isArray(data) && data.length > 0) {
           // Get the last (most recent) candle
           const k = data[data.length - 1];
+          const candleTs = k[0];
           const candle = {
-            ts: k[0],
+            ts: candleTs,
             open: parseFloat(k[1]),
             high: parseFloat(k[2]),
             low: parseFloat(k[3]),
@@ -101,33 +108,45 @@ export default async function latestRoute(app: FastifyInstance) {
           };
           // Update cache
           latestCache.set(key, candle);
-          const ageSec = Math.floor((serverNow - candle.ts) / 1000);
-          
+          const candleAgeSec = Math.floor((serverNow - candleTs) / 1000);
+          const fetchAgeSec = 0; // Just fetched
+
           inFlightFetches.delete(key);
           return {
-            ...candle,
+            open: candle.open,
+            high: candle.high,
+            low: candle.low,
+            close: candle.close,
+            volume: candle.volume,
             serverNow,
-            candleTs: candle.ts,
-            ageSec,
-            source: "binance_rest",
+            candleTs,
             fetchedAt: candle.fetchedAt,
-            stale: ageSec > maxAgeSec,
+            candleAgeSec,
+            fetchAgeSec,
+            source: "binance_rest",
+            stale: candleAgeSec > maxAgeSec,
           };
         }
         throw new Error("Empty response from Binance");
       } catch (err: any) {
         inFlightFetches.delete(key);
-        
+
         // If fetch fails and cache exists, return stale cache with error flag
         if (cached) {
-          const ageSec = Math.floor((serverNow - cached.ts) / 1000);
+          const candleAgeSec = Math.floor((serverNow - cached.ts) / 1000);
+          const fetchAgeSec = cached.fetchedAt ? Math.floor((serverNow - cached.fetchedAt) / 1000) : 0;
           return {
-            ...cached,
+            open: cached.open,
+            high: cached.high,
+            low: cached.low,
+            close: cached.close,
+            volume: cached.volume,
             serverNow,
             candleTs: cached.ts,
-            ageSec,
-            source: "cache_fallback_error",
             fetchedAt: cached.fetchedAt || serverNow,
+            candleAgeSec,
+            fetchAgeSec,
+            source: "cache_fallback_error",
             stale: true,
             error: {
               message: String(err?.message || err),
@@ -135,7 +154,7 @@ export default async function latestRoute(app: FastifyInstance) {
             },
           };
         }
-        
+
         // No cache, return error
         throw err;
       }
