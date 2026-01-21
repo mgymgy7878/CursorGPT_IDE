@@ -86,10 +86,44 @@ export default function RunnerPanel() {
     setIsHydrated(true);
   }, []);
 
+  // Track previous degraded state to detect transitions
+  const prevDegradedRef = useRef<{ degraded?: boolean; degradedReason?: string }>({});
+
   // Poll status
   useEffect(() => {
-    fetchStatus();
-    const interval = setInterval(fetchStatus, 5000);
+    const poll = async () => {
+      const data = await fetchStatus();
+      if (data) {
+        // Detect degraded state transition (normal -> degraded)
+        if (data.degraded && data.degradedReason && 
+            (!prevDegradedRef.current.degraded || prevDegradedRef.current.degradedReason !== data.degradedReason)) {
+          // Emit warning event to Event Console
+          const warningEvent: Event = {
+            v: 1,
+            seq: Date.now(),
+            ts: Date.now(),
+            type: "warning",
+            data: {
+              message: `System degraded: ${data.degradedReason}`,
+              reason: data.degradedReason,
+              marketdataAgeSec: data.marketdataAgeSec,
+              marketdataCandleTs: data.marketdataCandleTs,
+            },
+          };
+          setEvents((prev) => {
+            const next = [...prev, warningEvent];
+            return next.slice(-200);
+          });
+        }
+        // Update previous state
+        prevDegradedRef.current = {
+          degraded: data.degraded,
+          degradedReason: data.degradedReason,
+        };
+      }
+    };
+    poll();
+    const interval = setInterval(poll, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -291,7 +325,7 @@ export default function RunnerPanel() {
 
             {/* Marketdata Freshness */}
             {status.marketdataAgeSec !== undefined && (
-              <div 
+              <div
                 className={`px-2 py-0.5 rounded border cursor-help ${
                   status.degraded || (status.marketdataAgeSec > 125)
                     ? "bg-red-500/15 text-red-300 border-red-400/30"
@@ -316,7 +350,7 @@ export default function RunnerPanel() {
 
             {/* Decision Age */}
             {status.lastDecisionTs && (
-              <div 
+              <div
                 className={`px-2 py-0.5 rounded border cursor-help ${
                   status.degraded
                     ? "bg-amber-500/15 text-amber-300 border-amber-400/30"

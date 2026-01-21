@@ -93,6 +93,9 @@ export default function StatusBar() {
   const { lastCheckpoint, isDirty, hasUiTouch } = useCheckpointStatus()
   const metrics = useHealthzMetrics()
   const breadcrumb = getBreadcrumb(pathname)
+  
+  // SSE state (simplified: use wsOk as proxy for SSE connection)
+  const sseState = wsOk ? 'connected' : 'disconnected'
 
   // Live status'tan gelen service durumları (öncelikli)
   const apiOk = metrics.apiOk ?? (!error && !!data)
@@ -282,6 +285,23 @@ export default function StatusBar() {
               <span className="hidden sm:inline text-white/60">OrderBus: </span>
               <span className="sm:hidden text-white/60">OB: </span>
               <span className="text-emerald-300">{metrics.orderBus}</span>
+            </span>
+
+            {/* System Status (SSE + MD + Executor) */}
+            <span className="text-white/35 shrink-0">·</span>
+            <span className="text-[13px] whitespace-nowrap shrink-0 font-medium">
+              <span className="hidden sm:inline text-white/60">System: </span>
+              <span className={`${sseState === 'connected' ? 'text-emerald-300' : sseState === 'reconnecting' ? 'text-amber-400' : 'text-red-400'}`}>
+                SSE
+              </span>
+              <span className="text-white/35 mx-1">/</span>
+              <span className={`${marketDataHealth.status === 'healthy' ? 'text-emerald-300' : marketDataHealth.status === 'lagging' ? 'text-amber-400' : 'text-red-400'}`}>
+                MD
+              </span>
+              <span className="text-white/35 mx-1">/</span>
+              <span className={`${executorOk ? 'text-emerald-300' : 'text-red-400'}`}>
+                EX
+              </span>
             </span>
 
             {/* Checkpoint Status Badge */}
