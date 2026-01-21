@@ -10,14 +10,19 @@ type RunState = {
   params: Record<string, any>;
   startedAt: number;
   running: boolean;
-  lastTickTs?: number;
-  lastCandleTs?: number;
+  lastTickTs?: number; // Marketdata'dan gelen candle timestamp (candle.ts)
+  lastCandleTs?: number; // Gerçek mum zamanı (candle.ts, lastTickTs ile aynı)
+  lastLoopTs?: number; // Loop/heartbeat zamanı (Date.now())
   lastDecisionTs?: number;
   lastSignal?: { type: "long" | "short" | "exit"; ts: number; price: number; reason: string };
   position?: { side: "long" | "short"; qty: number; entryPrice: number; entryTs: number };
   pnl: number;
   equity: number;
   lastError?: string;
+  // Freshness metrics
+  marketdataCandleTs?: number;
+  marketdataAgeSec?: number;
+  loopLagMs?: number;
 };
 
 let currentRun: RunState | null = null;
@@ -81,10 +86,21 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       return;
     }
     const candle = await response.json();
-    
-    // Always update lastCandleTs (even if same candle, to show loop is running)
-    run.lastCandleTs = Date.now();
-    
+    const now = Date.now();
+
+    // Update loop timestamp (always, to show loop is running)
+    run.lastLoopTs = now;
+
+    // Extract freshness metrics from marketdata response
+    run.marketdataCandleTs = candle.candleTs || candle.ts;
+    run.marketdataAgeSec = candle.ageSec;
+    run.loopLagMs = now - (run.lastLoopTs || now);
+
+    // Update lastCandleTs to actual candle timestamp (semantic fix)
+    if (candle.ts) {
+      run.lastCandleTs = candle.ts;
+    }
+
     if (!candle.ts || candle.ts === run.lastTickTs) {
       // No new candle, but emit heartbeat log
       emitEvent("log", { message: `Waiting for new candle (current: ${run.lastTickTs || "none"})` });
@@ -93,8 +109,9 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
 
     // New candle detected - update timestamps and emit decision event
     run.lastTickTs = candle.ts;
-    run.lastDecisionTs = Date.now();
-    
+    run.lastCandleTs = candle.ts; // Semantic: lastCandleTs = actual candle timestamp
+    run.lastDecisionTs = now;
+
     // Emit decision event (proof that loop is processing new candles)
     emitEvent("decision", {
       ts: run.lastDecisionTs,
@@ -173,12 +190,16 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       mode: run.mode,
       lastTickTs: run.lastTickTs,
       lastCandleTs: run.lastCandleTs,
+      lastLoopTs: run.lastLoopTs,
       lastDecisionTs: run.lastDecisionTs,
       position: run.position,
       pnl: run.pnl,
       equity: run.equity,
       loopIntervalMs: 5000,
       lastError: run.lastError,
+      marketdataCandleTs: run.marketdataCandleTs,
+      marketdataAgeSec: run.marketdataAgeSec,
+      loopLagMs: run.loopLagMs,
     });
   } catch (err: any) {
     const errMsg = String(err?.message || err);
@@ -232,6 +253,11 @@ export default async function execRoute(app: FastifyInstance) {
     // Heartbeat (every 5 seconds, same as strategy loop)
     heartbeatInterval = setInterval(() => {
       if (currentRun?.running) {
+        // Update loop timestamp for heartbeat
+        currentRun.lastLoopTs = Date.now();
+        if (currentRun.lastLoopTs && currentRun.lastLoopTs > 0) {
+          currentRun.loopLagMs = Date.now() - currentRun.lastLoopTs;
+        }
         emitEvent("status", {
           running: currentRun.running,
           runId: currentRun.runId,
@@ -241,12 +267,16 @@ export default async function execRoute(app: FastifyInstance) {
           mode: currentRun.mode,
           lastTickTs: currentRun.lastTickTs,
           lastCandleTs: currentRun.lastCandleTs,
+          lastLoopTs: currentRun.lastLoopTs,
           lastDecisionTs: currentRun.lastDecisionTs,
           position: currentRun.position,
           pnl: currentRun.pnl,
           equity: currentRun.equity,
           loopIntervalMs: 5000,
           lastError: currentRun.lastError,
+          marketdataCandleTs: currentRun.marketdataCandleTs,
+          marketdataAgeSec: currentRun.marketdataAgeSec,
+          loopLagMs: currentRun.loopLagMs,
         });
       } else {
         if (heartbeatInterval) {
@@ -285,12 +315,16 @@ export default async function execRoute(app: FastifyInstance) {
       mode: currentRun.mode,
       lastTickTs: currentRun.lastTickTs,
       lastCandleTs: currentRun.lastCandleTs,
+      lastLoopTs: currentRun.lastLoopTs,
       lastDecisionTs: currentRun.lastDecisionTs,
       position: currentRun.position,
       pnl: currentRun.pnl,
       equity: currentRun.equity,
       loopIntervalMs: 5000,
       lastError: currentRun.lastError,
+      marketdataCandleTs: currentRun.marketdataCandleTs,
+      marketdataAgeSec: currentRun.marketdataAgeSec,
+      loopLagMs: currentRun.loopLagMs,
     });
 
     const stoppedAt = Date.now();
@@ -323,6 +357,7 @@ export default async function execRoute(app: FastifyInstance) {
       mode: currentRun.mode,
       lastTickTs: currentRun.lastTickTs,
       lastCandleTs: currentRun.lastCandleTs,
+      lastLoopTs: currentRun.lastLoopTs,
       lastDecisionTs: currentRun.lastDecisionTs,
       lastSignal: currentRun.lastSignal,
       pnl: currentRun.pnl,
@@ -330,6 +365,10 @@ export default async function execRoute(app: FastifyInstance) {
       equity: currentRun.equity,
       loopIntervalMs: 5000,
       lastError: currentRun.lastError,
+      // Freshness metrics
+      marketdataCandleTs: currentRun.marketdataCandleTs,
+      marketdataAgeSec: currentRun.marketdataAgeSec,
+      loopLagMs: currentRun.loopLagMs,
       build: buildInfo,
     };
   });
