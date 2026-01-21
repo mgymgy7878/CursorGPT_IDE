@@ -22,13 +22,13 @@ export default async function latestRoute(app: FastifyInstance) {
     const symbol = (req.query.symbol || "BTCUSDT").toUpperCase();
     const timeframe = req.query.timeframe || "1m";
     const key = `${symbol}:${timeframe}`;
-    
+
     const cached = latestCache.get(key);
     if (cached) {
       return cached;
     }
 
-    // Fallback: Binance REST API'den son candle çek
+    // Fallback: Binance REST API'den son candle çek (her zaman fresh)
     try {
       const interval = timeframe;
       const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1`);
@@ -43,6 +43,7 @@ export default async function latestRoute(app: FastifyInstance) {
           close: parseFloat(k[4]),
           volume: parseFloat(k[5]),
         };
+        // Always update cache (fresh data)
         latestCache.set(key, candle);
         return candle;
       }

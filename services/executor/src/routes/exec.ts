@@ -81,12 +81,17 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       return;
     }
     const candle = await response.json();
+    
+    // Always update lastCandleTs (even if same candle, to show loop is running)
+    run.lastCandleTs = Date.now();
+    
     if (!candle.ts || candle.ts === run.lastTickTs) {
-      return; // No new candle
+      // No new candle, but emit heartbeat log
+      emitEvent("log", { message: `Waiting for new candle (current: ${run.lastTickTs || "none"})` });
+      return;
     }
 
     run.lastTickTs = candle.ts;
-    run.lastCandleTs = Date.now();
 
     // Get historical candles for indicators (simplified: use last 30)
     const histResponse = await fetch(`https://api.binance.com/api/v3/klines?symbol=${run.symbol}&interval=${run.timeframe}&limit=30`);
@@ -212,7 +217,7 @@ export default async function execRoute(app: FastifyInstance) {
       }
     }, 5000);
 
-    // Heartbeat
+    // Heartbeat (every 5 seconds, same as strategy loop)
     heartbeatInterval = setInterval(() => {
       if (currentRun?.running) {
         emitEvent("status", {
@@ -237,7 +242,7 @@ export default async function execRoute(app: FastifyInstance) {
           heartbeatInterval = null;
         }
       }
-    }, 15000);
+    }, 5000);
 
     return { ok: true, runId, startedAt: new Date(currentRun.startedAt).toISOString() };
   });
@@ -291,7 +296,7 @@ export default async function execRoute(app: FastifyInstance) {
     };
 
     if (!currentRun) {
-      return { 
+      return {
         running: false,
         build: buildInfo,
       };
