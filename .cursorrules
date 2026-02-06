@@ -1,7 +1,27 @@
-FINAL-ONLY OUTPUT
-- Sadece FINAL SUMMARY döndür.
-- Format: FINAL SUMMARY başlığı + bölümler: PATCH | NOTES | SMOKE TEST | REGRESSION MATRIX.
-- Proje geneli analiz/rota envanteri/uzun rapor YOK.
-- Scope dışına çıkma; sadece istenen iş ve değişen dosyalar.
-- Kod blokları minimum; yalnız değişen dosyalar ve kritik diff parçaları.
-- Build/Smoke çalıştırılmadıysa açıkça yaz; uydurma yok.
+# Cursor Kuralları (Spark Repo)
+
+Bu dosya Cursor IDE için kısa kurallardır. Tek doğru kaynak: **AGENTS.md**.
+
+## Çıktı formatı
+- Talep edilirse: FINAL SUMMARY (PATCH | NOTES | SMOKE TEST | REGRESSION MATRIX).
+- Scope dışına çıkma; minimal diff.
+
+## Kod kuralları
+- **SSR-safe:** `window` / `document` doğrudan kullanma; `typeof window !== 'undefined'` veya `"use client"`.
+- **Locale / format:** Sayı/para için `formatNumber`, `formatMoney`, `formatPrice` (lib/format.ts). Varsayılan tr-TR. Bkz. docs/UI_UX_PLAN.md §5.
+- **Test/build:** `pnpm -w --filter web-next test` ve `pnpm -w --filter web-next build` yeşil olmalı.
+- Canlı trade/iptal gibi etkili aksiyon yok; sadece kod/test/build değişikliği yapılıyorsa ek onay gerekmez.
+
+## Komutlar (özet)
+- `pnpm -w install` — bağımlılıklar
+- `pnpm -w --filter web-next dev` — Web UI (port 3003)
+- `pnpm -w --filter web-next test` — Jest testleri
+- `pnpm -w --filter web-next build` — Next.js build
+
+## Evidence
+- P0 değişiklik: evidence/* altında kısa not.
+
+## Referanslar
+- **AGENTS.md** — Komutlar, kurallar, tek referans
+- docs/UI_UX_PLAN.md — UI standardı, para sembolü politikası
+- docs/INFORMATION_ARCHITECTURE.md — Sayfa yapısı
