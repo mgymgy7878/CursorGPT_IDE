@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     
     try {
       const execStart = Date.now();
-      const executorCheck = await fetch(`${executorUrl}/health`, {
+      const executorCheck = await fetch(`${executorUrl}/healthz`, {
         signal: AbortSignal.timeout(1200),
         headers: { 'Accept': 'application/json' }
       });

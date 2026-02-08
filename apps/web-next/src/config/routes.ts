@@ -11,6 +11,8 @@ export type Role = "guest" | "user" | "admin";
 export const redirects: Array<{ from: string; to: string }> = [
   { from: "/home", to: "/dashboard" },
   { from: "/backtest-lab", to: "/backtest" },
+  // Route hijyeni: /running → /strategies/running (canonical)
+  { from: "/running", to: "/strategies/running" },
 ];
 
 export const routes: ReadonlyArray<{
@@ -22,6 +24,7 @@ export const routes: ReadonlyArray<{
 }> = [
   { path: "/dashboard", label: "Anasayfa", icon: "Home", protected: false },
   { path: "/portfolio", label: "Portföy", icon: "PieChart", protected: true, roles: ["user", "admin"] },
+  { path: "/analysis", label: "Analiz", icon: "LineChart", protected: true, roles: ["user", "admin"] },
   { path: "/strategies", label: "Stratejiler", icon: "List", protected: true, roles: ["user", "admin"] },
   { path: "/running", label: "Çalışan Stratejiler", icon: "Activity", protected: true, roles: ["user", "admin"] },
   { path: "/strategy-lab", label: "Strateji Lab", icon: "FlaskConical", protected: true, roles: ["user", "admin"] },

@@ -47,23 +47,23 @@ export const useStrategies = () => {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      
+
       if (!response.ok) {
         // Fallback to mock endpoint
         const mockResponse = await fetch(mockBase, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
-        
+
         if (!mockResponse.ok) {
           throw new Error('Failed to fetch strategies');
         }
-        
+
         const mockData = await mockResponse.json();
         setStrategies(mockData.strategies || []);
         return;
       }
-      
+
       const data = await response.json();
       setStrategies(data.strategies || data.items || []);
     } catch (err) {
@@ -120,7 +120,7 @@ export const useStrategies = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      
+
       if (!response.ok) {
         // Fallback to mock endpoint
         const mockResponse = await fetch(mockBase, {
@@ -128,17 +128,17 @@ export const useStrategies = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        
+
         if (!mockResponse.ok) {
           throw new Error('Failed to create strategy');
         }
-        
+
         const mockData = await mockResponse.json();
         const newStrategy = mockData.strategy;
         setStrategies(prev => [...prev, newStrategy]);
         return newStrategy;
       }
-      
+
       const data = await response.json();
       const newStrategy = data.strategy || data.item;
       setStrategies(prev => [...prev, newStrategy]);
@@ -162,7 +162,7 @@ export const useStrategies = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...payload }),
       });
-      
+
       if (!response.ok) {
         // Fallback to mock endpoint
         const mockResponse = await fetch(`${mockBase}/${id}`, {
@@ -170,17 +170,17 @@ export const useStrategies = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        
+
         if (!mockResponse.ok) {
           throw new Error('Failed to update strategy');
         }
-        
+
         const mockData = await mockResponse.json();
         const updatedStrategy = mockData.strategy;
         setStrategies(prev => prev.map(s => s.id === id ? updatedStrategy : s));
         return updatedStrategy;
       }
-      
+
       const data = await response.json();
       const updatedStrategy = data.strategy || data.item;
       setStrategies(prev => prev.map(s => s.id === id ? updatedStrategy : s));
@@ -200,16 +200,16 @@ export const useStrategies = () => {
     setError(null);
     try {
       const response = await fetch(useMock ? `${mockBase}?action=delete` : `${apiBase}${prefix}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-      
+
       if (!response.ok) {
         // Fallback to mock endpoint
         const mockResponse = await fetch(`${mockBase}/${id}`, { method: 'DELETE' });
-        
+
         if (!mockResponse.ok) {
           throw new Error('Failed to delete strategy');
         }
       }
-      
+
       setStrategies(prev => prev.filter(s => s.id !== id));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete strategy';
@@ -226,7 +226,7 @@ export const useStrategies = () => {
     setError(null);
     try {
       const response = await fetch(useMock ? `${mockBase}?action=status` : `${apiBase}${prefix}/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action: status }) });
-      
+
       if (!response.ok) {
         // Fallback to mock endpoint
         const mockResponse = await fetch(`${mockBase}/${id}/status`, {
@@ -234,17 +234,17 @@ export const useStrategies = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status }),
         });
-        
+
         if (!mockResponse.ok) {
           throw new Error('Failed to update strategy status');
         }
-        
+
         const mockData = await mockResponse.json();
         const updatedStrategy = mockData.strategy;
         setStrategies(prev => prev.map(s => s.id === id ? updatedStrategy : s));
         return updatedStrategy;
       }
-      
+
       const data = await response.json();
       const updatedStrategy = data.strategy || data.item;
       setStrategies(prev => prev.map(s => s.id === id ? updatedStrategy : s));

@@ -72,7 +72,7 @@ async function main() {
     const expectedType = url.endsWith('.js') ? 'javascript' : url.endsWith('.css') ? 'css' : '';
     const hasCorrectType = !expectedType || headRes.contentType.includes(expectedType);
     const isOk = headRes.ok && headRes.status === 200 && hasCorrectType;
-    
+
     results.push({
       url,
       fullUrl,

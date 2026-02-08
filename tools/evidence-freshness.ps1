@@ -17,7 +17,7 @@ if (Test-Path $logFile) {
 
 for ($i = 0; $i -lt $iterations; $i++) {
     $timestamp = Get-Date -Format "o"
-    
+
     try {
         $md = Invoke-RestMethod -Uri "http://127.0.0.1:5001/api/marketdata/latest?symbol=BTCUSDT&timeframe=1m" -ErrorAction Stop
         $mdJson = $md | ConvertTo-Json -Compress
@@ -25,7 +25,7 @@ for ($i = 0; $i -lt $iterations; $i++) {
     } catch {
         "$timestamp MD=ERROR: $_" | Out-File -Append $logFile
     }
-    
+
     try {
         $ex = Invoke-RestMethod -Uri "http://127.0.0.1:4001/api/exec/status" -ErrorAction Stop
         $exJson = $ex | ConvertTo-Json -Compress
@@ -33,7 +33,7 @@ for ($i = 0; $i -lt $iterations; $i++) {
     } catch {
         "$timestamp EX=ERROR: $_" | Out-File -Append $logFile
     }
-    
+
     Write-Host "[$($i + 1)/$iterations] Logged" -ForegroundColor Gray
     Start-Sleep -Seconds $sleepSeconds
 }

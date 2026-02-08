@@ -44,10 +44,48 @@ jobs:
         run: pnpm -C apps/web-next lint:advisory
         continue-on-error: true
 
+      - name: Check Charts API (v5 migration guard)
+        run: pnpm -C apps/web-next check:charts-api
+        continue-on-error: false
+
+  test:
+    name: Unit & Component Tests (Coverage)
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: pnpm -C apps/web-next test -- --coverage
+        env:
+          CI: true
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-next-coverage
+          path: apps/web-next/coverage
+          retention-days: 7
+
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: lint-typecheck
+    needs: [lint-typecheck, test]
     steps:
       - uses: actions/checkout@v4
 
@@ -117,6 +155,16 @@ jobs:
         run: pnpm -C apps/web-next test:rightdock-layout
         env:
           UI_URL: 'http://localhost:3003/dashboard'
+
+      - name: E2E Navigation Tests
+        run: pnpm -C apps/web-next test:e2e tests/e2e/navigation.spec.ts
+        env:
+          BASE_URL: 'http://localhost:3003'
+
+      - name: E2E Dashboard Tests
+        run: pnpm -C apps/web-next test:e2e tests/e2e/dashboard.spec.ts
+        env:
+          BASE_URL: 'http://localhost:3003'
 
       - name: Upload evidence artifacts
         uses: actions/upload-artifact@v4

@@ -8,8 +8,9 @@ Bu dosya Codex, Cursor Agent ve diğer AI araçları için tek referans kaynakt�
 pnpm -w install                    # Bağımlılıklar
 pnpm -w build                      # Tüm paketler
 pnpm -w --filter web-next dev      # Web UI (port 3003)
-pnpm -w --filter web-next test     # Jest testleri
+pnpm -w --filter web-next test     # Jest (unit/component)
 pnpm -w --filter web-next build    # Next.js build
+pnpm -C apps/web-next test:e2e     # E2E ayrı (Playwright); unit gate'ten ayrı, opsiyonel/nightly
 ```
 
 ## Kurallar
@@ -33,7 +34,12 @@ pnpm -w --filter web-next build    # Next.js build
 ## Evidence Rutini
 
 - P0 değişiklik: evidence/\* altında screenshot + kısa not.
-- Test: `pnpm -C apps/web-next test` yeşil olmalı.
+- Test: `pnpm -C apps/web-next test` (Jest) yeşil olmalı. E2E ayrı koşulur: `test:e2e` (Playwright).
+
+## Build / CI
+
+- Lokal build: `pnpm -C apps/web-next build` (standalone üretilmez; postbuild uyarı verip exit 0).
+- CI: `output: standalone` açık; postbuild asset copy çalışır.
 
 ## Referanslar
 

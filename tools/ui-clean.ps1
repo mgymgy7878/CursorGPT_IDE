@@ -23,12 +23,12 @@ Write-Host "   node_modules/.cache temizlendi" -ForegroundColor Green
 
 # 4. Dev server başlat
 Write-Host "`n4. Dev server baslatiliyor..." -ForegroundColor Yellow
-Write-Host "   Komut: pnpm --filter web-next dev -- --hostname 127.0.0.1 --port 3003" -ForegroundColor Gray
+Write-Host "   Komut: pnpm --filter web-next dev -- --hostname localhost --port 3003" -ForegroundColor Gray
 Write-Host "`n   Dev server arka planda calisiyor..." -ForegroundColor Green
-Write-Host "   Browser'da http://127.0.0.1:3003 adresini acin" -ForegroundColor Cyan
+Write-Host "   Browser'da http://localhost:3003 adresini acin" -ForegroundColor Cyan
 Write-Host "   Hard refresh yapin: Ctrl+Shift+R" -ForegroundColor Cyan
 
 # Arka planda başlat
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; pnpm --filter web-next dev -- --hostname 127.0.0.1 --port 3003"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; pnpm --filter web-next dev -- --hostname localhost --port 3003"
 
 Write-Host "`n=== TAMAMLANDI ===" -ForegroundColor Green

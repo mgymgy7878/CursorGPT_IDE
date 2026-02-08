@@ -92,7 +92,7 @@ Add-Content -Path $logFile -Value "`n=== UI Prod Server Start: $timestamp ===`n"
 # Start process with output redirection
 $processStartInfo = New-Object System.Diagnostics.ProcessStartInfo
 $processStartInfo.FileName = $pnpmPath
-$processStartInfo.Arguments = "--filter web-next start -- --hostname 127.0.0.1 --port 3003"
+$processStartInfo.Arguments = "--filter web-next start -- --hostname localhost --port 3003"
 $processStartInfo.WorkingDirectory = $repoRoot
 $processStartInfo.UseShellExecute = $false
 $processStartInfo.RedirectStandardOutput = $true

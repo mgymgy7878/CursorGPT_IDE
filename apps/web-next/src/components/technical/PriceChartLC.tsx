@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { createChart, CrosshairMode, ColorType } from "lightweight-charts";
+import { createChart, CrosshairMode, ColorType, CandlestickSeries, HistogramSeries, LineSeries } from "lightweight-charts";
 import type { IChartApi } from "lightweight-charts";
 
 type Candle = { t: number; o: number; h: number; l: number; c: number; v: number };
@@ -27,7 +27,7 @@ export default function PriceChartLC({
   const candleSeriesRef = useRef<any>(null);
   const volSeriesRef = useRef<any>(null);
   const lastBarTimeRef = useRef<number | undefined>(undefined);
-  
+
   const [live, setLive] = useState(false);
   const esRef = useRef<EventSource | null>(null);
 
@@ -43,6 +43,7 @@ export default function PriceChartLC({
     const chart = createChart(divRef.current, {
       height,
       layout: {
+        attributionLogo: false, // NO TradingView logos (lightweight-charts Apache 2.0)
         background: { type: ColorType.Solid, color: "transparent" },
         textColor: "#e5e7eb"
       },
@@ -61,12 +62,14 @@ export default function PriceChartLC({
         borderColor: "#374151"
       },
     });
-    
+
+    // Sigorta: Chart oluşturulduktan sonra tekrar kontrol et
+    chart.applyOptions({ layout: { attributionLogo: false } });
+
     chartRef.current = chart as unknown as IChartApi;
 
-    // Candlestick series (cast for compatibility with different typings)
-    const anyChart = chart as unknown as any;
-    const candleSeries = anyChart.addCandlestickSeries({
+    // Candlestick series (v5 API: addSeries(CandlestickSeries, options))
+    const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: "#16a34a",
       downColor: "#ef4444",
       borderUpColor: "#16a34a",
@@ -74,7 +77,7 @@ export default function PriceChartLC({
       wickUpColor: "#16a34a",
       wickDownColor: "#ef4444",
     });
-    
+
     candleSeriesRef.current = candleSeries;
 
     const candleData = candles.map(k => ({
@@ -84,22 +87,22 @@ export default function PriceChartLC({
       low: k.l,
       close: k.c
     }));
-    
+
     candleSeries.setData(candleData);
     lastBarTimeRef.current = candleData[candleData.length - 1]?.time;
 
-    // Volume histogram (secondary scale)
-    const volumeSeries = anyChart.addHistogramSeries({
+    // Volume histogram (secondary scale) (v5 API: addSeries(HistogramSeries, options))
+    const volumeSeries = chart.addSeries(HistogramSeries, {
       priceScaleId: "",
       priceFormat: { type: 'volume' as const },
     });
-    
+
     volSeriesRef.current = volumeSeries;
-    
+
     volumeSeries.priceScale().applyOptions({
       scaleMargins: { top: 0.85, bottom: 0 }
     });
-    
+
     volumeSeries.setData(
       candles.map(k => ({
         time: Math.floor(k.t / 1000) as any,
@@ -108,37 +111,37 @@ export default function PriceChartLC({
       }))
     );
 
-    // BB overlay (3 lines)
+    // BB overlay (3 lines) (v5 API: addSeries(LineSeries, options))
     if (bbSeries && bbSeries.length === candles.length) {
-      const upperLine = anyChart.addLineSeries({
+      const upperLine = chart.addSeries(LineSeries, {
         color: "#10b981",
         lineWidth: 1,
         title: "BB Upper"
       });
-      
-      const middleLine = anyChart.addLineSeries({
+
+      const middleLine = chart.addSeries(LineSeries, {
         color: "#60a5fa",
         lineWidth: 1,
         lineStyle: 2, // dashed
         title: "BB Middle"
       });
-      
-      const lowerLine = anyChart.addLineSeries({
+
+      const lowerLine = chart.addSeries(LineSeries, {
         color: "#ef4444",
         lineWidth: 1,
         title: "BB Lower"
       });
 
       const times = candles.map(k => Math.floor(k.t / 1000) as any);
-      
+
       upperLine.setData(
         times.map((t, i) => ({ time: t, value: bbSeries[i]?.u })).filter(p => !isNaN(p.value))
       );
-      
+
       middleLine.setData(
         times.map((t, i) => ({ time: t, value: bbSeries[i]?.m })).filter(p => !isNaN(p.value))
       );
-      
+
       lowerLine.setData(
         times.map((t, i) => ({ time: t, value: bbSeries[i]?.l })).filter(p => !isNaN(p.value))
       );
@@ -165,7 +168,7 @@ export default function PriceChartLC({
         chart.applyOptions({ width: Math.max(320, Math.floor(w)) });
       }
     });
-    
+
     ro.observe(divRef.current);
 
     return () => {
@@ -184,7 +187,7 @@ export default function PriceChartLC({
       esRef.current = null;
       return;
     }
-    
+
     const qs = new URLSearchParams({ symbol, timeframe });
     const es = new EventSource(`/api/marketdata/stream?${qs.toString()}`);
     esRef.current = es;
@@ -209,7 +212,7 @@ export default function PriceChartLC({
       try {
         const msg = JSON.parse(ev.data);
         if (msg.event !== "kline") return;
-        
+
         const t = Math.floor(msg.t / 1000);
         const bar = { time: t, open: msg.o, high: msg.h, low: msg.l, close: msg.c };
         const vol = { time: t, value: msg.v, color: msg.c >= msg.o ? "#16a34a66" : "#ef444466" };

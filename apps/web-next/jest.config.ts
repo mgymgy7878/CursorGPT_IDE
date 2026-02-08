@@ -29,7 +29,7 @@ const customJestConfig = {
     },
   },
   testMatch: ["**/__tests__/**/*.{ts,tsx}", "**/?(*.)+(spec|test).{ts,tsx}"],
-  testPathIgnorePatterns: ["/node_modules/", "/.next/", "/e2e/", "/tests/"],
+  testPathIgnorePatterns: ["/node_modules/", "/.next/", "/e2e/", "<rootDir>/tests/"],
 };
 
 export default createJestConfig(customJestConfig);

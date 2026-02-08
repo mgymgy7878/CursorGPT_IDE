@@ -223,6 +223,33 @@ export const uiCopy = {
     // PATCH W.1 Polish: Disabled durumda tooltip
     armFirst: 'Önce Arm et',
   },
+
+  // ========== SYSTEM HEALTH (PATCH UI Polish P0) ==========
+  systemHealth: {
+    retry: 'Yenile',
+    retrying: 'Yenileniyor...',
+    copyStartCommand: 'Komut',
+    copyDiagnostics: 'Tanılama',
+    details: 'Detay',
+    healthz: 'Healthz',
+    healthzDirect: 'Doğrudan Healthz (4001)',
+    executorOffline: 'Executor Kapalı',
+    executorUnreachable: 'Executor Ulaşılamıyor',
+    startExecutorOffline: 'Başlat (Executor Kapalı)',
+    stopExecutorOffline: 'Durdur (Executor Kapalı)',
+    marketdataStale: 'Marketdata bayat',
+    marketdataUnavailable: 'Marketdata kullanılamıyor',
+    executorOfflineFeedback: 'Executor kapalı (502). Başlat komutunu kopyalayın.',
+  },
+  // ========== RUNNER (PATCH UI Polish P0) ==========
+  runner: {
+    starting: 'Başlatılıyor...',
+    stopping: 'Durduruluyor...',
+    running: 'Çalışıyor',
+    start: 'Başlat',
+    stop: 'Durdur',
+    alreadyStopped: 'Zaten Durduruldu',
+  },
 } as const;
 
 /**

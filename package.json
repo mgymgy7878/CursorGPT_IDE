@@ -7,6 +7,10 @@
     "dev": "pnpm --filter web-next dev",
     "dev:all": "pnpm --parallel --filter ./services/* --filter web-next dev",
     "smoke:mvp": "node tools/smoke-mvp.mjs",
+    "smoke:sse": "node tools/smoke-sse-status.mjs",
+    "smoke:ui": "pnpm -C apps/web-next smoke:system-status",
+    "smoke:all": "pnpm smoke:sse && pnpm smoke:ui",
+    "start:services": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/start-services.ps1",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
@@ -27,6 +31,7 @@
     "verify": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/release/verify.ps1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@types/react": "18.3.26",
     "@types/react-dom": "18.3.1",
     "cross-env": "^10.1.0",

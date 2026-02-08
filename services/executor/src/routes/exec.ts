@@ -22,6 +22,7 @@ type RunState = {
   // Freshness metrics
   marketdataCandleTs?: number;
   marketdataAgeSec?: number;
+  marketdataOkAtMs?: number; // Last successful marketdata fetch timestamp
   loopLagMs?: number;
   // Degraded state
   degraded?: boolean;
@@ -101,6 +102,39 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       const errMsg = "Failed to fetch market data";
       run.lastError = errMsg;
       emitEvent("error", { message: errMsg });
+      // On fetch failure, calculate age from last successful fetch (if exists)
+      const now = Date.now();
+      run.lastLoopTs = now;
+      if (run.marketdataOkAtMs) {
+        run.marketdataAgeSec = Math.floor((now - run.marketdataOkAtMs) / 1000);
+      } else {
+        // No previous successful fetch - set to a high value to trigger degraded
+        run.marketdataAgeSec = 999;
+      }
+      // Check if we should enter degraded mode
+      const intervalSec = timeframeToIntervalSec(run.timeframe);
+      const maxAgeSec = intervalSec * 2 + 5;
+      if (run.marketdataAgeSec > maxAgeSec) {
+        run.degraded = true;
+        run.degradedReason = "MARKETDATA_STALE";
+        emitEvent("warning", {
+          message: `Marketdata stale: ageSec=${run.marketdataAgeSec}, maxAgeSec=${maxAgeSec}`,
+          reason: "MARKETDATA_STALE",
+          ageSec: run.marketdataAgeSec,
+          threshold: maxAgeSec,
+          source: "executor_guardrail",
+        });
+      } else if (!run.marketdataOkAtMs) {
+        // No previous successful fetch - marketdata unavailable
+        run.degraded = true;
+        run.degradedReason = "MARKETDATA_UNAVAILABLE";
+        emitEvent("warning", {
+          message: `Marketdata unavailable: no successful fetch yet`,
+          reason: "MARKETDATA_UNAVAILABLE",
+          ageSec: run.marketdataAgeSec,
+          source: "executor_guardrail",
+        });
+      }
       return;
     }
     const candle = await response.json();
@@ -111,7 +145,10 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
 
     // Extract freshness metrics from marketdata response
     run.marketdataCandleTs = candle.candleTs;
-    run.marketdataAgeSec = candle.candleAgeSec || candle.ageSec; // Support both old and new format
+    // Update last successful fetch timestamp
+    run.marketdataOkAtMs = now;
+    // Calculate age from last successful fetch (not from candleTs)
+    run.marketdataAgeSec = run.marketdataOkAtMs ? Math.floor((now - run.marketdataOkAtMs) / 1000) : 0;
     run.loopLagMs = now - (run.lastLoopTs || now);
 
     // Stale guardrail: check if marketdata is too old
@@ -247,6 +284,7 @@ async function runEMA_RSI_Strategy(run: RunState, marketdataUrl: string) {
       lastError: run.lastError,
       marketdataCandleTs: run.marketdataCandleTs,
       marketdataAgeSec: run.marketdataAgeSec,
+      marketdataOkAtMs: run.marketdataOkAtMs,
       loopLagMs: run.loopLagMs,
       degraded: run.degraded,
       degradedReason: run.degradedReason,
@@ -419,13 +457,14 @@ export default async function execRoute(app: FastifyInstance) {
       equity: currentRun.equity,
       loopIntervalMs: 5000,
       lastError: currentRun.lastError,
-      // Freshness metrics
-      marketdataCandleTs: currentRun.marketdataCandleTs,
-      marketdataAgeSec: currentRun.marketdataAgeSec,
-      loopLagMs: currentRun.loopLagMs,
-      // Degraded state
-      degraded: currentRun.degraded,
-      degradedReason: currentRun.degradedReason,
+      // Freshness metrics (explicitly include even if undefined)
+      marketdataCandleTs: currentRun.marketdataCandleTs ?? null,
+      marketdataAgeSec: currentRun.marketdataAgeSec ?? null,
+      marketdataOkAtMs: currentRun.marketdataOkAtMs ?? null,
+      loopLagMs: currentRun.loopLagMs ?? null,
+      // Degraded state (explicitly include even if undefined)
+      degraded: currentRun.degraded ?? false,
+      degradedReason: currentRun.degradedReason ?? null,
       build: buildInfo,
     };
   });

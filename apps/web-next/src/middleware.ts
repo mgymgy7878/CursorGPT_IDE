@@ -14,7 +14,8 @@ function isProtectedPath(pathname: string): boolean {
   const protectedFallback = [
     '/portfolio',
     '/strategies',
-    '/running',
+    '/strategies/running', // Canonical route
+    '/running', // Redirect target (geriye dönük uyumluluk)
     '/strategy-lab',
     '/backtest',
     '/technical-analysis',
@@ -41,22 +42,34 @@ function pickToken(req: NextRequest): string {
   );
 }
 
+// Dev'de tek origin: localhost kullan; 127.0.0.1 buraya yönlendirilir (cache/SW tek yerde toplanır)
+const DEV_CANONICAL_HOST = 'localhost';
+const DEV_PORT = '3003';
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // CRITICAL: Next static + API must never be rewritten/intercepted
-  if (pathname.startsWith("/_next/")) {
+  // CRITICAL: Asset ve API isteklerine asla redirect uygulama (chunk yükleme bozulur → "missing required error components" vb.)
+  if (pathname.startsWith("/_next/") || pathname.startsWith("/api/") || pathname === "/favicon.ico") {
     return NextResponse.next();
   }
-  if (pathname.startsWith("/api/")) {
-    return NextResponse.next();
-  }
-  if (pathname === "/favicon.ico") {
-    return NextResponse.next();
-  }
-  // Static assets
   if (/\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|woff2?)$/.test(pathname)) {
     return NextResponse.next();
+  }
+
+  // Dev-only: sadece document (HTML) navigation için 127.0.0.1 → localhost; loop önleme: hostname port'suz, sadece HTML istek
+  if (process.env.NODE_ENV === 'development') {
+    const accept = request.headers.get('accept') ?? '';
+    if (accept.includes('text/html')) {
+      const hostHeader = request.headers.get('host') ?? '';
+      const hostname = hostHeader.split(':')[0].toLowerCase();
+      if (hostname === '127.0.0.1') {
+        const url = request.nextUrl.clone();
+        url.hostname = DEV_CANONICAL_HOST;
+        url.port = DEV_PORT;
+        return NextResponse.redirect(url, 307);
+      }
+    }
   }
 
   // Centralized redirects (single-source from config/routes.ts)

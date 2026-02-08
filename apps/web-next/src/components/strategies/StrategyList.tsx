@@ -10,6 +10,8 @@ interface StrategyListProps {
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: 'start' | 'stop' | 'pause') => void;
   loading?: boolean;
+  disabled?: boolean;
+  disabledTooltip?: string;
 }
 
 export const StrategyList: React.FC<StrategyListProps> = ({
@@ -18,6 +20,8 @@ export const StrategyList: React.FC<StrategyListProps> = ({
   onDelete,
   onStatusChange,
   loading = false,
+  disabled = false,
+  disabledTooltip,
 }) => {
   const getStatusColor = (status: Strategy['status']) => {
     switch (status) {
@@ -158,6 +162,8 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => onStatusChange(strategy.id, 'pause')}
+                    disabled={disabled}
+                    title={disabled && disabledTooltip ? disabledTooltip : undefined}
                   >
                     Duraklat
                   </Button>
@@ -167,6 +173,8 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => onStatusChange(strategy.id, 'start')}
+                    disabled={disabled}
+                    title={disabled && disabledTooltip ? disabledTooltip : undefined}
                   >
                     Başlat
                   </Button>
@@ -176,6 +184,8 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => onStatusChange(strategy.id, 'start')}
+                    disabled={disabled}
+                    title={disabled && disabledTooltip ? disabledTooltip : undefined}
                   >
                     Başlat
                   </Button>
@@ -185,6 +195,8 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => onStatusChange(strategy.id, 'stop')}
+                    disabled={disabled}
+                    title={disabled && disabledTooltip ? disabledTooltip : undefined}
                   >
                     Durdur
                   </Button>
@@ -194,6 +206,8 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                   size="sm"
                   variant="outline"
                   onClick={() => onEdit(strategy)}
+                  disabled={disabled}
+                  title={disabled && disabledTooltip ? disabledTooltip : undefined}
                 >
                   Düzenle
                 </Button>
@@ -203,6 +217,8 @@ export const StrategyList: React.FC<StrategyListProps> = ({
                   variant="outline"
                   onClick={() => onDelete(strategy.id)}
                   className="text-red-600 hover:text-red-700"
+                  disabled={disabled}
+                  title={disabled && disabledTooltip ? disabledTooltip : undefined}
                 >
                   Sil
                 </Button>

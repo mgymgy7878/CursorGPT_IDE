@@ -11,14 +11,16 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
-import { IconSpark } from '@/components/ui/LocalIcons';
+import { usePathname, useRouter } from 'next/navigation';
+import { startTransition } from 'react';
+import { IconSpark, IconX, IconChevronRight } from '@/components/ui/LocalIcons';
 import { cn } from '@/lib/utils';
 import { COMMAND_TEMPLATES, getTemplatesForScope, type CommandTemplate } from './commandTemplates';
 import { useDeferredLocalStorageState } from '@/hooks/useDeferredLocalStorageState';
 import { useCopilotContext, formatContextForPrompt } from '@/hooks/useCopilotContext';
 import { SparkAvatar } from './SparkAvatar';
 import { uiCopy } from '@/lib/uiCopy';
+import { useUiChrome, type RightDockMode } from '@/hooks/useUiChrome';
 
 interface Message {
   id: string;
@@ -37,7 +39,26 @@ const MAX_RECENT_COMMANDS = 5;
 
 export default function CopilotDock({ collapsed: externalCollapsed, onToggle: externalOnToggle }: CopilotDockProps = {}) {
   const pathname = usePathname();
+  const router = useRouter();
   const context = useCopilotContext();
+  const { rightDockMode, setRightDockMode } = useUiChrome();
+
+  // Close the right panel completely (hidden)
+  const handleClosePanel = useCallback(() => {
+    setRightDockMode('closed');
+  }, [setRightDockMode]);
+
+  // Collapse to mini dock (narrow strip)
+  const handleCollapsePanel = useCallback(() => {
+    setRightDockMode('collapsed');
+    setCollapsed(true); // Also update local state
+  }, [setRightDockMode]);
+
+  // Open/expand the panel
+  const handleOpenPanel = useCallback(() => {
+    setRightDockMode('open');
+    setCollapsed(false); // Also update local state
+  }, [setRightDockMode]);
 
   // PATCH T: Copilot greeting'i global store'da tut (localStorage persist)
   const GREETING_KEY = 'copilot.greeting.shown';
@@ -89,8 +110,15 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
     false
   );
 
-  const isCollapsed = externalCollapsed !== undefined ? externalCollapsed : collapsed;
-  const handleToggle = externalOnToggle || (() => setCollapsed(v => !v));
+  // Use global rightDockMode for collapsed state (collapsed = mini dock)
+  const isCollapsed = rightDockMode === 'collapsed' || (externalCollapsed !== undefined ? externalCollapsed : collapsed);
+  const handleToggle = externalOnToggle || (() => {
+    if (rightDockMode === 'collapsed') {
+      handleOpenPanel();
+    } else {
+      setCollapsed(v => !v);
+    }
+  });
 
   // Load recent commands from localStorage
   useEffect(() => {
@@ -281,9 +309,10 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
     return (
       <div className="h-full flex flex-col items-center py-3 bg-neutral-950 border-l border-white/6">
         <button
-          onClick={handleToggle}
+          onClick={handleOpenPanel}
           className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
           aria-label="Copilot panelini aç"
+          title="Copilot'u genişlet"
         >
           <IconSpark size={20} strokeWidth={1.8} className="text-emerald-400" />
         </button>
@@ -321,7 +350,9 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
         clickable: true,
         onClick: () => {
           // Navigate to strategies page or open strategy selector
-          window.location.href = '/strategies';
+          startTransition(() => {
+            router.push('/strategies');
+          });
         },
       });
     }
@@ -349,10 +380,30 @@ export default function CopilotDock({ collapsed: externalCollapsed, onToggle: ex
               Canlı
             </span>
           </div>
-          {/* Right: Model badge (compact) */}
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-white/5 border border-white/10 text-neutral-300 max-w-[100px] truncate shrink-0">
-            GPT-5.1
-          </span>
+          {/* Right: Model badge + Collapse + Close buttons */}
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-white/5 border border-white/10 text-neutral-300 max-w-[100px] truncate">
+              GPT-5.1
+            </span>
+            {/* Collapse button (minimize to mini dock) */}
+            <button
+              onClick={handleCollapsePanel}
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10 text-neutral-400 hover:text-neutral-200 transition-colors"
+              aria-label="Sağ paneli küçült"
+              title="Küçült"
+            >
+              <IconChevronRight size={14} strokeWidth={2} />
+            </button>
+            {/* Close button (hide completely) */}
+            <button
+              onClick={handleClosePanel}
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10 text-neutral-400 hover:text-neutral-200 transition-colors"
+              aria-label="Sağ paneli kapat"
+              title="Kapat"
+            >
+              <IconX size={14} strokeWidth={2} />
+            </button>
+          </div>
         </div>
       </div>
 

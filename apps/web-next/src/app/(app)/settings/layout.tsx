@@ -1,6 +1,6 @@
-import Shell from "@/components/layout/Shell";
+import AppShell from "@/components/layout/AppShell";
 export default function SettingsLayout({ children }:{ children: React.ReactNode }){
-  return <Shell>{children}</Shell>;
+  return <AppShell>{children}</AppShell>;
 }
 
 

@@ -8,6 +8,7 @@ export type CommandTemplate = {
   prompt: string;
   scope: string[]; // ['all', 'dashboard', 'market-data', 'strategy-lab', 'running', 'strategies']
   requiresContext?: string[]; // Optional context fields required
+  icon?: string;
 };
 
 export const COMMAND_TEMPLATES: CommandTemplate[] = [

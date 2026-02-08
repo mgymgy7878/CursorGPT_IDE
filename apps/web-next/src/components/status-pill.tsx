@@ -8,6 +8,7 @@ interface HealthPillProps {
   latency?: number | null
   onClick?: () => void
   title?: string
+  'data-testid'?: string
 }
 
 /**
@@ -17,7 +18,7 @@ interface HealthPillProps {
  * Responsive: shows only dot + label on small screens, adds latency on larger screens
  * Supports degraded state (amber) for slow responses
  */
-export function HealthPill({ ok, label, latency, onClick, title }: HealthPillProps) {
+export function HealthPill({ ok, label, latency, onClick, title, 'data-testid': testId }: HealthPillProps) {
   // Consistent pill typography token (Figma parity)
   const baseClasses = "flex items-center gap-1.5 shrink-0 rounded-full bg-white/5 px-2 py-[3px] text-[13px] font-medium text-white/80 leading-none"
   const interactiveClasses = onClick ? "cursor-pointer hover:bg-white/8 transition-colors" : ""
@@ -28,6 +29,7 @@ export function HealthPill({ ok, label, latency, onClick, title }: HealthPillPro
 
   return (
     <div
+      data-testid={testId}
       className={`${baseClasses} ${interactiveClasses}`}
       onClick={onClick}
       title={title}

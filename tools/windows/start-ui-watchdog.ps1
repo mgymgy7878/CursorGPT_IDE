@@ -72,7 +72,7 @@ try {
                 # Use PowerShell wrapper for .ps1
                 $useCmdWrapper = $false
                 $pnpmPath = "powershell.exe"
-                $pnpmArgs = "-NoProfile -ExecutionPolicy Bypass -Command `"& '$pnpmPath' --filter web-next dev -- --hostname 127.0.0.1 --port 3003`""
+                $pnpmArgs = "-NoProfile -ExecutionPolicy Bypass -Command `"& '$pnpmPath' --filter web-next dev -- --hostname localhost --port 3003`""
             }
         } else {
             $useCmdWrapper = $false
@@ -87,7 +87,7 @@ try {
 
 # Start dev server with logging
 Write-Host "[INFO] Starting dev server..." -ForegroundColor Cyan
-Write-Host "[INFO] Command: pnpm --filter web-next dev -- --hostname 127.0.0.1 --port 3003" -ForegroundColor Gray
+Write-Host "[INFO] Command: pnpm --filter web-next dev -- --hostname localhost --port 3003" -ForegroundColor Gray
 Write-Host ""
 
 # Append timestamp to log
@@ -95,7 +95,7 @@ $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Add-Content -Path $logFile -Value "`n=== UI Dev Server Start: $timestamp ===`n"
 
 # Build command - use pnpm directly with proper argument separation
-$pnpmCommand = "--filter web-next dev -- --hostname 127.0.0.1 --port 3003"
+$pnpmCommand = "--filter web-next dev -- --hostname localhost --port 3003"
 
 # Use direct execution with output redirection (simplest and most reliable)
 try {

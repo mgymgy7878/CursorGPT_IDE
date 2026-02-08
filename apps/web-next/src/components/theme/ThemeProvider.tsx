@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 type Theme = "light" | "dark" | "auto"; // auto = gün ışığına göre
 type Ctx = { theme: Theme; setTheme: (t: Theme) => void; resolved: "light"|"dark" };
@@ -12,7 +12,7 @@ function resolveAuto(): "light"|"dark" {
   return daylight ? "light" : "dark";
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "auto";
     return (localStorage.getItem("theme") as Theme) || "auto";

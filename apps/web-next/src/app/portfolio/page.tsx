@@ -1,8 +1,11 @@
+"use client";
 import AppShell from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { ClientDateTime } from "@/components/ui/ClientDateTime";
 import { OptimisticPositionsTable } from "@/components/portfolio/OptimisticPositionsTable";
+import GlobalSystemBanner from "@/components/dashboard/GlobalSystemBanner";
+import { useExecutorStatus } from "@/hooks/useExecutorStatus";
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { t } from '@/lib/i18n';
 
@@ -53,7 +56,7 @@ function LivePnL() {
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h3 
+        <h3
           className={`text-2xl font-bold num-tight ${pnl24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
           aria-live="polite"
           aria-atomic="true">
@@ -82,13 +85,26 @@ function LivePnL() {
 
 
 export default function Portfolio() {
+  const { executorReachable } = useExecutorStatus();
+
+  const handleStartExecutor = () => {
+    console.info("[Portfolio] Start executor requested");
+    // TODO: Ops drawer'ı aç veya /api/exec/start çağır
+  };
+
   return (
     <AppShell>
       <PageHeader
         title="Portföy"
         subtitle="Canlı pozisyonlar, PnL ve borsa durumu"
       />
-      
+
+      {/* Global System Banner (Executor OFFLINE durumunda tek CTA) */}
+      <GlobalSystemBanner
+        executorReachable={executorReachable}
+        onStartExecutor={handleStartExecutor}
+      />
+
       <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
         <Card title="Borsa Bağlantısı">
           <ExchangeStatus />

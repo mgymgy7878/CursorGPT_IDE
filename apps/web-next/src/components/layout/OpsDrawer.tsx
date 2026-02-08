@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import { useEffect, useCallback, useState } from "react";
 
 interface OpsDrawerProps {
   open?: boolean;
@@ -10,28 +10,46 @@ interface OpsDrawerProps {
 export function OpsDrawer({
   open: controlledOpen,
   onOpenChange,
-  showButton = false
+  showButton = false,
 }: OpsDrawerProps = {}) {
-  const [internalOpen, setInternalOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = (value: boolean) => {
-    if (controlledOpen === undefined) {
-      setInternalOpen(value);
-    }
-    onOpenChange?.(value);
-  };
 
-  // ESC key handler
+  // Stabilize setOpen with useCallback to avoid stale closures
+  const setOpen = useCallback(
+    (value: boolean) => {
+      if (controlledOpen === undefined) {
+        setInternalOpen(value);
+      }
+      onOpenChange?.(value);
+    },
+    [controlledOpen, onOpenChange]
+  );
+
+  // ESC key handler - only when drawer is open
   useEffect(() => {
-    if (!open) return;
+    if (!open) return; // Early return: no listener when closed (performance + avoid surprises)
+
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      // Guard: ignore ESC if user is typing in an input/textarea
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return; // Let the input handle ESC naturally (e.g., clear, blur)
+      }
+
+      // Guard: double-check drawer is still open (race condition protection)
+      if (!open) return;
+
+      if (e.key === "Escape") {
         setOpen(false);
       }
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [open]);
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [open, setOpen]);
 
   return (
     <>
@@ -78,7 +96,9 @@ export function OpsDrawer({
             </nav>
 
             <div className="mt-4 border-t border-neutral-800 pt-3">
-              <p className="mb-2 text-xs uppercase tracking-wide text-neutral-400">Hızlı Komutlar</p>
+              <p className="mb-2 text-xs uppercase tracking-wide text-neutral-400">
+                Hızlı Komutlar
+              </p>
               <pre className="rounded-lg bg-neutral-900 p-3 text-xs text-neutral-300">
                 bash scripts/green-room-check.sh
               </pre>

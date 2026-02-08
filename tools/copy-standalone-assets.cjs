@@ -42,10 +42,15 @@ function copyDir(src, dest) {
 
 console.log('📦 Copying standalone assets...\n');
 
-// Check if standalone build exists
+// Check if standalone build exists (CI'da zorunlu; lokal build'de opsiyonel)
+const isCI = process.env.CI === 'true' || process.env.CI === '1' || process.env.GITHUB_ACTIONS === 'true';
 if (!fs.existsSync(STANDALONE_DIR)) {
-  console.error('❌ Standalone build not found. Run `pnpm build` first.');
-  process.exit(1);
+  if (isCI) {
+    console.error('❌ Standalone build not found. Run `pnpm build` with NEXT_STANDALONE=1 or in CI.');
+    process.exit(1);
+  }
+  console.warn('⚠️  Standalone build not found; skipping asset copy (use NEXT_STANDALONE=1 to enable).');
+  process.exit(0);
 }
 
 // Copy .next/static → .next/standalone/apps/web-next/.next/static

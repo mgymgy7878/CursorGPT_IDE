@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { uiCopy } from '@/lib/uiCopy';
 
 type Status = {
   running: boolean;
@@ -51,8 +52,15 @@ export default function RunnerPanel() {
   const [lastStartInfo, setLastStartInfo] = useState<{ status?: number; time?: string } | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [lastClickTime, setLastClickTime] = useState<string | null>(null);
+  const [executorReachable, setExecutorReachable] = useState<boolean>(true);
+  const [lastExecError, setLastExecError] = useState<{ code: string; httpStatus?: number; detail?: string } | null>(null);
+  const [retrying, setRetrying] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const eventsEndRef = useRef<HTMLDivElement>(null);
   const esRef = useRef<EventSource | null>(null);
+  const inFlightRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const lastErrRef = useRef<string | null>(null);
 
   // Apply default risk preset on mount
   useEffect(() => {
@@ -66,19 +74,111 @@ export default function RunnerPanel() {
     setParams({ rsiEntry: preset.rsiEntry, rsiExit: preset.rsiExit });
   }, []); // Only on mount
 
-  // Fetch status helper
-  const fetchStatus = async () => {
+  // Normalize executor error
+  const normalizeExecutorError = async (err: any, res?: Response): Promise<{ code: string; httpStatus?: number; detail?: string } | null> => {
+    // HTTP 502
+    if (res?.status === 502) {
+      // Try to parse JSON body for detail
+      try {
+        const text = await res.clone().text();
+        const json = JSON.parse(text);
+        if (json.error === "executor_unreachable" || json.error?.includes("executor_unreachable")) {
+          return { code: "EXECUTOR_UNREACHABLE", httpStatus: 502, detail: json.detail || json.error };
+        }
+      } catch {
+        // Not JSON or parse failed
+      }
+      return { code: "EXECUTOR_UNREACHABLE", httpStatus: 502, detail: "fetch failed" };
+    }
+    // Network/fetch failed
+    if (err?.message?.includes("fetch failed") || err?.name === "TypeError") {
+      return { code: "EXECUTOR_UNREACHABLE", detail: err?.message || "Network error" };
+    }
+    // Try to parse JSON error response
+    if (res) {
+      try {
+        const text = await res.clone().text();
+        const json = JSON.parse(text);
+        if (json.error === "executor_unreachable" || json.error?.includes("executor_unreachable")) {
+          return { code: "EXECUTOR_UNREACHABLE", httpStatus: res.status, detail: json.detail || json.error };
+        }
+      } catch {
+        // Not JSON
+      }
+    }
+    return null;
+  };
+
+  // Fetch status helper - STABILIZED with useCallback + in-flight lock + abort
+  const fetchStatus = useCallback(async () => {
+    // In-flight guard: prevent overlapping fetches
+    if (inFlightRef.current) {
+      return null;
+    }
+    inFlightRef.current = true;
+
+    // Create new AbortController for this fetch
+    const ac = new AbortController();
+    abortControllerRef.current = ac;
+
     try {
-      const res = await fetch("/api/exec/status");
+      const res = await fetch("/api/exec/status", {
+        signal: ac.signal,
+        cache: "no-store"
+      });
+
+      // Check for 502 or executor_unreachable
+      if (res.status === 502) {
+        const errorInfo = await normalizeExecutorError(null, res).catch(() => ({ code: "EXECUTOR_UNREACHABLE", httpStatus: 502 }));
+        setExecutorReachable(false);
+        setLastExecError(errorInfo);
+        lastErrRef.current = "HTTP_502";
+        return null;
+      }
+
+      if (!res.ok) {
+        const text = await res.text();
+        let json: any = {};
+        try {
+          json = JSON.parse(text);
+        } catch {
+          // Not JSON
+        }
+        if (json.error === "executor_unreachable" || json.error?.includes("executor_unreachable")) {
+          const errorInfo = { code: "EXECUTOR_UNREACHABLE", httpStatus: res.status, detail: json.detail || json.error };
+          setExecutorReachable(false);
+          setLastExecError(errorInfo);
+          lastErrRef.current = `HTTP_${res.status}`;
+          return null;
+        }
+      }
+
       const data = await res.json();
       setStatus(data);
       if (data.runId) setRunId(data.runId);
+      setExecutorReachable(true);
+      setLastExecError(null);
+      lastErrRef.current = null; // Clear error on success
       return data;
-    } catch (err) {
+    } catch (err: any) {
+      // Ignore aborted fetches
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      const errorInfo = await normalizeExecutorError(err).catch(() => null);
+      if (errorInfo) {
+        setExecutorReachable(false);
+        setLastExecError(errorInfo);
+        lastErrRef.current = err?.message || "FETCH_FAILED";
+      }
       console.error("Status poll error:", err);
       return null;
+    } finally {
+      inFlightRef.current = false;
+      abortControllerRef.current = null;
     }
-  };
+  }, []); // Empty deps: setters are stable, normalizeExecutorError is declared above
 
   // Hydration kanıtı
   useEffect(() => {
@@ -90,17 +190,21 @@ export default function RunnerPanel() {
   const prevDegradedRef = useRef<{ degraded?: boolean; degradedReason?: string; lastWarningTs?: number }>({});
   const WARNING_DEDUPE_MS = 5 * 60 * 1000; // 5 minutes
 
-  // Poll status
+  // Poll status with backoff: ONLINE -> 2-3s, OFFLINE/502 -> 10-15s
   useEffect(() => {
-    const poll = async () => {
+    let timeoutId: NodeJS.Timeout;
+    let cancelled = false;
+
+    const tick = async () => {
       const data = await fetchStatus();
+
       if (data) {
         // Detect degraded state transition (normal -> degraded) with dedupe
         if (data.degraded && data.degradedReason &&
             (!prevDegradedRef.current.degraded || prevDegradedRef.current.degradedReason !== data.degradedReason)) {
           const now = Date.now();
           const lastWarningTs = prevDegradedRef.current.lastWarningTs || 0;
-          
+
           // Dedupe: Only emit if same reason wasn't warned in last 5 minutes
           if (now - lastWarningTs > WARNING_DEDUPE_MS || prevDegradedRef.current.degradedReason !== data.degradedReason) {
             // Emit warning event to Event Console with full context
@@ -134,11 +238,31 @@ export default function RunnerPanel() {
           degradedReason: data.degradedReason,
         };
       }
+
+      // Schedule next tick with backoff
+      if (cancelled) return;
+
+      // Backoff strategy: OFFLINE/error -> 10-15s, ONLINE -> 2-3s, max 60s
+      const hasError = lastErrRef.current !== null;
+      const baseInterval = hasError ? 12000 : 2500; // 12s offline, 2.5s online
+      const jitter = Math.random() * 2000; // +0-2s jitter to prevent thundering herd
+      const nextInterval = Math.min(baseInterval + jitter, 60000); // cap at 60s
+
+      timeoutId = setTimeout(tick, nextInterval);
     };
-    poll();
-    const interval = setInterval(poll, 5000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Start first tick immediately
+    tick();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      // Abort any in-flight fetch on unmount
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchStatus]);
 
   // SSE events (3-state: connected/reconnecting/disconnected)
   useEffect(() => {
@@ -201,11 +325,18 @@ export default function RunnerPanel() {
   };
 
   const handleStart = async () => {
+    // Guard: Executor unreachable - NO optimistic state
+    if (!executorReachable) {
+      // Show inline feedback in health strip instead of changing button state
+      setUiError(null);
+      return;
+    }
+
     // Guard: Already running
     if (status.running) {
       setUiError(null); // Clear any previous error
       // Show info message instead of error
-      const infoMsg = status.runId 
+      const infoMsg = status.runId
         ? `Runner already running (${status.strategyId || "ema_rsi_v1"} • ${status.symbol || "BTCUSDT"} • ${status.timeframe || "1m"} • runId: ${status.runId.substring(0, 12)}...). Use Stop to stop it first.`
         : "Runner already running. Use Stop to stop it first.";
       // Use info banner instead of error banner
@@ -220,6 +351,12 @@ export default function RunnerPanel() {
     }
     if (!form.qty || parseFloat(form.qty) <= 0) {
       setUiError("Invalid quantity: must be > 0");
+      return;
+    }
+
+    // Quick reachability check before optimistic state
+    if (!executorReachable) {
+      // Don't enter optimistic state if unreachable
       return;
     }
 
@@ -255,7 +392,7 @@ export default function RunnerPanel() {
         // Handle 400 "already running" as info, not error
         if (statusCode === 400 && errorText.includes("already running")) {
           const parsed = JSON.parse(errorText);
-          const infoMsg = parsed.runId 
+          const infoMsg = parsed.runId
             ? `Runner already running (runId: ${parsed.runId.substring(0, 12)}...). Use Stop to stop it first.`
             : "Runner already running. Use Stop to stop it first.";
           setUiError(infoMsg); // Info banner (will be styled differently)
@@ -299,6 +436,12 @@ export default function RunnerPanel() {
   const handleStop = async () => {
     if (!runId) {
       setUiError("No runId available");
+      return;
+    }
+
+    // Guard: Executor unreachable - NO optimistic state
+    if (!executorReachable) {
+      setUiError(null);
       return;
     }
 
@@ -439,8 +582,121 @@ export default function RunnerPanel() {
           )}
         </div>
 
-        {/* Error/Info Banner (sticky header içinde) */}
-        {uiError && (
+        {/* Executor Health Strip (compact, shown when offline or degraded) */}
+        {(!executorReachable || (status.degraded && status.degradedReason)) && (
+          <div
+            data-testid="runner-health-strip"
+            role="status"
+            aria-live="polite"
+            className={`mb-2 h-8 flex items-center justify-between px-2 rounded border text-[10px] relative ${
+              !executorReachable
+                ? "bg-red-950/25 border-red-800/50"
+                : "bg-amber-950/25 border-amber-800/50"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {!executorReachable ? (
+                <>
+                  <span className="text-red-400 font-semibold shrink-0">{uiCopy.systemHealth.executorOffline}</span>
+                  {lastExecError?.httpStatus && (
+                    <span className="text-red-300/70 shrink-0">({lastExecError.httpStatus})</span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="text-amber-400 font-semibold shrink-0">
+                    {status.degradedReason === 'MARKETDATA_STALE'
+                      ? `${uiCopy.systemHealth.marketdataStale} (age: ${status.marketdataAgeSec}s)`
+                      : status.degradedReason === 'MARKETDATA_UNAVAILABLE'
+                      ? uiCopy.systemHealth.marketdataUnavailable
+                      : `Degraded: ${status.degradedReason}`}
+                  </span>
+                </>
+              )}
+              {retrying && (
+                <span className="text-amber-400 text-[9px] shrink-0">{uiCopy.systemHealth.retrying}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                data-testid="health-retry"
+                type="button"
+                onClick={async () => {
+                  setRetrying(true);
+                  await fetchStatus();
+                  setTimeout(() => setRetrying(false), 2000);
+                }}
+                disabled={retrying}
+                className={`min-w-[60px] h-7 px-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed border rounded transition-colors ${
+                  !executorReachable
+                    ? "bg-red-900/40 hover:bg-red-900/60 border-red-700/50 text-red-200"
+                    : "bg-amber-900/40 hover:bg-amber-900/60 border-amber-700/50 text-amber-200"
+                }`}
+              >
+                {uiCopy.systemHealth.retry}
+              </button>
+              {!executorReachable && (
+                <>
+                  <button
+                    data-testid="health-copy-start"
+                    type="button"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText("pnpm start:services");
+                    }}
+                    className="min-w-[60px] h-7 px-2 text-xs bg-red-900/40 hover:bg-red-900/60 border border-red-700/50 rounded text-red-200 transition-colors"
+                  >
+                    {uiCopy.systemHealth.copyStartCommand}
+                  </button>
+                  <button
+                    data-testid="health-copy-diag"
+                    type="button"
+                    onClick={async () => {
+                      const diagnostics = {
+                        timestamp: new Date().toISOString(),
+                        tsLocal: new Date().toLocaleString(),
+                        tsUtc: new Date().toUTCString(),
+                        route: window.location.pathname,
+                        proxyTarget: "/api/exec/* → http://127.0.0.1:4001",
+                        executor: {
+                          reachable: false,
+                          error: lastExecError,
+                        },
+                        appVersion: process.env.NEXT_PUBLIC_APP_VERSION || 'dev',
+                        buildSha: process.env.NEXT_PUBLIC_BUILD_SHA || null,
+                      };
+                      await navigator.clipboard.writeText(JSON.stringify(diagnostics, null, 2));
+                    }}
+                    className="min-w-[60px] h-7 px-2 text-xs bg-red-900/40 hover:bg-red-900/60 border border-red-700/50 rounded text-red-200 transition-colors"
+                  >
+                    {uiCopy.systemHealth.copyDiagnostics}
+                  </button>
+                </>
+              )}
+              {lastExecError && (
+                <button
+                  type="button"
+                  onClick={() => setShowDetails(!showDetails)}
+                  className="min-w-[60px] h-7 px-2 text-xs bg-red-900/40 hover:bg-red-900/60 border border-red-700/50 rounded text-red-200 transition-colors"
+                >
+                  {showDetails ? '▾' : '▸'} {uiCopy.systemHealth.details}
+                </button>
+              )}
+            </div>
+            {showDetails && lastExecError && (
+              <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-red-950/60 border border-red-800 rounded text-[9px] font-mono text-red-300/80 break-all z-50">
+                {lastExecError.httpStatus && `HTTP ${lastExecError.httpStatus}`}
+                {lastExecError.detail && ` • ${lastExecError.detail}`}
+                {lastExecError.code && ` • Code: ${lastExecError.code}`}
+                <div className="mt-1 text-[8px] text-red-300/60">
+                  Proxy: /api/exec/* → http://127.0.0.1:4001
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Error/Info Banner (sticky header içinde) - for other errors */}
+        {uiError && executorReachable && (
           <div className={`mb-2 p-2 rounded border text-[10px] ${
             uiError.includes("already running") || uiError.includes("Runner already")
               ? "bg-blue-950/40 border-blue-800 text-blue-300"
@@ -484,6 +740,7 @@ export default function RunnerPanel() {
         {/* Controls moved to header */}
         <div className="relative z-[9999] pointer-events-auto flex gap-2">
           <button
+            data-testid="runner-start"
             type="button"
             onPointerDownCapture={() => {
               console.info("[RunnerPanel] start pointerdown");
@@ -495,13 +752,24 @@ export default function RunnerPanel() {
               e.stopPropagation();
               handleStart();
             }}
-            disabled={status.running || isStarting || isStopping}
-            className="flex-1 px-3 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white relative z-[9999]"
-            title={status.running ? `Runner already running (${status.runId ? status.runId.substring(0, 12) + "..." : "unknown"}). Use Stop first.` : undefined}
+            disabled={!executorReachable || status.running || isStarting || isStopping}
+            className={`flex-1 px-3 py-2 text-xs font-medium rounded text-white relative z-[9999] ${
+              !executorReachable
+                ? "bg-emerald-600/30 hover:bg-emerald-600/40 disabled:opacity-60 disabled:cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            }`}
+            title={
+              !executorReachable
+                ? "Executor Offline - service unreachable"
+                : status.running
+                ? `Runner already running (${status.runId ? status.runId.substring(0, 12) + "..." : "unknown"}). Use Stop first.`
+                : undefined
+            }
           >
-            {isStarting ? "Starting..." : status.running ? "Running" : "Start"}
+            {isStarting ? uiCopy.runner.starting : status.running ? uiCopy.runner.running : !executorReachable ? uiCopy.systemHealth.startExecutorOffline : uiCopy.runner.start}
           </button>
           <button
+            data-testid="runner-stop"
             type="button"
             onPointerDownCapture={() => {
               console.info("[RunnerPanel] stop pointerdown");
@@ -513,11 +781,21 @@ export default function RunnerPanel() {
               e.stopPropagation();
               handleStop();
             }}
-            disabled={!status.running || !runId || isStarting || isStopping}
-            className="flex-1 px-3 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white relative z-[9999]"
-            title={!status.running ? "Runner is not running" : undefined}
+            disabled={!executorReachable || !status.running || !runId || isStarting || isStopping}
+            className={`flex-1 px-3 py-2 text-xs font-medium rounded text-white relative z-[9999] ${
+              !executorReachable
+                ? "bg-red-600/30 hover:bg-red-600/40 disabled:opacity-60 disabled:cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            }`}
+            title={
+              !executorReachable
+                ? "Executor Offline - cannot send stop command"
+                : !status.running
+                ? "Runner is not running"
+                : undefined
+            }
           >
-            {isStopping ? "Stopping..." : !status.running ? "Already Stopped" : "Stop"}
+            {isStopping ? uiCopy.runner.stopping : !status.running ? uiCopy.runner.alreadyStopped : !executorReachable ? uiCopy.systemHealth.stopExecutorOffline : uiCopy.runner.stop}
           </button>
           <button
             type="button"
@@ -702,7 +980,7 @@ export default function RunnerPanel() {
         </div>
 
         {/* Event Console (Mini) */}
-        <div className="rounded bg-neutral-950/40 border border-white/5 p-2 max-h-[300px] overflow-y-auto">
+        <div data-testid="event-console" className="rounded bg-neutral-950/40 border border-white/5 p-2 max-h-[300px] overflow-y-auto">
           <div className="text-[10px] text-neutral-400 mb-1 font-semibold">Event Console (last 50)</div>
           <div className="space-y-1">
             {filteredEvents.length === 0 ? (
@@ -719,8 +997,19 @@ export default function RunnerPanel() {
                   ? JSON.stringify(event.data).substring(0, 80) + (JSON.stringify(event.data).length > 80 ? "..." : "")
                   : String(event.data).substring(0, 80);
 
+                const level = event.type === "error" ? "error" : event.type === "warning" ? "warning" : "info";
+                const reason = event.data?.reason || null;
+                const source = event.data?.source || null;
+
                 return (
-                  <div key={`${event.seq}-${idx}`} className="text-[10px] font-mono border-l-2 pl-2 border-white/5">
+                  <div
+                    key={`${event.seq}-${idx}`}
+                    data-testid="event-item"
+                    data-level={level}
+                    data-reason={reason}
+                    data-source={source}
+                    className="text-[10px] font-mono border-l-2 pl-2 border-white/5"
+                  >
                     <span className="text-neutral-500">{new Date(event.ts).toLocaleTimeString()}</span>
                     <span className="text-neutral-400 mx-1">•</span>
                     <span className={`${

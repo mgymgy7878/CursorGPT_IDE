@@ -1,19 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "../styles/figma-tokens.css";
 
 /* Proje teması */
 :root {
   color-scheme: dark;
-  --surface: 222 20% 8%;
-  --card: 222 17% 12%;
-  --card-foreground: 0 0% 98%;
-  --background: 0 0% 3.9%;
-  --foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --success: 142 70% 45%;
-  --warn: 38 92% 50%;
-  --danger: 0 90% 58%;
+  --surface: var(--figma-color-surface, 222 20% 8%);
+  --card: var(--figma-color-card, 222 17% 12%);
+  --card-foreground: var(--figma-color-card-foreground, 0 0% 98%);
+  --background: var(--figma-color-background, 0 0% 3.9%);
+  --foreground: var(--figma-color-foreground, 0 0% 98%);
+  --border: var(--figma-color-border, 0 0% 14.9%);
+  --success: var(--figma-color-success, 142 70% 45%);
+  --warn: var(--figma-color-warn, 38 92% 50%);
+  --danger: var(--figma-color-danger, 0 90% 58%);
   /* Popover token'ları (Command Palette, Dropdown vb. için) */
   --popover: 222 17% 12%; /* card ile aynı */
   --popover-foreground: 0 0% 98%; /* card-foreground ile aynı */
@@ -70,13 +71,13 @@ html, body {
   --z-drawer: 90;
   --z-header: 50;
   --z-page: 10;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --radius-lg: 1rem;
+  --space-1: var(--figma-space-1, 0.25rem);
+  --space-2: var(--figma-space-2, 0.5rem);
+  --space-3: var(--figma-space-3, 0.75rem);
+  --space-4: var(--figma-space-4, 1rem);
+  --space-5: var(--figma-space-5, 1.5rem);
+  --space-6: var(--figma-space-6, 2rem);
+  --radius-lg: var(--figma-radius-lg, 1rem);
 }
 
 .cmdk-overlay { z-index: var(--z-overlay) !important; }

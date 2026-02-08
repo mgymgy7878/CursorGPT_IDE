@@ -42,4 +42,4 @@ Not: Görseller repo’ya eklendiğinde Step 3.2 evidence tamamdır.
 
 - `pnpm -w --filter web-next test:dashboard` ✅
 - `pnpm -C apps/web-next build` ⚠️ (PASS with Windows symlink EPERM warnings for standalone copy)
-- Not: Windows'ta build sirasinda gorulen EPERM symlink uyariari lokal build'lerde non-fatal kabul edilir.
+- Not: Windows’ta build sırasında görülen EPERM symlink uyarıları lokal build’lerde non-fatal kabul edilir.

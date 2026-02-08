@@ -15,8 +15,8 @@ export default defineConfig({
   },
   reporter: 'list',
   webServer: {
-    command: 'pnpm --filter web-next dev -- --hostname 127.0.0.1 --port 3003',
-    url: 'http://127.0.0.1:3003',
+    command: 'pnpm --filter web-next dev -- --hostname localhost --port 3003',
+    url: 'http://localhost:3003',
     timeout: 90_000,
     reuseExistingServer: !process.env.CI,
     env: {

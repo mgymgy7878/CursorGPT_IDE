@@ -2,8 +2,22 @@
 
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/button';
+import { isMockMode } from '@/lib/marketClient';
+import { useExecutorHealth } from '@/hooks/useExecutorHealth';
 
 export default function ControlPage() {
+  // System mode kontrolü (P0: disabled + tooltip için)
+  const isMock = isMockMode();
+  const { ok: executorOk } = useExecutorHealth();
+  const isDegraded = !executorOk;
+  const systemMode = isMock ? 'MOCK MODE' : isDegraded ? 'Degraded' : 'live';
+  const isSystemLive = systemMode === 'live';
+  const disabledTooltip = systemMode === 'MOCK MODE' 
+    ? 'Mock mod: Gerçek işlemler devre dışı' 
+    : systemMode === 'Degraded' 
+    ? 'Degraded mod: Sistem sınırlı kapasitede çalışıyor' 
+    : undefined;
+
   return (
     <div className="px-6 py-4 min-h-screen bg-neutral-950">
       <PageHeader
@@ -21,6 +35,8 @@ export default function ControlPage() {
           <Button
             onClick={() => console.log('Kill switch')}
             className="bg-red-600 hover:bg-red-700 text-white"
+            disabled={!isSystemLive}
+            title={disabledTooltip}
           >
             Kill Switch Aktif Et
           </Button>

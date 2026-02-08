@@ -6,12 +6,16 @@ interface StrategyControlsProps {
   onCreateNew: () => void;
   onRefresh: () => void;
   loading?: boolean;
+  disabled?: boolean;
+  disabledTooltip?: string;
 }
 
 export const StrategyControls: React.FC<StrategyControlsProps> = ({
   onCreateNew,
   onRefresh,
   loading = false,
+  disabled = false,
+  disabledTooltip,
 }) => {
   return (
     <Card>
@@ -23,7 +27,8 @@ export const StrategyControls: React.FC<StrategyControlsProps> = ({
           <div className="flex items-center space-x-4">
             <Button
               onClick={onCreateNew}
-              disabled={loading}
+              disabled={loading || disabled}
+              title={disabled && disabledTooltip ? disabledTooltip : undefined}
             >
               Yeni Strateji
             </Button>
@@ -31,7 +36,8 @@ export const StrategyControls: React.FC<StrategyControlsProps> = ({
             <Button
               variant="outline"
               onClick={onRefresh}
-              disabled={loading}
+              disabled={loading || disabled}
+              title={disabled && disabledTooltip ? disabledTooltip : undefined}
             >
               {loading ? 'Yükleniyor...' : 'Yenile'}
             </Button>

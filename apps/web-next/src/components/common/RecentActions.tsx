@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition } from "react";
 import TraceId from "./TraceId";
 import ActionDetailsPopover from "./ActionDetailsPopover";
 
@@ -13,6 +15,7 @@ type Action = {
 };
 
 export default function RecentActions() {
+  const router = useRouter();
   const [actions, setActions] = useState<Action[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,18 +25,18 @@ export default function RecentActions() {
     const baseInterval = 10_000; // 10 seconds
     const jitter = 1_500; // ±1.5s
     let alive = true;
-    
+
     const load = async () => {
       if (alive) await loadActions();
     };
-    
+
     load();
     const interval = setInterval(() => {
       if (alive) {
         setTimeout(load, Math.floor(Math.random() * jitter));
       }
     }, baseInterval);
-    
+
     return () => {
       alive = false;
       clearInterval(interval);
@@ -72,7 +75,7 @@ export default function RecentActions() {
     const now = Date.now();
     const diff = now - timestamp;
     const seconds = Math.floor(diff / 1000);
-    
+
     if (seconds < 60) return `${seconds}s`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
     return `${Math.floor(seconds / 3600)}h`;
@@ -93,7 +96,7 @@ export default function RecentActions() {
   function getActionLabel(action: string) {
     const actionMap: Record<string, string> = {
       "strategy.start": "Strateji Başlatıldı",
-      "strategy.stop": "Strateji Durduruldu", 
+      "strategy.stop": "Strateji Durduruldu",
       "strategy.preview": "Strateji Önizlendi",
       "strategy.generate": "AI Strateji Üretildi",
       "backtest.run": "Backtest Çalıştırıldı",
@@ -162,7 +165,11 @@ export default function RecentActions() {
             Strategy Lab'de işlem yaparak aksiyonları görebilirsiniz
           </div>
           <button
-            onClick={() => window.location.href = "/strategy-lab"}
+            onClick={() => {
+              startTransition(() => {
+                router.push("/strategy-lab");
+              });
+            }}
             className="btn btn-sm btn-primary"
           >
             🧪 Strategy Lab'e Git
@@ -186,31 +193,31 @@ export default function RecentActions() {
           </button>
         </div>
       </div>
-      
+
       {isMock && (
         <div className="mb-2 px-2 py-1 rounded border border-amber-800/50 bg-amber-950/40 text-amber-300 text-xs">
           ⚠️ Demo verisi (Executor offline)
         </div>
       )}
-      
+
       <div className="space-y-3 max-h-64 overflow-y-auto">
         {actions.map((action) => (
           <ActionDetailsPopover key={action.id} action={action}>
             <div
               className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-help ${
-                action.result === "ok" 
-                  ? "bg-green-900/20 border-green-800/30 hover:bg-green-900/30" 
+                action.result === "ok"
+                  ? "bg-green-900/20 border-green-800/30 hover:bg-green-900/30"
                   : "bg-red-900/20 border-red-800/30 hover:bg-red-900/30"
               }`}
             >
             <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-              action.result === "ok" 
-                ? "bg-green-900 text-green-400" 
+              action.result === "ok"
+                ? "bg-green-900 text-green-400"
                 : "bg-red-900 text-red-400"
             }`}>
               {action.result === "ok" ? "✓" : "✗"}
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">
@@ -220,20 +227,20 @@ export default function RecentActions() {
                   {getActionLabel(action.action)}
                 </span>
               </div>
-              
+
               {action.details && (
                 <div className="text-xs text-neutral-500 truncate">
                   {action.details}
                 </div>
               )}
-              
+
               {action.traceId && (
                 <div className="mt-0.5">
                   <TraceId traceId={action.traceId} />
                 </div>
               )}
             </div>
-            
+
             <div className="flex-shrink-0 text-xs text-neutral-500">
               {formatTime(action.timestamp)}
             </div>
@@ -241,7 +248,7 @@ export default function RecentActions() {
           </ActionDetailsPopover>
         ))}
       </div>
-      
+
       <div className="mt-4 pt-3 border-t border-neutral-800">
         <div className="flex justify-between items-center text-xs text-neutral-500">
           <span>Toplam: {actions.length}</span>

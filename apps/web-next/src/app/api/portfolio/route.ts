@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { PortfolioResponse } from "@/types/portfolio";
+import { fetchWithTimeout } from "@/lib/net/fetchWithTimeout";
 
 const B = process.env.EXECUTOR_URL ?? process.env.EXECUTOR_BASE_URL; // ör: http://127.0.0.1:4001
 
@@ -7,7 +8,8 @@ export async function GET() {
   // PROD: backend varsa oraya proxy et
   if (B) {
     try {
-      const r = await fetch(`${B}/api/portfolio`, { cache: "no-store" });
+      // fetchWithTimeout kullan (AbortController + setTimeout - daha öngörülebilir)
+      const r = await fetchWithTimeout(`${B}/api/portfolio`, { cache: "no-store" }, 5000);
       const data = (await r.json()) as PortfolioResponse;
       return NextResponse.json(data, { status: r.status });
     } catch (e) {

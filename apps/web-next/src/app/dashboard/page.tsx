@@ -1,182 +1,88 @@
-import React from "react";
-import RunnerPanel from "@/components/dashboard/RunnerPanel";
+/**
+ * Dashboard Page - Server Component
+ * Client-side interactive parts DashboardClient.tsx'te
+ * Dynamic import with catch fallback to prevent "stuck loading" screen
+ */
+
+import { Suspense } from "react";
+import dynamicImport from "next/dynamic";
+import DashboardLoading from "./loading";
 
 export const dynamic = "force-dynamic";
 
-const kpiCards = [
-  { label: "Portfolio Value", value: "$12.84M", trend: "+1.8%" },
-  { label: "24h Volume", value: "$3.21M", trend: "+4.2%" },
-  { label: "Open Interest", value: "$812K", trend: "-0.9%" },
-  { label: "Active Orders", value: "124", trend: "+6" },
-];
+// MODULAR_COCKPIT_V2: Server-side initial data fetch kaldırıldı
+// DashboardV2 kendi hook'ları ile client-side fetch yapıyor
 
-const skeletonRows = Array.from({ length: 7 }).map((_, idx) => idx);
+// Chunk load timeout (ms) - takılı kalan import siyah ekranı önler
+const CHUNK_TIMEOUT_MS = 12000;
 
-function SkeletonLine({ width = "w-full" }: { width?: string }) {
-  return (
-    <div className={`h-3 rounded bg-white/10 ${width}`} />
-  );
-}
-
-function PanelShell({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] flex flex-col min-h-0">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-sm font-semibold text-neutral-100">{title}</div>
-          {subtitle && (
-            <div className="text-[11px] text-neutral-400 mt-0.5">
-              {subtitle}
-            </div>
-          )}
-        </div>
-        <div className="text-[10px] text-neutral-400">Placeholder</div>
-      </div>
-      <div className="mt-3 min-h-0">{children}</div>
-    </div>
-  );
-}
-
-export default function DashboardPage({
-  searchParams,
-}: {
-  searchParams?: { state?: string };
-}) {
-  const showWatermark =
-    searchParams?.state === "loading" || searchParams?.state === "degraded";
-
-  return (
-    <div
-      className="relative h-full min-h-0 overflow-hidden flex flex-col gap-4"
-      data-testid="dashboard-north-star"
-    >
-      {showWatermark && (
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.012]">
-          <div className="absolute right-8 top-6 text-[180px] font-bold text-white/20">
-            SPARK
-          </div>
-        </div>
-      )}
-
-      <header className="flex items-center justify-between gap-4">
-        <div>
-          <div className="text-lg font-semibold text-neutral-100">
-            Komuta Paneli
-          </div>
-          <div className="text-[12px] text-neutral-400">
-            Market Overview
-          </div>
-        </div>
-        <div className="text-[11px] text-neutral-500">
-          Dashboard / North-Star
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-        {kpiCards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-xl border border-white/10 bg-neutral-900/70 px-4 py-3"
-          >
-            <div className="text-[11px] text-neutral-400">{card.label}</div>
-            <div className="mt-1 flex items-baseline justify-between gap-2">
-              <div className="text-base font-semibold text-neutral-100">
-                {card.value}
-              </div>
-              <div className="text-[11px] text-emerald-300/80">
-                {card.trend}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-3">
-        <div className="flex flex-col min-h-0 gap-3">
-          <PanelShell title="Portfolio Performance" subtitle="12 saatlik özet">
-            <div className="flex-1 min-h-[220px] rounded-xl border border-white/5 bg-neutral-950/40 flex items-center justify-center text-xs text-neutral-500">
-              Chart placeholder
-            </div>
-            <div className="mt-3 text-[11px] text-neutral-400">
-              Performans metriği ve risk dağılımı burada görünecek.
-            </div>
-          </PanelShell>
-
-          <PanelShell title="Working Set" subtitle="Açık pozisyonlar">
-            <div className="flex-1 min-h-0 overflow-auto">
-              <div className="grid gap-2">
-                {skeletonRows.map((row) => (
-                  <div
-                    key={row}
-                    className="flex items-center justify-between rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2 text-[12px]"
-                  >
-                    <div className="text-neutral-200">BTCUSDT</div>
-                    <div className="text-emerald-300/80">+1.24%</div>
+// Dynamic import with timeout + catch fallback - prevents "stuck loading" / black screen
+// MODULAR_COCKPIT_V2: Yeni modüler kokpit DashboardV2 kullanılıyor
+const DashboardV2 = dynamicImport(
+  () => {
+    const load = import("@/components/dashboard/DashboardV2");
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("CHUNK_TIMEOUT: Dashboard 12s içinde yüklenemedi")), CHUNK_TIMEOUT_MS)
+    );
+    return Promise.race([load, timeout]).catch((err) => {
+      console.error("[dashboard] DashboardV2 import failed:", err);
+      return {
+        default: function DashboardChunkFailed() {
+          return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 p-6">
+              <div className="max-w-2xl w-full rounded-2xl border border-red-500/30 bg-neutral-900 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <span className="text-red-400 text-2xl">⚠</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          </PanelShell>
-
-          <PanelShell title="News / AI" subtitle="Haber · AI · Alarmlar · Sistem">
-            <div className="flex items-center gap-2 text-[11px] text-neutral-400">
-              {["Haber", "AI", "Alarmlar", "Sistem"].map((tab) => (
-                <div
-                  key={tab}
-                  className="rounded-full border border-white/10 px-2 py-1 bg-white/5"
-                >
-                  {tab}
+                  <div>
+                    <h2 className="text-xl font-semibold text-red-400">Dashboard Yüklenemedi</h2>
+                    <p className="text-sm text-neutral-400 mt-1">
+                      Chunk yükleme hatası, zaman aşımı veya modül başlatma hatası.
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
-            <div className="mt-3 flex-1 min-h-0 overflow-auto">
-              <div className="grid gap-2">
-                {skeletonRows.map((row) => (
-                  <div key={row} className="rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2">
-                    <div className="text-[12px] text-neutral-200">
-                      {row + 1}. Placeholder başlık
-                    </div>
-                    <div className="text-[11px] text-neutral-500 mt-1">
-                      Kısa açıklama alanı.
-                    </div>
+                <div className="bg-neutral-950 rounded-lg p-4 mb-4 border border-neutral-800">
+                  <div className="text-xs text-neutral-300 font-mono break-all">
+                    {err?.message || String(err) || "Bilinmeyen hata"}
                   </div>
-                ))}
-              </div>
-            </div>
-          </PanelShell>
-        </div>
-
-        <aside className="flex flex-col min-h-0 gap-3">
-          <RunnerPanel />
-          <PanelShell title="Top Gainers" subtitle="Top-N">
-            <div className="flex-1 min-h-0 overflow-auto">
-              <div className="grid gap-2">
-                {skeletonRows.map((row) => (
-                  <div
-                    key={row}
-                    className="flex items-center justify-between rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2 text-[12px]"
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
                   >
-                    <div className="text-neutral-200">SOLUSDT</div>
-                    <div className="text-emerald-300/80">+{row + 2.4}%</div>
-                  </div>
-                ))}
+                    Sayfayı Yenile
+                  </button>
+                  <button
+                    onClick={() => {
+                      window.location.href = "/";
+                    }}
+                    className="px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-medium transition-colors"
+                  >
+                    Ana Sayfa
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="mt-3 text-[11px] text-neutral-400">
-              Liste gerçek veri geldiğinde otomatik güncellenecek.
-            </div>
-          </PanelShell>
-        </aside>
-      </div>
-    </div>
+          );
+        },
+      };
+    });
+  },
+  {
+    ssr: false,
+    loading: () => <DashboardLoading />,
+  }
+);
+
+export default async function DashboardPage() {
+  // MODULAR_COCKPIT_V2: DashboardV2 artık initialData'ya ihtiyaç duymuyor (kendi hook'ları var)
+  // Server-side initial data fetch kaldırıldı (DashboardV2 client-side fetch kullanıyor)
+
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardV2 />
+    </Suspense>
   );
 }
-

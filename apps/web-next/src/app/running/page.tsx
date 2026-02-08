@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
-import DataModeBadge from "@/components/ui/DataModeBadge";
 import { Button } from "@/components/ui/button";
+import { classifyFetchError, getErrorUI, type ClassifiedError } from "@/lib/errorClassifier";
+import GlobalSystemBanner from "@/components/dashboard/GlobalSystemBanner";
 
 // Use same-origin proxy (no CORS)
 
@@ -27,19 +28,30 @@ type ExecutorStatus = {
 export default function RunningPage() {
   const [status, setStatus] = useState<ExecutorStatus | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [classifiedError, setClassifiedError] = useState<ClassifiedError | null>(null);
+  const [lastOkAt, setLastOkAt] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
   const fetchStatus = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/exec/status");
-      if (!res.ok) throw new Error("Failed to fetch status");
+      if (!res.ok) {
+        const error = classifyFetchError(new Error(`HTTP ${res.status}`), res);
+        setClassifiedError(error);
+        setStatus({ running: false });
+        return;
+      }
       const data = await res.json();
       setStatus(data);
-      setError(null);
+      setClassifiedError(null);
+      setLastOkAt(Date.now());
     } catch (err: any) {
-      setError(err?.message || "Failed to fetch status");
+      const error = classifyFetchError(err, null);
+      setClassifiedError(error);
       setStatus({ running: false });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,7 +73,8 @@ export default function RunningPage() {
       if (!res.ok) throw new Error("Failed to stop");
       await fetchStatus();
     } catch (err: any) {
-      setError(err?.message || "Failed to stop");
+      const error = classifyFetchError(err, null);
+      setClassifiedError(error);
     } finally {
       setBusy(false);
     }
@@ -72,17 +85,61 @@ export default function RunningPage() {
     return "medium";
   };
 
+  // Executor offline kontrolü (GlobalSystemBanner için)
+  const executorReachable = !classifiedError || classifiedError.category !== "executor-offline";
+
+  const handleStartExecutor = () => {
+    console.info("[Running] Start executor requested");
+    // TODO: Ops drawer'ı aç veya /api/exec/start çağır
+  };
+
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <PageHeader title="Çalışan Stratejiler" desc="Aktif stratejileri görüntüle ve yönet" />
-        <div className="flex items-center gap-2">
-          <DataModeBadge />
-        </div>
-      </div>
+      <PageHeader title="Çalışan Stratejiler" desc="Aktif stratejileri görüntüle ve yönet" />
 
-      {error && (
-        <div className="bg-red-950/20 border border-red-800 rounded-lg p-4 text-red-400">{error}</div>
+      {/* Global System Banner (Executor OFFLINE durumunda tek CTA) */}
+      <GlobalSystemBanner
+        executorReachable={executorReachable}
+        onStartExecutor={handleStartExecutor}
+      />
+
+      {/* Sınıflandırılmış Hata UI */}
+      {classifiedError && (
+        <div className="bg-red-950/20 border border-red-800 rounded-lg p-4 space-y-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="text-red-400 font-semibold mb-1">
+                {getErrorUI(classifiedError).title}
+              </div>
+              <div className="text-red-300/80 text-sm">
+                {getErrorUI(classifiedError).message}
+              </div>
+              {lastOkAt && (
+                <div className="text-red-400/60 text-xs mt-2">
+                  Son başarılı: {new Date(lastOkAt).toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {getErrorUI(classifiedError).cta && (
+                <>
+                  {getErrorUI(classifiedError).cta?.action === "retry" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={fetchStatus}
+                      disabled={loading || busy}
+                      className="border-red-700 text-red-300 hover:bg-red-950/30"
+                    >
+                      Yeniden Dene
+                    </Button>
+                  )}
+                  {/* CTA GlobalSystemBanner'da gösteriliyor, burada tekrar gösterme */}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {status?.running ? (

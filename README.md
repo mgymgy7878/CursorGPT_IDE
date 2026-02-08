@@ -4,9 +4,10 @@
 
 ## Quick Links / Docs
 
-- [**UI/UX Guide**](docs/UI_UX_GUIDE.md) — UI standartları, erişilebilirlik kuralları, bileşen standartları ve 2 haftalık uygulama planı
-- [**UI & UX Planı**](docs/UI_UX_PLAN.md) — UI/UX playbook (WCAG 2.2 AA, NN/g heuristics, tasarım ilkeleri, bileşen kuralları, sayfa backlog'u)
-- [**UI Guardrails**](docs/UI_GUARDRAILS.md) — UI regressions'ı engelleyen sigorta mekanizmaları (Token Lockdown, Visual Smoke, DoD Checklist)
+- [**UI/UX Guide**](docs/UI_UX_GUIDE.md) — Hızlı başlangıç / özet yönlendirme (Plan → Playbook → Guardrails)
+- [**UI & UX Planı**](docs/UI_UX_PLAN.md) — **Tek kaynak:** arayüz standardı + backlog + kabul kriterleri (NN/g + WCAG 2.2 AA + veri-viz best practices)
+- [**UI/UX Playbook**](docs/UX/UI_UX_PLAYBOOK.md) — Plan'dan türetilmiş uygulama sözleşmesi (loading/error/empty/success + regresyon matrisi)
+- [**UI Guardrails**](docs/UI_GUARDRAILS.md) — Enforcement/sigorta: CI + görsel smoke + DoD checklist
 - **Raporlar**: [2025-01-14 Detaylı Proje Analizi](docs/reports/PROJE_ANALIZ_2025_01_14_DETAYLI_TAM_RAPOR.md)
 
 ### Belgeler
@@ -17,7 +18,14 @@
 - [Docs/API](docs/API.md)
 - [Docs/Metrics & Canary](docs/METRICS_CANARY.md)
 - [Docs/UI & UX Planı](docs/UI_UX_PLAN.md)
+- [Docs/UI/UX Playbook](docs/UX/UI_UX_PLAYBOOK.md)
 - [Docs/UI Guardrails](docs/UI_GUARDRAILS.md)
+
+### Development Tools
+
+- **Chart Series Helper**: `apps/web-next/src/lib/charts/chartSeries.ts` - Lightweight Charts v5 compat wrapper (tek yerden seri ekleme)
+- **Error Classifier**: `apps/web-next/src/lib/errorClassifier.ts` - Hata sınıflandırması (Executor OFFLINE, Upstream 5xx, Network)
+- **Chart API Drift Check**: `pnpm -C apps/web-next check:charts-api` - v4 API kullanımını yakalar
 
 ### GREEN Receipt (v1.6-p1)
 

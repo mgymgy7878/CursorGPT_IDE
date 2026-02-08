@@ -7,6 +7,8 @@ import { CreateStrategyModal } from '@/components/strategies/CreateStrategyModal
 import { StrategyDetailPanel } from '@/components/strategies/StrategyDetailPanel';
 import { StrategyControls } from '@/components/strategies/StrategyControls';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { isMockMode } from '@/lib/marketClient';
+import { useExecutorHealth } from '@/hooks/useExecutorHealth';
 
 export default function StrategiesPage() {
   const {
@@ -23,6 +25,13 @@ export default function StrategiesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // System mode kontrolü (P0: disabled + tooltip için)
+  const isMock = isMockMode();
+  const { ok: executorOk } = useExecutorHealth();
+  const isDegraded = !executorOk;
+  const systemMode = isMock ? 'MOCK MODE' : isDegraded ? 'Degraded' : 'live';
+  const isSystemLive = systemMode === 'live';
 
   const handleCreateStrategy = async (data: any) => {
     setActionLoading(true);
@@ -97,6 +106,8 @@ export default function StrategiesPage() {
           onCreateNew={() => setShowCreateModal(true)}
           onRefresh={handleRefresh}
           loading={loading || actionLoading}
+          disabled={!isSystemLive}
+          disabledTooltip={systemMode === 'MOCK MODE' ? 'Mock mod: Gerçek işlemler devre dışı' : systemMode === 'Degraded' ? 'Degraded mod: Sistem sınırlı kapasitede çalışıyor' : undefined}
         />
 
         <StrategyList
@@ -105,6 +116,8 @@ export default function StrategiesPage() {
           onDelete={handleDeleteStrategy}
           onStatusChange={handleStatusChange}
           loading={loading}
+          disabled={!isSystemLive}
+          disabledTooltip={systemMode === 'MOCK MODE' ? 'Mock mod: Gerçek işlemler devre dışı' : systemMode === 'Degraded' ? 'Degraded mod: Sistem sınırlı kapasitede çalışıyor' : undefined}
         />
       </div>
 

@@ -9,19 +9,31 @@
 export const TOPBAR_HEIGHT = 56; // px - TopStatusBar yüksekliği
 
 // ========== SIDEBAR ==========
-export const SIDEBAR_EXPANDED = 240; // px - hover/focus/pinned modda tam genişlik
-export const SIDEBAR_COLLAPSED = 64; // px - default ikon genişliği (hover overlay için)
+export const SIDEBAR_EXPANDED = 240; // px - pinned modda tam genişlik (max)
+export const SIDEBAR_COLLAPSED = 56; // px - icon-only genişlik
 
 // ========== RIGHT RAIL ==========
-export const RIGHT_RAIL_EXPANDED = 420; // px - hover/focus/pinned modda tam genişlik (PATCH F: Copilot dock)
-export const RIGHT_RAIL_COLLAPSED = 56; // px - default dock genişliği (hover overlay için)
+export const RIGHT_RAIL_EXPANDED = 280; // px - pinned modda tam genişlik (max)
+export const RIGHT_RAIL_COLLAPSED = 56; // px - kapalı dock genişliği
 export const RIGHT_RAIL_DOCK = 56; // px - kapalıyken icon dock genişliği (alias)
-export const COPILOT_DOCK_WIDTH = 420; // px - Copilot dock genişliği (PATCH F)
+export const COPILOT_DOCK_WIDTH = 280; // px - Copilot dock genişliği (PATCH F)
 
-// ========== HANDLE (Figma Pill Style) ==========
-export const HANDLE_WIDTH = 28; // px - narrower for pill look
-export const HANDLE_HEIGHT = 56; // px - taller pill
+// ========== HANDLE (Figma Pill Style + WCAG hit-area) ==========
+export const HANDLE_WIDTH = 28; // px - legacy; prefer HANDLE_PILL_*
+export const HANDLE_HEIGHT = 56; // px - legacy
 export const HANDLE_RADIUS = 14; // px - rounded-full effect
+/** Görünen pill: yükseklik (Tailwind h-14 = 56px) */
+export const HANDLE_PILL_H = 56;
+/** Görünen pill: genişlik (Tailwind w-6 = 24px) */
+export const HANDLE_PILL_W = 24;
+/** Tıklanabilir genişlik - WCAG 44×44 / iOS 44pt / Material 48dp (Tailwind w-11 = 44px) */
+export const HANDLE_HIT_W = 44;
+/** Hit-area yükseklik (sol/sağ handle aynı); Tailwind h-14 = 56px */
+export const HANDLE_H = 56;
+/** Hit-area genişlik (sol/sağ handle aynı); 44px */
+export const HANDLE_W = 44;
+/** Dikey hiza: top 50% + -translate-y-1/2 (ileride header'a göre değiştirilebilir) */
+export const HANDLE_Y = "50%";
 
 // ========== DIVIDER ==========
 export const DIVIDER_WIDTH = 1; // px
@@ -44,13 +56,31 @@ export const SECTION_GAP = 12; // px - sayfa içinde blok arası boşluk (gap-3 
 // ========== TRANSITION ==========
 export const PANEL_TRANSITION_MS = 200;
 
+// ========== OVERLAY ==========
+export const RIGHT_OVERLAY_DIM_OPACITY = 0.2;
+
 // ========== LOCAL STORAGE ==========
-// v2: Sidebar default expanded migration (PATCH D)
-export const LS_SIDEBAR_COLLAPSED = "ui.sidebarCollapsed.v2";
-export const LS_RIGHT_RAIL_OPEN = "ui.rightRailOpen.v2"; // v2: 10 Ocak 2026 görünümü için versiyonlandırıldı
+// v4: Independent left/right state - no mutual exclusion
+export const LS_LEFT_OPEN = "spark.ui.leftOpen";
+export const LS_RIGHT_OPEN = "spark.ui.rightOpen";
+export const LS_RIGHT_DOCK_MODE = "spark.ui.rightDock.mode";
+
+// Legacy keys (for migration - will be deleted after first read)
+export const LEGACY_LS_LEFT_OPEN_V1 = "spark.ui.leftOpen";
+export const LEGACY_LS_RIGHT_OPEN_V1 = "spark.ui.rightOpen";
+export const LEGACY_LS_SIDEBAR_COLLAPSED = "ui.sidebarCollapsed.v2";
+export const LEGACY_LS_RIGHT_RAIL_OPEN = "ui.rightRailOpen.v2";
+
 // v1: Copilot dock collapse state (PATCH F)
 export const LS_COPILOT_DOCK_COLLAPSED = "ui.copilotDockCollapsed.v1";
 
+// Right dock width constants
+export const RIGHT_DOCK_WIDTH_OPEN = 280;
+export const RIGHT_DOCK_WIDTH_COLLAPSED = 56;
+
+// ========== BREAKPOINTS ==========
+export const OVERLAY_BREAKPOINT = 1600; // px - below this, right rail is overlay
+
 // ========== DEFAULTS ==========
-export const DEFAULT_SIDEBAR_COLLAPSED = false; // Sol panel default geniş (Figma parity - icon+label)
-export const DEFAULT_RIGHT_RAIL_OPEN = true; // Sağ panel default açık (10 Ocak 2026 görünümü - Copilot dock görünür)
+export const DEFAULT_SIDEBAR_COLLAPSED = false; // Sol panel default geniş (icon+label)
+export const DEFAULT_RIGHT_RAIL_OPEN = true; // Sağ panel default açık (geniş ekran)

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * MVP Smoke Test
- * 
+ *
  * Quick validation that:
  * 1. Dashboard opens
  * 2. Start button works
@@ -14,13 +14,13 @@ const WEB_URL = process.env.WEB_URL || "http://localhost:3003";
 
 async function checkHealth() {
   console.log("🔍 MVP Smoke Test\n");
-  
+
   // 1. Check executor status
   try {
     const statusRes = await fetch(`${EXECUTOR_URL}/api/exec/status`);
     const status = await statusRes.json();
     console.log(`✅ Executor status: ${status.running ? "RUNNING" : "STOPPED"}`);
-    
+
     if (status.running) {
       if (status.lastCandleTs) {
         const age = Date.now() - status.lastCandleTs;
@@ -29,7 +29,7 @@ async function checkHealth() {
       } else {
         console.log(`   Marketdata: ⏳ WAIT`);
       }
-      
+
       if (status.lastDecisionTs) {
         const age = Date.now() - status.lastDecisionTs;
         const stale = age > 30000;
@@ -37,7 +37,7 @@ async function checkHealth() {
       } else {
         console.log(`   Executor: ⏳ WAIT`);
       }
-      
+
       if (status.lastError) {
         console.log(`   ⚠️ Last Error: ${status.lastError}`);
       }
@@ -47,7 +47,7 @@ async function checkHealth() {
     console.log(`   Make sure executor is running on ${EXECUTOR_URL}`);
     process.exit(1);
   }
-  
+
   // 2. Check web-next
   try {
     const webRes = await fetch(`${WEB_URL}/dashboard`);
@@ -61,7 +61,7 @@ async function checkHealth() {
     console.log(`   Make sure web-next is running on ${WEB_URL}`);
     process.exit(1);
   }
-  
+
   console.log("\n✅ MVP Smoke Test PASSED");
   console.log("\n📋 Manual Steps:");
   console.log("   1. Open http://localhost:3003/dashboard");
