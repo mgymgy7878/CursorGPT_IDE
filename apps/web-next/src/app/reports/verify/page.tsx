@@ -40,7 +40,7 @@ export default function VerifyPage(){
 
   return (
     <main className="p-6 space-y-4">
-      <h1 className="text-3xl font-semibold">Rapor Doğrulama</h1>
+      <h1 className="text-xl font-semibold">Rapor Doğrulama</h1>
       <div className="card p-4 space-y-3">
         <div className="grid md:grid-cols-2 gap-3">
           <div className="card-sub p-3">

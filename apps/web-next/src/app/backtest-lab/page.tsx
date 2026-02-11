@@ -13,7 +13,7 @@ export default function BacktestLab(){
   const [j,setJ]=useState<any>(null);
   const [loading,setLoading]=useState(false);
   const [tab,setTab]=useState<TabType>('single');
-  
+
   async function runSingle(){
     setLoading(true);
     try {
@@ -25,12 +25,12 @@ export default function BacktestLab(){
         exchange:(document.getElementById("ex") as any).value||"binance",
         futures: (document.getElementById("fu") as any).checked,
         useCache: true,
-        config:{ 
-          indicators:{ emaFast:20, emaSlow:50, atr:14 }, 
-          entry:{ type:"crossUp", fast:"EMA", slow:"EMA" }, 
-          exit:{ atrMult:2, takeProfitRR:1.5 }, 
-          feesBps:5, 
-          slippageBps:1 
+        config:{
+          indicators:{ emaFast:20, emaSlow:50, atr:14 },
+          entry:{ type:"crossUp", fast:"EMA", slow:"EMA" },
+          exit:{ atrMult:2, takeProfitRR:1.5 },
+          feesBps:5,
+          slippageBps:1
         }
       };
       const r=await fetch("/api/backtest/run",{
@@ -45,7 +45,7 @@ export default function BacktestLab(){
       setLoading(false);
     }
   }
-  
+
   async function runWalkForward(){
     setLoading(true);
     try {
@@ -71,7 +71,7 @@ export default function BacktestLab(){
       setLoading(false);
     }
   }
-  
+
   async function runPortfolio(){
     setLoading(true);
     try {
@@ -98,16 +98,16 @@ export default function BacktestLab(){
       setLoading(false);
     }
   }
-  
+
   const run = tab === 'single' ? runSingle : tab === 'walkforward' ? runWalkForward : runPortfolio;
-  
+
   return (
     <div className="p-6 space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold mb-2">📊 Backtest Lab</h1>
-        <p className="text-sm opacity-70">Geçmiş veri üzerinde strateji performansını test edin</p>
+        <h1 className="text-xl font-semibold mb-1">📊 Backtest Lab</h1>
+        <p className="text-xs opacity-70">Geçmiş veri üzerinde strateji performansını test edin</p>
       </div>
-      
+
       {/* Tabs */}
       <div className="flex gap-2">
         {[
@@ -119,8 +119,8 @@ export default function BacktestLab(){
             key={t.id}
             onClick={() => {setTab(t.id as TabType); setJ(null);}}
             className={`px-4 py-2 rounded-xl border transition ${
-              tab === t.id 
-                ? 'border-green-500 bg-green-950/30 text-green-400' 
+              tab === t.id
+                ? 'border-green-500 bg-green-950/30 text-green-400'
                 : 'border-neutral-700 hover:bg-neutral-800'
             }`}
           >
@@ -128,39 +128,39 @@ export default function BacktestLab(){
           </button>
         ))}
       </div>
-      
+
       {/* Common Inputs */}
       <div className="grid md:grid-cols-6 gap-2">
         {tab === 'portfolio' ? (
-          <input 
-            id="syms" 
-            placeholder="Symbols (BTCUSDT,ETHUSDT,BNBUSDT)" 
+          <input
+            id="syms"
+            placeholder="Symbols (BTCUSDT,ETHUSDT,BNBUSDT)"
             defaultValue="BTCUSDT,ETHUSDT"
             className="p-2 rounded bg-black/40 border border-neutral-800 md:col-span-2"
           />
         ) : (
-          <input 
-            id="sym" 
-            placeholder="Symbol (BTCUSDT)" 
+          <input
+            id="sym"
+            placeholder="Symbol (BTCUSDT)"
             defaultValue="BTCUSDT"
             className="p-2 rounded bg-black/40 border border-neutral-800"
           />
         )}
-        <input 
-          id="tf"  
-          placeholder="Timeframe" 
+        <input
+          id="tf"
+          placeholder="Timeframe"
           defaultValue={tab === 'single' ? "15m" : "1h"}
           className="p-2 rounded bg-black/40 border border-neutral-800"
         />
-        <input 
-          id="s"   
-          placeholder="Start (YYYY-MM-DD)" 
+        <input
+          id="s"
+          placeholder="Start (YYYY-MM-DD)"
           defaultValue="2024-01-01"
           className="p-2 rounded bg-black/40 border border-neutral-800"
         />
-        <input 
-          id="e"   
-          placeholder="End (YYYY-MM-DD)" 
+        <input
+          id="e"
+          placeholder="End (YYYY-MM-DD)"
           defaultValue={tab === 'single' ? "2024-01-15" : "2024-03-01"}
           className="p-2 rounded bg-black/40 border border-neutral-800"
         />
@@ -174,15 +174,15 @@ export default function BacktestLab(){
           </label>
         )}
       </div>
-      
-      <button 
-        onClick={run} 
+
+      <button
+        onClick={run}
         disabled={loading}
         className="px-4 py-2 rounded-xl border border-neutral-700 hover:bg-neutral-800 disabled:opacity-50 transition"
       >
         {loading ? "⏳ Çalıştırılıyor..." : "🚀 Backtest Çalıştır"}
       </button>
-      
+
       {/* Results */}
       {j && !j.error && (
         <div className="space-y-4">
@@ -194,7 +194,7 @@ export default function BacktestLab(){
               overfitting={j.result.overfitting}
             />
           )}
-          
+
           {/* Portfolio Correlation */}
           {tab === 'portfolio' && j.result?.correlation?.matrix && (
             <CorrelationHeatmap
@@ -203,20 +203,20 @@ export default function BacktestLab(){
               threshold={0.7}
             />
           )}
-          
+
           {/* Equity Curve */}
           {j.metrics?.equity && tab === 'single' && (
             <EquityCurveChart
               equity={j.metrics.equity}
             />
           )}
-          
+
           {tab === 'portfolio' && j.result?.combined?.equityCurve && (
             <EquityCurveChart
               equity={j.result.combined.equityCurve as number[]}
             />
           )}
-          
+
           {/* Quick Metrics Cards for Single/Portfolio */}
           {(tab === 'single' && j.metrics) && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
@@ -246,7 +246,7 @@ export default function BacktestLab(){
               </div>
             </div>
           )}
-          
+
           {tab === 'portfolio' && j.result?.combined && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               <div className="p-3 rounded-lg border border-green-800/50 bg-green-950/20">
@@ -277,14 +277,14 @@ export default function BacktestLab(){
               </div>
             </div>
           )}
-          
+
           <details className="text-xs">
             <summary className="cursor-pointer opacity-70 mb-2 p-2 rounded border border-neutral-800 hover:bg-neutral-900">Raw JSON</summary>
             <pre className="overflow-auto p-3 rounded bg-black/40 border border-neutral-800">{JSON.stringify(j,null,2)}</pre>
           </details>
         </div>
       )}
-      
+
       {j?.error && (
         <div className="rounded-xl border border-red-800 bg-red-950/30 p-4">
           <div className="text-red-400 font-semibold">Hata</div>

@@ -1,0 +1,16 @@
+﻿Gate D Metrics Delta Summary
+=============================
+Timestamp: 20260107_130113
+MetricsUrl: http://localhost:3003/api/public/metrics.prom
+Before: artifacts\gateD\metrics_before_20260107_130113.prom
+After : artifacts\gateD\metrics_after_20260107_130113.prom
+
+spark_copilot_sse_bytes_total                                                     before=      3330  after=      6660  delta=      3330
+spark_copilot_sse_duration_seconds{quantile=0.5}                                  before=     1,424  after=    1,4835  delta=0,0594999999999999
+spark_copilot_sse_duration_seconds{quantile=0.95}                                 before=     2,136  after=   2,22525  delta=0,0892499999999998
+spark_copilot_sse_duration_seconds{quantile=0.99}                                 before=     2,848  after=     2,967  delta=     0,119
+spark_copilot_sse_event_total{event=complete}                                     before=         1  after=         2  delta=         1
+spark_copilot_sse_event_total{event=message_done}                                 before=         1  after=         2  delta=         1
+spark_copilot_sse_event_total{event=token}                                        before=        25  after=        50  delta=        25
+spark_copilot_sse_stream_close_total{reason=done}                                 before=         1  after=         2  delta=         1
+spark_copilot_sse_stream_open_total                                               before=         1  after=         2  delta=         1

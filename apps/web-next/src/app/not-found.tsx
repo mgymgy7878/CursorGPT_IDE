@@ -1,15 +1,10 @@
 export default function NotFound() {
   return (
-    <main className="min-h-dvh grid place-items-center p-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">Sayfa bulunamadı (404)</h1>
-        <p className="mt-2 text-muted-foreground">
-          Aradığınız sayfa taşınmış veya hiç olmamış olabilir.
-        </p>
-        <a href="/" className="inline-block mt-6 underline">Anasayfa’ya dön</a>
-      </div>
-    </main>
+    <div style={{ padding: 24 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 600 }}>Sayfa bulunamadı</h2>
+      <p style={{ opacity: 0.8, marginTop: 8 }}>
+        Bu rota mevcut değil.
+      </p>
+    </div>
   );
 }
-
-export const dynamic = "force-dynamic";

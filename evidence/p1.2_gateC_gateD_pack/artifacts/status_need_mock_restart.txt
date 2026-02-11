@@ -1,0 +1,55 @@
+Gate D Status: Server Restart Needed
+=====================================
+Timestamp: 2026-01-06 23:26
+
+CURRENT STATE:
+--------------
+✅ Port 3003: LISTENING
+✅ Metrics endpoint: 200 OK
+❌ Mock stream: INACTIVE (401 Unauthorized)
+
+ISSUE:
+------
+Server was started WITHOUT mock environment variables.
+Mock mode check in route.ts:
+  const mockStreamMode = process.env.NODE_ENV !== 'production' && process.env.SPARK_COPILOT_MOCK_STREAM === '1';
+
+Currently: SPARK_COPILOT_MOCK_STREAM is not set in server process.
+
+ACTION REQUIRED:
+----------------
+User must restart dev server with mock env vars set IN THE SAME TERMINAL:
+
+Terminal commands (copy-paste):
+```powershell
+# Stop current server (Ctrl+C if running)
+# Then in SAME terminal:
+
+$env:SPARK_COPILOT_MOCK_STREAM="1"
+$env:SPARK_COPILOT_MOCK_TOKENS="25"
+$env:SPARK_COPILOT_MOCK_DELAY_MS="50"
+pnpm --filter web-next dev -- --port 3003
+```
+
+VERIFICATION:
+-------------
+After restart, run:
+  .\tools\gate-d-test-mock-sse.ps1
+
+Expected:
+  - Status: 200 (not 401!)
+  - Tokens: 25
+  - Server log: [MOCK SSE] Mock stream mode enabled
+
+BLOCKER:
+--------
+Cannot proceed with Gate D metrics smoke test until mock mode is active.
+Current 401 error means API key check is running (mock mode bypasses this check).
+
+NEXT STEPS (after restart):
+---------------------------
+1. Verify mock: .\tools\gate-d-test-mock-sse.ps1
+2. Metrics smoke: .\tools\gate-d-smoke-metrics.ps1 -AutoWaitSeconds 10
+3. Update evidence files
+4. Run Gate C verify
+

@@ -13,11 +13,23 @@ function resolveAuto(): "light"|"dark" {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "auto";
-    return (localStorage.getItem("theme") as Theme) || "auto";
-  });
-  const resolved = useMemo(() => (theme === "auto" ? resolveAuto() : theme), [theme]);
+  // SSR-safe: İlk render'da her zaman "auto" döner (SSR/CSR aynı)
+  // Mount sonrası localStorage'dan okunur (useEffect ile)
+  const [theme, setTheme] = useState<Theme>("auto");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Mount sonrası localStorage'dan oku
+    const stored = (localStorage.getItem("theme") as Theme) || "auto";
+    setTheme(stored);
+  }, []);
+
+  const resolved = useMemo(() => {
+    // Mount olmadan önce "auto" çözümle (SSR-safe)
+    if (!mounted) return resolveAuto();
+    return theme === "auto" ? resolveAuto() : theme;
+  }, [theme, mounted]);
 
   useEffect(() => {
     if (typeof document !== "undefined") {

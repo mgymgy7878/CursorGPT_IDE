@@ -4,12 +4,13 @@ import { scrapeVal } from "@/lib/prom";
 import { TARGETS, BANDS } from "@/lib/config";
 import { fetchOptional } from "@/lib/net/fetchOptional";
 import { isExecutorOnline } from "@/lib/runtime/executor";
+import { formatDate } from "@/lib/format";
 
 export default function SmokeCard(){
   const [vals,setVals] = useState<{p95:number|null; st:number|null; code:number|null; ts:number|null}>({ p95:null, st:null, code:null, ts:null });
   const [last,setLast] = useState<string|undefined>();
-  
-  useEffect(()=>{ 
+
+  useEffect(()=>{
     (async()=>{
       // Check executor status first
       const online = await isExecutorOnline();
@@ -17,14 +18,14 @@ export default function SmokeCard(){
         setVals({ p95:null, st:null, code:null, ts:null });
         return;
       }
-      
+
       // Fetch metrics with graceful degradation
       const metricsRes = await fetchOptional('/api/public/metrics');
       if (metricsRes.ok && metricsRes.data) {
-        const txt = typeof metricsRes.data === 'string' 
-          ? metricsRes.data 
+        const txt = typeof metricsRes.data === 'string'
+          ? metricsRes.data
           : JSON.stringify(metricsRes.data);
-        
+
         setVals({
           p95: scrapeVal(txt, 'spark_smoke_p95_latency_ms'),
           st:  scrapeVal(txt, 'spark_smoke_staleness_seconds'),
@@ -34,15 +35,15 @@ export default function SmokeCard(){
       } else {
         setVals({ p95:null, st:null, code:null, ts:null });
       }
-      
+
       // Fetch last smoke test
       const smokeRes = await fetchOptional('/api/public/smoke-last');
       if (smokeRes.ok && smokeRes.data?.path) {
         setLast(String(smokeRes.data.path));
       }
-    })(); 
+    })();
   },[]);
-  const tsFmt = (vals.ts!=null) ? new Date(Number(vals.ts)*1000).toLocaleString() : '—';
+  const tsFmt = (vals.ts!=null) ? formatDate(new Date(Number(vals.ts)*1000)) : '—';
   const p95 = Number(vals.p95 ?? NaN);
   const st = Number(vals.st ?? NaN);
   const code = Number(vals.code ?? 0);

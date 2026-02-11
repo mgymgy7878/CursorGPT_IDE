@@ -1,0 +1,188 @@
+Gate D: Request-Based Mock Mode Implementation
+================================================
+Date: 2026-01-06 23:40
+Status: IMPLEMENTED - Env var dependency removed
+
+PROBLEM (Solved):
+-----------------
+Mock mode was env-only (SPARK_COPILOT_MOCK_STREAM=1), which created:
+- PowerShell background process env inheritance issues
+- "Ghost server" processes without env vars
+- Manual restart requirement for every test
+- Non-deterministic testing
+
+SOLUTION:
+---------
+Mock mode now supports BOTH env var AND request-level flags:
+
+1. **Environment Variable (original):**
+   - SPARK_COPILOT_MOCK_STREAM=1
+   - Persists for entire server lifetime
+   - Good for: Extended dev sessions
+
+2. **Request Flag (new):**
+   - Query param: `?mock=1`
+   - Header: `x-spark-mock: 1`
+   - Per-request activation
+   - Good for: Testing, CI/CD, deterministic evidence
+
+IMPLEMENTATION:
+---------------
+
+Route Logic (apps/web-next/src/app/api/copilot/chat/route.ts):
+
+```typescript
+const isDev = process.env.NODE_ENV !== 'production';
+const envMockFlag = process.env.SPARK_COPILOT_MOCK_STREAM === '1';
+
+// Request-level mock flag
+const url = new URL(req.url);
+const queryMockFlag = url.searchParams.get('mock') === '1';
+const headerMockFlag = req.headers.get('x-spark-mock') === '1';
+const reqMockFlag = queryMockFlag || headerMockFlag;
+
+// Mock enabled if: dev environment AND (env flag OR request flag)
+const mockStreamMode = isDev && (envMockFlag || reqMockFlag);
+
+// Security: Log mock activation source
+if (mockStreamMode) {
+  const source = envMockFlag ? 'env var' : 'request flag';
+  console.warn(`[MOCK SSE] Mock stream mode enabled - source: ${source}`);
+}
+
+// OPENAI_API_KEY check bypassed if mock mode active
+if (!mockStreamMode && !process.env.OPENAI_API_KEY) {
+  return 401;
+}
+```
+
+SECURITY:
+---------
+✅ Request flag ONLY works in development (NODE_ENV !== 'production')
+✅ Production ignores ?mock=1 and x-spark-mock header completely
+✅ Console warning logs mock activation source (audit trail)
+✅ No behavior change for existing env-based workflows
+
+USAGE:
+------
+
+Query Param (Default):
+```bash
+curl -N \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{"message":"test"}' \
+  "http://127.0.0.1:3003/api/copilot/chat?mock=1"
+```
+
+Header (Alternative):
+```bash
+curl -N \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -H "x-spark-mock: 1" \
+  -d '{"message":"test"}' \
+  "http://127.0.0.1:3003/api/copilot/chat"
+```
+
+PowerShell (gate-d-test-mock-sse.ps1):
+```powershell
+# Query param (default):
+.\tools\gate-d-test-mock-sse.ps1
+
+# Header mode:
+.\tools\gate-d-test-mock-sse.ps1 -UseHeader
+```
+
+BENEFITS:
+---------
+✅ No server restart required for mock testing
+✅ No env var inheritance issues (PowerShell background jobs)
+✅ Deterministic testing (request-scoped)
+✅ CI/CD friendly (no env var setup)
+✅ Works with any currently running dev server
+✅ Backward compatible (env var still works)
+
+TESTING:
+--------
+
+Dev Server (any state):
+```powershell
+# Server can be running with OR without SPARK_COPILOT_MOCK_STREAM
+pnpm --filter web-next dev -- --port 3003
+```
+
+Mock Test (should PASS):
+```powershell
+.\tools\gate-d-test-mock-sse.ps1
+```
+
+Expected:
+- ✅ 200 OK (not 401!)
+- ✅ 25 tokens
+- ✅ Stream completed
+- ✅ Server log: [MOCK SSE] Mock stream mode enabled - source: request flag
+
+Gate D Smoke Test:
+```powershell
+.\tools\gate-d-smoke-metrics.ps1 -AutoWaitSeconds 10
+```
+
+Expected delta:
+- spark_copilot_sse_stream_open_total: +1
+- spark_copilot_sse_event_total{event="token"}: +25
+- spark_copilot_sse_bytes_total: >0
+- spark_copilot_sse_stream_close_total{reason="done"}: +1
+
+REGRESSION MATRIX:
+------------------
+
+| Environment | Request Flag | OPENAI_API_KEY | Result           |
+|-------------|--------------|----------------|------------------|
+| production  | mock=1       | absent         | 401 (flag ignored) |
+| production  | mock=1       | present        | Real LLM stream  |
+| development | mock=0       | absent         | 401 (expected)   |
+| development | mock=0       | present        | Real LLM stream  |
+| development | mock=1       | absent         | Mock stream ✅   |
+| development | mock=1       | present        | Mock stream ✅   |
+
+MIGRATION:
+----------
+
+Before (env-only):
+```powershell
+# Required:
+$env:SPARK_COPILOT_MOCK_STREAM="1"
+pnpm --filter web-next dev -- --port 3003
+
+# Test:
+.\tools\gate-d-test-mock-sse.ps1
+```
+
+After (request flag):
+```powershell
+# Server can be running in any state:
+pnpm --filter web-next dev -- --port 3003
+
+# Test (just works):
+.\tools\gate-d-test-mock-sse.ps1
+```
+
+No breaking changes - env var still works if preferred.
+
+FILES UPDATED:
+--------------
+- apps/web-next/src/app/api/copilot/chat/route.ts (mock logic)
+- tools/gate-d-test-mock-sse.ps1 (default: ?mock=1, -UseHeader for header mode)
+- evidence/gateD_request_flag_implementation.txt (this file)
+
+GATE D CLOSURE:
+---------------
+With request flag, Gate D can be closed WITHOUT:
+- Manual server restart
+- Env var troubleshooting
+- PowerShell session debugging
+- "Is mock really active?" questions
+
+Just run: .\tools\gate-d-test-mock-sse.ps1 → PASS → metrics smoke test → done.
+

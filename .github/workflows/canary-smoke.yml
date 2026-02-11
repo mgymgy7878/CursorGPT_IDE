@@ -22,12 +22,12 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-      
+
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-      
+
       - name: Verify pnpm version
         shell: pwsh
         run: |
@@ -54,12 +54,12 @@ jobs:
         shell: pwsh
         run: |
           pnpm fetch --prod=false
-      
+
       - name: Install Dependencies (offline)
         shell: pwsh
         run: |
           pnpm -w install --offline --frozen-lockfile --strict-peer-dependencies
-      
+
       - name: Run Canary Smoke
         id: smoke
         shell: pwsh
@@ -85,3 +85,86 @@ jobs:
           name: ${{ steps.smoke.outputs.artifact_name }}
           path: evidence/local/smoke/smoke_*/
           retention-days: 14
+
+  chart-attribution-e2e:
+    name: Chart Attribution E2E
+    runs-on: windows-latest
+    needs: canary-smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Verify pnpm version
+        shell: pwsh
+        run: |
+          $expected = (Get-Content package.json | ConvertFrom-Json).packageManager.Split('@')[1]
+          $actual = (pnpm -v).Trim()
+          if ($actual -ne $expected) {
+            Write-Output "::error::pnpm version mismatch"
+            exit 1
+          }
+
+      - name: Fetch Dependencies
+        shell: pwsh
+        run: pnpm fetch --prod=false
+
+      - name: Install Dependencies (offline)
+        shell: pwsh
+        run: pnpm -w install --offline --frozen-lockfile --strict-peer-dependencies
+
+      - name: Install Playwright Browsers
+        shell: pwsh
+        run: pnpm --filter web-next exec playwright install chromium --with-deps
+
+      - name: Build web-next
+        shell: pwsh
+        run: pnpm --filter web-next build
+
+      - name: Start dev server
+        shell: pwsh
+        run: |
+          $env:PORT = "3003"
+          Start-Process -NoNewWindow -FilePath "pnpm" -ArgumentList "--filter", "web-next", "dev" -PassThru | Out-Null
+          Start-Sleep -Seconds 20
+          # Health check
+          $maxRetries = 10
+          $retry = 0
+          while ($retry -lt $maxRetries) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:3003/api/healthz" -UseBasicParsing -TimeoutSec 5
+              if ($response.StatusCode -eq 200) { break }
+            } catch {
+              Start-Sleep -Seconds 2
+              $retry++
+            }
+          }
+
+      - name: Run Chart Attribution E2E Tests
+        shell: pwsh
+        run: pnpm --filter web-next exec playwright test tests/e2e/chart-attribution.spec.ts --reporter=list
+
+      - name: Stop dev server
+        if: always()
+        shell: pwsh
+        run: |
+          Get-Process | Where-Object { $_.ProcessName -like "*node*" -or $_.CommandLine -like "*next*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-chart-attribution-results
+          path: apps/web-next/test-results/
+          retention-days: 7

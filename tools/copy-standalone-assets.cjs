@@ -1,20 +1,28 @@
 #!/usr/bin/env node
 /**
  * Copy standalone assets for Next.js production build
- * 
+ *
  * Next.js standalone mode doesn't copy static assets and public files by default.
  * This script copies them to the standalone directory for deployment.
- * 
+ *
  * Usage: node tools/copy-standalone-assets.cjs
  */
 
 const fs = require('fs');
 const path = require('path');
 
+// Marker: Script execution start (CI verification)
+console.log('[copy-standalone-assets] START', JSON.stringify({
+  cwd: process.cwd(),
+  __dirname: __dirname,
+  timestamp: new Date().toISOString(),
+}, null, 2));
+
 const WEB_NEXT_DIR = path.join(__dirname, '../apps/web-next');
 const STANDALONE_DIR = path.join(WEB_NEXT_DIR, '.next/standalone');
 const STATIC_DIR = path.join(WEB_NEXT_DIR, '.next/static');
 const PUBLIC_DIR = path.join(WEB_NEXT_DIR, 'public');
+const ROOT_DIR = path.join(__dirname, '..');
 
 /**
  * Recursively copy directory
@@ -37,6 +45,24 @@ function copyDir(src, dest) {
     } else {
       fs.copyFileSync(srcPath, destPath);
     }
+  }
+}
+
+/**
+ * EEXIST-proof utility functions for package copying
+ */
+
+// Ensure parent directory exists (recursive)
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+// Remove target if it exists (file/dir/symlink - handles EEXIST/broken symlinks)
+function rmIfExists(targetPath) {
+  try {
+    fs.rmSync(targetPath, { recursive: true, force: true });
+  } catch (err) {
+    // Ignore errors (file may not exist, or already removed)
   }
 }
 
@@ -67,6 +93,255 @@ if (fs.existsSync(PUBLIC_DIR)) {
   copyDir(PUBLIC_DIR, standalonePublicDir);
 } else {
   console.warn('⚠️  public directory not found, skipping...');
+}
+
+// Fix: Copy styled-jsx (Next.js internal dependency not auto-included in standalone)
+// https://github.com/vercel/next.js/issues/42641
+// Resolve styled-jsx from web-next context (store-layout independent)
+const standaloneNodeModules = path.join(STANDALONE_DIR, 'node_modules');
+const standaloneStyledJsxDir = path.join(standaloneNodeModules, 'styled-jsx');
+
+let styledJsxDir = null;
+
+// Strategy 1: Try require.resolve with paths (works if web-next has node_modules)
+try {
+  const styledJsxPath = require.resolve('styled-jsx/package.json', {
+    paths: [WEB_NEXT_DIR, ROOT_DIR],
+  });
+  styledJsxDir = path.dirname(styledJsxPath);
+} catch (err) {
+  // Strategy 2: Find in pnpm store (.pnpm/styled-jsx@*/node_modules/styled-jsx)
+  // Fallback for pnpm workspace where modules are in .pnpm store
+  const pnpmStoreDir = path.join(ROOT_DIR, 'node_modules/.pnpm');
+  if (fs.existsSync(pnpmStoreDir)) {
+    const entries = fs.readdirSync(pnpmStoreDir);
+    for (const entry of entries) {
+      if (entry.startsWith('styled-jsx@')) {
+        const candidate = path.join(pnpmStoreDir, entry, 'node_modules/styled-jsx');
+        if (fs.existsSync(candidate)) {
+          styledJsxDir = candidate;
+          break;
+        }
+      }
+    }
+  }
+}
+
+if (styledJsxDir && fs.existsSync(styledJsxDir)) {
+  // Copy to root standalone node_modules (for .next/standalone/server.js)
+  // Use EEXIST-proof copyPkgDir to handle broken symlinks/empty dirs
+  const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
+  const nestedStandaloneStyledJsxDir = path.join(nestedStandaloneNodeModules, 'styled-jsx');
+
+  // Ensure parent directories exist
+  ensureDir(standaloneNodeModules);
+  ensureDir(nestedStandaloneNodeModules);
+
+  // Remove existing targets (handles broken symlinks, empty dirs)
+  rmIfExists(standaloneStyledJsxDir);
+  rmIfExists(nestedStandaloneStyledJsxDir);
+
+  // Copy with dereference (resolve symlinks to actual files)
+  console.log(`✅ Copying styled-jsx → ${standaloneStyledJsxDir} (dereferencing symlinks)`);
+  fs.cpSync(styledJsxDir, standaloneStyledJsxDir, {
+    recursive: true,
+    dereference: true,
+    force: true,
+    errorOnExist: false,
+  });
+
+  console.log(`✅ Copying styled-jsx → ${nestedStandaloneStyledJsxDir} (nested, dereferencing symlinks)`);
+  fs.cpSync(styledJsxDir, nestedStandaloneStyledJsxDir, {
+    recursive: true,
+    dereference: true,
+    force: true,
+    errorOnExist: false,
+  });
+
+  // Fail-fast: Verify styled-jsx was actually copied in both locations
+  const targetPkgJson = path.join(standaloneStyledJsxDir, 'package.json');
+  const nestedTargetPkgJson = path.join(nestedStandaloneStyledJsxDir, 'package.json');
+
+  if (!fs.existsSync(targetPkgJson)) {
+    console.error(`❌ styled-jsx copy failed: ${targetPkgJson} not found after copy`);
+    process.exit(1);
+  }
+  if (!fs.existsSync(nestedTargetPkgJson)) {
+    console.error(`❌ styled-jsx nested copy failed: ${nestedTargetPkgJson} not found after copy`);
+    process.exit(1);
+  }
+
+  console.log(`✅ Verified: styled-jsx/package.json exists in standalone (both locations)`);
+  // Marker: styled-jsx copy verified (CI verification)
+  console.log('[copy-standalone-assets] styled-jsx OK:', targetPkgJson);
+  console.log('[copy-standalone-assets] styled-jsx OK (nested):', nestedTargetPkgJson);
+} else {
+  console.error('❌ styled-jsx not found - this will cause server startup failures in CI');
+  console.error('   Aborting build to prevent CI failures.');
+  process.exit(1);
+}
+
+// Fix: Copy core packages (next, react, react-dom) to standalone
+// These are required for runtime but may be missing due to broken symlinks in pnpm store
+const CORE_PACKAGES = ['next', 'react', 'react-dom', 'scheduler'];
+
+// Copy package directory with EEXIST-proof handling
+function copyPkgDir(srcDir, dstDir) {
+  // 1) Ensure parent node_modules directory exists
+  ensureDir(path.dirname(dstDir));
+
+  // 2) Check target existence and type before removal (CI debug marker)
+  if (fs.existsSync(dstDir)) {
+    try {
+      const stats = fs.lstatSync(dstDir);
+      const targetType = stats.isDirectory() ? 'dir' : (stats.isSymbolicLink() ? 'symlink' : 'file');
+      console.log(`[copy-standalone-assets] target exists (${targetType}):`, dstDir);
+
+      // If symlink, also log readlink target (helps debug broken symlinks)
+      if (stats.isSymbolicLink()) {
+        try {
+          const linkTarget = fs.readlinkSync(dstDir);
+          console.log(`[copy-standalone-assets] target symlink points to:`, linkTarget);
+        } catch (readlinkErr) {
+          console.log(`[copy-standalone-assets] target symlink readlink failed:`, readlinkErr.code);
+        }
+      }
+    } catch (err) {
+      console.log(`[copy-standalone-assets] target exists but lstat failed:`, dstDir, err.code);
+    }
+  } else {
+    console.log(`[copy-standalone-assets] target does not exist:`, dstDir);
+  }
+
+  // 3) Remove existing target (handles broken symlinks, empty dirs, files)
+  rmIfExists(dstDir);
+
+  // 4) Copy with dereference (resolve symlinks to actual files)
+  try {
+    fs.cpSync(srcDir, dstDir, {
+      recursive: true,
+      dereference: true,
+      force: true,
+      errorOnExist: false,
+    });
+  } catch (err) {
+    // CI debug marker: cpSync error details
+    console.error(`[copy-standalone-assets] cpSync error:`, {
+      code: err.code,
+      errno: err.errno,
+      path: err.path,
+      dest: dstDir,
+      syscall: err.syscall,
+      message: err.message,
+    });
+    throw err; // Re-throw to fail the copy
+  }
+}
+
+/**
+ * Find package directory (require.resolve or pnpm store fallback)
+ */
+function findPackageDir(packageName) {
+  // Strategy 1: Try require.resolve
+  try {
+    const packagePath = require.resolve(`${packageName}/package.json`, {
+      paths: [WEB_NEXT_DIR, ROOT_DIR],
+    });
+    return path.dirname(packagePath);
+  } catch (err) {
+    // Strategy 2: Find in pnpm store
+    const pnpmStoreDir = path.join(ROOT_DIR, 'node_modules/.pnpm');
+    if (fs.existsSync(pnpmStoreDir)) {
+      const entries = fs.readdirSync(pnpmStoreDir);
+      for (const entry of entries) {
+        if (entry.startsWith(`${packageName}@`)) {
+          const candidate = path.join(pnpmStoreDir, entry, `node_modules/${packageName}`);
+          if (fs.existsSync(candidate)) {
+            return candidate;
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Copy a package to standalone node_modules (both root and nested)
+ */
+function copyPackageToStandalone(packageName) {
+  const packageDir = findPackageDir(packageName);
+
+  if (!packageDir || !fs.existsSync(packageDir)) {
+    // scheduler is optional, others are critical
+    if (packageName === 'scheduler') {
+      console.warn(`⚠️  ${packageName} not found (optional, skipping...)`);
+      return false;
+    }
+    console.error(`❌ ${packageName} not found - this will cause server startup failures in CI`);
+    return false;
+  }
+
+  // Marker: Source path found (CI debug marker)
+  console.log(`[copy-standalone-assets] ${packageName} source:`, packageDir);
+
+  // Marker: Source package.json verification (CI debug marker)
+  const sourcePkgJson = path.join(packageDir, 'package.json');
+  const sourcePkgJsonExists = fs.existsSync(sourcePkgJson);
+  console.log(`[copy-standalone-assets] ${packageName} source package.json exists:`, sourcePkgJsonExists);
+  if (sourcePkgJsonExists) {
+    console.log(`[copy-standalone-assets] ${packageName} source package.json path:`, sourcePkgJson);
+  } else {
+    console.error(`[copy-standalone-assets] ${packageName} source package.json NOT FOUND:`, sourcePkgJson);
+  }
+
+  // Copy to root standalone node_modules
+  const standalonePackageDir = path.join(standaloneNodeModules, packageName);
+  // Marker: Target path (root) - CI debug marker
+  console.log(`[copy-standalone-assets] ${packageName} target (root):`, standalonePackageDir);
+  copyPkgDir(packageDir, standalonePackageDir);
+  console.log(`✅ Copying ${packageName} → ${standalonePackageDir} (dereferencing symlinks)`);
+
+  // Copy to nested standalone node_modules
+  const nestedStandaloneNodeModules = path.join(STANDALONE_DIR, 'apps/web-next/node_modules');
+  const nestedStandalonePackageDir = path.join(nestedStandaloneNodeModules, packageName);
+  // Marker: Target path (nested) - CI debug marker
+  console.log(`[copy-standalone-assets] ${packageName} target (nested):`, nestedStandalonePackageDir);
+  copyPkgDir(packageDir, nestedStandalonePackageDir);
+  console.log(`✅ Copying ${packageName} → ${nestedStandalonePackageDir} (nested, dereferencing symlinks)`);
+
+  // Verify copy
+  const targetPkgJson = path.join(standalonePackageDir, 'package.json');
+  const nestedTargetPkgJson = path.join(nestedStandalonePackageDir, 'package.json');
+
+  if (!fs.existsSync(targetPkgJson)) {
+    console.error(`❌ ${packageName} copy failed: ${targetPkgJson} not found after copy`);
+    return false;
+  }
+  if (!fs.existsSync(nestedTargetPkgJson)) {
+    console.error(`❌ ${packageName} nested copy failed: ${nestedTargetPkgJson} not found after copy`);
+    return false;
+  }
+
+  console.log(`✅ Verified: ${packageName}/package.json exists in standalone (both locations)`);
+  console.log(`[copy-standalone-assets] ${packageName} OK:`, targetPkgJson);
+  console.log(`[copy-standalone-assets] ${packageName} OK (nested):`, nestedTargetPkgJson);
+  return true;
+}
+
+// Copy core packages
+console.log('\n📦 Copying core packages to standalone...');
+let allCorePackagesOk = true;
+for (const pkg of CORE_PACKAGES) {
+  const ok = copyPackageToStandalone(pkg);
+  if (!ok && pkg !== 'scheduler') {
+    allCorePackagesOk = false;
+  }
+}
+
+if (!allCorePackagesOk) {
+  console.error('❌ Core packages copy failed - aborting build to prevent CI failures.');
+  process.exit(1);
 }
 
 console.log('\n✨ Standalone assets copied successfully!');
