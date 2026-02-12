@@ -189,8 +189,6 @@ Streams (WS/REST) → Stream‑Bus → Archive/Anomaly
 - Tüm dağınık plan/dokümanların tekilleştirilmiş **tek kaynak** referansı olmak.  
 - README ve Roadmap’in üst seviye özetleri bu dosyaya referans verecek.
 
-
-
 ---
 
 ## 15) Operasyon Protokolü — **Verbose+Final** (Raporlama Standardı)
@@ -254,4 +252,3 @@ Streams (WS/REST) → Stream‑Bus → Archive/Anomaly
 - **WS fırtına koruması**: backoff min=1s, max=20s, ≤6/dk.  
 - **Dry‑run şeridi**: Executor/WS yoksa görünür.  
 - **Kritik eylemler**: confirm_required (trade, model promote, risk threshold, rebalance, vb.).
-

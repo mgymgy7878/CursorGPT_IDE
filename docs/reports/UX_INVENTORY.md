@@ -1,9 +1,9 @@
 # UX Inventory
 
 ## Routes
+
 | path | inNav |
 | --- | --- |
-
 
 ## Nav Items
 - /
@@ -14,9 +14,9 @@
 - /strategy-lab
 
 ## API Routes (MOCK/REAL & usage)
+
 | route | type | used |
 | --- | --- | --- |
-
 
 ### Unused API
 - none
@@ -81,6 +81,7 @@
 
 ## HTTP Probe
 Server up: YES
+
 | path | status |
 | --- | --- |
 | / | 200 |

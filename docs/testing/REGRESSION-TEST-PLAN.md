@@ -111,4 +111,3 @@
 
 - Output: exit code, concise summary table, detailed logs to `artifacts/regression-logs.txt`.
 - Defects: log in issue tracker with test ID, steps, expected/actual, metrics snapshot.
-

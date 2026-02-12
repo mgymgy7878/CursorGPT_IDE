@@ -190,4 +190,3 @@ docker exec spark-redis redis-cli INFO persistence | grep aof_current_size
 **Last Updated:** 2025-10-11  
 **Version:** v1.0.0  
 **Status:** Production Ready
-

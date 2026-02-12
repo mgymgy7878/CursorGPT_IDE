@@ -690,4 +690,3 @@ function usePortfolioStream() {
 **Maintainer:** Spark Trading Team  
 **Son güncelleme:** 2025-10-27  
 **İlgili Dosyalar:** `UI_RECONSTRUCTION_PLAN.md`, `CI_USAGE.md`
-
